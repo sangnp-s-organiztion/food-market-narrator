@@ -37,26 +37,10 @@ Dự án hướng tới mục tiêu:
 
 ---
 
-## 📂 Cấu trúc thư mục (ví dụ)
+## 📂 Cấu trúc thư mục
 
 ```
-narration-automated-food-market/
-│
-├── backend/
-│   ├── src/
-│   └── pom.xml
-│
-├── frontend/
-│   ├── index.html
-│   ├── css/
-│   └── js/
-│
-├── database/
-│   └── schema.sql
-│
-├── docs/
-│
-└── README.md
+
 ```
 
 ---
