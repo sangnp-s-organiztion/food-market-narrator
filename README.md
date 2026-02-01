@@ -63,8 +63,7 @@ cd narration-automated-food-market
 ### 3️⃣ Chạy backend
 
 ```bash
-# Ví dụ với Spring Boot
-mvn spring-boot:run
+dotnet run
 ```
 
 ### 4️⃣ Chạy frontend
