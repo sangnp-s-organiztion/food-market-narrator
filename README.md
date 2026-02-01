@@ -94,8 +94,9 @@ dotnet run
 
 ## 👤 Tác giả
 
-* **sangnp**
-* GitHub: [https://github.com/](https://github.com/)<username>
+* **Nguyễn Phước Sang**
+* * **Nguyễn Gia Thiệu**
+* GitHub: [[https://github.com/](https://github.com/)<username>](https://github.com/NguyenPhuocSang1695/food-market-narrator)
 
 ---
 
