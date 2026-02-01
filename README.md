@@ -2,7 +2,17 @@
 
 ## 📌 Giới thiệu
 
-**Narration Automated Food Market** là một dự án mô phỏng hệ thống **chợ thực phẩm tự động**, tập trung vào việc **tự động hóa quy trình mua bán**, quản lý sản phẩm và (có thể) tích hợp **narration / thuyết minh tự động** để hỗ trợ người dùng.
+Narration Automated Food Market là một dự án mô phỏng hệ thống chợ thực phẩm tự động, lấy cảm hứng từ phố ẩm thực Vĩnh Khánh. Dự án tập trung vào việc tự động hóa quy trình mua bán, quản lý sản phẩm của các gian hàng ẩm thực, đồng thời tích hợp tính năng thuyết minh (narration) tự động nhằm giới thiệu món ăn, gian hàng và đặc trưng ẩm thực đến người dùng.
+
+Hệ thống hướng tới việc tái hiện trải nghiệm tham quan – ăn uống tại phố ẩm thực Vĩnh Khánh dưới dạng số hóa, giúp người dùng có thể:
+
+Khám phá các gian hàng thông qua nội dung thuyết minh tự động
+
+Xem thông tin món ăn, giá cả và mô tả chi tiết
+
+Trải nghiệm mô hình chợ ẩm thực hiện đại kết hợp công nghệ
+
+Dự án cũng đóng vai trò là nền tảng học tập và mở rộng cho các bài toán thực tế như web backend, cơ sở dữ liệu và system design.
 
 Dự án hướng tới mục tiêu:
 
