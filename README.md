@@ -4,18 +4,7 @@
 
 **Narration Automated Food Market** là một dự án mô phỏng hệ thống chợ thực phẩm tự động, lấy cảm hứng từ phố ẩm thực Vĩnh Khánh. Dự án tập trung vào việc **tự động hóa quy trình mua bán, quản lý sản phẩm của các gian hàng ẩm thực, đồng thời tích hợp tính năng thuyết minh (narration) tự động nhằm giới thiệu món ăn, gian hàng và đặc trưng ẩm thực đến người dùng.**
 
-Hệ thống hướng tới việc tái hiện trải nghiệm tham quan – ăn uống tại phố ẩm thực Vĩnh Khánh dưới dạng số hóa, giúp người dùng có thể:
-
-Khám phá các gian hàng thông qua nội dung thuyết minh tự động
-
-Xem thông tin món ăn, giá cả và mô tả chi tiết
-
-Trải nghiệm mô hình chợ ẩm thực hiện đại kết hợp công nghệ
-
-Dự án cũng đóng vai trò là nền tảng học tập và mở rộng cho các bài toán thực tế như web backend, cơ sở dữ liệu và system design.
-
 Dự án hướng tới mục tiêu:
-
 * Giảm sự can thiệp thủ công trong quản lý chợ thực phẩm
 * Tăng trải nghiệm người dùng thông qua tự động hóa
 * Làm nền tảng học tập & mở rộng cho các bài toán thực tế (web backend, database, system design)
@@ -28,29 +17,69 @@ Dự án hướng tới mục tiêu:
 * 📦 Quản lý danh mục (category)
 * 💰 Hiển thị giá và thông tin sản phẩm
 * 🤖 Tự động hóa quy trình xử lý dữ liệu
-* 🔊 (Optional) Narration / thuyết minh tự động cho sản phẩm
-* 🔐 Phân quyền người dùng (admin / user – nếu có)
+* 🔊 Text-to-Speech narration cho sản phẩm
+* 🔐 Phân quyền người dùng (Visitor / Saler / Admin)
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-* **Backend**: C# – ASP.NET Core (Web API)
-* **Frontend**: HTML, CSS, JavaScript *(hoặc Razor Pages / MVC nếu dùng chung)*
-* **Database**: Microsoft SQL Server
+* **Backend**: C# – ASP.NET Core 10.0 (Web API)
+* **Database**: Microsoft SQL Server + MongoDB
 * **ORM / Data Access**: Entity Framework Core
-* **Tools**:
-
-  * Git & GitHub
-  * Visual Studio / Visual Studio Code
-  * SQL Server Management Studio (SSMS)
+* **TTS**: Azure Speech Services / OpenAI TTS
+* **Tools**: Git, GitHub, VS Code, SSMS
 
 ---
 
 ## 📂 Cấu trúc thư mục
 
 ```
-
+├─ src/                          # Source code
+│  ├─ Presentation/              # UI/API Controllers
+│  │  ├─ Visitor/               # Customer endpoints
+│  │  ├─ Saler/                 # Seller portal
+│  │  └─ Admin/                 # Admin dashboard
+│  │
+│  ├─ Application/               # Business logic
+│  │  ├─ Services/              # Application services
+│  │  ├─ DTOs/                  # Data transfer objects
+│  │  └─ Interfaces/            # Service contracts
+│  │
+│  ├─ Domain/                    # Domain models
+│  │  ├─ Entities/              # Domain entities
+│  │  ├─ Enums/                 # Enumerations
+│  │  └─ ValueObjects/          # Value objects
+│  │
+│  ├─ Infrastructure/            # Data access & external services
+│  │  ├─ SqlServer/             # SQL Server implementation
+│  │  ├─ MongoDB/               # MongoDB implementation
+│  │  ├─ Repositories/          # Repository implementations
+│  │  └─ ExternalServices/      # TTS, API integration
+│  │
+│  └─ Shared/                    # Utilities & helpers
+│     ├─ Utils/
+│     ├─ Constants/
+│     └─ Helpers/
+│
+├─ database/                     # Database scripts
+│  ├─ sqlserver/                # SQL Server migrations
+│  └─ mongodb/                  # MongoDB schemas
+│
+├─ narration/                    # Narration & TTS
+│  ├─ scripts/                  # Narration scripts
+│  ├─ audio/                    # Generated audio
+│  └─ tts/                      # TTS service
+│
+├─ docs/                         # Documentation
+│  ├─ report/
+│  ├─ diagrams/
+│  └─ api/
+│
+├─ tests/                        # Test projects
+├─ .github/workflows/            # CI/CD pipelines
+├─ README.md
+└─ CONTRIBUTING.md
 ```
 
 ---
@@ -67,46 +96,34 @@ cd narration-automated-food-market
 ### 2️⃣ Cấu hình database
 
 * Tạo database mới
-* Import file SQL trong thư mục `database/`
-* Cập nhật thông tin DB trong file cấu hình backend
+* Import file SQL trong thư mục `database/sqlserver/`
+* Cập nhật connection string
 
 ### 3️⃣ Chạy backend
 
 ```bash
+dotnet build
 dotnet run
 ```
 
-### 4️⃣ Chạy frontend
+### 4️⃣ Chạy tests
 
-* Mở file `index.html` bằng trình duyệt
-* Hoặc chạy bằng Live Server (VS Code)
-
----
-
-## 📌 Mục tiêu học tập của dự án
-
-* Hiểu quy trình xây dựng một hệ thống web hoàn chỉnh
-* Thực hành REST API & kết nối database
-* Áp dụng tư duy **system design cơ bản**
-* Làm quen với quy trình làm việc Git/GitHub
+```bash
+dotnet test
+```
 
 ---
 
-## 🧭 Hướng phát triển tương lai
+## 🤝 Contributing
 
-* 🔊 Tích hợp Text-to-Speech cho narration
-* 📱 Responsive / Mobile-friendly UI
-* 🧠 Gợi ý sản phẩm thông minh
-* 📊 Dashboard thống kê
-* ☁️ Triển khai cloud (Docker, AWS, etc.)
+Xem [CONTRIBUTING.md](CONTRIBUTING.md) để biết hướng dẫn đóng góp.
 
 ---
 
 ## 👤 Tác giả
 
-* **Nguyễn Phước Sang**
-* * **Nguyễn Gia Thiệu**
-* GitHub: [[https://github.com/](https://github.com/)<username>](https://github.com/NguyenPhuocSang1695/food-market-narrator)
+* **Nguyễn Phước Sang** - [GitHub](https://github.com/NguyenPhuocSang1695)
+* **Nguyễn Gia Thiệu**
 
 ---
 
