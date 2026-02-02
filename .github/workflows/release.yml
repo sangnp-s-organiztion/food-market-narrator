@@ -1,3 +1,4 @@
+# tự động tạo bản phát hành (Release) khi tag version mới được đẩy lên
 name: Release
 
 on:
