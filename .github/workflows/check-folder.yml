@@ -1,0 +1,36 @@
+# name: Folder Structure Check
+
+# on:
+#   pull_request:
+#     branches: [ "main" ]
+
+# jobs:
+#   check-folder:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Check root folder changes
+#         run: |
+#           echo "Checking folder structure..."
+
+#           git fetch origin main
+#           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+
+#           # Folder cấp 1 được phép
+#           ALLOWED_DIRS="src docs tests .github README.md .gitignore CONTRIBUTING.md"
+
+#           for file in $CHANGED_FILES; do
+#             TOP_DIR=$(echo "$file" | cut -d'/' -f1)
+
+#             if [[ ! " $ALLOWED_DIRS " =~ " $TOP_DIR " ]]; then
+#               echo "New folders at the root are not allowed: '$TOP_DIR'"
+#               exit 1
+#             fi
+#           done
+
+#           echo "Folder structure hợp lệ"
