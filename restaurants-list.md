@@ -10,7 +10,7 @@ Lẩu nướng Thuận Việt
 Ốc Oanh 
 Chilli Bbq Hotpot Restaurant
 Thế Giới Bò - Nướng 
-Sốt và Lẩu, Alo Quán | Beer & Seafood, 
-Lẩu mẹt nướng 79k, 
-Ốc Cúc Vĩnh Khánh Quận 4, 
+Sốt và Lẩu, Alo Quán | Beer & Seafood
+Lẩu mẹt nướng 79k
+Ốc Cúc Vĩnh Khánh Quận 4
 THÈM NƯỚNG YAKINIKU
