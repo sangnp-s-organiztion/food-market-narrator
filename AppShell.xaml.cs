@@ -1,4 +1,7 @@
-﻿namespace food_market_narrator;
+﻿using food_market_narrator.Views;
+
+
+namespace food_market_narrator;
 
 public partial class AppShell : Shell
 {

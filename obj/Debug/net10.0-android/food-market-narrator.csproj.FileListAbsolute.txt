@@ -2660,3 +2660,6 @@ D:\Programs\food-market-narrator\obj\Debug\net10.0-android\stamp\_ConvertResourc
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\stamp\_GenerateJavaStubs.stamp
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\stamp\_GeneratePackageManagerJava.stamp
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\resizetizer\r\drawable\van_mieu_bg.jpg
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\resizetizer\f\fa-solid-900.ttf
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\assets\fa-solid-900.ttf

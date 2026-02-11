@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="food_market_narrator.Views.MainPage"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="*, Auto">
+        
+        <Image Source="van_mieu_bg.jpg" 
+               Aspect="AspectFill"
+               Grid.RowSpan="2" />
+
+        <Grid Grid.RowSpan="2" RowDefinitions="Auto, *, Auto, Auto">
+            
+            <FlexLayout JustifyContent="SpaceBetween" Padding="20, 50, 20, 0">
+                <Border HeightRequest="45" WidthRequest="45" Padding="0" BackgroundColor="#80FFFFFF" StrokeShape="RoundRectangle 22.5,22.5,22.5,22.5">
+                    <Image Source="dotnet_bot.png" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="24"/>
+                </Border>
+                
+                <Button Text="Khóa" 
+                        ImageSource="lock_icon.png"
+                        BackgroundColor="White" 
+                        TextColor="Maroon"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45"
+                        Padding="15,0"/>
+            </FlexLayout>
+
+            <Label Grid.Row="2"
+                   Text="Văn Miếu - Quốc Tử Giám"
+                   TextColor="White"
+                   FontSize="32"
+                   FontAttributes="Bold"
+                   Margin="20, 0, 20, 40"
+                   VerticalOptions="End" />
+
+            <Grid Grid.Row="3" 
+                  ColumnDefinitions="*, *, *, *" 
+                  Padding="10, 20" 
+                  BackgroundColor="#40000000"> <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
+                    <Image Source="qr_icon.png" HeightRequest="30" />
+                    <Label Text="Mã QR" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="Center">
+                    <Image Source="numbers_icon.png" HeightRequest="30" />
+                    <Label Text="Số" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="2" Spacing="5" HorizontalOptions="Center">
+                    <Image Source="story_icon.png" HeightRequest="30" />
+                    <Label Text="Câu chuyện" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="3" Spacing="5" HorizontalOptions="Center">
+                    <Image Source="map_icon.png" HeightRequest="30" />
+                    <Label Text="Sơ đồ" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentPage>
