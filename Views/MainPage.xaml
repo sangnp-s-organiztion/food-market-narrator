@@ -34,6 +34,16 @@
                         Padding="15,0"/>
             </FlexLayout>
 
+            <Label  Grid.Row="1"
+                    x:Name="LocationLabel"
+                    Text="Đang lấy vị trí ..."
+                    FontAttributes="Bold"
+                    FontSize="15"
+                    TextColor="White"
+                    Margin="20, 0, 20, 40"
+                    VerticalOptions="End"
+                    />
+
             <Label Grid.Row="2"
                    Text="Phố ẩm thực Vĩnh Khánh"
                    TextColor="White"

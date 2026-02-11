@@ -1,6 +1,7 @@
 using food_market_narrator.Views;
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Maps;
+using food_market_narrator.Views;
 
 namespace food_market_narrator.Services;
 
@@ -55,6 +56,12 @@ public class LocationServices
         locationTimer.Start();
     }
 
-    // Load tất cả các POI
-    // LoadAllPOIsAsync
+    // Hiển thị vị trí hiện tại của người dùng
+	private void UpdateLocationLabel(double lat, double lng)
+	{
+		MainThread.BeginInvokeOnMainThread(() =>
+		{
+			OnLocationUpdated?.Invoke(lat, lng);
+		});
+	}
 }

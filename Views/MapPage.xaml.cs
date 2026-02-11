@@ -1,6 +1,7 @@
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Maps;
 using Microsoft.Maui.Controls.Maps;
+using food_market_narrator.Services;
 
 
 namespace food_market_narrator.Views;
@@ -13,6 +14,7 @@ public partial class MapPage : ContentPage
 	private String _targetLocationName; // tên địa điểm
 	private bool _isTrackingLocation = false;
 	private IDispatcherTimer locationTimer;
+	private LocationServices locationServices;
 
 	// Khởi tạo địa điểm của map khi mở map
 	public MapPage(double? latitude, double? longitude, String locationName)
@@ -66,29 +68,5 @@ public partial class MapPage : ContentPage
 		}
 	}
 
-    // tự động tải thông tin cần thiết
-    // protected override void OnAppearing()
-    // {
-    //     base.OnAppearing();
-
-	// 	if (_targetLatitude != 0 && _targetLongitude != 0)
-	// 	{
-	// 		var location = new Location (_targetLatitude.Value, _targetLongitude.Value);
-	// 		Map.MoveToRegion(
-	// 			MapSpan.FromCenterAndRadius(
-	// 				location,
-	// 				Distance.FromKilometers(1)
-	// 			)
-	// 		);
-
-
-	// 		Map.Pins.Add(new Pin
-    //         {
-    //             Label = _targetLocationName,
-    //             Address = "Vị trí nhà hàng",
-    //             Type = PinType.Place,
-    //             Location = location
-    //         });
-	// 	} 
-    // }
+    
 }
