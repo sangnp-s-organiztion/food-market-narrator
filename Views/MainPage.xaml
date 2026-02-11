@@ -14,7 +14,13 @@
             
             <FlexLayout JustifyContent="SpaceBetween" Padding="20, 50, 20, 0">
                 <Border HeightRequest="45" WidthRequest="45" Padding="0" BackgroundColor="#80FFFFFF" StrokeShape="RoundRectangle 22.5,22.5,22.5,22.5">
-                    <Image Source="dotnet_bot.png" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="24"/>
+                    <Label
+                        FontFamily="FASolid"
+                        Text="&#xf0c9;"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        FontSize="24"
+                        TextColor="Black" />
                 </Border>
                 
                 <Button Text="Khóa" 
@@ -29,7 +35,7 @@
             </FlexLayout>
 
             <Label Grid.Row="2"
-                   Text="Văn Miếu - Quốc Tử Giám"
+                   Text="Phố ẩm thực Vĩnh Khánh"
                    TextColor="White"
                    FontSize="32"
                    FontAttributes="Bold"
@@ -39,24 +45,48 @@
             <Grid Grid.Row="3" 
                   ColumnDefinitions="*, *, *, *" 
                   Padding="10, 20" 
-                  BackgroundColor="#40000000"> <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
-                    <Image Source="qr_icon.png" HeightRequest="30" />
-                    <Label Text="Mã QR" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                  BackgroundColor="#40000000"> 
+                  <VerticalStackLayout Grid.Column="0" Spacing="5" 
+                    HorizontalOptions="Center">
+                    <Label FontFamily="FASolid" Text="&#xf029;" 
+                        HorizontalOptions="Center" VerticalOptions="Center" 
+                        FontSize="24" TextColor="White" /> 
+                    <Label Text="Mã QR" TextColor="White" 
+                        HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="Center">
-                    <Image Source="numbers_icon.png" HeightRequest="30" />
-                    <Label Text="Số" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="5" 
+                    HorizontalOptions="Center">
+                    <Label FontFamily="FASolid" Text="&#xf095;" 
+                        HorizontalOptions="Center" VerticalOptions="Center" 
+                        FontSize="24" TextColor="White" /> 
+                    <Label Text="Số" TextColor="White" 
+                        HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Grid.Column="2" Spacing="5" HorizontalOptions="Center">
-                    <Image Source="story_icon.png" HeightRequest="30" />
-                    <Label Text="Câu chuyện" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                <VerticalStackLayout Grid.Column="2" Spacing="5" 
+                    HorizontalOptions="Center">
+                    <Label FontFamily="FASolid" Text="&#xf1e6;" 
+                        HorizontalOptions="Center" VerticalOptions="Center" 
+                        FontSize="24" TextColor="White" /> 
+                    <Label Text="Câu chuyện" TextColor="White" 
+                        HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Grid.Column="3" Spacing="5" HorizontalOptions="Center">
-                    <Image Source="map_icon.png" HeightRequest="30" />
-                    <Label Text="Sơ đồ" TextColor="White" HorizontalOptions="Center" FontSize="12"/>
+                <!-- Map Icon -->
+                    <VerticalStackLayout Grid.Column="3" Spacing="5" HorizontalOptions="Center">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OpenMap" />
+                        </VerticalStackLayout.GestureRecognizers>
+                        
+                    <Label FontFamily="FASolid" Text="&#xf279;" 
+                        HorizontalOptions="Center" VerticalOptions="Center" 
+                        FontSize="24" TextColor="White" />
+
+                    <Label Text="Sơ đồ" TextColor="White" 
+                        HorizontalOptions="Center" FontSize="12"/>
+                        
+                        
                 </VerticalStackLayout>
             </Grid>
         </Grid>

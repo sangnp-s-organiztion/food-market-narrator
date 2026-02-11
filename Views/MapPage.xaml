@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             x:Class="food_market_narrator.Views.MapPage"
+             Title="Bản đồ">
+
+    <Grid RowDefinitions="Auto, *" x:Name="MapContainer">
+        <Label
+            Grid.Row="0"
+            Text="🗺 Trang bản đồ"
+            FontSize="20"
+            FontAttributes="Bold"
+            HorizontalTextAlignment="Center"
+            Padding="10" />
+
+        <!-- Initialize Map -->
+        <maps:Map
+            Grid.Row="1"
+            x:Name="Map"
+            IsShowingUser="True" />
+    </Grid>
+
+
+</ContentPage>
