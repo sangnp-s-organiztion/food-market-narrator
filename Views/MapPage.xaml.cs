@@ -15,6 +15,7 @@ public partial class MapPage : ContentPage
 	private bool _isTrackingLocation = false;
 	private IDispatcherTimer locationTimer;
 	private LocationServices locationServices;
+	private POIService _poiService = new POIService();
 
 	// Khởi tạo địa điểm của map khi mở map
 	public MapPage(double? latitude, double? longitude, String locationName)
@@ -26,6 +27,17 @@ public partial class MapPage : ContentPage
 
 		Loaded += OnMapLoadedAndFocused;
 	}
+
+
+
+	protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+		await LoadAllPOIsAsync();
+    }
+
+
+
 
 	// Tải bản đồ và focus vào vị trí cần đến khi map được tải xong
 	public async void OnMapLoadedAndFocused(object sender, EventArgs e)
@@ -68,5 +80,53 @@ public partial class MapPage : ContentPage
 		}
 	}
 
-    
+    // Hiển thị tất cả các POIs 
+	private async Task LoadAllPOIsAsync()
+    {
+        if (Map == null) return;
+
+        var pois = await _poiService.GetAllPOIsAsync();
+        
+        // Nếu không có dữ liệu, thoát sớm để tránh lỗi tính toán
+        if (pois == null || !pois.Any()) return;
+
+        foreach (var poi in pois)
+        {
+            Map.Pins.Add(new Pin
+            {
+                Label = poi.Name,
+                Address = poi.Description,
+                Type = PinType.Place,
+                Location = new Location(poi.Latitude, poi.Longitude)
+            });
+        }
+
+        // --- Tự viết hàm tính Bounding Box thay cho FromLocations ---
+        
+        // 1. Tìm cực điểm vĩ độ và kinh độ
+        double minLat = pois.Min(p => p.Latitude);
+        double maxLat = pois.Max(p => p.Latitude);
+        double minLon = pois.Min(p => p.Longitude);
+        double maxLon = pois.Max(p => p.Longitude);
+
+        // 2. Tính điểm trung tâm
+        double centerLat = (minLat + maxLat) / 2;
+        double centerLon = (minLon + maxLon) / 2;
+
+        // 3. Tính độ chênh lệch (Delta) 
+        // Nhân thêm 1.2 (thêm 20% lề) để các Pin không bị dính sát mép màn hình
+        double latDelta = (maxLat - minLat) * 1.2;
+        double lonDelta = (maxLon - minLon) * 1.2;
+
+        // 4. Di chuyển bản đồ (giới hạn độ Delta tối thiểu để không bị zoom quá sâu nếu chỉ có 1 điểm)
+        Map.MoveToRegion(new MapSpan(
+            new Location(centerLat, centerLon), 
+            Math.Max(latDelta, 0.01), 
+            Math.Max(lonDelta, 0.01)
+        ));
+    }
+
+
+
+
 }
