@@ -2,9 +2,92 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="food_market_narrator.Views.MainPage"
+             xmlns:res="clr-namespace:food_market_narrator.Resources"
              Shell.NavBarIsVisible="False">
 
+             
+
     <Grid RowDefinitions="*, Auto">
+
+        <!-- LANGUAGE POPUP -->
+        <Grid x:Name="LanguagePopup" 
+            Grid.RowSpan="2" 
+            BackgroundColor="#AA000000" 
+            IsVisible="False"
+            ZIndex="10"> <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="ClosePopup" />
+            </Grid.GestureRecognizers>
+
+            <Border VerticalOptions="Center" 
+                    HorizontalOptions="Center" 
+                    WidthRequest="320" 
+                    Padding="25"
+                    BackgroundColor="White" 
+                    StrokeShape="RoundRectangle 20">
+                
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="{x:Static res:AppResources.SelectLanguage}" 
+                        TextColor="#333333" 
+                        FontSize="18" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center" />
+
+                    <BoxView HeightRequest="1" Color="#EEEEEE" HorizontalOptions="Fill" />
+
+                    <Button Text="Tiếng Việt" 
+                            Clicked="OnLanguageSelected"
+                            CommandParameter="vi-VN"
+                            HeightRequest="50"
+                            BackgroundColor="#F8F8F8" 
+                            TextColor="Black"
+                            FontSize="16"
+                            CornerRadius="10" />
+
+                    <Button Text="English" 
+                            Clicked="OnLanguageSelected"
+                            CommandParameter="en-US"
+                            HeightRequest="50"
+                            BackgroundColor="#F8F8F8" 
+                            TextColor="Black"
+                            FontSize="16"
+                            CornerRadius="10" />
+
+                    <Button Text="中文 (Tiếng Trung)" 
+                            Clicked="OnLanguageSelected"
+                            CommandParameter="zh-CN"
+                            HeightRequest="50"
+                            BackgroundColor="#F8F8F8" 
+                            TextColor="Black"
+                            FontSize="16"
+                            CornerRadius="10" />
+
+                    <Button Text="日本語 (Tiếng Nhật)" 
+                            Clicked="OnLanguageSelected"
+                            CommandParameter="ja-JP"
+                            HeightRequest="50"
+                            BackgroundColor="#F8F8F8" 
+                            TextColor="Black"
+                            FontSize="16"
+                            CornerRadius="10" />
+
+                    <Button Text="한국어 (Tiếng Hàn)" 
+                            Clicked="OnLanguageSelected"
+                            CommandParameter="ko-KR"
+                            HeightRequest="50"
+                            BackgroundColor="#F8F8F8" 
+                            TextColor="Black"
+                            FontSize="16"
+                            CornerRadius="10" />
+
+                    <Button Text="Đóng" 
+                            Clicked="ClosePopup"
+                            BackgroundColor="Transparent" 
+                            TextColor="Gray"
+                            FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+       
         
         <Image Source="van_mieu_bg.jpg" 
                Aspect="AspectFill"
@@ -45,7 +128,7 @@
                     />
 
             <Label Grid.Row="2"
-                   Text="Phố ẩm thực Vĩnh Khánh"
+                   Text="{x:Static res:AppResources.StreetName}"
                    TextColor="White"
                    FontSize="32"
                    FontAttributes="Bold"
@@ -56,30 +139,37 @@
                   ColumnDefinitions="*, *, *, *" 
                   Padding="10, 20" 
                   BackgroundColor="#40000000"> 
+
+
+
+                <!-- QR code Icon -->
                   <VerticalStackLayout Grid.Column="0" Spacing="5" 
                     HorizontalOptions="Center">
                     <Label FontFamily="FASolid" Text="&#xf029;" 
                         HorizontalOptions="Center" VerticalOptions="Center" 
                         FontSize="24" TextColor="White" /> 
-                    <Label Text="Mã QR" TextColor="White" 
+                    <Label x:Name="QrLabel" Text="{x:Static res:AppResources.QRCode}" TextColor="White" 
                         HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
+
+                <!-- Phone Icon -->
                 <VerticalStackLayout Grid.Column="1" Spacing="5" 
                     HorizontalOptions="Center">
                     <Label FontFamily="FASolid" Text="&#xf095;" 
                         HorizontalOptions="Center" VerticalOptions="Center" 
                         FontSize="24" TextColor="White" /> 
-                    <Label Text="Số" TextColor="White" 
+                    <Label x:Name="NumberLabel" Text="{x:Static res:AppResources.PhoneNumber}" TextColor="White" 
                         HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
+                <!-- Story Icon -->
                 <VerticalStackLayout Grid.Column="2" Spacing="5" 
                     HorizontalOptions="Center">
                     <Label FontFamily="FASolid" Text="&#xf1e6;" 
                         HorizontalOptions="Center" VerticalOptions="Center" 
                         FontSize="24" TextColor="White" /> 
-                    <Label Text="Câu chuyện" TextColor="White" 
+                    <Label x:Name="StoryLabel"  Text="{x:Static res:AppResources.Story}" TextColor="White" 
                         HorizontalOptions="Center" FontSize="12"/>
                 </VerticalStackLayout>
 
@@ -93,7 +183,7 @@
                         HorizontalOptions="Center" VerticalOptions="Center" 
                         FontSize="24" TextColor="White" />
 
-                    <Label Text="Sơ đồ" TextColor="White" 
+                    <Label Text="{x:Static res:AppResources.Map}" TextColor="White" 
                         HorizontalOptions="Center" FontSize="12"/>
                         
                         
