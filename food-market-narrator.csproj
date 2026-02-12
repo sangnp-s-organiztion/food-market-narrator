@@ -79,4 +79,31 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Localization\AppResources.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppResources.en-US.resx">
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppResources.zh-CN.resx">
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppResources.ja-JP.resx">
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppResources.ko-KR.resx">
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\Localization\AppResources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
 </Project>
