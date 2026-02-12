@@ -105,16 +105,6 @@
                         FontSize="24"
                         TextColor="Black" />
                 </Border>
-                
-                <Button Text="Khóa" 
-                        ImageSource="lock_icon.png"
-                        BackgroundColor="White" 
-                        TextColor="Maroon"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        CornerRadius="10"
-                        HeightRequest="45"
-                        Padding="15,0"/>
             </FlexLayout>
 
             <Label  Grid.Row="1"

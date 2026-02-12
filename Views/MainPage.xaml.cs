@@ -1,13 +1,12 @@
 ﻿using food_market_narrator.Services;
 namespace food_market_narrator.Views;
-using System.Globalization;
-using food_market_narrator.Resources;
 
 public partial class MainPage : ContentPage
 {
 	private double? lat;
 	private double? lng;
 	private string name;
+	private LanguageService? languageService = new LanguageService();
 
 	private LocationServices locationServices = new LocationServices();
 	private bool _isFirstLoad = true;
@@ -17,7 +16,7 @@ public partial class MainPage : ContentPage
 	{
 		InitializeComponent();
 		var mapPage = new MapPage(lat, lng, name);
-		// Giả sử bạn đã khởi tạo locationService
+		
 		locationServices.OnLocationUpdated += (lat, lng) => 
 		{
 			MainThread.BeginInvokeOnMainThread(() => 
@@ -63,38 +62,20 @@ public partial class MainPage : ContentPage
 	// Đóng popup chọn ngôn ngữ
 	private void ClosePopup(object sender, EventArgs e)
 	{
+		LanguagePopup.FadeTo(0, 250); // Hiệu ứng mờ dần nhẹ nhàng
 		LanguagePopup.IsVisible = false;
 	}
 
-	// Khi người dùng chọn ngôn ngữ
+	 // Khi người dùng chọn ngôn ngữ
 	private async void OnLanguageSelected(object sender, EventArgs e)
 	{
 		var button = (Button)sender;
 		string lang = button.CommandParameter.ToString();
 
-		 // Đóng popup mượt
-        await LanguagePopup.FadeTo(0, 200);
-        LanguagePopup.IsVisible = false;
-
-		ChangeLanguage(lang);
+		languageService.ChangeLanguage(lang);
 	}
 
 
-	// Thay đổi ngôn ngữ ứng dụng
-	private void ChangeLanguage(string cultureCode)
-    {
-		// Lưu lại để lần sau app mở tự load
-        Preferences.Set("AppLanguage", cultureCode);
 
-        var culture = new CultureInfo(cultureCode);
 
-        Thread.CurrentThread.CurrentUICulture = culture;
-        Thread.CurrentThread.CurrentCulture = culture;
-
-        AppResources.Culture = culture;
-
-        // Reload AppShell (nhẹ hơn recreate toàn app)
-        Application.Current.Windows[0].Page = new AppShell();
-
-    }
 }
