@@ -89,7 +89,7 @@
         </Grid>
        
         
-        <Image Source="van_mieu_bg.jpg" 
+        <Image Source="vinh_khanh_background.png" 
                Aspect="AspectFill"
                Grid.RowSpan="2" />
 
@@ -130,10 +130,17 @@
             <Label Grid.Row="2"
                    Text="{x:Static res:AppResources.StreetName}"
                    TextColor="White"
-                   FontSize="32"
+                   FontSize="44"
                    FontAttributes="Bold"
-                   Margin="20, 0, 20, 40"
-                   VerticalOptions="End" />
+                   Margin="15, 0, 20, 40"
+                   VerticalOptions="End">
+                <Label.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="3,6"
+                            Radius="10"
+                            Opacity="1" />
+                </Label.Shadow>
+            </Label>
 
             <Grid Grid.Row="3" 
                   ColumnDefinitions="*, *, *, *" 

@@ -1,10 +1,10 @@
-<api type="debug" assembly-name="food-market-narrator" mvid="985eed85216a4d16b6eda675bcd67fff">
+<api type="debug" assembly-name="food-market-narrator" mvid="4badb54f30e140999a84a22b40c3612a">
   <java-to-managed>
-    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554440" />
-    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554441" />
+    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554441" />
+    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554442" />
   </java-to-managed>
   <managed-to-java>
-    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554440" />
-    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554441" />
+    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554441" />
+    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554442" />
   </managed-to-java>
 </api>
