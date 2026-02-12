@@ -1,5 +1,2 @@
-int attr drawerLayoutStyle 0x0
-int attr elevation 0x0
-int dimen def_drawer_elevation 0x0
-int[] styleable DrawerLayout { 0x0 }
-int styleable DrawerLayout_elevation 0
+int[] styleable ViewPager2 { 0x10100c4 }
+int styleable ViewPager2_android_orientation 0
