@@ -27,6 +27,13 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
+	builder.ConfigureMauiHandlers(handlers =>
+	{
+	#if ANDROID
+		handlers.AddHandler<Microsoft.Maui.Controls.Maps.Map, CustomMapHandler>();
+	#endif
+	});
+
 		return builder.Build();
 	}
 }

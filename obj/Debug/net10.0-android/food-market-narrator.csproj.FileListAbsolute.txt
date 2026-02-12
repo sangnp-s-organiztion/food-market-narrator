@@ -2816,11 +2816,6 @@ D:\Programs\food-market-narrator\obj\Debug\net10.0-android\en-US\food-market-nar
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\ja-JP\food-market-narrator.resources.dll
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\ko-KR\food-market-narrator.resources.dll
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\resizetizer\r\drawable\vinh_khanh_background.png
-D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.Maui.Controls.HotReload.Forms.dll
-D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.MobileTapContracts.dll
-D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.TapContract.dll
-D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.XamlTapContract.dll
-D:\Programs\food-market-narrator\obj\Debug\net10.0-android\food-mar.E54AF248.Up2Date
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.Maui.Controls.HotReload.Forms.dll
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.Maui.Controls.HotReload.Forms.jlo.xml
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.Maui.Controls.HotReload.Forms.typemap.xml
@@ -2833,3 +2828,10 @@ D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.VisualStudio.DesignTools.XamlTapContract.dll
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.VisualStudio.DesignTools.XamlTapContract.jlo.xml
 D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\assets\x86_64\Microsoft.VisualStudio.DesignTools.XamlTapContract.typemap.xml
+D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.Maui.Controls.HotReload.Forms.dll
+D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.MobileTapContracts.dll
+D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.TapContract.dll
+D:\Programs\food-market-narrator\bin\Debug\net10.0-android\Microsoft.VisualStudio.DesignTools.XamlTapContract.dll
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\food-mar.E54AF248.Up2Date
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\resizetizer\r\drawable\hightlight_pin_map.jpg
+D:\Programs\food-market-narrator\obj\Debug\net10.0-android\android\src\crc6448ff03fc5be1540a\CustomMapHandler_MapReadyCallback.java

@@ -1,7 +1,8 @@
-using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Maps;
 using Microsoft.Maui.Controls.Maps;
 using food_market_narrator.Services;
+using Android.Gms.Maps.Model;
+
 
 
 namespace food_market_narrator.Views;
@@ -14,7 +15,7 @@ public partial class MapPage : ContentPage
 	private String _targetLocationName; // tên địa điểm
 	private bool _isTrackingLocation = false;
 	private IDispatcherTimer locationTimer;
-	private LocationServices locationServices;
+	private LocationServices locationServices = new LocationServices();
 	private POIService _poiService = new POIService();
 
 	// Khởi tạo địa điểm của map khi mở map
@@ -34,8 +35,50 @@ public partial class MapPage : ContentPage
     {
         base.OnAppearing();
 		await LoadAllPOIsAsync();
+
+		StartTrackingLocation();
     }
 
+
+
+	private void StartTrackingLocation()
+	{
+		if (_isTrackingLocation) return;
+
+		locationTimer = Dispatcher.CreateTimer();
+		locationTimer.Interval = TimeSpan.FromSeconds(1);
+
+		locationTimer.Tick += async (s, e) =>
+		{
+			var request = new GeolocationRequest(
+				GeolocationAccuracy.Medium,
+				TimeSpan.FromSeconds(3));
+
+			var location = await Geolocation.Default.GetLocationAsync(request);
+
+			if (location == null) return;
+
+			var nearest = _poiService.UpdateNearestPOI(
+				location.Latitude,
+				location.Longitude);
+
+			if (nearest != null)
+			{
+				_poiService.HighlightNearestPOI(Map, nearest);
+			}
+		};
+
+		locationTimer.Start();
+		_isTrackingLocation = true;
+	}
+
+	protected override void OnDisappearing()
+	{
+		base.OnDisappearing();
+
+		locationTimer?.Stop();
+		_isTrackingLocation = false;
+	}
 
 
 
@@ -92,14 +135,47 @@ public partial class MapPage : ContentPage
 
         foreach (var poi in pois)
         {
-            Map.Pins.Add(new Pin
-            {
-                Label = poi.Name,
-                Address = poi.Description,
-                Type = PinType.Place,
-                Location = new Location(poi.Latitude, poi.Longitude)
-            });
+			#if ANDROID
+			int retry = 0;
+			while (CustomMapHandler.NativeGoogleMap == null && retry < 10)
+			{
+				await Task.Delay(200);
+				retry++;
+			}
+
+			var googleMap = CustomMapHandler.NativeGoogleMap;
+
+			if (googleMap != null)
+			{
+				var marker = googleMap.AddMarker(new MarkerOptions()
+					.SetPosition(new LatLng(poi.Latitude, poi.Longitude))
+					.SetTitle(poi.Name)
+					.SetSnippet(poi.Description)
+					.SetIcon(BitmapDescriptorFactory.DefaultMarker(
+						BitmapDescriptorFactory.HueRed)));
+
+				CustomMapHandler.MarkerDictionary[poi.Id] = marker;
+			}
+
+			Console.WriteLine(CustomMapHandler.NativeGoogleMap == null 
+				? "MAP NULL" 
+				: "MAP READY");
+			#else
+			// iOS thì giữ MAUI pin ở đây
+			var pin = new Pin
+			{
+				Label = poi.Name,
+				Address = poi.Description,
+				Type = PinType.Place,
+				Location = new Location(poi.Latitude, poi.Longitude)
+			};
+
+			poi.MapPin = pin;
+			Map.Pins.Add(pin);
+			#endif
         }
+
+        // _poiService.SetPOIs(pois);    // 👈 LƯU POI VÀO SERVICE
 
         // --- Tự viết hàm tính Bounding Box thay cho FromLocations ---
         

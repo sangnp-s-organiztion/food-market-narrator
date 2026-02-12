@@ -2293,6 +2293,9 @@ com.bumptech.glide.util.pool.FactoryPools$Poolable;com.bumptech.glide.util.pool.
 Bumptech.Glide.Util.Pool.FactoryPools+IResetter, Xamarin.Android.Glide;com.bumptech.glide.util.pool.FactoryPools$Resetter
 Bumptech.Glide.Util.Pool.FactoryPools.IResetter;com.bumptech.glide.util.pool.FactoryPools$Resetter
 com.bumptech.glide.util.pool.FactoryPools$Resetter;com.bumptech.glide.util.pool.FactoryPools$Resetter
+food_market_narrator.CustomMapHandler+MapReadyCallback, food-market-narrator;crc6448ff03fc5be1540a.CustomMapHandler_MapReadyCallback
+food_market_narrator.CustomMapHandler.MapReadyCallback;crc6448ff03fc5be1540a.CustomMapHandler_MapReadyCallback
+food_market_narrator.CustomMapHandler_MapReadyCallback;crc6448ff03fc5be1540a.CustomMapHandler_MapReadyCallback
 food_market_narrator.MainActivity, food-market-narrator;crc6448ff03fc5be1540a.MainActivity
 food_market_narrator.MainActivity;crc6448ff03fc5be1540a.MainActivity
 food_market_narrator.MainActivity;crc6448ff03fc5be1540a.MainActivity
