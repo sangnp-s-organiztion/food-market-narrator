@@ -12146,7 +12146,7 @@ public final class R {
     public static final int test_level_drawable=0x7f0700fa;
     public static final int tooltip_frame_dark=0x7f0700fb;
     public static final int tooltip_frame_light=0x7f0700fc;
-    public static final int van_mieu_bg=0x7f0700fd;
+    public static final int vinh_khanh_background=0x7f0700fd;
   }
   public static final class id {
     public static final int ALT=0x7f080000;
