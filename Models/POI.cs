@@ -1,4 +1,5 @@
 using SQLite;
+using Microsoft.Maui.Controls.Maps;
 
 namespace food_market_narrator.Models;
 
@@ -15,6 +16,9 @@ public class POI
     public double Radius { get; set; } = 500; // met
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
+    
+    public Pin? MapPin { get; set; } 
+
     
     // Thong tin bo sung
     public string? PriceRange { get; set; }
