@@ -4,68 +4,68 @@
         <name>food-market-narrator</name>
     </assembly>
     <members>
-        <member name="T:food_market_narrator.Resources.AppResources">
+        <member name="T:food_market_narrator.Resources.Localization.AppResources">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.ResourceManager">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.ResourceManager">
             <summary>
               Returns the cached ResourceManager instance used by this class.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Culture">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Culture">
             <summary>
               Overrides the current thread's CurrentUICulture property for all
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Close">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Close">
             <summary>
               Looks up a localized string similar to Đóng.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.GettingLocation">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.GettingLocation">
             <summary>
               Looks up a localized string similar to Đang lấy vị trí ....
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Language">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Language">
             <summary>
               Looks up a localized string similar to Ngôn ngữ.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Lock">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Lock">
             <summary>
               Looks up a localized string similar to Khóa.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Map">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Map">
             <summary>
               Looks up a localized string similar to Sơ đồ.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.PhoneNumber">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.PhoneNumber">
             <summary>
               Looks up a localized string similar to Số điện thoại.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.QRCode">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.QRCode">
             <summary>
               Looks up a localized string similar to Mã QR.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.SelectLanguage">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.SelectLanguage">
             <summary>
               Looks up a localized string similar to CHỌN NGÔN NGỮ.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.Story">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.Story">
             <summary>
               Looks up a localized string similar to Câu chuyện.
             </summary>
         </member>
-        <member name="P:food_market_narrator.Resources.AppResources.StreetName">
+        <member name="P:food_market_narrator.Resources.Localization.AppResources.StreetName">
             <summary>
               Looks up a localized string similar to Phố ẩm thực Vĩnh Khánh.
             </summary>
