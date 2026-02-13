@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="food-market-narrator" mvid="ad6d7132e10349eb893ceff1cfaa37f7">
+<api type="debug" assembly-name="food-market-narrator" mvid="2660cfd58f624ed58804248aed14cba9">
   <java-to-managed>
     <entry java-name="crc6448ff03fc5be1540a/CustomMapHandler_MapReadyCallback" managed-name="food_market_narrator.CustomMapHandler+MapReadyCallback, food-market-narrator" managed-type-token-id="33554455" />
     <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554442" />
