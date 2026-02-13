@@ -8,6 +8,8 @@ namespace food_market_narrator;
 public class CustomMapHandler : MapHandler
 {
     public static GoogleMap? NativeGoogleMap;
+    public static event Action<GoogleMap>? OnGoogleMapReady;
+
     public static Dictionary<string, Marker> MarkerDictionary = new();
 
     protected override void ConnectHandler(MapView platformView)
@@ -21,6 +23,7 @@ public class CustomMapHandler : MapHandler
         public void OnMapReady(GoogleMap googleMap)
         {
             NativeGoogleMap = googleMap;
+            OnGoogleMapReady?.Invoke(googleMap);
         }
     }
 }

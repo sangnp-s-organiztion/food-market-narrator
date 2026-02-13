@@ -34,11 +34,34 @@ public partial class MapPage : ContentPage
 	protected override async void OnAppearing()
     {
         base.OnAppearing();
-		await LoadAllPOIsAsync();
-
+		// Đợi map sẵn sàng TRƯỚC khi thao tác
+		CustomMapHandler.OnGoogleMapReady += async (googleMap) =>
+		{
+			Console.WriteLine("MAP READY EVENT FIRED");
+			await LoadAllPOIsAsync();
+		};
 		StartTrackingLocation();
     }
 
+
+	protected override void OnDisappearing()
+	{
+		base.OnDisappearing();
+
+		#if ANDROID
+			CustomMapHandler.OnGoogleMapReady -= HandleMapReady;
+		#endif
+
+		locationTimer?.Stop();
+		_isTrackingLocation = false;
+	}
+
+	#if ANDROID
+	private async void HandleMapReady(Android.Gms.Maps.GoogleMap map)
+	{
+		await LoadAllPOIsAsync();
+	}
+	#endif
 
 
 	private void StartTrackingLocation()
@@ -72,13 +95,7 @@ public partial class MapPage : ContentPage
 		_isTrackingLocation = true;
 	}
 
-	protected override void OnDisappearing()
-	{
-		base.OnDisappearing();
 
-		locationTimer?.Stop();
-		_isTrackingLocation = false;
-	}
 
 
 
@@ -126,6 +143,7 @@ public partial class MapPage : ContentPage
     // Hiển thị tất cả các POIs 
 	private async Task LoadAllPOIsAsync()
     {
+		
         if (Map == null) return;
 
         var pois = await _poiService.GetAllPOIsAsync();
@@ -133,52 +151,49 @@ public partial class MapPage : ContentPage
         // Nếu không có dữ liệu, thoát sớm để tránh lỗi tính toán
         if (pois == null || !pois.Any()) return;
 
+		#if ANDROID
+		// Đợi map sẵn sàng TRƯỚC khi thao tác
+		
+
+		var googleMap = CustomMapHandler.NativeGoogleMap;
+		
+		if (googleMap == null)
+		{
+			Console.WriteLine("Google Map không sẵn sàng sau khi đợi");
+			return;
+		}		
+		// Clear tất cả markers cũ
+		googleMap.Clear();
+		CustomMapHandler.MarkerDictionary.Clear();
+		#endif
+
         foreach (var poi in pois)
         {
 			#if ANDROID
-			int retry = 0;
-			while (CustomMapHandler.NativeGoogleMap == null && retry < 10)
-			{
-				await Task.Delay(200);
-				retry++;
-			}
+			var marker = googleMap.AddMarker(new MarkerOptions()
+				.SetPosition(new LatLng(poi.Latitude, poi.Longitude))
+				.SetTitle(poi.Name)
+				.SetSnippet(poi.Description)
+				.SetIcon(BitmapDescriptorFactory.DefaultMarker(
+					BitmapDescriptorFactory.HueRed)));
 
-			var googleMap = CustomMapHandler.NativeGoogleMap;
-
-			if (googleMap != null)
-			{
-				var marker = googleMap.AddMarker(new MarkerOptions()
-					.SetPosition(new LatLng(poi.Latitude, poi.Longitude))
-					.SetTitle(poi.Name)
-					.SetSnippet(poi.Description)
-					.SetIcon(BitmapDescriptorFactory.DefaultMarker(
-						BitmapDescriptorFactory.HueRed)));
-
-				CustomMapHandler.MarkerDictionary[poi.Id] = marker;
-			}
-
-			Console.WriteLine(CustomMapHandler.NativeGoogleMap == null 
-				? "MAP NULL" 
-				: "MAP READY");
-			#else
-			// iOS thì giữ MAUI pin ở đây
-			var pin = new Pin
-			{
-				Label = poi.Name,
-				Address = poi.Description,
-				Type = PinType.Place,
-				Location = new Location(poi.Latitude, poi.Longitude)
-			};
-
-			poi.MapPin = pin;
-			Map.Pins.Add(pin);
+			CustomMapHandler.MarkerDictionary[poi.Id] = marker;
 			#endif
+			// iOS thì giữ MAUI pin ở đây
+			// var pin = new Pin
+			// {
+			// 	Label = poi.Name,
+			// 	Address = poi.Description,
+			// 	Type = PinType.Place,
+			// 	Location = new Location(poi.Latitude, poi.Longitude)
+			// };
+
+			// poi.MapPin = pin;
+			// Map.Pins.Add(pin);
         }
 
-        // _poiService.SetPOIs(pois);    // 👈 LƯU POI VÀO SERVICE
 
-        // --- Tự viết hàm tính Bounding Box thay cho FromLocations ---
-        
+        // Viết hàm tính Bounding Box thay cho FromLocations ---
         // 1. Tìm cực điểm vĩ độ và kinh độ
         double minLat = pois.Min(p => p.Latitude);
         double maxLat = pois.Max(p => p.Latitude);
