@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="food_market_narrator.Views.MainPage"
-             xmlns:res="clr-namespace:food_market_narrator.Resources"
+             xmlns:res="clr-namespace:food_market_narrator.Resources.Localization"
              Shell.NavBarIsVisible="False">
 
              
