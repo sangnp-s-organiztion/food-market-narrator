@@ -482,9 +482,7 @@ $RECYCLE.BIN/
 *.swp
 
 
-
-
-# trashhh
+# trash
 bin/
 obj/
 .vs/

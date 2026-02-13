@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="food_market_narrator.Views.MainPage"
-             xmlns:res="clr-namespace:food_market_narrator.Resources"
+             xmlns:res="clr-namespace:food_market_narrator.Resources.Localization"
              Shell.NavBarIsVisible="False">
 
              
@@ -105,16 +105,6 @@
                         FontSize="24"
                         TextColor="Black" />
                 </Border>
-                
-                <Button Text="Khóa" 
-                        ImageSource="lock_icon.png"
-                        BackgroundColor="White" 
-                        TextColor="Maroon"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        CornerRadius="10"
-                        HeightRequest="45"
-                        Padding="15,0"/>
             </FlexLayout>
 
             <Label  Grid.Row="1"
