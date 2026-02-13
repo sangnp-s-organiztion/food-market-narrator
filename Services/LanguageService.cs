@@ -1,5 +1,6 @@
 using System.Globalization;
 using food_market_narrator.Resources;
+using food_market_narrator.Resources.Localization;
 
 namespace food_market_narrator.Services;
 
