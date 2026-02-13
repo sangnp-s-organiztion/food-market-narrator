@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Programs\\narration-automated-food-market\\narration-automated-food-market.csproj",
+      "projectUniqueName": "D:\\Programs\\food-market-narrator\\narration-automated-food-market.csproj",
       "projectName": "narration-automated-food-market",
-      "projectPath": "D:\\Programs\\narration-automated-food-market\\narration-automated-food-market.csproj",
+      "projectPath": "D:\\Programs\\food-market-narrator\\narration-automated-food-market.csproj",
       "packagesPath": "C:\\Users\\sangn\\.nuget\\packages\\",
-      "outputPath": "D:\\Programs\\narration-automated-food-market\\obj\\",
+      "outputPath": "D:\\Programs\\food-market-narrator\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
