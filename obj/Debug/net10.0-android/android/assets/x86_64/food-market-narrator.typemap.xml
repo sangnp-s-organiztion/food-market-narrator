@@ -1,0 +1,12 @@
+<api type="debug" assembly-name="food-market-narrator" mvid="2660cfd58f624ed58804248aed14cba9">
+  <java-to-managed>
+    <entry java-name="crc6448ff03fc5be1540a/CustomMapHandler_MapReadyCallback" managed-name="food_market_narrator.CustomMapHandler+MapReadyCallback, food-market-narrator" managed-type-token-id="33554455" />
+    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554442" />
+    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554443" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc6448ff03fc5be1540a/CustomMapHandler_MapReadyCallback" managed-name="food_market_narrator.CustomMapHandler+MapReadyCallback, food-market-narrator" managed-type-token-id="33554455" />
+    <entry java-name="crc6448ff03fc5be1540a/MainActivity" managed-name="food_market_narrator.MainActivity, food-market-narrator" managed-type-token-id="33554442" />
+    <entry java-name="crc6448ff03fc5be1540a/MainApplication" managed-name="food_market_narrator.MainApplication, food-market-narrator" managed-type-token-id="33554443" />
+  </managed-to-java>
+</api>

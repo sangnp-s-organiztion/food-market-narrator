@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="food_market_narrator.AppShell"
+    xmlns:views="clr-namespace:food_market_narrator.Views"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:food_market_narrator"
+    Title="food_market_narrator">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Route="MainPage" />
+
+</Shell>
