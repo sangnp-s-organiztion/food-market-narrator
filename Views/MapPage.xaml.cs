@@ -1,7 +1,10 @@
 using Microsoft.Maui.Maps;
 using Microsoft.Maui.Controls.Maps;
 using food_market_narrator.Services;
+#if ANDROID
+using Android.Gms.Maps;
 using Android.Gms.Maps.Model;
+#endif
 
 
 
@@ -17,6 +20,8 @@ public partial class MapPage : ContentPage
 	private IDispatcherTimer locationTimer;
 	private LocationServices locationServices = new LocationServices();
 	private POIService _poiService = new POIService();
+	private IDispatcherTimer _timer;
+	private NarrationFlowService _narrationFlowService = new NarrationFlowService();
 
 	// Khởi tạo địa điểm của map khi mở map
 	public MapPage(double? latitude, double? longitude, String locationName)
@@ -32,16 +37,26 @@ public partial class MapPage : ContentPage
 
 
 	protected override async void OnAppearing()
-    {
-        base.OnAppearing();
+	{
+		base.OnAppearing();
 		// Đợi map sẵn sàng TRƯỚC khi thao tác
+		#if ANDROID
 		CustomMapHandler.OnGoogleMapReady += async (googleMap) =>
 		{
 			Console.WriteLine("MAP READY EVENT FIRED");
 			await LoadAllPOIsAsync();
 		};
+		#endif
 		StartTrackingLocation();
-    }
+
+		_timer = Dispatcher.CreateTimer();
+		_timer.Interval = TimeSpan.FromSeconds(5);
+		_timer.Tick += async (s, e) =>
+		{
+			await _narrationFlowService.CheckAndNarrateAsync();
+		};
+		_timer.Start();
+	}
 
 
 	protected override void OnDisappearing()

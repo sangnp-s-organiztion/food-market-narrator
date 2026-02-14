@@ -16,6 +16,7 @@ public class POI
     public double Radius { get; set; } = 500; // met
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string AudioFile { get; set; } = string.Empty;
     
     public Pin? MapPin { get; set; } 
 

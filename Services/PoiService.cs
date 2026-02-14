@@ -5,6 +5,7 @@ using MauiMap = Microsoft.Maui.Controls.Maps.Map;
 using Android.Gms.Maps.Model;
 
 
+
 namespace food_market_narrator.Services;
 
 public class POIService
@@ -35,7 +36,7 @@ public class POIService
             },
             new POI
             {
-                Id = "oc-thao-2",
+                Id = "quan-oc-thao-quan-4-2",
                 Name = "Quán Ốc Thảo",
                 Description = "Thiên đường ốc hải sản ở Quận 4. Thực đơn phong phú, nguyên liệu tươi, nước sốt đậm vị. Không gian bình dân, gần gũi, luôn đông khách buổi tối.",
                 Latitude = 10.761732598326033,
@@ -63,7 +64,7 @@ public class POIService
             },
             new POI
             {
-                Id = "oc-vu-4",
+                Id = "quan-oc-vu-4",
                 Name = "Quán Ốc Vũ",
                 Description = "Ốc ngon chuẩn vị, phục vụ nhanh. Món lên đều tay, giá hợp lý. Ốc xào và nướng sa tế rất được yêu thích.",
                 Latitude = 10.761407697463692,
@@ -77,7 +78,7 @@ public class POIService
             },
             new POI
             {
-                Id = "be-oc-5",
+                Id = "quan-be-oc-5",
                 Name = "Quán Bò Ốc",
                 Description = "Quán ốc bình dân, giá sinh viên. Hải sản tươi, chế biến đơn giản nhưng đậm đà.",
                 Latitude = 10.763402443407372,
@@ -244,6 +245,17 @@ public class POIService
                 Address = "TP.HCM"
             }
         };
+        foreach (var poi in _pois)
+        {
+           var originalId = poi.Id;
+            var lastDashIndex = originalId.LastIndexOf('-');
+
+            var audioFileName = lastDashIndex > 0 
+                ? originalId.Substring(0, lastDashIndex) + ".mp3"
+                : originalId + ".mp3";
+
+            poi.AudioFile = audioFileName;
+        }
     }
 
     public void SetPOIs(List<POI> pois)

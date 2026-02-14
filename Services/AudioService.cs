@@ -1,5 +1,6 @@
 
 using food_market_narrator.Services;
+using Plugin.Maui.Audio;
 
 public class AudioService
 {
@@ -7,25 +8,49 @@ public class AudioService
     private LocationServices _locationService = new LocationServices();
     private LanguageService _languageService = new LanguageService();
 
+    private readonly IAudioManager _audioManager;
+    private IAudioPlayer? _player;
+    public bool IsPlaying => _player?.IsPlaying ?? false;
 
-
+    public AudioService()
+        {
+            _audioManager = AudioManager.Current;
+        }
 
 
     // ================ Audio Methods ================
 
-    public void PlaySound(string soundFile)
+    public async Task PlaySound(string language, string fileName)
     {
-        // Implementation to play sound
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            Console.WriteLine("File name null -> skip");
+            return;
+        }
+
+        StopSound();
+
+        try
+        {
+            var path = $"audio/languages/{language}/{fileName}";
+            Console.WriteLine($"Loading path: {path}");
+
+            var stream = await FileSystem.OpenAppPackageFileAsync(path);
+            _player = _audioManager.CreatePlayer(stream);
+
+            _player.Play();
+            Console.WriteLine("Audio started");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR PLAY SOUND: {ex}");
+        }
     }
 
     public void StopSound()
     {
         // Implementation to stop sound
-    }
-
-    // put audio in to queue
-    public void QueueSound(string soundFile)
-    {
-        // Implementation to queue sound
+        _player?.Stop();
+        _player = null;
     }
 }
