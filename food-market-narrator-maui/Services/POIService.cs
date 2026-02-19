@@ -2,7 +2,6 @@ using food_market_narrator.Models;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
 using MauiMap = Microsoft.Maui.Controls.Maps.Map;
-using Android.Gms.Maps.Model;
 using System.Net.Http.Json;
 
 
@@ -148,26 +147,6 @@ public class POIService
     {
         if (_pois == null || !_pois.Any())
             return;
-
-        #if ANDROID
-        foreach (var pair in CustomMapHandler.MarkerDictionary)
-        {
-            var marker = pair.Value;
-
-            if (nearest != null && pair.Key == nearest.restaurantId)
-            {
-                marker.SetIcon(
-                    BitmapDescriptorFactory.DefaultMarker(
-                        BitmapDescriptorFactory.HueBlue));
-            }
-            else
-            {
-                marker.SetIcon(
-                    BitmapDescriptorFactory.DefaultMarker(
-                        BitmapDescriptorFactory.HueRed));
-            }
-        }
-        #endif
 
         // tự động zoom map về POI gần nhất trong bán kính
         if (nearest != null)
