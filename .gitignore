@@ -485,4 +485,6 @@ $RECYCLE.BIN/
 # trash
 bin/
 obj/
+*.bin/
+*.obj/
 .vs/

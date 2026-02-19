@@ -6,7 +6,7 @@ namespace food_market_narrator.Models;
 public class POI
 {
     [PrimaryKey]
-    public string Id { get; set; } = string.Empty;
+    public string restaurantId { get; set; } = string.Empty;
 
     public string? Name { get; set; }
     public string? Description { get; set; }
@@ -16,6 +16,7 @@ public class POI
     public double Radius { get; set; } = 500; // met
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string AudioFile { get; set; } = string.Empty;
     
     public Pin? MapPin { get; set; } 
 
