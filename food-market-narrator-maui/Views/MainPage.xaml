@@ -1,191 +1,240 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="food_market_narrator.Views.MainPage"
-             xmlns:res="clr-namespace:food_market_narrator.Resources.Localization"
+             BackgroundColor="#FFFCF8"
              Shell.NavBarIsVisible="False">
 
-             
+    <Grid RowDefinitions="*, Auto" RowSpacing="0">
+        <Grid Grid.Row="0">
+            <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="15" Padding="20,10,20,120">
 
-    <Grid RowDefinitions="*, Auto">
+                <!-- 1. Header -->
+                <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                    <!-- Icon placeholder -->
+                    <Border Stroke="#FFF3E0" StrokeThickness="0" BackgroundColor="#FFF3E0" 
+                            HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20">
+                        <Label Text="&#xf2e7;" FontFamily="FASolid" TextColor="#F48C06" 
+                               HorizontalOptions="Center" VerticalOptions="Center" FontSize="18"/>
+                    </Border>
 
-        <!-- LANGUAGE POPUP -->
-        <Grid x:Name="LanguagePopup" 
-            Grid.RowSpan="2" 
-            BackgroundColor="#AA000000" 
-            IsVisible="False"
-            ZIndex="10"> <Grid.GestureRecognizers>
-                <TapGestureRecognizer Tapped="ClosePopup" />
-            </Grid.GestureRecognizers>
+                    <!-- Title -->
+                    <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0" VerticalOptions="Center" Spacing="0">
+                        <Label Text="Vĩnh Khánh Food" FontSize="18" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                        <Label Text="Khám phá thiên đường ẩm thực" FontSize="12" TextColor="#9E9E9E"/>
+                    </VerticalStackLayout>
 
-            <Border VerticalOptions="Center" 
-                    HorizontalOptions="Center" 
-                    WidthRequest="320" 
-                    Padding="25"
-                    BackgroundColor="White" 
-                    StrokeShape="RoundRectangle 20">
-                
-                <VerticalStackLayout Spacing="20">
-                    <Label Text="{x:Static res:AppResources.SelectLanguage}" 
-                        TextColor="#333333" 
-                        FontSize="18" 
-                        FontAttributes="Bold" 
-                        HorizontalOptions="Center" />
+                    <!-- Notification -->
+                    <Border Grid.Column="2" StrokeThickness="0" BackgroundColor="#F0F0F0" 
+                            HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20">
+                        <Label Text="&#xf0f3;" FontFamily="FASolid" TextColor="#1A1A1A" 
+                               HorizontalOptions="Center" VerticalOptions="Center" FontSize="18"/>
+                    </Border>
+                </Grid>
 
-                    <BoxView HeightRequest="1" Color="#EEEEEE" HorizontalOptions="Fill" />
+                <!-- 2. Search Bar -->
+                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                    <Border StrokeThickness="0" BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 25" HeightRequest="50" Padding="15,0">
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Label Text="&#xf002;" FontFamily="FASolid" TextColor="#8D6E63" 
+                                   VerticalOptions="Center" FontSize="16" Margin="0,0,10,0"/>
+                            <Entry Grid.Column="1" Placeholder="Tìm ốc, phá lấu, đồ nướng..." 
+                                   FontSize="14" VerticalOptions="Center" BackgroundColor="Transparent" TextColor="#3E2723" PlaceholderColor="#8D6E63"/>
+                        </Grid>
+                    </Border>
 
-                    <Button Text="Tiếng Việt" 
-                            Clicked="OnLanguageSelected"
-                            CommandParameter="vi-VN"
-                            HeightRequest="50"
-                            BackgroundColor="#F8F8F8" 
-                            TextColor="Black"
-                            FontSize="16"
-                            CornerRadius="10" />
+                    <!-- Filter Button -->
+                    <Button Grid.Column="1" Text="" BackgroundColor="#F48C06" HeightRequest="50" WidthRequest="50" CornerRadius="25">
+                         <Button.ImageSource>
+                            <FontImageSource Glyph="&#xf1de;" FontFamily="FASolid" Color="White" Size="20"/>
+                        </Button.ImageSource>
+                    </Button>
+                </Grid>
 
-                    <Button Text="English" 
-                            Clicked="OnLanguageSelected"
-                            CommandParameter="en-US"
-                            HeightRequest="50"
-                            BackgroundColor="#F8F8F8" 
-                            TextColor="Black"
-                            FontSize="16"
-                            CornerRadius="10" />
+                <!-- 3. Map Section -->
+                <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
+                    <Grid>
+                        <!-- Map Control -->
+                        <maps:Map x:Name="map" IsShowingUser="True" MapType="Street"/>
 
-                    <Button Text="中文 (Tiếng Trung)" 
-                            Clicked="OnLanguageSelected"
-                            CommandParameter="zh-CN"
-                            HeightRequest="50"
-                            BackgroundColor="#F8F8F8" 
-                            TextColor="Black"
-                            FontSize="16"
-                            CornerRadius="10" />
-
-                    <Button Text="日本語 (Tiếng Nhật)" 
-                            Clicked="OnLanguageSelected"
-                            CommandParameter="ja-JP"
-                            HeightRequest="50"
-                            BackgroundColor="#F8F8F8" 
-                            TextColor="Black"
-                            FontSize="16"
-                            CornerRadius="10" />
-
-                    <Button Text="한국어 (Tiếng Hàn)" 
-                            Clicked="OnLanguageSelected"
-                            CommandParameter="ko-KR"
-                            HeightRequest="50"
-                            BackgroundColor="#F8F8F8" 
-                            TextColor="Black"
-                            FontSize="16"
-                            CornerRadius="10" />
-
-                    <Button Text="Đóng" 
-                            Clicked="ClosePopup"
-                            BackgroundColor="Transparent" 
-                            TextColor="Gray"
-                            FontSize="14" />
-                </VerticalStackLayout>
-            </Border>
-        </Grid>
-       
-        
-        <Image Source="vinh_khanh_background.png" 
-               Aspect="AspectFill"
-               Grid.RowSpan="2" />
-
-        <Grid Grid.RowSpan="2" RowDefinitions="Auto, *, Auto, Auto">
-            
-            <FlexLayout JustifyContent="SpaceBetween" Padding="20, 50, 20, 0">
-                <Border HeightRequest="45" WidthRequest="45" Padding="0" BackgroundColor="#80FFFFFF" StrokeShape="RoundRectangle 22.5,22.5,22.5,22.5">
-                    <Label
-                        FontFamily="FASolid"
-                        Text="&#xf0c9;"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center"
-                        FontSize="24"
-                        TextColor="Black" />
+                        <!-- Map Overlays -->
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">
+                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                                <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                                <Label Text="&#xf5a0;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Border>
-            </FlexLayout>
 
-            <Label  Grid.Row="1"
-                    x:Name="LocationLabel"
-                    Text="Đang lấy vị trí ..."
-                    FontAttributes="Bold"
-                    FontSize="15"
-                    TextColor="White"
-                    Margin="20, 0, 20, 40"
-                    VerticalOptions="End"
-                    />
+                <!-- 4. Categories -->
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="10" HeightRequest="40">
+                        <!-- 'All' Button -->
+                        <Border BackgroundColor="#F48C06" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                            <Label Text="Tất cả" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Border>
 
-            <Label Grid.Row="2"
-                   Text="{x:Static res:AppResources.StreetName}"
-                   TextColor="White"
-                   FontSize="44"
-                   FontAttributes="Bold"
-                   Margin="15, 0, 20, 40"
-                   VerticalOptions="End">
-                <Label.Shadow>
-                    <Shadow Brush="Black"
-                            Offset="3,6"
-                            Radius="10"
-                            Opacity="1" />
-                </Label.Shadow>
-            </Label>
+                        <!-- Other Categories -->
+                        <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                 <Label Text="&#xf6d7;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- 'Oc' icon? Using generic food -->
+                                 <Label Text="Ốc" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                             </HorizontalStackLayout>
+                        </Border>
 
-            <Grid Grid.Row="3" 
-                  ColumnDefinitions="*, *, *, *" 
-                  Padding="10, 20" 
-                  BackgroundColor="#40000000"> 
+                         <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                 <Label Text="&#xf818;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- Bowl appx -->
+                                 <Label Text="Phá lấu" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                             </HorizontalStackLayout>
+                        </Border>
 
+                         <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                 <Label Text="&#xf805;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- Fire/Grill appx -->
+                                 <Label Text="Đồ nướng" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                             </HorizontalStackLayout>
+                        </Border>
+                    </HorizontalStackLayout>
+                </ScrollView>
 
+                <!-- 5. Featured Section Header -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Quán ngon nổi bật" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                    <Label Grid.Column="1" Text="Xem tất cả" FontSize="13" TextColor="#F48C06"/>
+                </Grid>
 
-                <!-- QR code Icon -->
-                  <VerticalStackLayout Grid.Column="0" Spacing="5" 
-                    HorizontalOptions="Center">
-                    <Label FontFamily="FASolid" Text="&#xf029;" 
-                        HorizontalOptions="Center" VerticalOptions="Center" 
-                        FontSize="24" TextColor="White" /> 
-                    <Label x:Name="QrLabel" Text="{x:Static res:AppResources.QRCode}" TextColor="White" 
-                        HorizontalOptions="Center" FontSize="12"/>
+                <!-- 6. List Items (Hardcoded for demo) -->
+                <VerticalStackLayout Spacing="15">
+                    <!-- Item 1 -->
+                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="10">
+                        <Border.Shadow>
+                            <Shadow Brush="#E0E0E0" Offset="0,4" Radius="10" Opacity="0.3"/>
+                        </Border.Shadow>
+                        <Grid ColumnDefinitions="100, *" ColumnSpacing="15">
+                            <Image Source="dotnet_bot.svg" Aspect="AspectFill" HeightRequest="100" WidthRequest="100">
+                                <Image.Clip>
+                                    <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50"/>
+                                </Image.Clip>
+                            </Image>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                                <Label Text="Ốc Đào Vĩnh Khánh" FontSize="15" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                                <Label Text="Hải sản • 400m • Đang mở cửa" FontSize="12">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Hải sản • 400m • " TextColor="#757575"/>
+                                            <Span Text="Đang mở cửa" TextColor="#4CAF50"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                        <Label Text="&#xf005;" FontFamily="FASolid" TextColor="#FFC107" FontSize="12"/>
+                                        <Label Text="4.8" TextColor="#1A1A1A" FontSize="12" FontAttributes="Bold"/>
+                                        <Label Text="(2.4k đánh giá)" TextColor="#9E9E9E" FontSize="12"/>
+                                    </HorizontalStackLayout>
+
+                                    <Label Grid.Column="1" Text="&#xf02e;" FontFamily="FASolid" TextColor="#F48C06" HorizontalOptions="End" FontSize="18"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                     <!-- Item 2 -->
+                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="10">
+                        <Border.Shadow>
+                            <Shadow Brush="#E0E0E0" Offset="0,4" Radius="10" Opacity="0.3"/>
+                        </Border.Shadow>
+                        <Grid ColumnDefinitions="100, *" ColumnSpacing="15">
+                            <Image Source="dotnet_bot.svg" Aspect="AspectFill" HeightRequest="100" WidthRequest="100">
+                                <Image.Clip>
+                                    <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50"/>
+                                </Image.Clip>
+                            </Image>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                                <Label Text="Phá Lấu Cô Thảo" FontSize="15" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                                <Label Text="Ăn vặt • 1.2km • Đang mở cửa" FontSize="12">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Ăn vặt • 1.2km • " TextColor="#757575"/>
+                                            <Span Text="Đang mở cửa" TextColor="#4CAF50"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                        <Label Text="&#xf005;" FontFamily="FASolid" TextColor="#FFC107" FontSize="12"/>
+                                        <Label Text="4.6" TextColor="#1A1A1A" FontSize="12" FontAttributes="Bold"/>
+                                        <Label Text="(1.1k đánh giá)" TextColor="#9E9E9E" FontSize="12"/>
+                                    </HorizontalStackLayout>
+
+                                    <Label Grid.Column="1" Text="&#xf02e;" FontFamily="FASolid" TextColor="#F48C06" HorizontalOptions="End" FontSize="18"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Floating Button -->
+        <Border StrokeThickness="0" BackgroundColor="#F48C06" StrokeShape="RoundRectangle 25" 
+                HeightRequest="50" VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,20" Padding="20,0">
+            <Border.Shadow>
+                 <Shadow Brush="#E65100" Offset="0,5" Radius="10" Opacity="0.4"/>
+            </Border.Shadow>
+            <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                <Label Text="&#xf590;" FontFamily="FASolid" TextColor="White" FontSize="20" VerticalOptions="Center"/>
+                <Label Text="Bắt đầu thuyết minh" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Border>
+        </Grid>
+
+        <!-- Bottom Navigation Bar -->
+        <Border Grid.Row="1" StrokeThickness="0" BackgroundColor="White" HeightRequest="70" VerticalOptions="End">
+            <Border.Shadow>
+                <Shadow Brush="#E0E0E0" Offset="0,-5" Radius="10" Opacity="0.2"/>
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*,*,*,*,*" VerticalOptions="Center">
+                <!-- Trang chủ -->
+                <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="&#xf015;" FontFamily="FASolid" TextColor="#F48C06" FontSize="20" HorizontalOptions="Center"/>
+                    <Label Text="Trang chủ" TextColor="#F48C06" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
-
-                <!-- Phone Icon -->
-                <VerticalStackLayout Grid.Column="1" Spacing="5" 
-                    HorizontalOptions="Center">
-                    <Label FontFamily="FASolid" Text="&#xf095;" 
-                        HorizontalOptions="Center" VerticalOptions="Center" 
-                        FontSize="24" TextColor="White" /> 
-                    <Label x:Name="NumberLabel" Text="{x:Static res:AppResources.PhoneNumber}" TextColor="White" 
-                        HorizontalOptions="Center" FontSize="12"/>
+                <!-- Bản đồ -->
+                <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="&#xf14e;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
+                    <Label Text="Bản đồ" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
-                <!-- Story Icon -->
-                <VerticalStackLayout Grid.Column="2" Spacing="5" 
-                    HorizontalOptions="Center">
-                    <Label FontFamily="FASolid" Text="&#xf1e6;" 
-                        HorizontalOptions="Center" VerticalOptions="Center" 
-                        FontSize="24" TextColor="White" /> 
-                    <Label x:Name="StoryLabel"  Text="{x:Static res:AppResources.Story}" TextColor="White" 
-                        HorizontalOptions="Center" FontSize="12"/>
+                <!-- Yêu thích -->
+                <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
+                    <Label Text="Yêu thích" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
-                <!-- Map Icon -->
-                    <VerticalStackLayout Grid.Column="3" Spacing="5" HorizontalOptions="Center">
-                        <VerticalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OpenMap" />
-                        </VerticalStackLayout.GestureRecognizers>
-                        
-                    <Label FontFamily="FASolid" Text="&#xf279;" 
-                        HorizontalOptions="Center" VerticalOptions="Center" 
-                        FontSize="24" TextColor="White" />
+                <!-- Lịch sử -->
+                <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="&#xf1da;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
+                    <Label Text="Lịch sử" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
 
-                    <Label Text="{x:Static res:AppResources.Map}" TextColor="White" 
-                        HorizontalOptions="Center" FontSize="12"/>
-                        
-                        
+                <!-- Cài đặt -->
+                <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="&#xf013;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
+                    <Label Text="Cài đặt" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Grid>
-        </Grid>
+        </Border>
     </Grid>
 </ContentPage>
