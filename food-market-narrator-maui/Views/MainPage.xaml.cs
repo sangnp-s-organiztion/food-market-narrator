@@ -15,7 +15,6 @@ public partial class MainPage : ContentPage
 	public MainPage()
 	{
 		InitializeComponent();
-		var mapPage = new MapPage(lat, lng, name);
 		
 		locationServices.OnLocationUpdated += (lat, lng) => 
 		{
@@ -26,13 +25,24 @@ public partial class MainPage : ContentPage
 		};
 	}
 
-	// Mở trang bản đồ khi nhấn nút
-	private async void OpenMap(object sender, EventArgs e)
-	{
-		await Navigation.PushAsync(new MapPage(lat, lng, name));
-	}
+    // Mở trang bản đồ khi nhấn nút
+    private async void OpenMap(object sender, EventArgs e)
+    {
+        var poiService = App.Current.Handler.MauiContext.Services.GetService<POIService>();
+        var narrationService = App.Current.Handler.MauiContext.Services.GetService<NarrationFlowService>();
 
-	// Load tất cả những gì cần thiết trước khi hiển thị trang MainPage
+        var page = new MapPage(
+            poiService,
+            narrationService,
+            lat,
+            lng,
+            name
+        );
+
+        await Navigation.PushAsync(page);
+    }
+
+    // Load tất cả những gì cần thiết trước khi hiển thị trang MainPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();

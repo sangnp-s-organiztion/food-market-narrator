@@ -1,0 +1,6 @@
+@food_market_narrator_api_HostAddress = http://localhost:5044
+
+GET {{food_market_narrator_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
