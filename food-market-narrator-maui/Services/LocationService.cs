@@ -15,7 +15,7 @@ public class LocationServices
 
 
     // Lấy vị trí hiện tại của người dùng
-	private async Task<(double?, double?)> GetCurrentLocation()
+	public async Task<(double?, double?)> GetCurrentLocation()
 	{
 		try
 		{
