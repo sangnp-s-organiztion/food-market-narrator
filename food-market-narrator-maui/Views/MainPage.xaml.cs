@@ -1,4 +1,5 @@
-﻿using food_market_narrator.Services;
+﻿using food_market_narrator.Helpers;
+using food_market_narrator.Services;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
 
@@ -6,106 +7,39 @@ namespace food_market_narrator.Views;
 
 public partial class MainPage : ContentPage
 {
-	private double? lat;
-	private double? lng;
-	private string name;
-	private LanguageService? languageService = new LanguageService();
+    // Khời tạo tọa độ và tên cho điểm
+    private readonly POIService _poiService;
+    private readonly NarrationFlowService _narrationFlowService;
 
-	private LocationServices locationServices = new LocationServices();
-	private bool _isFirstLoad = true;
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public string? LocationName { get; set; }
+
+    private bool _isFirstLoad = true;
 
 	// Hàm khởi tạo MainPage mới
-	public MainPage()
+	public MainPage(POIService poiService, NarrationFlowService narrationFlowService)
 	{
 		InitializeComponent();
+        _poiService = poiService;
+        _narrationFlowService = narrationFlowService;
         
-        // Di chuyển map đến vị trí mặc định (TP.HCM) để giống mẫu
-        // Tọa độ Vĩnh Khánh Food Area (khoảng Quận 4)
-        var constructionPoint = new Location(10.7629, 106.7000); 
-        var mapSpan = MapSpan.FromCenterAndRadius(constructionPoint, Distance.FromKilometers(1));
-        
-        map.MoveToRegion(mapSpan);
-        
-        // Thêm pin mẫu
-        map.Pins.Add(new Pin
-        {
-            Label = "Ốc Đào",
-            Address = "Vĩnh Khánh",
-            Type = PinType.Place,
-            Location = new Location(10.7635, 106.7010)
-        });
-
-        // Initialize any other data if needed
-	}
+        Loaded += OnMapLoadedAndFocused;
+    }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        // Cần đảm bảo quyền truy cập vị trí đã được cấp nếu muốn IsShowingUser hoạt động tốt
-        // Nhưng user nói đã xử lý API key, có thể quyền cũng đã xử lý.
+        // Load map data on appearing, reusing helper logic
+        await MapHelper.LoadMap(map, _poiService);
     }
 
- //   // Mở trang bản đồ khi nhấn nút
- //   private async void OpenMap(object sender, EventArgs e)
- //   {
- //       var poiService = App.Current.Handler.MauiContext.Services.GetService<POIService>();
- //       var narrationService = App.Current.Handler.MauiContext.Services.GetService<NarrationFlowService>();
-
- //       var page = new MapPage(
- //           poiService,
- //           narrationService,
- //           lat,
- //           lng,
- //           name
- //       );
-
- //       await Navigation.PushAsync(page);
- //   }
-
- //   // Load tất cả những gì cần thiết trước khi hiển thị trang MainPage
- //   protected override async void OnAppearing()
- //   {
- //       base.OnAppearing();
-	//	if (_isFirstLoad)
-	//	{
-	//		_isFirstLoad = false;
-	//		// Nếu chưa từng chọn language thì mới mở popup
- //           if (!Preferences.ContainsKey("AppLanguage"))
- //           {
- //               await OpenLanguagePopup();
- //           }
-	//	}
-	//	locationServices.StartTrackingLocation();
- //   }
-
-
-
-
-	//// Mở popup (Bạn có thể gọi hàm này khi nhấn vào icon Menu hoặc nút Khóa)
-	//private async Task OpenLanguagePopup()
-	//{
-	//	LanguagePopup.IsVisible = true;
-	//	LanguagePopup.Opacity = 0;
-	//	await LanguagePopup.FadeTo(1, 250); // Hiệu ứng hiện dần nhẹ nhàng
-	//}
-
-	//// Đóng popup chọn ngôn ngữ
-	//private void ClosePopup(object sender, EventArgs e)
-	//{
-	//	LanguagePopup.FadeTo(0, 250); // Hiệu ứng mờ dần nhẹ nhàng
-	//	LanguagePopup.IsVisible = false;
-	//}
-
-	// // Khi người dùng chọn ngôn ngữ
-	//private async void OnLanguageSelected(object sender, EventArgs e)
-	//{
-	//	var button = (Button)sender;
-	//	string lang = button.CommandParameter.ToString();
-
-	//	languageService.ChangeLanguage(lang);
-	//}
-
-
-
-
+    private async void OnMapLoadedAndFocused(object sender, EventArgs e)
+    {
+       if (_isFirstLoad)
+       {
+           await MapHelper.LoadMap(map, _poiService);
+           _isFirstLoad = false;
+       }
+    }
 }
