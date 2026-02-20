@@ -26,45 +26,47 @@ public class POIService
 
     public async Task<List<POI>> GetPOIsAsync()
     {
-        var url = "http://10.0.2.2:5044/api/restaurant";
-        // Nếu chạy Windows local app thì dùng localhost
+        if (_pois != null && _pois.Count > 0)
+             return _pois;
 
-        var data = await _httpClient.GetFromJsonAsync<List<POI>>(url);
-
-        if (data == null)
-            return new List<POI>();
-
-        // xử lý audio file giống như m làm trước đó
-        foreach (var poi in data)
+        try
         {
-            var originalId = poi.restaurantId;
-            var lastDashIndex = originalId.LastIndexOf('-');
+            var url = "http://10.0.2.2:5044/api/restaurant";
+            // Nếu chạy Windows local app thì dùng localhost
 
-            var audioFileName = lastDashIndex > 0
-                ? originalId.Substring(0, lastDashIndex) + ".mp3"
-                : originalId + ".mp3";
+            var data = await _httpClient.GetFromJsonAsync<List<POI>>(url);
 
-            poi.AudioFile = audioFileName;
+            if (data == null)
+                return new List<POI>();
+
+            // xử lý audio file giống như m làm trước đó
+            foreach (var poi in data)
+            {
+                var originalId = poi.restaurantId;
+            
+                var audioFileName = originalId + ".mp3";
+
+                poi.AudioFile = audioFileName;
+            }
+
+            _pois = data; // Cache the data
+            return _pois;
         }
-
-        return data;
-    }
-
-    public void SetPOIs(List<POI> pois)
-    {
-        _pois = pois;
-    }
-
-    // Lấy tất cả các POIs
-    public List<POI> GetAllPOIs()
-    {
-        return _pois;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching POIs: {ex.Message}");
+            return new List<POI>();
+        }
     }
 
     // Lấy tất cả các POIs đồng bộ
     public async Task<List<POI>> GetAllPOIsAsync()
     {
-        return await Task.FromResult(_pois);
+        if (_pois == null || !_pois.Any())
+        {
+            return await GetPOIsAsync();
+        }
+        return _pois;
     }
 
     // Lấy POI gần nhất dựa trên vị trí hiện tại và các POIs

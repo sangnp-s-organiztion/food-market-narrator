@@ -10,7 +10,7 @@ public partial class BottomNavigationView : ContentView
     private string _locationName;
     private LanguageService? languageService = new LanguageService();
 
-    private LocationServices locationServices = new LocationServices();
+    private LocationService locationServices = new LocationService();
 
 
     public static readonly BindableProperty ActiveTabProperty =

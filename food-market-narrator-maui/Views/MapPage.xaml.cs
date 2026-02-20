@@ -13,6 +13,7 @@ public partial class MapPage : ContentPage
 {
     private readonly POIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
+    private readonly ILocationService _locationService;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -20,21 +21,21 @@ public partial class MapPage : ContentPage
 
     public MapPage(
         POIService poiService,
-        NarrationFlowService narrationFlowService)
+        NarrationFlowService narrationFlowService,
+        ILocationService locationService)
     {
         InitializeComponent();
         _poiService = poiService;
         _narrationFlowService = narrationFlowService;
+        _locationService = locationService;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        Location? initialLocation = null;
-        if (Latitude != 0 && Longitude != 0)
-        {
-            initialLocation = new Location(Latitude, Longitude);
-        }
-        await MapHelper.LoadMap(map, _poiService, initialLocation);
+        await MapHelper.LoadMapAsync(
+        map,
+        _poiService,
+        _locationService);
     }
 }
