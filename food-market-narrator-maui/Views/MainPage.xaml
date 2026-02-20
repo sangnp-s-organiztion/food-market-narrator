@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
              xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="food_market_narrator.Views.MainPage"
              BackgroundColor="#FFFCF8"
@@ -200,41 +201,11 @@
         </Grid>
 
         <!-- Bottom Navigation Bar -->
-        <Border Grid.Row="1" StrokeThickness="0" BackgroundColor="White" HeightRequest="70" VerticalOptions="End">
-            <Border.Shadow>
-                <Shadow Brush="#E0E0E0" Offset="0,-5" Radius="10" Opacity="0.2"/>
-            </Border.Shadow>
-            <Grid ColumnDefinitions="*,*,*,*,*" VerticalOptions="Center">
-                <!-- Trang chủ -->
-                <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="&#xf015;" FontFamily="FASolid" TextColor="#F48C06" FontSize="20" HorizontalOptions="Center"/>
-                    <Label Text="Trang chủ" TextColor="#F48C06" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
 
-                <!-- Bản đồ -->
-                <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="&#xf14e;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
-                    <Label Text="Bản đồ" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
+        <shared:BottomNavigationView 
+            ActiveTab="Home"
+            Grid.Row="1"/>
 
-                <!-- Yêu thích -->
-                <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
-                    <Label Text="Yêu thích" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
 
-                <!-- Lịch sử -->
-                <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="&#xf1da;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
-                    <Label Text="Lịch sử" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
-
-                <!-- Cài đặt -->
-                <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="&#xf013;" FontFamily="FASolid" TextColor="#8D6E63" FontSize="20" HorizontalOptions="Center"/>
-                    <Label Text="Cài đặt" TextColor="#8D6E63" FontSize="10" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
-            </Grid>
-        </Border>
     </Grid>
 </ContentPage>

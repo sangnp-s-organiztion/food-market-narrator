@@ -1,260 +1,40 @@
-using Microsoft.Maui.Maps;
-using Microsoft.Maui.Controls.Maps;
+using food_market_narrator.Helpers;
 using food_market_narrator.Services;
-#if ANDROID
-using Android.Gms.Maps;
-using Android.Gms.Maps.Model;
-#endif
-
-
+using Microsoft.Maui.Controls.Maps;
+using Microsoft.Maui.Maps;
 
 namespace food_market_narrator.Views;
 
+[QueryProperty(nameof(Latitude), "lat")]
+[QueryProperty(nameof(Longitude), "lng")]
+[QueryProperty(nameof(LocationName), "name")]
+
 public partial class MapPage : ContentPage
 {
-	// set giá trị null cho tọa độ (souble?) để tránh lỗi khi không có tọa độ
-	private double? _targetLatitude; // vĩ độ
-	private double? _targetLongitude; // kinh độ
-	private String _targetLocationName; // tên địa điểm
-	private bool _isTrackingLocation = false;
-	private IDispatcherTimer locationTimer;
-	private LocationServices locationServices = new LocationServices();
-	private POIService _poiService;
-	private IDispatcherTimer _timer;
-    private NarrationFlowService _narrationFlowService;
-    // Khởi tạo địa điểm của map khi mở map
+    private readonly POIService _poiService;
+    private readonly NarrationFlowService _narrationFlowService;
+
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public string? LocationName { get; set; }
+
     public MapPage(
-    POIService poiService,
-    NarrationFlowService narrationFlowService,
-    double? latitude,
-    double? longitude,
-    string locationName)
+        POIService poiService,
+        NarrationFlowService narrationFlowService)
     {
         InitializeComponent();
-
         _poiService = poiService;
         _narrationFlowService = narrationFlowService;
-
-        _targetLatitude = latitude;
-        _targetLongitude = longitude;
-        _targetLocationName = locationName;
-
-        Loaded += OnMapLoadedAndFocused;
     }
-
-
 
     protected override async void OnAppearing()
-	{
-		base.OnAppearing();
-		// Đợi map sẵn sàng TRƯỚC khi thao tác
-		#if ANDROID
-		CustomMapHandler.OnGoogleMapReady += async (googleMap) =>
-		{
-			Console.WriteLine("MAP READY EVENT FIRED");
-			await LoadAllPOIsAsync();
-		};
-		#endif
-		StartTrackingLocation();
-
-		_timer = Dispatcher.CreateTimer();
-		_timer.Interval = TimeSpan.FromSeconds(5);
-		_timer.Tick += async (s, e) =>
-		{
-			await _narrationFlowService.CheckAndNarrateAsync();
-		};
-		_timer.Start();
-	}
-
-
-	protected override void OnDisappearing()
-	{
-		base.OnDisappearing();
-
-		#if ANDROID
-				CustomMapHandler.OnGoogleMapReady += HandleMapReady;
-		#endif
-
-        locationTimer?.Stop();
-		_isTrackingLocation = false;
-	}
-
-	#if ANDROID
-	private async void HandleMapReady(Android.Gms.Maps.GoogleMap map)
-	{
-		await LoadAllPOIsAsync();
-	}
-	#endif
-
-
-	private void StartTrackingLocation()
-	{
-		if (_isTrackingLocation) return;
-
-		locationTimer = Dispatcher.CreateTimer();
-		locationTimer.Interval = TimeSpan.FromSeconds(1);
-
-		locationTimer.Tick += async (s, e) =>
-		{
-			var request = new GeolocationRequest(
-				GeolocationAccuracy.Medium,
-				TimeSpan.FromSeconds(3));
-
-			var location = await Geolocation.Default.GetLocationAsync(request);
-
-			if (location == null) return;
-
-			var nearest = _poiService.UpdateNearestPOI(
-				location.Latitude,
-				location.Longitude);
-
-			if (nearest != null)
-			{
-				_poiService.HighlightNearestPOI(Map, nearest);
-			}
-		};
-
-		locationTimer.Start();
-		_isTrackingLocation = true;
-	}
-
-
-
-
-
-	// Tải bản đồ và focus vào vị trí cần đến khi map được tải xong
-	public async void OnMapLoadedAndFocused(object sender, EventArgs e)
-	{
-		await FocusLocation();
-	}
-
-	// Focus vào vị trí cần đến khi map được tải xong
-	public async Task FocusLocation()
-	{
-		try
-		{
-			Location? location;
-
-			// Kiểm tra lat, lng có tọa độ hay không
-			if (_targetLatitude.HasValue && _targetLongitude.HasValue)
-			{
-				location = new Location(_targetLatitude.Value, _targetLongitude.Value);
-			} else
-			{
-				// Lấy vị trí (lat, lng) hiện tại qua GPS
-				// Medium giúp tiết kiệm pin hơn Best, độ chính xác ~10-100m
-				var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-				location = await Geolocation.Default.GetLocationAsync(request);
-			}
-
-
-			if (location != null)
-			{
-				Map.MoveToRegion(
-					MapSpan.FromCenterAndRadius(
-						location,
-						Distance.FromKilometers(1)
-					)
-				);
-			}
-		} catch (Exception ex)
-		{
-			await DisplayAlert("Lỗi", "Không thể tải bản đồ: " + ex.Message, "OK");
-		}
-	}
-
-    // Hiển thị tất cả các POIs 
-	private async Task LoadAllPOIsAsync()
     {
-		try
-		{
-
-			if (Map == null) return;
-
-			var pois = await _poiService.GetPOIsAsync();
-
-			// Nếu không có dữ liệu, thoát sớm để tránh lỗi tính toán
-			if (pois == null || !pois.Any()) return;
-
-
-			_poiService.SetPOIs(pois);
-
-
-
-#if ANDROID
-			// Đợi map sẵn sàng TRƯỚC khi thao tác
-
-
-			var googleMap = CustomMapHandler.NativeGoogleMap;
-
-			if (googleMap == null)
-			{
-				Console.WriteLine("Google Map không sẵn sàng sau khi đợi");
-				return;
-			}
-			// Clear tất cả markers cũ
-			googleMap.Clear();
-			CustomMapHandler.MarkerDictionary.Clear();
-#endif
-
-			foreach (var poi in pois)
-			{
-#if ANDROID
-				var marker = googleMap.AddMarker(new MarkerOptions()
-					.SetPosition(new LatLng(poi.Latitude, poi.Longitude))
-					.SetTitle(poi.Name)
-					.SetSnippet(poi.Description)
-					.SetIcon(BitmapDescriptorFactory.DefaultMarker(
-						BitmapDescriptorFactory.HueRed)));
-
-				CustomMapHandler.MarkerDictionary[poi.restaurantId] = marker;
-#endif
-				// iOS thì giữ MAUI pin ở đây
-				// var pin = new Pin
-				// {
-				// 	Label = poi.Name,
-				// 	Address = poi.Description,
-				// 	Type = PinType.Place,
-				// 	Location = new Location(poi.Latitude, poi.Longitude)
-				// };
-
-				// poi.MapPin = pin;
-				// Map.Pins.Add(pin);
-			}
-
-            Console.WriteLine($"POI COUNT: {pois.Count}");
-
-
-            // Viết hàm tính Bounding Box thay cho FromLocations ---
-            // 1. Tìm cực điểm vĩ độ và kinh độ
-            double minLat = pois.Min(p => p.Latitude);
-			double maxLat = pois.Max(p => p.Latitude);
-			double minLon = pois.Min(p => p.Longitude);
-			double maxLon = pois.Max(p => p.Longitude);
-
-			// 2. Tính điểm trung tâm
-			double centerLat = (minLat + maxLat) / 2;
-			double centerLon = (minLon + maxLon) / 2;
-
-			// 3. Tính độ chênh lệch (Delta) 
-			// Nhân thêm 1.2 (thêm 20% lề) để các Pin không bị dính sát mép màn hình
-			double latDelta = (maxLat - minLat) * 1.2;
-			double lonDelta = (maxLon - minLon) * 1.2;
-
-			// 4. Di chuyển bản đồ (giới hạn độ Delta tối thiểu để không bị zoom quá sâu nếu chỉ có 1 điểm)
-			Map.MoveToRegion(new MapSpan(
-				new Location(centerLat, centerLon),
-				Math.Max(latDelta, 0.01),
-				Math.Max(lonDelta, 0.01)
-			));
-		}
-        catch (Exception ex)
+        base.OnAppearing();
+        Location? initialLocation = null;
+        if (Latitude != 0 && Longitude != 0)
         {
-            Console.WriteLine("LOAD POI ERROR: " + ex.ToString());
+            initialLocation = new Location(Latitude, Longitude);
         }
+        await MapHelper.LoadMap(map, _poiService, initialLocation);
     }
-
-
-
-
 }
