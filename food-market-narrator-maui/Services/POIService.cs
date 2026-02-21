@@ -8,11 +8,11 @@ using System.Net.Http.Json;
 
 namespace food_market_narrator.Services;
 
-public class POIService
+public class POIService : IPOIService
 {
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
-    private List<POI> _pois;
+    private List<POI>? _pois;
     private const double EnterRadius = 30; // mét
     private const double ExitRadius = 40;  // mét
 

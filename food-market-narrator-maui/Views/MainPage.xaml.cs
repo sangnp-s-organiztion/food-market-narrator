@@ -2,6 +2,7 @@
 using food_market_narrator.Services;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
+using System.Collections.Generic;
 
 namespace food_market_narrator.Views;
 
@@ -11,6 +12,10 @@ public partial class MainPage : ContentPage
     private readonly POIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly ILocationService _locationService;
+    private readonly LanguageService _languageService = new();
+
+    private readonly Dictionary<string, Border> _languageOptions;
+    private readonly Dictionary<string, Label> _languageChecks;
 
 
     public double Latitude { get; set; }
@@ -26,6 +31,26 @@ public partial class MainPage : ContentPage
         _poiService = poiService;
         _narrationFlowService = narrationFlowService;
         _locationService = locationService;
+
+        _languageOptions = new Dictionary<string, Border>
+        {
+            ["vi-VN"] = VietnameseOption,
+            ["en-US"] = EnglishOption,
+            ["zh-CN"] = ChineseOption,
+            ["ko-KR"] = KoreanOption,
+            ["ja-JP"] = JapaneseOption
+        };
+
+        _languageChecks = new Dictionary<string, Label>
+        {
+            ["vi-VN"] = VietnameseCheck,
+            ["en-US"] = EnglishCheck,
+            ["zh-CN"] = ChineseCheck,
+            ["ko-KR"] = KoreanCheck,
+            ["ja-JP"] = JapaneseCheck
+        };
+
+        ApplyLanguageSelectionStyle(_languageService.CurrentLanguage);
     }
 
     protected override async void OnAppearing()
@@ -44,12 +69,77 @@ public partial class MainPage : ContentPage
         //await _narrationFlowService.CheckAndNarrateAsync(currentLocation, force: true);
     }
 
+    // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
     private async void OnNarratorTapped(object sender, EventArgs e)
     {
         // Hiệu ứng nhấn xuống
-        await FloatingButton.ScaleTo(0.93, 80, Easing.CubicOut);
-        await FloatingButton.ScaleTo(1, 80, Easing.CubicIn);
+        await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
+        await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
 
         _narrationFlowService.StartNarration();
+    }
+
+    // Hàm xử lý khi nhấn nút chọn ngôn ngữ
+    private async void OnLanguageButtonTapped(object sender, EventArgs e)
+    {
+        ApplyLanguageSelectionStyle(_languageService.CurrentLanguage);
+        LanguagePopupOverlay.IsVisible = true;
+        await LanguagePopupOverlay.FadeToAsync(1, 180, Easing.CubicOut);
+    }
+
+    // Hàm xử lý khi nhấn nút đóng popup ngôn ngữ
+    private async void OnLanguageCloseTapped(object sender, EventArgs e)
+    {
+        await HideLanguagePopupAsync();
+    }
+
+    // Hàm xử lý khi nhấn vào vùng phủ ngôn ngữ (để đóng popup) 
+    private async void OnLanguageOverlayTapped(object sender, EventArgs e)
+    {
+        await HideLanguagePopupAsync();
+    }
+
+    // Hàm xử lý khi nhấn vào một tùy chọn ngôn ngữ
+    private async void OnLanguageOptionTapped(object sender, TappedEventArgs e)
+    {
+        if (e.Parameter is not string cultureCode)
+        {
+            return;
+        }
+
+        ApplyLanguageSelectionStyle(cultureCode);
+        await HideLanguagePopupAsync();
+
+        if (_languageService.CurrentLanguage != cultureCode)
+        {
+            _languageService.ChangeLanguage(cultureCode);
+        }
+    }
+
+    // Hàm ẩn popup ngôn ngữ với hiệu ứng mờ dần
+    private async Task HideLanguagePopupAsync()
+    {
+        await LanguagePopupOverlay.FadeToAsync(0, 140, Easing.CubicIn);
+        LanguagePopupOverlay.IsVisible = false;
+    }
+
+    // Hàm áp dụng style cho tùy chọn ngôn ngữ được chọn
+    private void ApplyLanguageSelectionStyle(string cultureCode)
+    {
+        foreach (var option in _languageOptions)
+        {
+            var isSelected = option.Key == cultureCode;
+
+            option.Value.BackgroundColor = isSelected
+                ? Color.FromArgb("#F7F3EF")
+                : Color.FromArgb("#F1EDE9");
+
+            option.Value.StrokeThickness = isSelected ? 1.5 : 0;
+            option.Value.Stroke = isSelected
+                ? Color.FromArgb("#F48C06")
+                : Colors.Transparent;
+
+            _languageChecks[option.Key].IsVisible = isSelected;
+        }
     }
 }

@@ -4,7 +4,7 @@ using food_market_narrator.Resources.Localization;
 
 namespace food_market_narrator.Services;
 
-public class LanguageService
+public class LanguageService : ILanguageService
 {
 
     private const string LANGUAGE_KEY = "AppLanguage";

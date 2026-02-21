@@ -5,7 +5,7 @@ using food_market_narrator.Views;
 
 namespace food_market_narrator.Services;
 
-public class NarrationFlowService
+public class NarrationFlowService : INarrationFlowService
 {
     private readonly POIService _poiService;
     private readonly ILocationService _locationService;
