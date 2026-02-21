@@ -17,6 +17,7 @@ public partial class MainPage : ContentPage
     private readonly Dictionary<string, Border> _languageOptions;
     private readonly Dictionary<string, Label> _languageChecks;
 
+    Boolean IsFirstLoad = true;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -58,6 +59,15 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
         // Load map data on appearing, reusing helper logic
         await MapHelper.LoadMapAsync(map, _poiService, _locationService);
+
+        // Hiện popup chọn ngôn ngữ khi mới vào app
+        Console.WriteLine("Is First Load: " + _isFirstLoad);
+        if (_isFirstLoad)
+        {
+            _isFirstLoad = false;
+            await Task.Delay(300);
+            OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
+        }
     }
 
     public async void CheckAndNarrateAsync(object sender, EventArgs e)
