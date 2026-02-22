@@ -69,6 +69,21 @@ public class POIService : IPOIService
         return _pois;
     }
 
+    public POI? GetNearestPOI(double currentLat, double currentLng)
+    {
+        if (_pois == null || !_pois.Any())
+            return null;
+
+        var currentLocation = new Location(currentLat, currentLng);
+
+        return _pois
+            .OrderBy(poi => Location.CalculateDistance(
+                currentLocation,
+                new Location(poi.Latitude, poi.Longitude),
+                DistanceUnits.Kilometers))
+            .FirstOrDefault();
+    }
+
     // Lấy POI gần nhất dựa trên vị trí hiện tại và các POIs
     public POI? UpdateNearestPOI(double currentLat, double currentLng)
     {
@@ -150,13 +165,17 @@ public class POIService : IPOIService
         if (_pois == null || !_pois.Any())
             return;
 
+#if ANDROID
+        CustomMapHandler.HighlightMarker(nearest?.restaurantId);
+#endif
+
         // tự động zoom map về POI gần nhất trong bán kính
         if (nearest != null)
         {
             map.MoveToRegion(
                 MapSpan.FromCenterAndRadius(
                     new Location(nearest.Latitude, nearest.Longitude),
-                    Distance.FromMeters(10)));
+                    Distance.FromMeters(35)));
         }
     }
 

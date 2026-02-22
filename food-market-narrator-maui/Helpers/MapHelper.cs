@@ -2,6 +2,9 @@
 using food_market_narrator.Services;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
+#if ANDROID
+using Android.Gms.Maps;
+#endif
 
 
 namespace food_market_narrator.Helpers
@@ -42,6 +45,34 @@ namespace food_market_narrator.Helpers
                        Location = new Location(poi.Latitude, poi.Longitude)
                    };
                    map.Pins.Add(pin);
+                }
+
+#if ANDROID
+                void RegisterNativeMarkers()
+                {
+                    CustomMapHandler.SetPOIMarkers(pois);
+                }
+
+                if (CustomMapHandler.NativeGoogleMap != null)
+                {
+                    RegisterNativeMarkers();
+                }
+                else
+                {
+                    void OnMapReady(GoogleMap _)
+                    {
+                        RegisterNativeMarkers();
+                        CustomMapHandler.OnGoogleMapReady -= OnMapReady;
+                    }
+
+                    CustomMapHandler.OnGoogleMapReady += OnMapReady;
+                }
+#endif
+
+                if (focusLocation != null)
+                {
+                    var nearest = poiService.GetNearestPOI(focusLocation.Latitude, focusLocation.Longitude);
+                    poiService.HighlightNearestPOI(map, nearest);
                 }
             }
             catch (Exception ex)

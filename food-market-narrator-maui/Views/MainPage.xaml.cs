@@ -1,6 +1,5 @@
 ﻿using food_market_narrator.Helpers;
 using food_market_narrator.Services;
-using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
 using System.Collections.Generic;
 
@@ -16,12 +15,6 @@ public partial class MainPage : ContentPage
 
     private readonly Dictionary<string, Border> _languageOptions;
     private readonly Dictionary<string, Label> _languageChecks;
-
-    Boolean IsFirstLoad = true;
-
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
-    public string? LocationName { get; set; }
 
     private bool _isFirstLoad = true;
 
@@ -57,6 +50,11 @@ public partial class MainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        _locationService.LocationChanged -= OnLocationChangedForMap;
+        _locationService.LocationChanged += OnLocationChangedForMap;
+        await _locationService.StartTrackingAsync();
+
         // Load map data on appearing, reusing helper logic
         await MapHelper.LoadMapAsync(map, _poiService, _locationService);
 
@@ -70,13 +68,16 @@ public partial class MainPage : ContentPage
         }
     }
 
-    public async void CheckAndNarrateAsync(object sender, EventArgs e)
+    protected override void OnDisappearing()
     {
-        //// 1. Lấy vị trí hiện tại
-        //var currentLocation = await _locationService.GetCurrentLocationAsync();
-        
-        //// 2. Gọi hàm check và narrate với FORCE = TRUE (bỏ qua check khoảng cách)
-        //await _narrationFlowService.CheckAndNarrateAsync(currentLocation, force: true);
+        _locationService.LocationChanged -= OnLocationChangedForMap;
+        base.OnDisappearing();
+    }
+
+    private void OnLocationChangedForMap(object? sender, Location location)
+    {
+        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
+        _poiService.HighlightNearestPOI(map, nearest);
     }
 
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh

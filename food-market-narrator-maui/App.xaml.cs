@@ -1,20 +1,15 @@
 ﻿using food_market_narrator.Services;
-using System.Globalization;
-using food_market_narrator.Resources;
-using food_market_narrator.Resources.Localization;
 
 namespace food_market_narrator;
 
 public partial class App : Application
 {
     private readonly ILocationService _locationService;
-    private readonly NarrationFlowService _narrationFlowService;
 
-	public App(ILocationService locationService, NarrationFlowService narrationFlowService)
+    public App(ILocationService locationService)
 	{
 		InitializeComponent();
         _locationService = locationService;
-        _narrationFlowService = narrationFlowService;
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

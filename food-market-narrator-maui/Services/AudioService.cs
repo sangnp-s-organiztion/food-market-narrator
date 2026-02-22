@@ -4,9 +4,6 @@ namespace food_market_narrator.Services;
 
 public class AudioService : IAudioService
 {
-    private POIService _poiService;
-    private LanguageService _languageService = new LanguageService();
-
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
     public bool IsPlaying => _player?.IsPlaying ?? false;

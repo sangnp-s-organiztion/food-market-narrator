@@ -1,7 +1,5 @@
 using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
-using food_market_narrator.Services;
-using food_market_narrator.Views;
 
 namespace food_market_narrator.Services;
 
