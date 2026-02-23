@@ -1,13 +1,9 @@
-
-using food_market_narrator.Services;
 using Plugin.Maui.Audio;
 
-public class AudioService
-{
-    private POIService _poiService;
-    private LocationServices _locationService = new LocationServices();
-    private LanguageService _languageService = new LanguageService();
+namespace food_market_narrator.Services;
 
+public class AudioService : IAudioService
+{
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
     public bool IsPlaying => _player?.IsPlaying ?? false;

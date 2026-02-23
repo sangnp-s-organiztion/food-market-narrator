@@ -12,4 +12,7 @@ public class AppDbContext : DbContext
 
     // Bảng nhà hàng
     public DbSet<RestaurantModel> Restaurant { get; set; }
+    public DbSet<RestaurantImageModel> RestaurantImage { get; set; }
+    public DbSet<AudioModel> Audio { get; set; }
+    public DbSet<LanguageModel> Language { get; set; }
 }

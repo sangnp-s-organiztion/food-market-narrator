@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="food_market_narrator.Views.Shared.BottomNavigationView"
+             >
+
+    <!-- Bottom Navigation Bar -->
+        <Border Grid.Row="1" StrokeThickness="0" BackgroundColor="White" HeightRequest="70" VerticalOptions="End">
+        <Border.Shadow>
+            <Shadow Brush="#E0E0E0" Offset="0,-5" Radius="10" Opacity="0.2"/>
+        </Border.Shadow>
+        <Grid ColumnDefinitions="*,*,*,*,*" VerticalOptions="Center">
+            <!-- Trang chủ -->
+            <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OpenMainPage"/>
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Label Text="&#xf015;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="HomeIcon" />
+                <Label Text="Trang chủ" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center" x:Name="HomeText" />
+            </VerticalStackLayout>
+
+            <!-- Bản đồ -->
+            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OpenMap"/>
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Label Text="&#xf14e;" FontFamily="FASolid"  FontSize="20" HorizontalOptions="Center" x:Name="MapIcon"/>
+                <Label Text="Bản đồ" FontSize="10" HorizontalOptions="Center" x:Name="MapText"/>
+            </VerticalStackLayout>
+
+            <!-- Yêu thích -->
+            <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped=""/>
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Label Text="&#xf004;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="FavoriteIcon"/>
+                <Label Text="Yêu thích" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
+            </VerticalStackLayout>
+
+            <!-- Lịch sử -->
+            <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Gọi hàm để mở lịch sử -->
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped=""/>
+                </VerticalStackLayout.GestureRecognizers>
+                
+                <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
+                <Label Text="Lịch sử" FontSize="10" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Cài đặt -->
+            <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Gọi hàm để mở Cài đặt -->
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped=""/>
+                </VerticalStackLayout.GestureRecognizers>
+                
+                <Label Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
+                <Label Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+
+</ContentView>

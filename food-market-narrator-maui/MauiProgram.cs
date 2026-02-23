@@ -36,10 +36,11 @@ public static class MauiProgram
         });
 
         // Register pages for dependency injection
-        builder.Services.AddTransient<POIService>();
-        builder.Services.AddTransient<NarrationFlowService>();
+        builder.Services.AddSingleton<POIService>(); // POI data cache should be singleton
+        builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<MapPage>();
+        builder.Services.AddSingleton<ILocationService, LocationService>(); // Updated class name to singular
 
 #if DEBUG
         builder.Logging.AddDebug();
