@@ -159,4 +159,10 @@ public partial class MainPage : ContentPage
             _languageChecks[option.Key].IsVisible = isSelected;
         }
     }
+
+    // Hàm xử lý khi nhấn vào một POI trong danh sách để hiển thị chi tiết
+    private async void OnPoiDetailTapped(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(POIDetailPage));
+    }
 }

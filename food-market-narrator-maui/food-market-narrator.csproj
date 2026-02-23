@@ -86,6 +86,9 @@
 	  <MauiXaml Update="Views\MapPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\POIDetailPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Shared\BottomNavigationView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

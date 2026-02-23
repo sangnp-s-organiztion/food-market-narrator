@@ -114,7 +114,10 @@
                 </Grid>
 
                 <!-- 6. List Items -->
-                <CollectionView x:Name="PoiList">
+                <CollectionView x:Name="PoiList" 
+                    SelectionMode="Single"
+                    SelectionChanged="OnPoiDetailTapped"
+                    >
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
 
@@ -123,6 +126,12 @@
                                     StrokeThickness="0"
                                     Padding="10"
                                     Margin="0,5">
+
+                            <!-- khi nhấm vào POI -->
+                            <!-- <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPoiDetailTapped"/>
+                            </Border.GestureRecognizers> -->
+                            
 
                                 <Border.Shadow>
                                     <Shadow Brush="#E0E0E0"
