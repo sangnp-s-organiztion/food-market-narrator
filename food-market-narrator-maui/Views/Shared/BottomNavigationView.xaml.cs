@@ -1,18 +1,9 @@
 using food_market_narrator.Enums;
-using food_market_narrator.Services;
 
 namespace food_market_narrator.Views.Shared;
 
 public partial class BottomNavigationView : ContentView
 {
-    private double? _latitude;
-    private double? _longtitude;
-    private string _locationName;
-    private LanguageService? languageService = new LanguageService();
-
-    private LocationService locationServices = new LocationService();
-
-
     public static readonly BindableProperty ActiveTabProperty =
        BindableProperty.Create(
            nameof(ActiveTab),
@@ -86,17 +77,7 @@ public partial class BottomNavigationView : ContentView
     // Mở bản đồ khi nhấn vào MapIcon hoặc MapText
     private async void OpenMap(object sender, EventArgs e)
     {
-        // Kiểm tra nếu có tọa độ thì mới truyền tham số để tránh lỗi parse double từ chuỗi rỗng
-        if (_latitude.HasValue && _longtitude.HasValue)
-        {
-            // Sử dụng đường dẫn tuyệt đối (//) cho trang chính (ShellContent)
-            await Shell.Current.GoToAsync($"//MapPage?lat={_latitude.Value}&lng={_longtitude.Value}&name={_locationName}");
-        }
-        else
-        {
-            // Chỉ chuyển trang nếu không có dữ liệu
-            await Shell.Current.GoToAsync("//MapPage");
-        }
+        await Shell.Current.GoToAsync("//MapPage");
     }
 
     // Mở trang OpenMainPage khi nhấn vào HomeIcon hoặc HomeText

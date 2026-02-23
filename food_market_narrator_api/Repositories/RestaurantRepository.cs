@@ -13,7 +13,11 @@ namespace food_market_narrator_api.Repositories
         }
         public async Task<List<RestaurantModel>> GetAllAsync()
         {
-            return await _context.Restaurant.ToListAsync();
+            return await _context.Restaurant
+                .Include(r => r.ImageURL)
+                .Include(r => r.AudioURL)
+                    .ThenInclude(a => a.Language)
+                .ToListAsync();
         }
     }
 }

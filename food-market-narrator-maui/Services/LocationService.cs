@@ -1,6 +1,4 @@
-using food_market_narrator.Views;
 using Microsoft.Maui.Devices.Sensors;
-using Microsoft.Maui.Maps;
 
 namespace food_market_narrator.Services;
 

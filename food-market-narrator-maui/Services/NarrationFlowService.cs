@@ -1,11 +1,9 @@
 using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
-using food_market_narrator.Services;
-using food_market_narrator.Views;
 
 namespace food_market_narrator.Services;
 
-public class NarrationFlowService
+public class NarrationFlowService : INarrationFlowService
 {
     private readonly POIService _poiService;
     private readonly ILocationService _locationService;
@@ -101,9 +99,11 @@ public class NarrationFlowService
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(nearestPOI.POI.AudioFile))
+        var selectedAudio = nearestPOI.POI.GetAudioUrl(_languageService.CurrentLanguage);
+
+        if (string.IsNullOrWhiteSpace(selectedAudio))
         {
-            Console.WriteLine($"AudioFile is NULL or EMPTY for POI: {nearestPOI.POI.Name}");
+            Console.WriteLine($"No audio found for POI: {nearestPOI.POI.Name}");
             return;
         }
 
@@ -158,9 +158,16 @@ public class NarrationFlowService
 
             Console.WriteLine($"Queue playing: {poi.Name}");
 
+            var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
+            if (string.IsNullOrWhiteSpace(selectedAudio))
+            {
+                Console.WriteLine($"No playable audio for POI: {poi.Name}");
+                continue;
+            }
+
             await _audioService.PlaySound(
                 _languageService.CurrentLanguage,
-                poi.AudioFile
+                selectedAudio
             );
 
             // đợi audio phát xong

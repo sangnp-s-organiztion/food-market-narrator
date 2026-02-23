@@ -27,10 +27,13 @@
                         <Label Text="Khám phá thiên đường ẩm thực" FontSize="12" TextColor="#9E9E9E"/>
                     </VerticalStackLayout>
 
-                    <!-- Notification -->
-                    <Border Grid.Column="2" StrokeThickness="0" BackgroundColor="#F0F0F0" 
+                    <!-- Language Button -->
+                    <Border Grid.Column="2" StrokeThickness="0" BackgroundColor="#F0F0F0"
                             HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20">
-                        <Label Text="&#xf0f3;" FontFamily="FASolid" TextColor="#1A1A1A" 
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLanguageButtonTapped"/>
+                        </Border.GestureRecognizers>
+                            <Label Text="&#xf57e;" FontFamily="FASolid" TextColor="#1A1A1A"
                                HorizontalOptions="Center" VerticalOptions="Center" FontSize="18"/>
                     </Border>
                 </Grid>
@@ -110,80 +113,123 @@
                     <Label Grid.Column="1" Text="Xem tất cả" FontSize="13" TextColor="#F48C06"/>
                 </Grid>
 
-                <!-- 6. List Items (Hardcoded for demo) -->
-                <VerticalStackLayout Spacing="15">
-                    <!-- Item 1 -->
-                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="10">
-                        <Border.Shadow>
-                            <Shadow Brush="#E0E0E0" Offset="0,4" Radius="10" Opacity="0.3"/>
-                        </Border.Shadow>
-                        <Grid ColumnDefinitions="100, *" ColumnSpacing="15">
-                            <Image Source="dotnet_bot.svg" Aspect="AspectFill" HeightRequest="100" WidthRequest="100">
-                                <Image.Clip>
-                                    <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50"/>
-                                </Image.Clip>
-                            </Image>
+                <!-- 6. List Items -->
+                <CollectionView x:Name="PoiList" 
+                    SelectionMode="Single"
+                    SelectionChanged="OnPoiDetailTapped"
+                    >
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
-                                <Label Text="Ốc Đào Vĩnh Khánh" FontSize="15" FontAttributes="Bold" TextColor="#1A1A1A"/>
-                                <Label Text="Hải sản • 400m • Đang mở cửa" FontSize="12">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="Hải sản • 400m • " TextColor="#757575"/>
-                                            <Span Text="Đang mở cửa" TextColor="#4CAF50"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
+                            <Border BackgroundColor="White"
+                                    StrokeShape="RoundRectangle 20"
+                                    StrokeThickness="0"
+                                    Padding="10"
+                                    Margin="0,5">
 
-                                <Grid ColumnDefinitions="Auto, *">
-                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                        <Label Text="&#xf005;" FontFamily="FASolid" TextColor="#FFC107" FontSize="12"/>
-                                        <Label Text="4.8" TextColor="#1A1A1A" FontSize="12" FontAttributes="Bold"/>
-                                        <Label Text="(2.4k đánh giá)" TextColor="#9E9E9E" FontSize="12"/>
-                                    </HorizontalStackLayout>
+                            <!-- khi nhấm vào POI -->
+                            <!-- <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPoiDetailTapped"/>
+                            </Border.GestureRecognizers> -->
+                            
 
-                                    <Label Grid.Column="1" Text="&#xf02e;" FontFamily="FASolid" TextColor="#F48C06" HorizontalOptions="End" FontSize="18"/>
+                                <Border.Shadow>
+                                    <Shadow Brush="#E0E0E0"
+                                            Offset="0,4"
+                                            Radius="10"
+                                            Opacity="0.3"/>
+                                </Border.Shadow>
+
+                                <Grid ColumnDefinitions="100,*"
+                                    ColumnSpacing="15">
+
+                                    <!-- Ảnh tạm -->
+                                    <Image Source="{Binding PrimaryImage}"
+                                        Aspect="AspectFill"
+                                        HeightRequest="100"
+                                        WidthRequest="100">
+                                        <Image.Clip>
+                                            <EllipseGeometry RadiusX="50"
+                                                            RadiusY="50"
+                                                            Center="50,50"/>
+                                        </Image.Clip>
+                                    </Image>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                        Spacing="4">
+
+                                        <!-- Tên -->
+                                        <Label Text="{Binding Name}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            TextColor="#1A1A1A"/>
+
+                                        <!-- ID -->
+                                        <!-- <Label Text="{Binding restaurantId,
+                                                    StringFormat='ID: {0}'}"
+                                            FontSize="11"
+                                            TextColor="#9E9E9E"/> -->
+
+                                        <!-- Địa chỉ -->
+                                        <Label Text="{Binding Address}"
+                                            FontSize="12"
+                                            TextColor="#757575"/>
+
+                                        <!-- Mô tả -->
+                                        <Label Text="{Binding Description}"
+                                            FontSize="12"
+                                            MaxLines="2"
+                                            LineBreakMode="TailTruncation"/>
+
+                                        <!-- Toạ độ -->
+                                        <!-- <Label FontSize="11"
+                                            TextColor="#9E9E9E">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Lat: " />
+                                                    <Span Text="{Binding Latitude}" />
+                                                    <Span Text=" | Lng: " />
+                                                    <Span Text="{Binding Longitude}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label> -->
+
+                                        <!-- Trạng thái -->
+                                        <Label FontSize="12">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Trạng thái: "
+                                                        TextColor="#757575"/>
+                                                    <Span Text="{Binding StatusText}"
+                                                        TextColor="#4CAF50"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+
+                                        <!-- CreatedAt -->
+                                        <!-- <Label Text="{Binding CreatedAt,
+                                                    StringFormat='Tạo lúc: {0:dd/MM/yyyy HH:mm}'}"
+                                            FontSize="11"
+                                            TextColor="#9E9E9E"/> -->
+
+                                        <!-- Audio file -->
+                                        <!-- <Label Text="{Binding AudioFile,
+                                                    StringFormat='Audio: {0}'}"
+                                            FontSize="11"
+                                            TextColor="#9E9E9E"/> -->
+
+                                    </VerticalStackLayout>
+
                                 </Grid>
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
+                            </Border>
 
-                     <!-- Item 2 -->
-                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="10">
-                        <Border.Shadow>
-                            <Shadow Brush="#E0E0E0" Offset="0,4" Radius="10" Opacity="0.3"/>
-                        </Border.Shadow>
-                        <Grid ColumnDefinitions="100, *" ColumnSpacing="15">
-                            <Image Source="dotnet_bot.svg" Aspect="AspectFill" HeightRequest="100" WidthRequest="100">
-                                <Image.Clip>
-                                    <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50"/>
-                                </Image.Clip>
-                            </Image>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
-                                <Label Text="Phá Lấu Cô Thảo" FontSize="15" FontAttributes="Bold" TextColor="#1A1A1A"/>
-                                <Label Text="Ăn vặt • 1.2km • Đang mở cửa" FontSize="12">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="Ăn vặt • 1.2km • " TextColor="#757575"/>
-                                            <Span Text="Đang mở cửa" TextColor="#4CAF50"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
 
-                                <Grid ColumnDefinitions="Auto, *">
-                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                        <Label Text="&#xf005;" FontFamily="FASolid" TextColor="#FFC107" FontSize="12"/>
-                                        <Label Text="4.6" TextColor="#1A1A1A" FontSize="12" FontAttributes="Bold"/>
-                                        <Label Text="(1.1k đánh giá)" TextColor="#9E9E9E" FontSize="12"/>
-                                    </HorizontalStackLayout>
 
-                                    <Label Grid.Column="1" Text="&#xf02e;" FontFamily="FASolid" TextColor="#F48C06" HorizontalOptions="End" FontSize="18"/>
-                                </Grid>
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
 
@@ -192,15 +238,148 @@
                 HeightRequest="50" VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,20" Padding="20,0">
                 <Border.Shadow>
                  <Shadow Brush="#E65100" Offset="0,5" Radius="10" Opacity="0.4"/>
-            </Border.Shadow>
-            <HorizontalStackLayout Spacing="10" VerticalOptions="Center" x:Name="NarratorButton">
-                    <HorizontalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnNarratorTapped"/>
-                    </HorizontalStackLayout.GestureRecognizers>
-                    <Label Text="&#xf590;" FontFamily="FASolid" TextColor="White" FontSize="20" VerticalOptions="Center" />
-                <Label Text="Bắt đầu thuyết minh" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-        </Border>
+                </Border.Shadow>
+                <HorizontalStackLayout Spacing="10" VerticalOptions="Center" x:Name="NarratorButton">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnNarratorTapped"/>
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Label Text="&#xf590;" FontFamily="FASolid" TextColor="White" FontSize="20" VerticalOptions="Center" />
+                    <Label Text="Bắt đầu thuyết minh" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+
+            <Grid x:Name="LanguagePopupOverlay"
+                  IsVisible="False"
+                  Opacity="0"
+                  BackgroundColor="#80000000"
+                  InputTransparent="False"
+                  RowDefinitions="*,Auto">
+                <BoxView Grid.Row="0" Color="Transparent">
+                    <BoxView.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLanguageOverlayTapped"/>
+                    </BoxView.GestureRecognizers>
+                </BoxView>
+
+                <Grid Grid.Row="1" VerticalOptions="End">
+                    <Border BackgroundColor="White"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 28,28,0,0"
+                            Padding="20,12,20,24">
+                        <VerticalStackLayout Spacing="16">
+                            <BoxView HeightRequest="4"
+                                     WidthRequest="52"
+                                     HorizontalOptions="Center"
+                                     CornerRadius="2"
+                                     Color="#E7E2DD"/>
+
+                            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                <Label Text="Chọn ngôn ngữ"
+                                       FontSize="30"
+                                       FontAttributes="Bold"
+                                       TextColor="#1A1A1A"
+                                       VerticalOptions="Center"/>
+                                <Border Grid.Column="1"
+                                        BackgroundColor="#F1EDE9"
+                                        HeightRequest="32"
+                                        WidthRequest="32"
+                                        StrokeShape="RoundRectangle 16"
+                                        StrokeThickness="0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageCloseTapped"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="&#xf00d;" FontFamily="FASolid"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           FontSize="14"
+                                           TextColor="#7D746D"/>
+                                </Border>
+                            </Grid>
+                            <!-- Ngôn ngữ  -->
+                            <VerticalStackLayout Spacing="12">
+                                <!-- Tiếng Việt  -->
+                                <Border x:Name="VietnameseOption"
+                                        BackgroundColor="#F7F3EF"
+                                        Stroke="#F48C06"
+                                        StrokeThickness="1.5"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="vi-VN"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Label Text="🇻🇳" FontSize="20" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="Tiếng Việt" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
+                                        <Label x:Name="VietnameseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                                <!-- Tiếng Anh  -->
+                                <Border x:Name="EnglishOption"
+                                        BackgroundColor="#F1EDE9"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="en-US"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Label Text="🇺🇸" FontSize="20" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="English" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
+                                        <Label x:Name="EnglishCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
+                                    </Grid>
+                                </Border> 
+                                
+                                <!-- Tiếng Trung  -->
+                                <Border x:Name="ChineseOption"
+                                        BackgroundColor="#F1EDE9"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="zh-CN"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Label Text="🇨🇳" FontSize="20" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="中文" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
+                                        <Label x:Name="ChineseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
+                                    </Grid>
+                                </Border>
+                                
+                                <!-- Tiếng Hàn  -->
+                                <Border x:Name="KoreanOption"
+                                        BackgroundColor="#F1EDE9"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="ko-KR"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Label Text="🇰🇷" FontSize="20" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="한국어" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
+                                        <Label x:Name="KoreanCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Tiếng Nhật  -->
+                                <Border x:Name="JapaneseOption"
+                                        BackgroundColor="#F1EDE9"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="ja-JP"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Label Text="🇯🇵" FontSize="20" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="日本語" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
+                                        <Label x:Name="JapaneseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
+                                    </Grid>
+                                </Border>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+            </Grid>
         </Grid>
 
         <!-- Bottom Navigation Bar -->

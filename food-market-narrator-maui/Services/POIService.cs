@@ -8,11 +8,11 @@ using System.Net.Http.Json;
 
 namespace food_market_narrator.Services;
 
-public class POIService
+public class POIService : IPOIService
 {
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
-    private List<POI> _pois;
+    private List<POI>? _pois;
     private const double EnterRadius = 30; // mét
     private const double ExitRadius = 40;  // mét
 
@@ -39,16 +39,6 @@ public class POIService
             if (data == null)
                 return new List<POI>();
 
-            // xử lý audio file giống như m làm trước đó
-            foreach (var poi in data)
-            {
-                var originalId = poi.restaurantId;
-            
-                var audioFileName = originalId + ".mp3";
-
-                poi.AudioFile = audioFileName;
-            }
-
             _pois = data; // Cache the data
             return _pois;
         }
@@ -67,6 +57,21 @@ public class POIService
             return await GetPOIsAsync();
         }
         return _pois;
+    }
+
+    public POI? GetNearestPOI(double currentLat, double currentLng)
+    {
+        if (_pois == null || !_pois.Any())
+            return null;
+
+        var currentLocation = new Location(currentLat, currentLng);
+
+        return _pois
+            .OrderBy(poi => Location.CalculateDistance(
+                currentLocation,
+                new Location(poi.Latitude, poi.Longitude),
+                DistanceUnits.Kilometers))
+            .FirstOrDefault();
     }
 
     // Lấy POI gần nhất dựa trên vị trí hiện tại và các POIs
@@ -150,13 +155,17 @@ public class POIService
         if (_pois == null || !_pois.Any())
             return;
 
+#if ANDROID
+        CustomMapHandler.HighlightMarker(nearest?.restaurantId);
+#endif
+
         // tự động zoom map về POI gần nhất trong bán kính
         if (nearest != null)
         {
             map.MoveToRegion(
                 MapSpan.FromCenterAndRadius(
                     new Location(nearest.Latitude, nearest.Longitude),
-                    Distance.FromMeters(10)));
+                    Distance.FromMeters(35)));
         }
     }
 
