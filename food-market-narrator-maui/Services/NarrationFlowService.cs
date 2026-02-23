@@ -99,9 +99,11 @@ public class NarrationFlowService : INarrationFlowService
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(nearestPOI.POI.AudioFile))
+        var selectedAudio = nearestPOI.POI.GetAudioUrl(_languageService.CurrentLanguage);
+
+        if (string.IsNullOrWhiteSpace(selectedAudio))
         {
-            Console.WriteLine($"AudioFile is NULL or EMPTY for POI: {nearestPOI.POI.Name}");
+            Console.WriteLine($"No audio found for POI: {nearestPOI.POI.Name}");
             return;
         }
 
@@ -156,9 +158,16 @@ public class NarrationFlowService : INarrationFlowService
 
             Console.WriteLine($"Queue playing: {poi.Name}");
 
+            var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
+            if (string.IsNullOrWhiteSpace(selectedAudio))
+            {
+                Console.WriteLine($"No playable audio for POI: {poi.Name}");
+                continue;
+            }
+
             await _audioService.PlaySound(
                 _languageService.CurrentLanguage,
-                poi.AudioFile
+                selectedAudio
             );
 
             // đợi audio phát xong

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System;
+using System.Collections.Generic;
 
 
 namespace food_market_narrator_api.Models
@@ -11,7 +12,7 @@ namespace food_market_narrator_api.Models
     {
         [Key]
         [Column("restaurant_id")]
-        [MaxLength(100)]
+        [MaxLength(255)]
         public string RestaurantId { get; set; }
 
         [Required]
@@ -38,5 +39,9 @@ namespace food_market_narrator_api.Models
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Navigation properties
+        public ICollection<RestaurantImageModel> ImageURL { get; set; } = new List<RestaurantImageModel>();
+        public ICollection<AudioModel> AudioURL { get; set; } = new List<AudioModel>();
     }
 }

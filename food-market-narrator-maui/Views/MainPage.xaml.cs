@@ -66,6 +66,12 @@ public partial class MainPage : ContentPage
             await Task.Delay(300);
             OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
         }
+
+        // Hiển thị POI lên giao diện
+        Console.WriteLine("Loading POIs for display...");
+        Console.WriteLine("The number of POIs loaded: " + (_poiService.GetAllPOIsAsync().Result.Count));
+        var poisData = await _poiService.GetPOIsAsync();
+        PoiList.ItemsSource = poisData;             
     }
 
     protected override void OnDisappearing()

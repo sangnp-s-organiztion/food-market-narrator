@@ -39,16 +39,6 @@ public class POIService : IPOIService
             if (data == null)
                 return new List<POI>();
 
-            // xử lý audio file giống như m làm trước đó
-            foreach (var poi in data)
-            {
-                var originalId = poi.restaurantId;
-            
-                var audioFileName = originalId + ".mp3";
-
-                poi.AudioFile = audioFileName;
-            }
-
             _pois = data; // Cache the data
             return _pois;
         }
