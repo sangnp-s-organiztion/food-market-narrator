@@ -59,6 +59,18 @@ public class POIService : IPOIService
         return _pois;
     }
 
+    public async Task<POI?> GetPOIByIdAsync(string restaurantId)
+    {
+        if (string.IsNullOrWhiteSpace(restaurantId))
+        {
+            return null;
+        }
+
+        var pois = await GetAllPOIsAsync();
+        return pois.FirstOrDefault(p =>
+            string.Equals(p.restaurantId, restaurantId, StringComparison.OrdinalIgnoreCase));
+    }
+
     public POI? GetNearestPOI(double currentLat, double currentLng)
     {
         if (_pois == null || !_pois.Any())

@@ -1,4 +1,5 @@
 ﻿using food_market_narrator.Helpers;
+using food_market_narrator.Models;
 using food_market_narrator.Services;
 using Microsoft.Maui.Maps;
 using System.Collections.Generic;
@@ -161,8 +162,21 @@ public partial class MainPage : ContentPage
     }
 
     // Hàm xử lý khi nhấn vào một POI trong danh sách để hiển thị chi tiết
-    private async void OnPoiDetailTapped(object sender, EventArgs e)
+    private async void OnPoiDetailTapped(object sender, SelectionChangedEventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(POIDetailPage));
+        if (e.CurrentSelection.FirstOrDefault() is not POI selectedPoi)
+        {
+            return;
+        }
+
+        PoiList.SelectedItem = null;
+
+        if (string.IsNullOrWhiteSpace(selectedPoi.restaurantId))
+        {
+            return;
+        }
+
+        var encodedId = Uri.EscapeDataString(selectedPoi.restaurantId);
+        await Shell.Current.GoToAsync($"{nameof(POIDetailPage)}?restaurantId={encodedId}");
     }
 }
