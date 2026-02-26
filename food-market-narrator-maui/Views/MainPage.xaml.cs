@@ -82,7 +82,8 @@ public partial class MainPage : ContentPage
         if (currentLocation != null)
         {
             UpdateUIByLocation(currentLocation);
-        }       
+        }
+        UpdateFloatingButtonUI();       
     }
 
     protected override void OnDisappearing()
@@ -106,7 +107,18 @@ public partial class MainPage : ContentPage
         await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
         await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
 
-        _narrationFlowService.StartNarration();
+        if (!_narrationFlowService.IsNarrating)
+        {
+            _narrationFlowService.StartNarration();
+        }
+        else
+        {
+            // dừng thuyet minh
+            _narrationFlowService.StopNarration();
+
+        }
+        // cập nhật lại UI của nút thuyết minh
+        UpdateFloatingButtonUI();
     }
 
     // Hàm xử lý khi nhấn nút chọn ngôn ngữ
@@ -147,6 +159,7 @@ public partial class MainPage : ContentPage
 
         // phát audio sau khi đổi ngôn ngữ
         _narrationFlowService.StartNarration();
+        UpdateFloatingButtonUI();
     }
 
     // Hàm ẩn popup ngôn ngữ với hiệu ứng mờ dần
@@ -222,6 +235,19 @@ public partial class MainPage : ContentPage
             {
                 FloatingButton.IsVisible = shouldShow;
             });
+        }
+    }
+
+    // Cập nhật trạng thái của nút thuyết minh dựa trên trạng thái hiện tại của NarrationFlowService
+    private void UpdateFloatingButtonUI()
+    {
+        if (_narrationFlowService.IsNarrating)
+        {
+            NarratorText.Text = "Dừng thuyết minh";
+        }
+        else
+        {
+            NarratorText.Text = "Bắt đầu thuyết minh";
         }
     }
 }

@@ -18,6 +18,7 @@ public class NarrationFlowService : INarrationFlowService
 
     private readonly Queue<POI> _playQueue = new();
     private bool _isProcessingQueue = false;
+    public bool IsNarrating => _isNarrationEnabled;
 
     public NarrationFlowService(POIService poiService, ILocationService locationService)
     {
@@ -33,6 +34,7 @@ public class NarrationFlowService : INarrationFlowService
         if (_isNarrationEnabled) return;
 
         _isNarrationEnabled = true;
+        Console.WriteLine($"IsNarrating: {_isNarrationEnabled}");
         _locationService.LocationChanged += OnLocationChanged;
         await _locationService.StartTrackingAsync();
 
@@ -44,6 +46,28 @@ public class NarrationFlowService : INarrationFlowService
         }
 
         Console.WriteLine("Narration STARTED");
+    }
+
+    public void StopNarration()
+    {
+        if (!_isNarrationEnabled) return;
+
+        _isNarrationEnabled = false;
+
+        // stop tracking
+        _locationService.LocationChanged -= OnLocationChanged;
+
+        // stop audio
+        _audioService.StopSound();
+
+        // clear queue
+        _playQueue.Clear();
+        _isProcessingQueue = false;
+
+        // optional: reset POI đã phát
+        // _playedPOIs.Clear();
+
+        Console.WriteLine("Narration STOPPED");
     }
 
     // Khi thay đổi vị trí thì làm gì đó
