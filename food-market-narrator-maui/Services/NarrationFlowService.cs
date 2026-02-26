@@ -18,6 +18,7 @@ public class NarrationFlowService : INarrationFlowService
 
     private readonly Queue<POI> _playQueue = new();
     private bool _isProcessingQueue = false;
+    public bool IsNarrating => _isNarrationEnabled;
 
     public NarrationFlowService(POIService poiService, ILocationService locationService)
     {
@@ -33,6 +34,7 @@ public class NarrationFlowService : INarrationFlowService
         if (_isNarrationEnabled) return;
 
         _isNarrationEnabled = true;
+        Console.WriteLine($"IsNarrating: {_isNarrationEnabled}");
         _locationService.LocationChanged += OnLocationChanged;
         await _locationService.StartTrackingAsync();
 
@@ -46,6 +48,29 @@ public class NarrationFlowService : INarrationFlowService
         Console.WriteLine("Narration STARTED");
     }
 
+    public void StopNarration()
+    {
+        if (!_isNarrationEnabled) return;
+
+        _isNarrationEnabled = false;
+
+        // stop tracking
+        _locationService.LocationChanged -= OnLocationChanged;
+
+        // stop audio
+        _audioService.StopSound();
+
+        // clear queue
+        _playQueue.Clear();
+        _isProcessingQueue = false;
+
+        // reset POI đã phát để lần Start thủ công tiếp theo có thể phát lại ở cùng vị trí
+        _playedPOIs.Clear();
+
+        Console.WriteLine("Narration STOPPED");
+    }
+
+    // Khi thay đổi vị trí thì làm gì đó
     private async void OnLocationChanged(object? sender, Location location)
     {
         await CheckAndNarrateAsync(location);
@@ -115,22 +140,23 @@ public class NarrationFlowService : INarrationFlowService
         {
             Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
 
-            // Chỉ check đã chơi nếu là tự động (không force)
-            if (force || !_playedPOIs.Contains(nearestPOI.POI.restaurantId))
+            var poiId = nearestPOI.POI.restaurantId;
+            var alreadyPlayed = _playedPOIs.Contains(poiId);
+
+            // Force luôn cho phép phát lại POI hiện tại
+            if (force || !alreadyPlayed)
             {
                 Console.WriteLine("Playing audio...");
-                if (!_playedPOIs.Contains(nearestPOI.POI.restaurantId))
+
+                Console.WriteLine("Add to queue...");
+                _playQueue.Enqueue(nearestPOI.POI);
+
+                if (!alreadyPlayed)
                 {
-                    Console.WriteLine("Add to queue...");
-
-                    _playQueue.Enqueue(nearestPOI.POI);
-                    _playedPOIs.Add(nearestPOI.POI.restaurantId);
-
-                    await ProcessQueueAsync();
+                    _playedPOIs.Add(poiId);
                 }
 
-                if (!force) // Chỉ đánh dấu đã chơi khi tự động kích hoạt
-                    _playedPOIs.Add(nearestPOI.POI.restaurantId);
+                await ProcessQueueAsync();
             }
             else
             {

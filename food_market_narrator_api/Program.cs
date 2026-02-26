@@ -12,6 +12,8 @@ public class Program
         // Theem Repository vào DI container
         builder.Services.AddScoped<RestaurantRepository>();
         builder.Services.AddScoped<RestaurantService>();
+        builder.Services.AddScoped<AudioRepository>();
+        builder.Services.AddScoped<AudioService>();
 
         // Lấy connection string từ appsettings.json
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
