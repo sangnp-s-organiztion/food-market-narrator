@@ -32,9 +32,14 @@ public class AudioService : IAudioService
             Console.WriteLine($"Loading path: {path}");
 
             var stream = await FileSystem.OpenAppPackageFileAsync(path);
-            _player = _audioManager.CreatePlayer(stream);
+            // Lưu audio vừa load vào cache để phát lại nếu cần
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
 
+            _player = _audioManager.CreatePlayer(memoryStream);
             _player.Play();
+
             Console.WriteLine("Audio started");
         }
         catch (Exception ex)

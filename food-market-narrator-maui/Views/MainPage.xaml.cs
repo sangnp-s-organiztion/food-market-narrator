@@ -110,6 +110,7 @@ public partial class MainPage : ContentPage
         if (!_narrationFlowService.IsNarrating)
         {
             _narrationFlowService.StartNarration();
+            // await _narrationFlowService.SmartPlayAsync();
         }
         else
         {

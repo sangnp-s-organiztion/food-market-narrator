@@ -64,8 +64,8 @@ public class NarrationFlowService : INarrationFlowService
         _playQueue.Clear();
         _isProcessingQueue = false;
 
-        // optional: reset POI đã phát
-        // _playedPOIs.Clear();
+        // reset POI đã phát để lần Start thủ công tiếp theo có thể phát lại ở cùng vị trí
+        _playedPOIs.Clear();
 
         Console.WriteLine("Narration STOPPED");
     }
@@ -140,22 +140,23 @@ public class NarrationFlowService : INarrationFlowService
         {
             Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
 
-            // Chỉ check đã chơi nếu là tự động (không force)
-            if (force || !_playedPOIs.Contains(nearestPOI.POI.restaurantId))
+            var poiId = nearestPOI.POI.restaurantId;
+            var alreadyPlayed = _playedPOIs.Contains(poiId);
+
+            // Force luôn cho phép phát lại POI hiện tại
+            if (force || !alreadyPlayed)
             {
                 Console.WriteLine("Playing audio...");
-                if (!_playedPOIs.Contains(nearestPOI.POI.restaurantId))
+
+                Console.WriteLine("Add to queue...");
+                _playQueue.Enqueue(nearestPOI.POI);
+
+                if (!alreadyPlayed)
                 {
-                    Console.WriteLine("Add to queue...");
-
-                    _playQueue.Enqueue(nearestPOI.POI);
-                    _playedPOIs.Add(nearestPOI.POI.restaurantId);
-
-                    await ProcessQueueAsync();
+                    _playedPOIs.Add(poiId);
                 }
 
-                if (!force) // Chỉ đánh dấu đã chơi khi tự động kích hoạt
-                    _playedPOIs.Add(nearestPOI.POI.restaurantId);
+                await ProcessQueueAsync();
             }
             else
             {
