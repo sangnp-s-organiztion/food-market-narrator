@@ -16,6 +16,7 @@ public partial class MainPage : ContentPage
 
     private readonly Dictionary<string, Border> _languageOptions;
     private readonly Dictionary<string, Label> _languageChecks;
+    private bool _isInsidePOIUI = false; // trạng thái UI hiện tại
 
     private bool _isFirstLoad = true;
 
@@ -72,7 +73,14 @@ public partial class MainPage : ContentPage
         Console.WriteLine("Loading POIs for display...");
         Console.WriteLine("The number of POIs loaded: " + (_poiService.GetAllPOIsAsync().Result.Count));
         var poisData = await _poiService.GetPOIsAsync();
-        PoiList.ItemsSource = poisData;             
+        PoiList.ItemsSource = poisData;      
+
+        // Cập nhật trạng thái UI dựa trên vị trí hiện tại
+        var currentLocation = await _locationService.GetCurrentLocationAsync();
+        if (currentLocation != null)
+        {
+            UpdateUIByLocation(currentLocation);
+        }       
     }
 
     protected override void OnDisappearing()
@@ -81,10 +89,12 @@ public partial class MainPage : ContentPage
         base.OnDisappearing();
     }
 
+    // Hàm xử lý khi thay đổi vị trí để cập nhật giao diện và thuyết minh
     private void OnLocationChangedForMap(object? sender, Location location)
     {
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
         _poiService.HighlightNearestPOI(map, nearest);
+        UpdateUIByLocation(location);
     }
 
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
@@ -178,5 +188,35 @@ public partial class MainPage : ContentPage
 
         var encodedId = Uri.EscapeDataString(selectedPoi.restaurantId);
         await Shell.Current.GoToAsync($"{nameof(POIDetailPage)}?restaurantId={encodedId}");
+    }
+
+    // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất
+    private void UpdateUIByLocation(Location location)
+    {
+        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
+
+        _poiService.HighlightNearestPOI(map, nearest);
+
+        bool shouldShow = false;
+
+        if (nearest != null)
+        {
+            var distance = Location.CalculateDistance(
+                location,
+                new Location(nearest.Latitude, nearest.Longitude),
+                DistanceUnits.Kilometers) * 1000;
+
+            shouldShow = distance <= 30;
+        }
+
+        if (_isInsidePOIUI != shouldShow)
+        {
+            _isInsidePOIUI = shouldShow;
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                FloatingButton.IsVisible = shouldShow;
+            });
+        }
     }
 }

@@ -234,7 +234,7 @@
         </ScrollView>
 
         <!-- Bottom Floating Button -->
-            <Border x:Name="FloatingButton" StrokeThickness="0" BackgroundColor="#F48C06" StrokeShape="RoundRectangle 25" 
+            <Border x:Name="FloatingButton" IsVisible="False" StrokeThickness="0" BackgroundColor="#F48C06" StrokeShape="RoundRectangle 25" 
                 HeightRequest="50" VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,20" Padding="20,0">
                 <Border.Shadow>
                  <Shadow Brush="#E65100" Offset="0,5" Radius="10" Opacity="0.4"/>

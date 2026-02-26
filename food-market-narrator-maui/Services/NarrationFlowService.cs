@@ -46,6 +46,7 @@ public class NarrationFlowService : INarrationFlowService
         Console.WriteLine("Narration STARTED");
     }
 
+    // Khi thay đổi vị trí thì làm gì đó
     private async void OnLocationChanged(object? sender, Location location)
     {
         await CheckAndNarrateAsync(location);
