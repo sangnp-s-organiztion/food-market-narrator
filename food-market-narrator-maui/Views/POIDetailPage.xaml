@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:food_market_narrator.Models"
              x:Class="food_market_narrator.Views.POIDetailPage"
+             x:DataType="models:POI"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#EEEEEE">
     <Grid RowDefinitions="*,Auto" RowSpacing="0">
@@ -18,7 +20,7 @@
                             StrokeShape="RoundRectangle 18"
                             HeightRequest="220">
                         <Grid>
-                            <Image Source="oc_oanh.jpg" Aspect="AspectFill" />
+                            <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
 
                             <Grid Padding="14,14,14,0" ColumnDefinitions="Auto,*,Auto,Auto" VerticalOptions="Start" ColumnSpacing="8">
                                 <Border StrokeThickness="0"
@@ -87,13 +89,13 @@
                                         BackgroundColor="#C8E6C9"
                                         StrokeShape="RoundRectangle 10"
                                         Padding="8,2">
-                                    <Label Text="ĐANG MỞ CỬA"
+                                     <Label Text="{Binding StatusText}"
                                            FontSize="10"
                                            FontAttributes="Bold"
                                            TextColor="#2E7D32" />
                                 </Border>
                                 <Label Grid.Column="1"
-                                       Text="13:00 - 23:00"
+                                    Text="{Binding OpeningHoursDisplay}"
                                        VerticalOptions="Center"
                                        FontSize="13"
                                        TextColor="#7A7A7A" />
@@ -113,7 +115,7 @@
                             </Grid>
 
                             <Label Grid.Row="1"
-                                   Text="Ốc Oanh - Vĩnh Khánh"
+                   Text="{Binding Name}"
                                    FontSize="35"
                                    TextColor="#1B1F2A"
                                    LineBreakMode="WordWrap"
@@ -122,13 +124,14 @@
                             <VerticalStackLayout Grid.Row="2" Spacing="6">
                                 <HorizontalStackLayout Spacing="6">
                                     <Label Text="&#xf005;" FontFamily="FASolid" FontSize="12" TextColor="#F39C12" />
-                                    <Label Text="4.8" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
-                                    <Label Text="(1.2k+ đánh giá)" FontSize="12" TextColor="#808B96" />
+                                    <Label Text="N/A" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
+                                    <Label Text="(chưa có đánh giá)" FontSize="12" TextColor="#808B96" />
                                 </HorizontalStackLayout>
+                                <!-- HARD_CODE: payload không có rating/review -->
 
                                 <HorizontalStackLayout Spacing="8">
                                     <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#E67E22" VerticalOptions="Start" Margin="0,2,0,0" />
-                                    <Label Text="534 Vĩnh Khánh, Phường 8, Quận 4, TP. Hồ Chí Minh"
+                                    <Label Text="{Binding AddressDisplay}"
                                            FontSize="13"
                                            TextColor="#616A6B"
                                            LineBreakMode="WordWrap"
@@ -162,9 +165,14 @@
                             </Border>
                             <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                                 <Label Text="Audio Guide" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
-                                <Label Text="Khám phá câu chuyện món Ốc tại Vĩnh Khánh" FontSize="12" TextColor="#6B7280" />
+                                <Label Text="{Binding Description}" FontSize="12" TextColor="#6B7280" LineBreakMode="WordWrap" MaxLines="2" />
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
+
+                        <Label Text="{Binding AudioLanguagesDisplay, StringFormat='Ngôn ngữ: {0}'}"
+                               FontSize="11"
+                               TextColor="#6B7280"
+                               LineBreakMode="WordWrap" />
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                             <Border StrokeThickness="0"
@@ -182,9 +190,10 @@
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <Label Text="01:12" FontSize="10" TextColor="#8D8D8D" />
-                                    <Label Grid.Column="2" Text="03:45" FontSize="10" TextColor="#8D8D8D" HorizontalTextAlignment="End" />
+                                    <Label Text="00:00" FontSize="10" TextColor="#8D8D8D" />
+                                    <Label Grid.Column="2" Text="03:30" FontSize="10" TextColor="#8D8D8D" HorizontalTextAlignment="End" />
                                 </Grid>
+                                <!-- HARD_CODE: payload không có duration audio -->
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="0" HeightRequest="6">
                                     <Border StrokeThickness="0" BackgroundColor="#F39C12" StrokeShape="RoundRectangle 3" />
                                     <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="#D6DBDF" StrokeShape="RoundRectangle 3" />
@@ -205,7 +214,7 @@
 
                 <!-- Header phần món ăn đặc sắc -->
                 <Grid Padding="10,0,10,0" ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                    <Label Text="Món ăn đặc sắc"
+                    <Label Text="Hình ảnh nổi bật"
                            FontSize="32"
                            FontFamily="OpenSansSemibold"
                            TextColor="#1F2937" />
@@ -222,26 +231,26 @@
                     <HorizontalStackLayout Spacing="12" Padding="10,0,10,0">
                         <VerticalStackLayout WidthRequest="116" Spacing="6">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D5E1D6">
-                                <Image Source="be_oc_2.PNG" Aspect="AspectFit" Margin="10" />
+                                <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Ốc hương trứng muối" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="125.000đ" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                            <Label Text="Ảnh chính" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="sortOrder: 1" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout WidthRequest="116" Spacing="6">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
-                                <Image Source="oc_hong_nhung.jpg" Aspect="AspectFill" />
+                                <Image Source="{Binding SecondaryDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Càng ghẹ rang muối" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="145.000đ" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                            <Label Text="Ảnh phụ" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="sortOrder: 2" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout WidthRequest="116" Spacing="6">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
-                                <Image Source="oc_hoa_kieu.jpg" Aspect="AspectFill" />
+                                <Image Source="{Binding ThirdDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Sò điệp nướng mỡ hành" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="85.000đ" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                            <Label Text="Ảnh bổ sung" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="HARD_CODE" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                 </ScrollView>
@@ -252,10 +261,24 @@
                            FontSize="30"
                            FontFamily="OpenSansSemibold"
                            TextColor="#1F2937" />
-                    <Label Text="Ốc Oanh là một trong những quán ốc nổi tiếng nhất tại phố ẩm thực Vĩnh Khánh. Với không gian mở náo nhiệt đặc trưng của Sài Gòn, cùng tối mang đến những món hải sản tươi ngon được chế biến đậm đà theo phong cách riêng biệt."
+                      <Label Text="{Binding Description}"
                            FontSize="13"
                            TextColor="#6B7280"
                            LineHeight="1.4" />
+
+                      <Label Text="{Binding restaurantId, StringFormat='restaurantId: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding CreatedAtDisplay, StringFormat='createdAt: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding AudioSummaryDisplay}"
+                          FontSize="12"
+                          TextColor="#6B7280"
+                          LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

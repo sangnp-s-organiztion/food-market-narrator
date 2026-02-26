@@ -1,6 +1,7 @@
 using SQLite;
 using Microsoft.Maui.Controls.Maps;
 using System.Linq;
+using System.Globalization;
 
 namespace food_market_narrator.Models;
 
@@ -82,5 +83,86 @@ public class POI
             .ThenByDescending(a => a.DateGeneration)
             .Select(a => a.AudioUrl)
             .FirstOrDefault();
+    }
+
+    [Ignore]
+    public string OpeningHoursDisplay => string.IsNullOrWhiteSpace(OpeningHours)
+        ? "08:00 - 22:00"
+        : OpeningHours;
+
+    [Ignore]
+    public string AddressDisplay => string.IsNullOrWhiteSpace(Address)
+        ? "Đang cập nhật địa chỉ"
+        : Address;
+
+    [Ignore]
+    public string CoordinatesDisplay => $"{Latitude.ToString("0.######", CultureInfo.InvariantCulture)}, {Longitude.ToString("0.######", CultureInfo.InvariantCulture)}";
+
+    [Ignore]
+    public string CreatedAtDisplay => CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture);
+
+    [Ignore]
+    public string AudioLanguagesDisplay
+    {
+        get
+        {
+            var names = Audios
+                .Where(a => a.IsActive)
+                .Select(a => string.IsNullOrWhiteSpace(a.LanguageName)
+                    ? a.LanguageCode
+                    : $"{a.LanguageName} ({a.LanguageCode})")
+                .Distinct()
+                .ToList();
+
+            return names.Count == 0
+                ? "Đang cập nhật"
+                : string.Join(", ", names);
+        }
+    }
+
+    [Ignore]
+    public string AudioSummaryDisplay
+    {
+        get
+        {
+            var activeCount = Audios.Count(a => a.IsActive);
+            return activeCount == 0
+                ? "Audio: chưa có bản ghi"
+                : $"Audio active: {activeCount} bản ghi";
+        }
+    }
+
+    [Ignore]
+    public string PrimaryDetailImage => NormalizeImagePath(Images
+        .OrderByDescending(i => i.IsPrimary)
+        .ThenBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .FirstOrDefault());
+
+    [Ignore]
+    public string SecondaryDetailImage => NormalizeImagePath(Images
+        .OrderBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .Skip(1)
+        .FirstOrDefault());
+
+    [Ignore]
+    public string ThirdDetailImage => NormalizeImagePath(Images
+        .OrderBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .Skip(2)
+        .FirstOrDefault() ?? PrimaryImage);
+
+    private static string NormalizeImagePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return "dotnet_bot.svg";
+        }
+
+        return path
+            .Replace("Resources/Images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("resources/images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
     }
 }
