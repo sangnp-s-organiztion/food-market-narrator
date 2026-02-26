@@ -4,7 +4,7 @@ using food_market_narrator.Resources.Localization;
 
 namespace food_market_narrator.Services;
 
-public class LanguageService
+public class LanguageService : ILanguageService
 {
 
     private const string LANGUAGE_KEY = "AppLanguage";
@@ -13,9 +13,9 @@ public class LanguageService
     {
         get
         {
-            Console.WriteLine($"CurrentLanguage getter called, returning: {Preferences.Get(LANGUAGE_KEY, "vi")}");
-            return Preferences.Get(LANGUAGE_KEY, "vi"); 
-            // mặc định tiếng Việt nếu chưa có
+            Console.WriteLine($"CurrentLanguage getter called, returning: {Preferences.Get(LANGUAGE_KEY, "vi-VN")}");
+            return Preferences.Get(LANGUAGE_KEY, "vi-VN"); 
+            // mặc định tiếng Việt (vi-VN) nếu chưa có
         }
     }
 

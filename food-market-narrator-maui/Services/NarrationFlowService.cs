@@ -1,100 +1,210 @@
 using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
-using food_market_narrator.Services;
-using food_market_narrator.Views;
 
-public class NarrationFlowService
+namespace food_market_narrator.Services;
+
+public class NarrationFlowService : INarrationFlowService
 {
     private readonly POIService _poiService;
-    private readonly LocationServices _locationService = new();
+    private readonly ILocationService _locationService;
     private readonly AudioService _audioService = new();
     private readonly LanguageService _languageService = new();
 
     private readonly HashSet<string> _playedPOIs = new();
 
     private const double TRIGGER_DISTANCE_METERS = 30;
-    public NarrationFlowService(POIService poiService)
+
+    private bool _isNarrationEnabled = false;
+
+    private readonly Queue<POI> _playQueue = new();
+    private bool _isProcessingQueue = false;
+    public bool IsNarrating => _isNarrationEnabled;
+
+    public NarrationFlowService(POIService poiService, ILocationService locationService)
     {
         _poiService = poiService;
+        _locationService = locationService;
+        
+        // Subscribe to location updates
+        //_locationService.LocationChanged += OnLocationChanged;
     }
 
-    public async Task CheckAndNarrateAsync()
-{
-
-    
-    Console.WriteLine("=== CHECK NARRATE START ===");
-
-    if (_audioService.IsPlaying)
+    public async void StartNarration()
     {
-        Console.WriteLine("Audio đang phát, skip...");
-        return;
-    }
+        if (_isNarrationEnabled) return;
 
-    var currentLocation = await _locationService.GetCurrentLocation();
-    if (currentLocation.Item1 == null || currentLocation.Item2 == null)
-    {
-        Console.WriteLine("Current location NULL");
-        return;
-    }
+        _isNarrationEnabled = true;
+        Console.WriteLine($"IsNarrating: {_isNarrationEnabled}");
+        _locationService.LocationChanged += OnLocationChanged;
+        await _locationService.StartTrackingAsync();
 
-    Console.WriteLine($"Current location: {currentLocation.Item1}, {currentLocation.Item2}");
-
-    var pois = await _poiService.GetAllPOIsAsync();
-    if (pois == null || !pois.Any())
-    {
-        Console.WriteLine("POI list empty");
-        return;
-    }
-
-    Console.WriteLine($"POI COUNT: {pois.Count()}");
-
-    var nearestPOI = pois
-        .Select(p => new
+        // 👇 THÊM DÒNG NÀY
+        var currentLocation = await _locationService.GetCurrentLocationAsync();
+        if (currentLocation != null)
         {
-            POI = p,
-            Distance = Location.CalculateDistance(
-                new Location(currentLocation.Item1.Value, currentLocation.Item2.Value),
-                new Location(p.Latitude, p.Longitude),
-                DistanceUnits.Kilometers)
-        })
-        .OrderBy(x => x.Distance)
-        .FirstOrDefault();
+            await CheckAndNarrateAsync(currentLocation);
+        }
 
-    if (string.IsNullOrWhiteSpace(nearestPOI.POI.AudioFile))
-    {
-        Console.WriteLine("AudioFile is NULL or EMPTY!");
-        return;
+        Console.WriteLine("Narration STARTED");
     }
 
-    if (nearestPOI == null)
+    public void StopNarration()
     {
-        Console.WriteLine("Nearest POI NULL");
-        return;
+        if (!_isNarrationEnabled) return;
+
+        _isNarrationEnabled = false;
+
+        // stop tracking
+        _locationService.LocationChanged -= OnLocationChanged;
+
+        // stop audio
+        _audioService.StopSound();
+
+        // clear queue
+        _playQueue.Clear();
+        _isProcessingQueue = false;
+
+        // reset POI đã phát để lần Start thủ công tiếp theo có thể phát lại ở cùng vị trí
+        _playedPOIs.Clear();
+
+        Console.WriteLine("Narration STOPPED");
     }
 
-    double distanceMeters = nearestPOI.Distance * 1000;
-    Console.WriteLine($"Nearest POI: {nearestPOI.POI.restaurantId} - {distanceMeters}m");
-
-    if (distanceMeters <= 30)
+    // Khi thay đổi vị trí thì làm gì đó
+    private async void OnLocationChanged(object? sender, Location location)
     {
-        Console.WriteLine("Inside trigger radius");
+        await CheckAndNarrateAsync(location);
+    }
 
-        if (!_playedPOIs.Contains(nearestPOI.POI.restaurantId))
+    public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
+    {
+        Console.WriteLine("=== CHECK NARRATE START ===");
+
+        //if (_audioService.IsPlaying)
+        //{
+        //    Console.WriteLine("Audio đang phát, skip...");
+        //    return;
+        //}
+
+        if (currentLocation == null)
+            currentLocation = await _locationService.GetCurrentLocationAsync();
+
+        if (currentLocation == null)
         {
-            Console.WriteLine("Playing audio...");
-            await _audioService.PlaySound(
-                _languageService.CurrentLanguage,
-                nearestPOI.POI.AudioFile
-            );
+            Console.WriteLine("Current location NULL");
+            return;
+        }
+
+        //Console.WriteLine($"Current location: {currentLocation.Item1}, {currentLocation.Item2}");
+
+        var pois = await _poiService.GetAllPOIsAsync();
+        if (pois == null || !pois.Any())
+        {
+            Console.WriteLine("POI list empty");
+            return;
+        }
+
+        //Console.WriteLine($"POI COUNT: {pois.Count()}");
+
+        var nearestPOI = pois
+            .Select(p => new
+            {
+                POI = p,
+                Distance = Location.CalculateDistance(
+                    currentLocation,
+                    new Location(p.Latitude, p.Longitude),
+                    DistanceUnits.Kilometers)
+            })
+            .OrderBy(x => x.Distance)
+            .FirstOrDefault();
+
+        if (nearestPOI == null)
+        {
+            Console.WriteLine("Nearest POI NULL - No valid POI found");
+            return;
+        }
+
+        var selectedAudio = nearestPOI.POI.GetAudioUrl(_languageService.CurrentLanguage);
+
+        if (string.IsNullOrWhiteSpace(selectedAudio))
+        {
+            Console.WriteLine($"No audio found for POI: {nearestPOI.POI.Name}");
+            return;
+        }
+
+        double distanceMeters = nearestPOI.Distance * 1000;
+        Console.WriteLine($"Nearest POI: {nearestPOI.POI.restaurantId} - {distanceMeters:F1}m");
+
+        // Nếu force (manual trigger) hoặc trong khoảng cách cho phép
+        if (force || distanceMeters <= TRIGGER_DISTANCE_METERS)
+        {
+            Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
+
+            var poiId = nearestPOI.POI.restaurantId;
+            var alreadyPlayed = _playedPOIs.Contains(poiId);
+
+            // Force luôn cho phép phát lại POI hiện tại
+            if (force || !alreadyPlayed)
+            {
+                Console.WriteLine("Playing audio...");
+
+                Console.WriteLine("Add to queue...");
+                _playQueue.Enqueue(nearestPOI.POI);
+
+                if (!alreadyPlayed)
+                {
+                    _playedPOIs.Add(poiId);
+                }
+
+                await ProcessQueueAsync();
+            }
+            else
+            {
+                Console.WriteLine("POI already played (auto-trigger skipped)");
+            }
         }
         else
         {
-            Console.WriteLine("POI already played");
+            Console.WriteLine($"Too far from nearest POI ({distanceMeters:F1}m > {TRIGGER_DISTANCE_METERS}m)");
         }
+
+        Console.WriteLine("=== CHECK NARRATE END ===");
     }
 
-    Console.WriteLine("=== CHECK NARRATE END ===");
-}
+    private async Task ProcessQueueAsync()
+    {
+        if (_isProcessingQueue)
+            return;
+
+        _isProcessingQueue = true;
+
+        while (_playQueue.Count > 0)
+        {
+            var poi = _playQueue.Dequeue();
+
+            Console.WriteLine($"Queue playing: {poi.Name}");
+
+            var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
+            if (string.IsNullOrWhiteSpace(selectedAudio))
+            {
+                Console.WriteLine($"No playable audio for POI: {poi.Name}");
+                continue;
+            }
+
+            await _audioService.PlaySound(
+                _languageService.CurrentLanguage,
+                selectedAudio
+            );
+
+            // đợi audio phát xong
+            while (_audioService.IsPlaying)
+            {
+                await Task.Delay(300);
+            }
+        }
+
+        _isProcessingQueue = false;
+    }
 
     public void ResetPlayedPOIs()
     {

@@ -1,5 +1,7 @@
 using SQLite;
 using Microsoft.Maui.Controls.Maps;
+using System.Linq;
+using System.Globalization;
 
 namespace food_market_narrator.Models;
 
@@ -15,8 +17,14 @@ public class POI
     public string? Category { get; set; }
     public double Radius { get; set; } = 500; // met
     public bool IsActive { get; set; }
+
+    [Ignore]
+    public string StatusText => IsActive ? "Đang mở cửa" : "Đóng cửa";
+    
     public DateTime CreatedAt { get; set; }
     public string AudioFile { get; set; } = string.Empty;
+    public List<RestaurantImageModel> Images { get; set; } = new();
+    public List<AudioModel> Audios { get; set; } = new();
     
     public Pin? MapPin { get; set; } 
 
@@ -30,29 +38,131 @@ public class POI
     // Đường dẫn file âm thanh offline (nếu có)
     public string? AudioFilePath { get; set; } 
 
-    public double GetDistance(double userLat, double userLng)
+    [Ignore]
+    public string PrimaryImage
     {
-        const double R = 6371000; // ban kinh trai dat (met)
-        var lat1 = ToRadians(userLat);
-        var lat2 = ToRadians(Latitude);
-        var deltaLat = ToRadians(Latitude - userLat);
-        var deltaLng = ToRadians(Longitude - userLng);
+        get
+        {
+            var selected = Images
+                .OrderByDescending(i => i.IsPrimary)
+                .ThenBy(i => i.SortOrder)
+                .Select(i => i.ImageUrl)
+                .FirstOrDefault();
 
-        var a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                Math.Cos(lat1) * Math.Cos(lat2) *
-                Math.Sin(deltaLng / 2) * Math.Sin(deltaLng / 2);
+            if (string.IsNullOrWhiteSpace(selected))
+            {
+                return "dotnet_bot.svg";
+            }
 
-        var c = 2 * Math.Asin(Math.Sqrt(a));
-        return R * c;
+            return selected
+                .Replace("Resources/Images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("resources/images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Trim();
+        }
     }
 
-    private double ToRadians(double degrees)
+    public string? GetAudioUrl(string languageCode)
     {
-        return degrees * Math.PI / 180;
+        var activeAudios = Audios
+            .Where(a => a.IsActive)
+            .ToList();
+
+        var byLanguage = activeAudios
+            .Where(a => string.Equals(a.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(a => a.Version)
+            .ThenByDescending(a => a.DateGeneration)
+            .FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(byLanguage?.AudioUrl))
+        {
+            return byLanguage.AudioUrl;
+        }
+
+        return activeAudios
+            .OrderByDescending(a => a.Version)
+            .ThenByDescending(a => a.DateGeneration)
+            .Select(a => a.AudioUrl)
+            .FirstOrDefault();
     }
 
-    public bool IsNearby(double userLat, double userLng)
+    [Ignore]
+    public string OpeningHoursDisplay => string.IsNullOrWhiteSpace(OpeningHours)
+        ? "08:00 - 22:00"
+        : OpeningHours;
+
+    [Ignore]
+    public string AddressDisplay => string.IsNullOrWhiteSpace(Address)
+        ? "Đang cập nhật địa chỉ"
+        : Address;
+
+    [Ignore]
+    public string CoordinatesDisplay => $"{Latitude.ToString("0.######", CultureInfo.InvariantCulture)}, {Longitude.ToString("0.######", CultureInfo.InvariantCulture)}";
+
+    [Ignore]
+    public string CreatedAtDisplay => CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture);
+
+    [Ignore]
+    public string AudioLanguagesDisplay
     {
-        return GetDistance(userLat, userLng) <= Radius;
+        get
+        {
+            var names = Audios
+                .Where(a => a.IsActive)
+                .Select(a => string.IsNullOrWhiteSpace(a.LanguageName)
+                    ? a.LanguageCode
+                    : $"{a.LanguageName} ({a.LanguageCode})")
+                .Distinct()
+                .ToList();
+
+            return names.Count == 0
+                ? "Đang cập nhật"
+                : string.Join(", ", names);
+        }
+    }
+
+    [Ignore]
+    public string AudioSummaryDisplay
+    {
+        get
+        {
+            var activeCount = Audios.Count(a => a.IsActive);
+            return activeCount == 0
+                ? "Audio: chưa có bản ghi"
+                : $"Audio active: {activeCount} bản ghi";
+        }
+    }
+
+    [Ignore]
+    public string PrimaryDetailImage => NormalizeImagePath(Images
+        .OrderByDescending(i => i.IsPrimary)
+        .ThenBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .FirstOrDefault());
+
+    [Ignore]
+    public string SecondaryDetailImage => NormalizeImagePath(Images
+        .OrderBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .Skip(1)
+        .FirstOrDefault());
+
+    [Ignore]
+    public string ThirdDetailImage => NormalizeImagePath(Images
+        .OrderBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .Skip(2)
+        .FirstOrDefault() ?? PrimaryImage);
+
+    private static string NormalizeImagePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return "dotnet_bot.svg";
+        }
+
+        return path
+            .Replace("Resources/Images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("resources/images/", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
     }
 }

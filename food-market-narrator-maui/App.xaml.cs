@@ -1,14 +1,15 @@
-﻿using System.Globalization;
-using food_market_narrator.Resources;
-using food_market_narrator.Resources.Localization;
+﻿using food_market_narrator.Services;
+
 namespace food_market_narrator;
 
 public partial class App : Application
 {
-	public App()
+    private readonly ILocationService _locationService;
+
+    public App(ILocationService locationService)
 	{
 		InitializeComponent();
-		ApplySavedLanguage();
+        _locationService = locationService;
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
@@ -16,17 +17,18 @@ public partial class App : Application
 		return new Window(new AppShell());
 	}
 
-
-
-	private void ApplySavedLanguage()
+    protected override async void OnStart()
     {
-        var savedLang = Preferences.Get("AppLanguage", "vi-VN");
+        base.OnStart();
+        // Start tracking immediately when app starts
+        await _locationService.StartTrackingAsync();
+    }
 
-        var culture = new CultureInfo(savedLang);
-
-        Thread.CurrentThread.CurrentUICulture = culture;
-        Thread.CurrentThread.CurrentCulture = culture;
-
-        AppResources.Culture = culture;
+    protected override void OnSleep()
+    {
+        base.OnSleep();
+        // For true background tracking without Foreground Service, OS might kill this.
+        // We'll leave it running to hope for the best if permission allows background (on Android).
+        // If strict lifecycle management is needed, consider StopTracking() here.
     }
 }

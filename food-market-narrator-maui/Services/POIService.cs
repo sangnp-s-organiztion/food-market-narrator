@@ -8,11 +8,11 @@ using System.Net.Http.Json;
 
 namespace food_market_narrator.Services;
 
-public class POIService
+public class POIService : IPOIService
 {
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
-    private List<POI> _pois;
+    private List<POI>? _pois;
     private const double EnterRadius = 30; // mét
     private const double ExitRadius = 40;  // mét
 
@@ -26,45 +26,64 @@ public class POIService
 
     public async Task<List<POI>> GetPOIsAsync()
     {
-        var url = "http://10.0.2.2:5044/api/restaurant";
-        // Nếu chạy Windows local app thì dùng localhost
+        if (_pois != null && _pois.Count > 0)
+             return _pois;
 
-        var data = await _httpClient.GetFromJsonAsync<List<POI>>(url);
-
-        if (data == null)
-            return new List<POI>();
-
-        // xử lý audio file giống như m làm trước đó
-        foreach (var poi in data)
+        try
         {
-            var originalId = poi.restaurantId;
-            var lastDashIndex = originalId.LastIndexOf('-');
+            var url = "http://10.0.2.2:5044/api/restaurant";
+            // Nếu chạy Windows local app thì dùng localhost
 
-            var audioFileName = lastDashIndex > 0
-                ? originalId.Substring(0, lastDashIndex) + ".mp3"
-                : originalId + ".mp3";
+            var data = await _httpClient.GetFromJsonAsync<List<POI>>(url);
 
-            poi.AudioFile = audioFileName;
+            if (data == null)
+                return new List<POI>();
+
+            _pois = data; // Cache the data
+            return _pois;
         }
-
-        return data;
-    }
-
-    public void SetPOIs(List<POI> pois)
-    {
-        _pois = pois;
-    }
-
-    // Lấy tất cả các POIs
-    public List<POI> GetAllPOIs()
-    {
-        return _pois;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching POIs: {ex.Message}");
+            return new List<POI>();
+        }
     }
 
     // Lấy tất cả các POIs đồng bộ
     public async Task<List<POI>> GetAllPOIsAsync()
     {
-        return await Task.FromResult(_pois);
+        if (_pois == null || !_pois.Any())
+        {
+            return await GetPOIsAsync();
+        }
+        return _pois;
+    }
+
+    public async Task<POI?> GetPOIByIdAsync(string restaurantId)
+    {
+        if (string.IsNullOrWhiteSpace(restaurantId))
+        {
+            return null;
+        }
+
+        var pois = await GetAllPOIsAsync();
+        return pois.FirstOrDefault(p =>
+            string.Equals(p.restaurantId, restaurantId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public POI? GetNearestPOI(double currentLat, double currentLng)
+    {
+        if (_pois == null || !_pois.Any())
+            return null;
+
+        var currentLocation = new Location(currentLat, currentLng);
+
+        return _pois
+            .OrderBy(poi => Location.CalculateDistance(
+                currentLocation,
+                new Location(poi.Latitude, poi.Longitude),
+                DistanceUnits.Kilometers))
+            .FirstOrDefault();
     }
 
     // Lấy POI gần nhất dựa trên vị trí hiện tại và các POIs
@@ -148,13 +167,17 @@ public class POIService
         if (_pois == null || !_pois.Any())
             return;
 
+#if ANDROID
+        CustomMapHandler.HighlightMarker(nearest?.restaurantId);
+#endif
+
         // tự động zoom map về POI gần nhất trong bán kính
         if (nearest != null)
         {
             map.MoveToRegion(
                 MapSpan.FromCenterAndRadius(
                     new Location(nearest.Latitude, nearest.Longitude),
-                    Distance.FromMeters(10)));
+                    Distance.FromMeters(35)));
         }
     }
 

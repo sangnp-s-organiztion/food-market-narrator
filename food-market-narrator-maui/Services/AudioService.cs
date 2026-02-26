@@ -1,13 +1,9 @@
-
-using food_market_narrator.Services;
 using Plugin.Maui.Audio;
 
-public class AudioService
-{
-    private POIService _poiService;
-    private LocationServices _locationService = new LocationServices();
-    private LanguageService _languageService = new LanguageService();
+namespace food_market_narrator.Services;
 
+public class AudioService : IAudioService
+{
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
     public bool IsPlaying => _player?.IsPlaying ?? false;
@@ -36,9 +32,14 @@ public class AudioService
             Console.WriteLine($"Loading path: {path}");
 
             var stream = await FileSystem.OpenAppPackageFileAsync(path);
-            _player = _audioManager.CreatePlayer(stream);
+            // Lưu audio vừa load vào cache để phát lại nếu cần
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
 
+            _player = _audioManager.CreatePlayer(memoryStream);
             _player.Play();
+
             Console.WriteLine("Audio started");
         }
         catch (Exception ex)

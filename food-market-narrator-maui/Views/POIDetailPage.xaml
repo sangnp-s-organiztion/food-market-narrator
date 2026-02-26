@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:food_market_narrator.Models"
+             x:Class="food_market_narrator.Views.POIDetailPage"
+             x:DataType="models:POI"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#EEEEEE">
+    <Grid RowDefinitions="*,Auto" RowSpacing="0">
+        <!-- Khu vực nội dung chính có thể cuộn -->
+        <ScrollView Grid.Row="0" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="18" Padding="14,10,14,24">
+
+                <!-- Cụm đầu trang: ảnh cover + card thông tin quán -->
+                <Grid RowDefinitions="220,Auto">
+                    <!-- Ảnh cover + nhóm icon điều hướng/tương tác ở trên ảnh -->
+                    <Border Grid.Row="0"
+                            StrokeThickness="0"
+                            BackgroundColor="White"
+                            StrokeShape="RoundRectangle 18"
+                            HeightRequest="220">
+                        <Grid>
+                            <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
+
+                            <Grid Padding="14,14,14,0" ColumnDefinitions="Auto,*,Auto,Auto" VerticalOptions="Start" ColumnSpacing="8">
+                                <Border StrokeThickness="0"
+                                        BackgroundColor="#80FFFFFF"
+                                        HeightRequest="34"
+                                        WidthRequest="34"
+                                        StrokeShape="RoundRectangle 17">
+
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnBackButtonTapped"/>
+                                    </Border.GestureRecognizers>
+                                    <!-- Button back -->
+                                    <Label Text="&#xf060;"
+                                           FontFamily="FASolid"
+                                           FontSize="14"
+                                           TextColor="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+
+                                <Label Grid.Column="1" />
+
+                                <Border Grid.Column="2"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#80FFFFFF"
+                                        HeightRequest="34"
+                                        WidthRequest="34"
+                                        StrokeShape="RoundRectangle 17">
+                                    <!-- Button favorite -->
+                                    <Label Text="&#xf004;"
+                                           FontFamily="FASolid"
+                                           FontSize="14"
+                                           TextColor="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+
+                                <Border Grid.Column="3"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#80FFFFFF"
+                                        HeightRequest="34"
+                                        WidthRequest="34"
+                                        StrokeShape="RoundRectangle 17">
+                                    <!-- Button share -->
+                                    <Label Text="&#xf1e0;"
+                                           FontFamily="FASolid"
+                                           FontSize="14"
+                                           TextColor="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Card thông tin quán (trạng thái, giờ mở cửa, tên, rating, địa chỉ) -->
+                    <Border Grid.Row="1"
+                            Margin="16,-44,16,0"
+                            Padding="14"
+                            StrokeThickness="0"
+                            BackgroundColor="#F8F7F4"
+                            StrokeShape="RoundRectangle 28">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Border StrokeThickness="0"
+                                        BackgroundColor="#C8E6C9"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="8,2">
+                                     <Label Text="{Binding StatusText}"
+                                           FontSize="10"
+                                           FontAttributes="Bold"
+                                           TextColor="#2E7D32" />
+                                </Border>
+                                <Label Grid.Column="1"
+                                    Text="{Binding OpeningHoursDisplay}"
+                                       VerticalOptions="Center"
+                                       FontSize="13"
+                                       TextColor="#7A7A7A" />
+                                <Border Grid.Column="2"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#2D6A5E"
+                                        HeightRequest="40"
+                                        WidthRequest="40"
+                                        StrokeShape="RoundRectangle 20">
+                                    <Label Text="&#xf017;"
+                                           FontFamily="FASolid"
+                                           FontSize="12"
+                                           TextColor="#CFD8DC"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+
+                            <Label Grid.Row="1"
+                   Text="{Binding Name}"
+                                   FontSize="35"
+                                   TextColor="#1B1F2A"
+                                   LineBreakMode="WordWrap"
+                                   FontFamily="OpenSansSemibold" />
+
+                            <VerticalStackLayout Grid.Row="2" Spacing="6">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="&#xf005;" FontFamily="FASolid" FontSize="12" TextColor="#F39C12" />
+                                    <Label Text="N/A" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
+                                    <Label Text="(chưa có đánh giá)" FontSize="12" TextColor="#808B96" />
+                                </HorizontalStackLayout>
+                                <!-- HARD_CODE: payload không có rating/review -->
+
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#E67E22" VerticalOptions="Start" Margin="0,2,0,0" />
+                                    <Label Text="{Binding AddressDisplay}"
+                                           FontSize="13"
+                                           TextColor="#616A6B"
+                                           LineBreakMode="WordWrap"
+                                           MaxLines="2" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Khối Audio Guide: tiêu đề, nút play, tiến trình, waveform -->
+                <Border BackgroundColor="#E7DDCF"
+                        Stroke="#E8BF8A"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 26"
+                        Padding="16,14"
+                        Margin="8,0">
+                    <VerticalStackLayout Spacing="10">
+                        <HorizontalStackLayout Spacing="10">
+                            <Border StrokeThickness="0"
+                                    BackgroundColor="#F39C12"
+                                    HeightRequest="42"
+                                    WidthRequest="42"
+                                    StrokeShape="RoundRectangle 21">
+                                <Label Text="&#xf025;"
+                                       FontFamily="FASolid"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       FontSize="18" />
+                            </Border>
+                            <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Label Text="Audio Guide" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
+                                <Label Text="{Binding Description}" FontSize="12" TextColor="#6B7280" LineBreakMode="WordWrap" MaxLines="2" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <Label Text="{Binding AudioLanguagesDisplay, StringFormat='Ngôn ngữ: {0}'}"
+                               FontSize="11"
+                               TextColor="#6B7280"
+                               LineBreakMode="WordWrap" />
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Border StrokeThickness="0"
+                                    BackgroundColor="#F39C12"
+                                    HeightRequest="42"
+                                    WidthRequest="42"
+                                    StrokeShape="RoundRectangle 21">
+                                <Label Text="&#xf04b;"
+                                       FontFamily="FASolid"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       Margin="2,0,0,0"
+                                       FontSize="14" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Label Text="00:00" FontSize="10" TextColor="#8D8D8D" />
+                                    <Label Grid.Column="2" Text="03:30" FontSize="10" TextColor="#8D8D8D" HorizontalTextAlignment="End" />
+                                </Grid>
+                                <!-- HARD_CODE: payload không có duration audio -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="0" HeightRequest="6">
+                                    <Border StrokeThickness="0" BackgroundColor="#F39C12" StrokeShape="RoundRectangle 3" />
+                                    <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="#D6DBDF" StrokeShape="RoundRectangle 3" />
+                                </Grid>
+                            </VerticalStackLayout>
+                            <HorizontalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                                <BoxView WidthRequest="2" HeightRequest="6" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="12" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="8" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="16" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="10" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="15" Color="#E8B878" VerticalOptions="End" />
+                                <BoxView WidthRequest="2" HeightRequest="9" Color="#E8B878" VerticalOptions="End" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Header phần món ăn đặc sắc -->
+                <Grid Padding="10,0,10,0" ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                    <Label Text="Hình ảnh nổi bật"
+                           FontSize="32"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="#1F2937" />
+                    <Label Grid.Column="1"
+                           Text="Xem tất cả"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="#F39C12"
+                           VerticalOptions="Center" />
+                </Grid>
+
+                <!-- Danh sách món ăn dạng cuộn ngang -->
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="12" Padding="10,0,10,0">
+                        <VerticalStackLayout WidthRequest="116" Spacing="6">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D5E1D6">
+                                <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
+                            </Border>
+                            <Label Text="Ảnh chính" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="sortOrder: 1" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout WidthRequest="116" Spacing="6">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
+                                <Image Source="{Binding SecondaryDetailImage}" Aspect="AspectFill" />
+                            </Border>
+                            <Label Text="Ảnh phụ" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="sortOrder: 2" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout WidthRequest="116" Spacing="6">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
+                                <Image Source="{Binding ThirdDetailImage}" Aspect="AspectFill" />
+                            </Border>
+                            <Label Text="Ảnh bổ sung" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="HARD_CODE" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Phần giới thiệu / mô tả về quán -->
+                <VerticalStackLayout Spacing="8" Padding="10,0,10,0">
+                    <Label Text="Về chúng tôi"
+                           FontSize="30"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="#1F2937" />
+                      <Label Text="{Binding Description}"
+                           FontSize="13"
+                           TextColor="#6B7280"
+                           LineHeight="1.4" />
+
+                      <Label Text="{Binding restaurantId, StringFormat='restaurantId: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding CreatedAtDisplay, StringFormat='createdAt: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" />
+                      <Label Text="{Binding AudioSummaryDisplay}"
+                          FontSize="12"
+                          TextColor="#6B7280"
+                          LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Thanh CTA cố định dưới cùng: Đường đi + Gọi điện -->
+        <Grid Grid.Row="1" BackgroundColor="#EEEEEE" Padding="14,10,14,16" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="Đường đi"
+                    FontAttributes="Bold"
+                    TextColor="#F39C12"
+                    BackgroundColor="White"
+                    BorderColor="#F39C12"
+                    BorderWidth="1"
+                    CornerRadius="24">
+                <Button.ImageSource>
+                    <FontImageSource Glyph="&#xf5eb;" FontFamily="FASolid" Size="14" Color="#F39C12" />
+                </Button.ImageSource>
+            </Button>
+
+            <Button Grid.Column="1"
+                    Text="Gọi điện ngay"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    BackgroundColor="#F39C12"
+                    CornerRadius="24">
+                <Button.ImageSource>
+                    <FontImageSource Glyph="&#xf095;" FontFamily="FASolid" Size="14" Color="White" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+    </Grid>
+</ContentPage>
