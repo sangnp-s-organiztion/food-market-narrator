@@ -57,6 +57,8 @@ public partial class MainPage : ContentPage
         _locationService.LocationChanged += OnLocationChangedForMap;
         await _locationService.StartTrackingAsync();
 
+        // _narrationFlowService.StartNarration();
+
         // Load map data on appearing, reusing helper logic
         await MapHelper.LoadMapAsync(map, _poiService, _locationService);
 
@@ -142,6 +144,9 @@ public partial class MainPage : ContentPage
         {
             _languageService.ChangeLanguage(cultureCode);
         }
+
+        // phát audio sau khi đổi ngôn ngữ
+        _narrationFlowService.StartNarration();
     }
 
     // Hàm ẩn popup ngôn ngữ với hiệu ứng mờ dần
