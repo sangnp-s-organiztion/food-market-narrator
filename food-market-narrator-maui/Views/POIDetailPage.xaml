@@ -89,10 +89,12 @@
                                         BackgroundColor="#C8E6C9"
                                         StrokeShape="RoundRectangle 10"
                                         Padding="8,2">
-                                     <Label Text="{Binding StatusText}"
-                                           FontSize="10"
-                                           FontAttributes="Bold"
-                                           TextColor="#2E7D32" />
+                                    <Label Text="{Binding StatusText}"
+                                         FontSize="10"
+                                         FontAttributes="Bold"
+                                         TextColor="#2E7D32"
+                                         HorizontalTextAlignment="Center"
+                                         VerticalTextAlignment="Center" />
                                 </Border>
                                 <Label Grid.Column="1"
                                     Text="{Binding OpeningHoursDisplay}"
@@ -180,7 +182,11 @@
                                     HeightRequest="42"
                                     WidthRequest="42"
                                     StrokeShape="RoundRectangle 21">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPlayAudioTapped" />
+                                </Border.GestureRecognizers>
                                 <Label Text="&#xf04b;"
+                                       x:Name="PlayIconLabel"
                                        FontFamily="FASolid"
                                        TextColor="White"
                                        HorizontalOptions="Center"
@@ -190,14 +196,14 @@
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <Label Text="00:00" FontSize="10" TextColor="#8D8D8D" />
-                                    <Label Grid.Column="2" Text="03:30" FontSize="10" TextColor="#8D8D8D" HorizontalTextAlignment="End" />
+                                    <Label x:Name="CurrentTimeLabel" Text="00:00" FontSize="10" TextColor="#8D8D8D" />
+                                    <Label x:Name="TotalTimeLabel" Grid.Column="2" Text="00:00" FontSize="10" TextColor="#8D8D8D" HorizontalTextAlignment="End" />
                                 </Grid>
-                                <!-- HARD_CODE: payload không có duration audio -->
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="0" HeightRequest="6">
-                                    <Border StrokeThickness="0" BackgroundColor="#F39C12" StrokeShape="RoundRectangle 3" />
-                                    <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="#D6DBDF" StrokeShape="RoundRectangle 3" />
-                                </Grid>
+                                <ProgressBar x:Name="AudioProgressBar"
+                                             HeightRequest="6"
+                                             Progress="0"
+                                             ProgressColor="#F39C12"
+                                             BackgroundColor="#D6DBDF" />
                             </VerticalStackLayout>
                             <HorizontalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
                                 <BoxView WidthRequest="2" HeightRequest="6" Color="#E8B878" VerticalOptions="End" />

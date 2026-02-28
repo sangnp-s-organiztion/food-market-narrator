@@ -7,8 +7,8 @@ public class NarrationFlowService : INarrationFlowService
 {
     private readonly POIService _poiService;
     private readonly ILocationService _locationService;
-    private readonly AudioService _audioService = new();
-    private readonly LanguageService _languageService = new();
+    private readonly IAudioService _audioService;
+    private readonly ILanguageService _languageService;
 
     private readonly HashSet<string> _playedPOIs = new();
 
@@ -20,10 +20,16 @@ public class NarrationFlowService : INarrationFlowService
     private bool _isProcessingQueue = false;
     public bool IsNarrating => _isNarrationEnabled;
 
-    public NarrationFlowService(POIService poiService, ILocationService locationService)
+    public NarrationFlowService(
+        POIService poiService,
+        ILocationService locationService,
+        IAudioService audioService,
+        ILanguageService languageService)
     {
         _poiService = poiService;
         _locationService = locationService;
+        _audioService = audioService;
+        _languageService = languageService;
         
         // Subscribe to location updates
         //_locationService.LocationChanged += OnLocationChanged;
