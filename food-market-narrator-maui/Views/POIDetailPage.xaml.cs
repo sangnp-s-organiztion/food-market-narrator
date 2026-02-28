@@ -68,6 +68,25 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
+		// Đang phát → tạm dừng
+		if (_audioService.IsPlaying)
+		{
+			_audioService.Pause();
+			SetPlayButtonState(false);
+			StopProgressTimer();
+			return;
+		}
+
+		// Đang tạm dừng → tiếp tục phát
+		if (_audioService.IsPaused)
+		{
+			_audioService.Resume();
+			SetPlayButtonState(true);
+			StartProgressTimer();
+			return;
+		}
+
+		// Chưa phát gì → bắt đầu phát mới
 		if (BindingContext is not POI poi)
 		{
 			return;
@@ -81,9 +100,7 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		_audioService.StopSound();
 		ResetAudioProgressUi();
-
 		await _audioService.PlaySound(language, audioUrl);
 		SetPlayButtonState(_audioService.IsPlaying);
 		StartProgressTimer();

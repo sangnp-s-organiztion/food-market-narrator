@@ -6,7 +6,9 @@ public class AudioService : IAudioService
 {
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
+    private bool _isPaused;
     public bool IsPlaying => _player?.IsPlaying ?? false;
+    public bool IsPaused => _isPaused;
     public TimeSpan Duration => TimeSpan.FromSeconds(_player?.Duration ?? 0d);
     public TimeSpan CurrentPosition => TimeSpan.FromSeconds(_player?.CurrentPosition ?? 0d);
     public event EventHandler? PlaybackEnded;
@@ -28,6 +30,7 @@ public class AudioService : IAudioService
         }
 
         StopSound();
+        _isPaused = false;
 
         try
         {
@@ -75,8 +78,23 @@ public class AudioService : IAudioService
         return $"audio/languages/{language}/{normalized}";
     }
 
+    public void Pause()
+    {
+        if (_player is null || !_player.IsPlaying) return;
+        _player.Pause();
+        _isPaused = true;
+    }
+
+    public void Resume()
+    {
+        if (_player is null || !_isPaused) return;
+        _player.Play();
+        _isPaused = false;
+    }
+
     private void OnPlaybackEnded(object? sender, EventArgs e)
     {
+        _isPaused = false;
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 
@@ -89,5 +107,6 @@ public class AudioService : IAudioService
 
         _player?.Stop();
         _player = null;
+        _isPaused = false;
     }
 }
