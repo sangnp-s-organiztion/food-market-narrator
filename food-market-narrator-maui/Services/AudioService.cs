@@ -6,7 +6,12 @@ public class AudioService : IAudioService
 {
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
+    private bool _isPaused;
     public bool IsPlaying => _player?.IsPlaying ?? false;
+    public bool IsPaused => _isPaused;
+    public TimeSpan Duration => TimeSpan.FromSeconds(_player?.Duration ?? 0d);
+    public TimeSpan CurrentPosition => TimeSpan.FromSeconds(_player?.CurrentPosition ?? 0d);
+    public event EventHandler? PlaybackEnded;
 
     public AudioService()
         {
@@ -25,10 +30,11 @@ public class AudioService : IAudioService
         }
 
         StopSound();
+        _isPaused = false;
 
         try
         {
-            var path = $"audio/languages/{language}/{fileName}";
+            var path = ResolveAudioPath(language, fileName);
             Console.WriteLine($"Loading path: {path}");
 
             var stream = await FileSystem.OpenAppPackageFileAsync(path);
@@ -38,6 +44,7 @@ public class AudioService : IAudioService
             memoryStream.Position = 0;
 
             _player = _audioManager.CreatePlayer(memoryStream);
+            _player.PlaybackEnded += OnPlaybackEnded;
             _player.Play();
 
             Console.WriteLine("Audio started");
@@ -48,10 +55,58 @@ public class AudioService : IAudioService
         }
     }
 
+    private static string ResolveAudioPath(string language, string fileName)
+    {
+        var normalized = fileName
+            .Replace("\\", "/", StringComparison.Ordinal)
+            .Trim();
+
+        if (normalized.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("narration/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("resources/narration/", StringComparison.OrdinalIgnoreCase))
+        {
+            return normalized
+                .Replace("resources/", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("narration/", "audio/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (normalized.Contains('/'))
+        {
+            return normalized;
+        }
+
+        return $"audio/languages/{language}/{normalized}";
+    }
+
+    public void Pause()
+    {
+        if (_player is null || !_player.IsPlaying) return;
+        _player.Pause();
+        _isPaused = true;
+    }
+
+    public void Resume()
+    {
+        if (_player is null || !_isPaused) return;
+        _player.Play();
+        _isPaused = false;
+    }
+
+    private void OnPlaybackEnded(object? sender, EventArgs e)
+    {
+        _isPaused = false;
+        PlaybackEnded?.Invoke(this, EventArgs.Empty);
+    }
+
     public void StopSound()
     {
-        // Implementation to stop sound
+        if (_player != null)
+        {
+            _player.PlaybackEnded -= OnPlaybackEnded;
+        }
+
         _player?.Stop();
         _player = null;
+        _isPaused = false;
     }
 }
