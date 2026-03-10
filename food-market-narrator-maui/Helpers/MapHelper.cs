@@ -27,6 +27,7 @@ public static class MapHelper
         try
         {
             mapView.Map ??= new Mapsui.Map();
+            // mapView.Map.Widgets.Clear();
 
             if (!HasBaseLayer(mapView.Map))
             {

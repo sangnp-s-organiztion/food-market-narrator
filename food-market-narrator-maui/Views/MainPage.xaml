@@ -61,17 +61,9 @@
                 <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
                     <Grid>
                         <!-- Map Control -->
-                        <mapsui:MapView x:Name="map" MyLocationEnabled="True"/>
+                        <mapsui:MapView x:Name="map" MyLocationEnabled="False"/>
 
-                        <!-- Map Overlays -->
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">
-                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
-                                <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
-                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
-                                <Label Text="&#xf5a0;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
-                        </VerticalStackLayout>
+
                     </Grid>
                 </Border>
 

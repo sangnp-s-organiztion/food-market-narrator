@@ -10,7 +10,7 @@
     <Grid RowDefinitions="*, Auto" RowSpacing="0">
         <!-- Main Map Content -->
         <Grid Grid.Row="0">
-            <mapsui:MapView x:Name="map" Grid.Row="1" MyLocationEnabled="True"/>
+            <mapsui:MapView x:Name="map" Grid.Row="1" MyLocationEnabled="False"/>
 
             <!-- Top Overlay: Search & Filters -->
             <VerticalStackLayout Spacing="10" Margin="20,20,20,0" VerticalOptions="Start">
