@@ -1,7 +1,6 @@
 ﻿using food_market_narrator.Helpers;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
-using Microsoft.Maui.Maps;
 using System.Collections.Generic;
 
 namespace food_market_narrator.Views;
@@ -12,6 +11,7 @@ public partial class MainPage : ContentPage
     private readonly POIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly ILocationService _locationService;
+    private readonly TileServerService _tileServerService;
     private readonly LanguageService _languageService = new();
 
     private readonly Dictionary<string, Border> _languageOptions;
@@ -21,12 +21,13 @@ public partial class MainPage : ContentPage
     private bool _isFirstLoad = true;
 
 	// Hàm khởi tạo MainPage mới
-	public MainPage(POIService poiService, NarrationFlowService narrationFlowService, ILocationService locationService)
+	public MainPage(POIService poiService, NarrationFlowService narrationFlowService, ILocationService locationService, TileServerService tileServerService)
 	{
 		InitializeComponent();
         _poiService = poiService;
         _narrationFlowService = narrationFlowService;
         _locationService = locationService;
+        _tileServerService = tileServerService;
 
         _languageOptions = new Dictionary<string, Border>
         {
@@ -60,7 +61,7 @@ public partial class MainPage : ContentPage
         // _narrationFlowService.StartNarration();
 
         // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(map, _poiService, _locationService);
+        await MapHelper.LoadMapAsync(map, _poiService, _locationService, _tileServerService);
 
         // Hiện popup chọn ngôn ngữ khi mới vào app
         Console.WriteLine("Is First Load: " + _isFirstLoad);
@@ -93,10 +94,12 @@ public partial class MainPage : ContentPage
     }
 
     // Hàm xử lý khi thay đổi vị trí để cập nhật giao diện và thuyết minh
-    private void OnLocationChangedForMap(object? sender, Location location)
+    private async void OnLocationChangedForMap(object? sender, Location location)
     {
+        await map.UpdateUserLocationAsync(location.Latitude, location.Longitude);
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
         _poiService.HighlightNearestPOI(map, nearest);
+    
         UpdateUIByLocation(location);
     }
 

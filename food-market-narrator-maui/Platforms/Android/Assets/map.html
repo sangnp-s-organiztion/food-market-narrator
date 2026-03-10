@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    OFFLINE BUILD INSTRUCTIONS
+    ───────────────────────────────────────────────────────────────────────────
+    By default the map loads MapLibre GL JS and pmtiles from CDN (requires
+    internet for first use).
+
+    For a fully-offline build, download these three files and place them next
+    to map.html inside Resources/Raw/:
+
+      maplibre-gl.js   → https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js
+      maplibre-gl.css  → https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css
+      pmtiles.min.js   → https://unpkg.com/pmtiles@3.2.0/dist/pmtiles.js
+
+    Then replace the CDN <link> and <script> tags below with local paths:
+      <link href="maplibre-gl.css" rel="stylesheet" />
+      <script src="maplibre-gl.js"></script>
+      <script src="pmtiles.min.js"></script>
+    ═══════════════════════════════════════════════════════════════════════════
+  -->
+
+  <!-- CDN references (swap with local paths for offline builds) -->
+  <link href="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/pmtiles@3.2.0/dist/pmtiles.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #f0ebe3; }
+    #map { width: 100%; height: 100%; }
+
+    /* POI marker dots */
+    .poi-marker {
+      width: 26px;
+      height: 26px;
+      background: #FF6B00;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.38);
+      transition: width .15s, height .15s, background .15s;
+    }
+    .poi-marker.highlighted {
+      width: 34px;
+      height: 34px;
+      background: #E53935;
+      box-shadow: 0 3px 14px rgba(229,57,53,.55);
+    }
+    
+    /* User location marker (Google Maps style blue dot with pulse) */
+    .user-marker {
+      width: 18px;
+      height: 18px;
+      background: #4285F4;
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    /* Pulse animation */
+    .user-marker::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 50px; height: 50px;
+      transform: translate(-50%, -50%);
+      background: rgba(66, 133, 244, 0.25);
+      border-radius: 50%;
+      animation: user-pulse 2s infinite;
+      pointer-events: none;
+    }
+    @keyframes user-pulse {
+      0% { width: 18px; height: 18px; opacity: 0.8; }
+      100% { width: 50px; height: 50px; opacity: 0; }
+    }
+
+    /* MapLibre popup tweaks */
+    .maplibregl-popup-content {
+      font-family: sans-serif;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      max-width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    // ── Read query-string params injected by .NET ─────────────────────────────
+    const _params      = new URLSearchParams(window.location.search);
+    const _useOffline  = _params.get('offline') === '1';
+    const _tilePort    = _params.get('port') || '8765';
+
+    // Default map centre (Vĩnh Khánh food street, HCMC)
+    const DEFAULT_CENTER = [106.698, 10.776];
+    const DEFAULT_ZOOM   = 15;
+
+    // ── PMTiles protocol ──────────────────────────────────────────────────────
+    const _protocol = new pmtiles.Protocol();
+    maplibregl.addProtocol('pmtiles', _protocol.tile.bind(_protocol));
+
+    // ── Build MapLibre style based on tile-source mode ────────────────────────
+    function buildStyle() {
+      if (_useOffline) {
+        // Raster tiles served by the local TileServerService (with Range support)
+        const pmtilesUrl = `pmtiles://http://127.0.0.1:${_tilePort}/tiles.pmtiles`;
+        const pmt = new pmtiles.PMTiles(`http://127.0.0.1:${_tilePort}/tiles.pmtiles`);
+        _protocol.add(pmt);
+
+        return {
+          version: 8,
+          sources: {
+            'local-tiles': {
+              type: 'raster',
+              url: pmtilesUrl,
+              tileSize: 256,
+              attribution: 'Offline tiles'
+            }
+          },
+          layers: [{
+            id: 'local-raster',
+            type: 'raster',
+            source: 'local-tiles',
+            minzoom: 0,
+            maxzoom: 20
+          }]
+        };
+      }
+
+      // Online fallback: OpenStreetMap raster tiles
+      return {
+        version: 8,
+        sources: {
+          osm: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+          }
+        },
+        layers: [{
+          id: 'osm-raster',
+          type: 'raster',
+          source: 'osm',
+          minzoom: 0,
+          maxzoom: 19
+        }]
+      };
+    }
+
+    // ── Initialise map ────────────────────────────────────────────────────────
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: buildStyle(),
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM,
+      attributionControl: false,
+      pitchWithRotate: false
+    });
+
+    // ── Marker registry ───────────────────────────────────────────────────────
+    /** @type {Object.<string, {marker: maplibregl.Marker, el: HTMLElement}>} */
+    const _markers = {};
+    /** @type {maplibregl.Marker|null} */
+    let _userMarker = null;
+
+    // ── Bridge: .NET → JS ─────────────────────────────────────────────────────
+
+    /**
+     * Fly the map camera to a position.
+     * Called by MapWebView.MoveToLocationAsync()
+     */
+    window.setCamera = function(lat, lng, zoom) {
+      map.flyTo({ center: [lng, lat], zoom: zoom ?? DEFAULT_ZOOM });
+    };
+
+    /**
+     * Update user location marker.
+     * Called by MapWebView.UpdateUserLocationAsync()
+     */
+    window.updateUserLocation = function(lat, lng) {
+      if (!_userMarker) {
+        const el = document.createElement('div');
+        el.className = 'user-marker';
+        _userMarker = new maplibregl.Marker({ element: el })
+          .setLngLat([lng, lat])
+          .addTo(map);
+      } else {
+        _userMarker.setLngLat([lng, lat]);
+      }
+    };
+
+    /**
+     * Replace all markers on the map.
+     * Called by MapWebView.AddMarkersAsync()
+     *
+     * @param {string|Array} poisJson  JSON array of {id, name, address, lat, lng}
+     */
+    window.addMarkers = function(poisJson) {
+      const pois = typeof poisJson === 'string' ? JSON.parse(poisJson) : poisJson;
+
+      // Remove old markers
+      Object.values(_markers).forEach(({ marker }) => marker.remove());
+      Object.keys(_markers).forEach(k => delete _markers[k]);
+
+      pois.forEach(poi => {
+        const el = document.createElement('div');
+        el.className = 'poi-marker';
+        el.title = poi.name;
+
+        const popup = new maplibregl.Popup({ offset: 22, closeButton: false, maxWidth: '220px' })
+          .setHTML(
+            `<strong>${_esc(poi.name)}</strong>` +
+            (poi.address ? `<br><span style="color:#666;font-size:11px">${_esc(poi.address)}</span>` : '')
+          );
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([poi.lng, poi.lat])
+          .setPopup(popup)
+          .addTo(map);
+
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          // Pass the id directly (not JSON-encoded) so .NET receives a plain string.
+          window.location.href = 'maui://poiSelected?data=' + encodeURIComponent(poi.id);
+        });
+
+        _markers[poi.id] = { marker, el };
+      });
+    };
+
+    /**
+     * Highlight the marker for the given POI, dimming all others.
+     * Called by MapWebView.HighlightMarkerAsync()
+     *
+     * @param {string|null} id  restaurantId to highlight, or null to clear
+     */
+    window.highlightMarker = function(id) {
+      Object.entries(_markers).forEach(([mId, { marker, el }]) => {
+        const isTarget = id !== null && String(mId) === String(id);
+        const wasHighlighted = el.classList.contains('highlighted');
+
+        el.classList.toggle('highlighted', isTarget);
+
+        if (isTarget && !wasHighlighted) {
+          map.flyTo({ center: marker.getLngLat(), zoom: Math.max(map.getZoom(), 16) });
+          if (!marker.getPopup().isOpen()) marker.togglePopup();
+        } else if (!isTarget) {
+          if (marker.getPopup().isOpen()) marker.togglePopup();
+        }
+      });
+    };
+
+    // ── Bridge: JS → .NET ─────────────────────────────────────────────────────
+
+    /** Send an action + payload to MAUI by triggering a navigation to maui:// scheme. */
+    function _toNative(action, data) {
+      const encoded = encodeURIComponent(JSON.stringify(data));
+      window.location.href = 'maui://' + action + '?data=' + encoded;
+    }
+
+    function _esc(s) {
+      if (!s) return '';
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Notify .NET that MapLibre is fully initialised
+    map.on('load', () => _toNative('mapReady', true));
+  </script>
+</body>
+</html>

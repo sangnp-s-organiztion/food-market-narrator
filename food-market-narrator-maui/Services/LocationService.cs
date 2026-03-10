@@ -47,7 +47,7 @@ public class LocationService : ILocationService
 
             var request = new GeolocationListeningRequest(GeolocationAccuracy.Best)
             {
-                MinimumTime = TimeSpan.FromSeconds(3), // Tần suất cập nhật
+                MinimumTime = TimeSpan.FromSeconds(1), // Tần suất cập nhật
                 DesiredAccuracy = GeolocationAccuracy.High
             };
 

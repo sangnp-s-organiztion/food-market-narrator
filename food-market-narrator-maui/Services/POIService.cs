@@ -1,7 +1,5 @@
+using food_market_narrator.Controls;
 using food_market_narrator.Models;
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Maps;
-using MauiMap = Microsoft.Maui.Controls.Maps.Map;
 using System.Net.Http.Json;
 
 
@@ -162,23 +160,16 @@ public class POIService : IPOIService
     }
 
     // Hightlight POI gần nhất
-    public void HighlightNearestPOI(MauiMap map, POI? nearest)
+    public void HighlightNearestPOI(MapWebView map, POI? nearest)
     {
         if (_pois == null || !_pois.Any())
             return;
 
-#if ANDROID
-        CustomMapHandler.HighlightMarker(nearest?.restaurantId);
-#endif
+        // Fire-and-forget: highlight marker and fly camera to nearest POI
+        _ = map.HighlightMarkerAsync(nearest?.restaurantId);
 
-        // tự động zoom map về POI gần nhất trong bán kính
         if (nearest != null)
-        {
-            map.MoveToRegion(
-                MapSpan.FromCenterAndRadius(
-                    new Location(nearest.Latitude, nearest.Longitude),
-                    Distance.FromMeters(35)));
-        }
+            _ = map.MoveToLocationAsync(nearest.Latitude, nearest.Longitude, 17);
     }
 
 

@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             xmlns:controls="clr-namespace:food_market_narrator.Controls"
              x:Class="food_market_narrator.Views.MainPage"
              BackgroundColor="#FFFCF8"
              Shell.NavBarIsVisible="False">
@@ -61,7 +61,7 @@
                 <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
                     <Grid>
                         <!-- Map Control -->
-                        <maps:Map x:Name="map" IsShowingUser="True" MapType="Street"/>
+                        <controls:MapWebView x:Name="map" />
 
                         <!-- Map Overlays -->
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">

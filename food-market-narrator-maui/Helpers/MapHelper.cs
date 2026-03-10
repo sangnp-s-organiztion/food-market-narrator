@@ -1,83 +1,67 @@
-﻿using food_market_narrator.Models;
+﻿using food_market_narrator.Controls;
 using food_market_narrator.Services;
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Maps;
-#if ANDROID
-using Android.Gms.Maps;
-#endif
-
 
 namespace food_market_narrator.Helpers
 {
     public static class MapHelper
     {
-        // Dùng để load map với các POI, có thể gọi khi trang map được hiển thị và move to region nếu có location ban đầu
+        /// <summary>
+        /// Load (or refresh) the MapLibre map:
+        ///  1. First call  → starts the tile-server if local tiles exist, loads map.html,
+        ///                    waits for MapLibre to initialise, then pushes markers.
+        ///  2. Subsequent  → just refreshes markers and pans to current location
+        ///                    (map HTML stays alive in the WebView).
+        /// </summary>
         public static async Task LoadMapAsync(
-            Microsoft.Maui.Controls.Maps.Map map,
+            MapWebView mapWebView,
             POIService poiService,
             ILocationService locationService,
+            TileServerService tileServerService,
             Location? initialLocation = null)
         {
             try
             {
-                Location? focusLocation = initialLocation;
+                Location? focusLocation = initialLocation
+                    ?? await locationService.GetCurrentLocationAsync();
 
-                if (focusLocation == null)
+                if (!mapWebView.IsMapReady)
                 {
-                    focusLocation = await locationService.GetCurrentLocationAsync();
-                }
+                    // Start local tile-server if a PMTiles file is present
+                    if (tileServerService.HasLocalTiles)
+                        tileServerService.Start();
 
-                if (focusLocation != null)
-                {
-                    map.MoveToRegion(MapSpan.FromCenterAndRadius(focusLocation, Distance.FromKilometers(0.5)));
+                    mapWebView.LoadMap(
+                        useLocalTiles: tileServerService.HasLocalTiles,
+                        tileServerPort: TileServerService.Port);
+
+                    // Wait for MapLibre 'load' event (JS fires maui://mapReady)
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    await mapWebView.WhenMapReadyAsync(cts.Token);
                 }
 
                 var pois = await poiService.GetPOIsAsync();
-                
-                map.Pins.Clear();
-                foreach (var poi in pois)
-                {
-                   var pin = new Pin
-                   {
-                       Label = poi.Name,
-                       Address = poi.Address,
-                       Type = PinType.Place,
-                       Location = new Location(poi.Latitude, poi.Longitude)
-                   };
-                   map.Pins.Add(pin);
-                }
-
-#if ANDROID
-                void RegisterNativeMarkers()
-                {
-                    CustomMapHandler.SetPOIMarkers(pois);
-                }
-
-                if (CustomMapHandler.NativeGoogleMap != null)
-                {
-                    RegisterNativeMarkers();
-                }
-                else
-                {
-                    void OnMapReady(GoogleMap _)
-                    {
-                        RegisterNativeMarkers();
-                        CustomMapHandler.OnGoogleMapReady -= OnMapReady;
-                    }
-
-                    CustomMapHandler.OnGoogleMapReady += OnMapReady;
-                }
-#endif
+                await mapWebView.AddMarkersAsync(pois);
 
                 if (focusLocation != null)
                 {
-                    var nearest = poiService.GetNearestPOI(focusLocation.Latitude, focusLocation.Longitude);
-                    poiService.HighlightNearestPOI(map, nearest);
+                    await mapWebView.UpdateUserLocationAsync(
+                        focusLocation.Latitude, focusLocation.Longitude);
+
+                    await mapWebView.MoveToLocationAsync(
+                        focusLocation.Latitude, focusLocation.Longitude, zoom: 15);
+
+                    var nearest = poiService.GetNearestPOI(
+                        focusLocation.Latitude, focusLocation.Longitude);
+                    poiService.HighlightNearestPOI(mapWebView, nearest);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("[MapHelper] Timed out waiting for map to initialise.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading map: {ex.Message}");
+                Console.WriteLine($"[MapHelper] Error loading map: {ex.Message}");
             }
         }
     }

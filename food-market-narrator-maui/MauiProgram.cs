@@ -1,7 +1,7 @@
-﻿using food_market_narrator.Services;
+﻿using food_market_narrator.Controls;
+using food_market_narrator.Services;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Maps;
 
 
 namespace food_market_narrator;
@@ -13,7 +13,6 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiMaps()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -39,6 +38,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<POIService>(); // POI data cache should be singleton
         builder.Services.AddSingleton<IAudioService, AudioService>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
+        builder.Services.AddSingleton<TileServerService>(); // local offline tile-server
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<MapPage>();
@@ -51,7 +51,7 @@ public static class MauiProgram
         builder.ConfigureMauiHandlers(handlers =>
         {
 #if ANDROID
-            handlers.AddHandler<Microsoft.Maui.Controls.Maps.Map, CustomMapHandler>();
+            handlers.AddHandler<MapWebView, MapWebViewHandler>();
 #endif
         });
 

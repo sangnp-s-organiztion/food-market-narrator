@@ -1,5 +1,5 @@
+using food_market_narrator.Controls;
 using food_market_narrator.Models;
-using MauiMap = Microsoft.Maui.Controls.Maps.Map;
 
 namespace food_market_narrator.Services;
 
@@ -10,5 +10,5 @@ public interface IPOIService
     Task<POI?> GetPOIByIdAsync(string restaurantId);
     POI? GetNearestPOI(double currentLat, double currentLng);
     POI? UpdateNearestPOI(double currentLat, double currentLng);
-    void HighlightNearestPOI(MauiMap map, POI? nearest);
+    void HighlightNearestPOI(MapWebView map, POI? nearest);
 }
