@@ -1,7 +1,7 @@
 ﻿using food_market_narrator.Helpers;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
-using Microsoft.Maui.Maps;
+using Microsoft.Maui.Devices.Sensors;
 using System.Collections.Generic;
 
 namespace food_market_narrator.Views;

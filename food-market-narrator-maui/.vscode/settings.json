@@ -1,0 +1,7 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "dotnet build": true,
+        "Out-Null": true,
+        "ForEach-Object": true
+    }
+}

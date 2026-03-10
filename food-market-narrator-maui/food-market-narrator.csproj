@@ -31,7 +31,7 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<UseMauiMaps>true</UseMauiMaps>
+		<UseMauiMaps>false</UseMauiMaps>
 
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
@@ -62,16 +62,18 @@
 
 		<!-- Raw Assets -->
 		<MauiAsset Include="Resources\Narration\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(Filename)%(Extension)" />
 
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="BruTile.MbTiles" Version="4.0.0" />
+		<PackageReference Include="Mapsui.Maui" Version="4.1.6" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.40" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="10.0.40" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 	</ItemGroup>

@@ -1,5 +1,4 @@
 using SQLite;
-using Microsoft.Maui.Controls.Maps;
 using System.Linq;
 using System.Globalization;
 
@@ -26,8 +25,6 @@ public class POI
     public List<RestaurantImageModel> Images { get; set; } = new();
     public List<AudioModel> Audios { get; set; } = new();
     
-    public Pin? MapPin { get; set; } 
-
     
     // Thong tin bo sung
     public string? PriceRange { get; set; }
