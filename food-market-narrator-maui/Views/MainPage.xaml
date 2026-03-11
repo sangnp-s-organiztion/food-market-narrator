@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="food_market_narrator.Views.MainPage"
              BackgroundColor="#FFFCF8"
              Shell.NavBarIsVisible="False">
@@ -61,16 +61,16 @@
                 <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
                     <Grid>
                         <!-- Map Control -->
-                        <maps:Map x:Name="map" IsShowingUser="True" MapType="Street"/>
+                        <mapsui:MapControl x:Name="mapControl" />
 
                         <!-- Map Overlays -->
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">
-                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                             <!-- <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
                                 <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                              <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
                                 <Label Text="&#xf5a0;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
+                            </Border> -->
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

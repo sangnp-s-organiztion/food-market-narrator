@@ -1,6 +1,6 @@
 using food_market_narrator.Helpers;
 using food_market_narrator.Services;
-using Microsoft.Maui.Maps;
+using Mapsui.UI.Maui;
 
 namespace food_market_narrator.Views;
 
@@ -35,7 +35,7 @@ public partial class MapPage : ContentPage
         await _locationService.StartTrackingAsync();
 
         await MapHelper.LoadMapAsync(
-        map,
+        mapControl,
         _poiService,
         _locationService);
     }
@@ -49,6 +49,6 @@ public partial class MapPage : ContentPage
     private void OnLocationChangedForMap(object? sender, Location location)
     {
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
-        _poiService.HighlightNearestPOI(map, nearest);
+        MapHelper.HighlightPOI(mapControl, nearest);
     }
 }

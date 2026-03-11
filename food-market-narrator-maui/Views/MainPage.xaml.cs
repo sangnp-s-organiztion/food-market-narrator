@@ -1,7 +1,6 @@
 ﻿using food_market_narrator.Helpers;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
-using Microsoft.Maui.Maps;
 using System.Collections.Generic;
 
 namespace food_market_narrator.Views;
@@ -60,8 +59,7 @@ public partial class MainPage : ContentPage
         // _narrationFlowService.StartNarration();
 
         // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(map, _poiService, _locationService);
-
+        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService);
         // Hiện popup chọn ngôn ngữ khi mới vào app
         Console.WriteLine("Is First Load: " + _isFirstLoad);
         if (_isFirstLoad)
@@ -96,7 +94,7 @@ public partial class MainPage : ContentPage
     private void OnLocationChangedForMap(object? sender, Location location)
     {
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
-        _poiService.HighlightNearestPOI(map, nearest);
+        MapHelper.HighlightPOI(mapControl, nearest);
         UpdateUIByLocation(location);
     }
 
@@ -214,7 +212,7 @@ public partial class MainPage : ContentPage
     {
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
 
-        _poiService.HighlightNearestPOI(map, nearest);
+        MapHelper.HighlightPOI(mapControl, nearest);
 
         bool shouldShow = false;
 

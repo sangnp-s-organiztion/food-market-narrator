@@ -1,7 +1,7 @@
 ﻿using food_market_narrator.Services;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Maps;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 
 namespace food_market_narrator;
@@ -13,7 +13,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiMaps()
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -47,13 +47,6 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-
-        builder.ConfigureMauiHandlers(handlers =>
-        {
-#if ANDROID
-            handlers.AddHandler<Microsoft.Maui.Controls.Maps.Map, CustomMapHandler>();
-#endif
-        });
 
         return builder.Build();
     }
