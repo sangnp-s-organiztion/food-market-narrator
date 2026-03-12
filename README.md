@@ -162,3 +162,10 @@ Một số trường dữ liệu chính:
 ## 📄 License
 
 Chưa khai báo. Thêm file `LICENSE` nếu bạn muốn công bố điều khoản sử dụng.
+
+---
+
+## Copyright
+
+© 2026 **Nguyen Phuoc Sang** · **Nguyen Gia Thieu**  
+All rights reserved.
