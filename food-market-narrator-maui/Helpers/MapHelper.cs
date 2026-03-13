@@ -20,7 +20,7 @@ namespace food_market_narrator.Helpers
 
         public static async Task LoadMapAsync(
             MapControl mapControl,
-            POIService poiService,
+            IPOIService poiService,
             ILocationService locationService,
             Location? initialLocation = null)
         {

@@ -10,7 +10,7 @@ namespace food_market_narrator.Views;
 
 public partial class MapPage : ContentPage
 {
-    private readonly POIService _poiService;
+    private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
 
     public double Latitude { get; set; }
@@ -18,7 +18,7 @@ public partial class MapPage : ContentPage
     public string? LocationName { get; set; }
 
     public MapPage(
-        POIService poiService,
+        IPOIService poiService,
         ILocationService locationService)
     {
         InitializeComponent();

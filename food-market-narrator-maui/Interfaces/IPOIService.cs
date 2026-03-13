@@ -9,5 +9,7 @@ public interface IPOIService
     Task<List<POI>> GetAllPOIsAsync();
     Task<POI?> GetPOIByIdAsync(string restaurantId);
     POI? GetNearestPOI(double currentLat, double currentLng);
+    POI? GetNearestPOI(Location currentLocation, IEnumerable<POI>? pois = null);
+    double GetDistanceMeters(Location currentLocation, POI poi);
     POI? UpdateNearestPOI(double currentLat, double currentLng);
 }

@@ -1,5 +1,6 @@
 ﻿using food_market_narrator.Helpers;
 using food_market_narrator.Models;
+using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using System.Collections.Generic;
 
@@ -8,7 +9,7 @@ namespace food_market_narrator.Views;
 public partial class MainPage : ContentPage
 {
     // Khời tạo tọa độ và tên cho điểm
-    private readonly POIService _poiService;
+    private readonly IPOIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly ILocationService _locationService;
     private readonly LanguageService _languageService = new();
@@ -20,7 +21,7 @@ public partial class MainPage : ContentPage
     private bool _isFirstLoad = true;
 
 	// Hàm khởi tạo MainPage mới
-	public MainPage(POIService poiService, NarrationFlowService narrationFlowService, ILocationService locationService)
+    public MainPage(IPOIService poiService, NarrationFlowService narrationFlowService, ILocationService locationService)
 	{
 		InitializeComponent();
         _poiService = poiService;
@@ -218,12 +219,9 @@ public partial class MainPage : ContentPage
 
         if (nearest != null)
         {
-            var distance = Location.CalculateDistance(
-                location,
-                new Location(nearest.Latitude, nearest.Longitude),
-                DistanceUnits.Kilometers) * 1000;
+            var distance = _poiService.GetDistanceMeters(location, nearest);
 
-            shouldShow = distance <= 30;
+            shouldShow = distance <= AppSettings.TriggerDistanceMeters;
         }
 
         if (_isInsidePOIUI != shouldShow)
