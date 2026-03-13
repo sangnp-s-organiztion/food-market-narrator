@@ -15,4 +15,5 @@ public class AppDbContext : DbContext
     public DbSet<RestaurantImageModel> RestaurantImage { get; set; }
     public DbSet<AudioModel> Audio { get; set; }
     public DbSet<LanguageModel> Language { get; set; }
+    public DbSet<UserModel> User { get; set; }
 }

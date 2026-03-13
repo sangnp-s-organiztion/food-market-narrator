@@ -40,6 +40,12 @@ namespace food_market_narrator_api.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [Column("user_id")]
+        public int UserId { get; set; }
+
+        [ForeignKey(nameof(UserId))]
+        public UserModel User { get; set; }
+
         // Navigation properties
         public ICollection<RestaurantImageModel> ImageURL { get; set; } = new List<RestaurantImageModel>();
         public ICollection<AudioModel> AudioURL { get; set; } = new List<AudioModel>();
