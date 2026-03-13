@@ -19,6 +19,7 @@ public static class AppSettings
 #endif
 
     public const string RestaurantEndpoint = "api/restaurant";
+    public const string LanguageEndpoint = "api/language";
     public const double TriggerDistanceMeters = 30;
     public const double PoiEnterRadiusMeters = 30;
     public const double PoiExitRadiusMeters = 40;
