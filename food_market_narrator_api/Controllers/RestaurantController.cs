@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace food_market_narrator_api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class RestaurantController : ControllerBase
     {
         private readonly RestaurantService _restaurantService;

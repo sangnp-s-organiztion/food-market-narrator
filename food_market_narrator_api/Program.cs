@@ -16,6 +16,8 @@ public class Program
         builder.Services.AddScoped<AudioService>();
         builder.Services.AddScoped<LanguageRepository>();
         builder.Services.AddScoped<LanguageService>();
+        builder.Services.AddScoped<UserRepository>();
+        builder.Services.AddScoped<UserService>();
 
         // Lấy connection string từ appsettings.json
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
