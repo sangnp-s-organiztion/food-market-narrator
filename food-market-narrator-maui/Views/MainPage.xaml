@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="food_market_narrator.Views.MainPage"
              BackgroundColor="#FFFCF8"
              Shell.NavBarIsVisible="False">
@@ -61,16 +61,16 @@
                 <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
                     <Grid>
                         <!-- Map Control -->
-                        <maps:Map x:Name="map" IsShowingUser="True" MapType="Street"/>
+                        <mapsui:MapControl x:Name="mapControl" />
 
                         <!-- Map Overlays -->
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">
-                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                             <!-- <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
                                 <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                              <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
                                 <Label Text="&#xf5a0;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
+                            </Border> -->
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
@@ -295,87 +295,7 @@
                                 </Border>
                             </Grid>
                             <!-- Ngôn ngữ  -->
-                            <VerticalStackLayout Spacing="12">
-                                <!-- Tiếng Việt  -->
-                                <Border x:Name="VietnameseOption"
-                                        BackgroundColor="#F7F3EF"
-                                        Stroke="#F48C06"
-                                        StrokeThickness="1.5"
-                                        StrokeShape="RoundRectangle 14"
-                                        Padding="14,12">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="vi-VN"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                        <Label Text="🇻🇳" FontSize="20" VerticalOptions="Center"/>
-                                        <Label Grid.Column="1" Text="Tiếng Việt" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
-                                        <Label x:Name="VietnameseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center"/>
-                                    </Grid>
-                                </Border>
-                                <!-- Tiếng Anh  -->
-                                <Border x:Name="EnglishOption"
-                                        BackgroundColor="#F1EDE9"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 14"
-                                        Padding="14,12">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="en-US"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                        <Label Text="🇺🇸" FontSize="20" VerticalOptions="Center"/>
-                                        <Label Grid.Column="1" Text="English" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
-                                        <Label x:Name="EnglishCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
-                                    </Grid>
-                                </Border> 
-                                
-                                <!-- Tiếng Trung  -->
-                                <Border x:Name="ChineseOption"
-                                        BackgroundColor="#F1EDE9"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 14"
-                                        Padding="14,12">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="zh-CN"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                        <Label Text="🇨🇳" FontSize="20" VerticalOptions="Center"/>
-                                        <Label Grid.Column="1" Text="中文" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
-                                        <Label x:Name="ChineseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
-                                    </Grid>
-                                </Border>
-                                
-                                <!-- Tiếng Hàn  -->
-                                <Border x:Name="KoreanOption"
-                                        BackgroundColor="#F1EDE9"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 14"
-                                        Padding="14,12">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="ko-KR"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                        <Label Text="🇰🇷" FontSize="20" VerticalOptions="Center"/>
-                                        <Label Grid.Column="1" Text="한국어" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
-                                        <Label x:Name="KoreanCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Tiếng Nhật  -->
-                                <Border x:Name="JapaneseOption"
-                                        BackgroundColor="#F1EDE9"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 14"
-                                        Padding="14,12">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageOptionTapped" CommandParameter="ja-JP"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                        <Label Text="🇯🇵" FontSize="20" VerticalOptions="Center"/>
-                                        <Label Grid.Column="1" Text="日本語" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center"/>
-                                        <Label x:Name="JapaneseCheck" Grid.Column="2" Text="✓" FontSize="16" TextColor="#F48C06" FontAttributes="Bold" VerticalOptions="Center" IsVisible="False"/>
-                                    </Grid>
-                                </Border>
-                            </VerticalStackLayout>
+                            <VerticalStackLayout x:Name="LanguageOptionsContainer" Spacing="12"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>

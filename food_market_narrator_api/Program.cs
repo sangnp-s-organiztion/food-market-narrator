@@ -14,6 +14,8 @@ public class Program
         builder.Services.AddScoped<RestaurantService>();
         builder.Services.AddScoped<AudioRepository>();
         builder.Services.AddScoped<AudioService>();
+        builder.Services.AddScoped<LanguageRepository>();
+        builder.Services.AddScoped<LanguageService>();
 
         // Lấy connection string từ appsettings.json
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
