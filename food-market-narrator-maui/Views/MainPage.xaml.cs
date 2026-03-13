@@ -20,7 +20,8 @@ public partial class MainPage : ContentPage
     private bool _isLanguageOptionsLoaded;
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại
 
-    private bool _isFirstLoad = true;
+    // private static bool _hasShownLanguagePopupThisSession;
+    // private bool _languageSelected = Preferences.Get("language_selected", false);
 
 	// Hàm khởi tạo MainPage mới
     public MainPage(
@@ -51,17 +52,21 @@ public partial class MainPage : ContentPage
         // Load map data on appearing, reusing helper logic
         await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService);
         // Hiện popup chọn ngôn ngữ khi mới vào app
-        Console.WriteLine("Is First Load: " + _isFirstLoad);
-        if (_isFirstLoad)
+        bool languageSelected = Preferences.Get("language_selected", false);
+        Console.WriteLine("Language selected: " + languageSelected);
+        if (!languageSelected)
         {
-            _isFirstLoad = false;
+            // _hasShownLanguagePopupThisSession = true;
             await Task.Delay(300);
             OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
         }
 
         // Hiển thị POI lên giao diện
         Console.WriteLine("Loading POIs for display...");
-        Console.WriteLine("The number of POIs loaded: " + (_poiService.GetAllPOIsAsync().Result.Count));
+        
+        var allPois = await _poiService.GetAllPOIsAsync();
+        Console.WriteLine("The number of POIs loaded: " + allPois.Count);
+
         var poisData = await _poiService.GetPOIsAsync();
         PoiList.ItemsSource = poisData;      
 
@@ -262,6 +267,9 @@ public partial class MainPage : ContentPage
 
         ApplyLanguageSelectionStyle(cultureCode);
         await HideLanguagePopupAsync();
+
+        Preferences.Set("language_selected", true);
+        Preferences.Set("language", cultureCode);
 
         if (_languageService.CurrentLanguage != cultureCode)
         {
