@@ -57,8 +57,14 @@ public partial class POIDetailPage : ContentPage
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			BindingContext = poi;
-			ResetAudioProgressUi();
+			SyncAudioUiWithService();
 		});
+	}
+
+	protected override void OnAppearing()
+	{
+		base.OnAppearing();
+		SyncAudioUiWithService();
 	}
 
 	private async void OnPlayAudioTapped(object sender, EventArgs e)
@@ -158,6 +164,34 @@ public partial class POIDetailPage : ContentPage
 		TotalTimeLabel.Text = "00:00";
 		AudioProgressBar.Progress = 0;
 		SetPlayButtonState(false);
+	}
+
+	private void SyncAudioUiWithService()
+	{
+		if (_audioService is null)
+		{
+			ResetAudioProgressUi();
+			return;
+		}
+
+		if (_audioService.IsPlaying)
+		{
+			SetPlayButtonState(true);
+			UpdateAudioProgressUi();
+			StartProgressTimer();
+			return;
+		}
+
+		StopProgressTimer();
+
+		if (_audioService.IsPaused)
+		{
+			SetPlayButtonState(false);
+			UpdateAudioProgressUi();
+			return;
+		}
+
+		ResetAudioProgressUi();
 	}
 
 	private void SetPlayButtonState(bool isPlaying)

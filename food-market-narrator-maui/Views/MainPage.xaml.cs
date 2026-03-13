@@ -60,6 +60,11 @@ public partial class MainPage : ContentPage
             await Task.Delay(300);
             OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
         }
+        else
+        {
+            // Người dùng đã chọn ngôn ngữ ở lần trước: tự bật luồng thuyết minh khi vào app.
+            _narrationFlowService.StartNarration();
+        }
 
         // Hiển thị POI lên giao diện
         Console.WriteLine("Loading POIs for display...");
