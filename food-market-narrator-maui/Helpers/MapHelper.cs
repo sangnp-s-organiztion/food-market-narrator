@@ -22,7 +22,8 @@ namespace food_market_narrator.Helpers
             MapControl mapControl,
             IPOIService poiService,
             ILocationService locationService,
-            Location? initialLocation = null)
+            Location? initialLocation = null,
+            int initialZoomLevel = 16)
         {
             try
             {
@@ -50,7 +51,8 @@ namespace food_market_narrator.Helpers
 
                 if (focusLocation != null)
                 {
-                    NavigateTo(mapControl, focusLocation.Latitude, focusLocation.Longitude, 16);
+                    NavigateTo(mapControl, focusLocation.Latitude, focusLocation.Longitude, initialZoomLevel);
+                    UpdateUserLocation(mapControl, focusLocation.Latitude, focusLocation.Longitude);
                 }
 
                 var pois = await poiService.GetPOIsAsync();
@@ -93,7 +95,7 @@ namespace food_market_narrator.Helpers
         }
 
         /// <summary>
-        /// Highlight the nearest POI on map and navigate to it.
+        /// Highlight the nearest POI on map without moving camera.
         /// </summary>
         public static void HighlightPOI(MapControl mapControl, POI? nearest)
         {
@@ -105,11 +107,6 @@ namespace food_market_narrator.Helpers
                 feature.Styles.Clear();
                 bool isHighlighted = nearest != null && feature["id"]?.ToString() == nearest.restaurantId;
                 feature.Styles.Add(CreateMarkerStyle(isHighlighted));
-            }
-
-            if (nearest != null)
-            {
-                NavigateTo(mapControl, nearest.Latitude, nearest.Longitude, 18);
             }
 
             mapControl.Map.RefreshData();
@@ -140,6 +137,7 @@ namespace food_market_narrator.Helpers
                 Features = new[] { feature }
             };
             mapControl.Map.Layers.Add(layer);
+            mapControl.Map.RefreshData();
         }
 
         private static void NavigateTo(MapControl mapControl, double lat, double lon, int zoomLevel)
