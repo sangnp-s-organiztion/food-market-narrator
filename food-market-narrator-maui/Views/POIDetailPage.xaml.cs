@@ -7,7 +7,7 @@ namespace food_market_narrator.Views;
 [QueryProperty(nameof(RestaurantId), "restaurantId")]
 public partial class POIDetailPage : ContentPage
 {
-	private readonly POIService? _poiService;
+	private readonly IPOIService? _poiService;
 	private readonly IAudioService? _audioService;
 	private readonly ILanguageService? _languageService;
 	private IDispatcherTimer? _progressTimer;
@@ -29,7 +29,7 @@ public partial class POIDetailPage : ContentPage
 	{
 		InitializeComponent();
 		var services = Application.Current?.Handler?.MauiContext?.Services;
-		_poiService = services?.GetService<POIService>();
+		_poiService = services?.GetService<IPOIService>();
 		_audioService = services?.GetService<IAudioService>();
 		_languageService = services?.GetService<ILanguageService>();
 

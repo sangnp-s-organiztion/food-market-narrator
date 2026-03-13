@@ -1,7 +1,8 @@
 ﻿using food_market_narrator.Services;
+using food_market_narrator.Settings;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Maps;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 
 namespace food_market_narrator;
@@ -13,7 +14,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiMaps()
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -21,22 +22,24 @@ public static class MauiProgram
                 fonts.AddFont("fa-solid-900.ttf", "FASolid");
             });
 
+        builder.Services.AddSingleton(sp =>
+        {
+            Console.WriteLine($"[AppSettings] ApiBaseUrl = {AppSettings.ApiBaseUrl}");
 
-        builder.Services.AddHttpClient<POIService>(client =>
-        {
-            client.BaseAddress = new Uri("http://10.0.2.2:5044/");
-        })
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return new HttpClientHandler
+            var handler = new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback =
                     HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
+
+            return new HttpClient(handler)
+            {
+                BaseAddress = new Uri(AppSettings.ApiBaseUrl)
+            };
         });
 
         // Register pages for dependency injection
-        builder.Services.AddSingleton<POIService>(); // POI data cache should be singleton
+        builder.Services.AddSingleton<IPOIService, POIService>(); // POI data cache should be singleton
         builder.Services.AddSingleton<IAudioService, AudioService>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
@@ -47,13 +50,6 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-
-        builder.ConfigureMauiHandlers(handlers =>
-        {
-#if ANDROID
-            handlers.AddHandler<Microsoft.Maui.Controls.Maps.Map, CustomMapHandler>();
-#endif
-        });
 
         return builder.Build();
     }
