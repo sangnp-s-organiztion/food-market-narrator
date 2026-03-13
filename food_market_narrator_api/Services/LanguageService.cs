@@ -26,6 +26,17 @@ namespace food_market_narrator_api.Services
                 LanguageName = languageModel.LanguageName
             };
         }
+
+        public async Task<List<LanguageResponse>> GetAllLanguagesAsync()
+        {
+            var languageModels = await _languageRepository.GetAllLanguagesAsync();
+
+            return languageModels.Select(l => new LanguageResponse
+            {
+                LanguageCode = l.LanguageCode,
+                LanguageName = l.LanguageName
+            }).ToList();
+        }
     }
 }
 

@@ -15,6 +15,16 @@ public class LanguageController : ControllerBase
         _languageService = languageService;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAllLanguages()
+    {
+        var data = await _languageService.GetAllLanguagesAsync();
+        if (data == null || data.Count == 0)
+            return NotFound();
+            
+        return Ok(data);
+    }
+
     [HttpGet("{languageCode}")]
     public async Task<IActionResult> GetLanguageByCode(string languageCode)
     {
