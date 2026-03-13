@@ -48,6 +48,7 @@ public partial class MapPage : ContentPage
 
     private void OnLocationChangedForMap(object? sender, Location location)
     {
+        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
         MapHelper.HighlightPOI(mapControl, nearest);
     }
