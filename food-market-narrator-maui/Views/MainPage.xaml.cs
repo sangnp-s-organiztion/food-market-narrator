@@ -50,7 +50,7 @@ public partial class MainPage : ContentPage
         // _narrationFlowService.StartNarration();
 
         // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService);
+        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 18);
         // Hiện popup chọn ngôn ngữ khi mới vào app
         bool languageSelected = Preferences.Get("language_selected", false);
         Console.WriteLine("Language selected: " + languageSelected);
@@ -88,8 +88,7 @@ public partial class MainPage : ContentPage
     // Hàm xử lý khi thay đổi vị trí để cập nhật giao diện và thuyết minh
     private void OnLocationChangedForMap(object? sender, Location location)
     {
-        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
-        MapHelper.HighlightPOI(mapControl, nearest);
+        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
         UpdateUIByLocation(location);
     }
 
@@ -315,6 +314,8 @@ public partial class MainPage : ContentPage
     // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất
     private void UpdateUIByLocation(Location location)
     {
+        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
+
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
 
         MapHelper.HighlightPOI(mapControl, nearest);
