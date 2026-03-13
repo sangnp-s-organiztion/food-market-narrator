@@ -9,6 +9,8 @@ namespace food_market_narrator.Views;
 
 public partial class MainPage : ContentPage
 {
+    private static bool _hasAutoStartedNarrationThisSession;
+
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
@@ -62,8 +64,12 @@ public partial class MainPage : ContentPage
         }
         else
         {
-            // Người dùng đã chọn ngôn ngữ ở lần trước: tự bật luồng thuyết minh khi vào app.
-            _narrationFlowService.StartNarration();
+            // Chỉ tự bật 1 lần trong mỗi phiên chạy app (cold start).
+            if (!_hasAutoStartedNarrationThisSession)
+            {
+                _narrationFlowService.StartNarration();
+                _hasAutoStartedNarrationThisSession = true;
+            }
         }
 
         // Hiển thị POI lên giao diện
