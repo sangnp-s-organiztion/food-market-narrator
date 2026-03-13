@@ -99,8 +99,10 @@ public partial class MainPage : ContentPage
     // Hàm xử lý khi thay đổi vị trí để cập nhật giao diện và thuyết minh
     private void OnLocationChangedForMap(object? sender, Location location)
     {
-        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
-        UpdateUIByLocation(location);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            UpdateUIByLocation(location);
+        });
     }
 
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
@@ -329,7 +331,9 @@ public partial class MainPage : ContentPage
 
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
 
-        MapHelper.HighlightPOI(mapControl, nearest);
+        var shouldHighlight = nearest != null
+            && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
+        MapHelper.HighlightPOI(mapControl, shouldHighlight ? nearest : null);
 
         bool shouldShow = false;
 

@@ -27,11 +27,8 @@ namespace food_market_narrator.Helpers
         {
             try
             {
-                
-                // Tắt logging widget và FPS widget mặc định của Mapsui
                 mapControl.Map.Widgets.Clear();
 
-                // Add OSM tile layer once per MapControl (check by layer name)
                 if (!mapControl.Map.Layers.Any(l => l.Name == OsmLayerName))
                 {
                     var cacheDir = Path.Combine(FileSystem.CacheDirectory, "osm_tiles");
@@ -57,12 +54,10 @@ namespace food_market_narrator.Helpers
 
                 var pois = await poiService.GetPOIsAsync();
 
-                // Remove existing POI layer
                 var existingLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName);
                 if (existingLayer != null)
                     mapControl.Map.Layers.Remove(existingLayer);
 
-                // Create POI markers
                 var features = new List<PointFeature>();
                 foreach (var poi in pois)
                 {
@@ -102,14 +97,37 @@ namespace food_market_narrator.Helpers
             var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
             if (poiLayer == null) return;
 
+            PointFeature? highlightedFeature = null;
+
             foreach (var feature in poiLayer.Features.OfType<PointFeature>())
             {
                 feature.Styles.Clear();
                 bool isHighlighted = nearest != null && feature["id"]?.ToString() == nearest.restaurantId;
                 feature.Styles.Add(CreateMarkerStyle(isHighlighted));
+                if (isHighlighted)
+                {
+                    highlightedFeature = feature;
+                }
             }
 
+            if (highlightedFeature != null)
+            {
+                var reordered = poiLayer.Features
+                    .OfType<PointFeature>()
+                    .Where(f => !ReferenceEquals(f, highlightedFeature))
+                    .Cast<IFeature>()
+                    .ToList();
+
+                reordered.Add(highlightedFeature);
+                poiLayer.Features = reordered;
+            }
+
+            // FIX: Invalidate layer data cache trước, sau đó force re-render graphics.
+            // RefreshData() đơn độc không đủ khi 2 POI gần nhau vì Mapsui
+            // cache viewport và không detect style change nếu bounding box không đổi.
+            poiLayer.DataHasChanged();
             mapControl.Map.RefreshData();
+            mapControl.Map.RefreshGraphics();
         }
 
         /// <summary>
@@ -137,13 +155,15 @@ namespace food_market_narrator.Helpers
                 Features = new[] { feature }
             };
             mapControl.Map.Layers.Add(layer);
+
+            // Tương tự: force re-render sau khi update user location
             mapControl.Map.RefreshData();
+            mapControl.Map.RefreshGraphics();
         }
 
         private static void NavigateTo(MapControl mapControl, double lat, double lon, int zoomLevel)
         {
             var spherical = SphericalMercator.FromLonLat(lon, lat);
-            // Resolution for OSM tile zoom levels: 156543.03392 / 2^zoom
             double resolution = 156543.03392 / Math.Pow(2, zoomLevel);
             mapControl.Map.Navigator.CenterOnAndZoomTo(new MPoint(spherical.x, spherical.y), resolution);
         }
@@ -154,8 +174,8 @@ namespace food_market_narrator.Helpers
             {
                 SymbolScale = isHighlighted ? 0.45 : 0.35,
                 Fill = new Mapsui.Styles.Brush(isHighlighted
-                    ? new Mapsui.Styles.Color(255, 0, 0)       // Red for highlighted
-                    : new Mapsui.Styles.Color(244, 140, 6)),    // Orange for normal
+                    ? new Mapsui.Styles.Color(255, 0, 0)
+                    : new Mapsui.Styles.Color(244, 140, 6)),
                 Outline = new Pen(new Mapsui.Styles.Color(255, 255, 255), 2),
                 SymbolType = SymbolType.Ellipse
             };

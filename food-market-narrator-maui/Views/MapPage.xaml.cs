@@ -1,4 +1,5 @@
 using food_market_narrator.Helpers;
+using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using Mapsui.UI.Maui;
 
@@ -48,8 +49,13 @@ public partial class MapPage : ContentPage
 
     private void OnLocationChangedForMap(object? sender, Location location)
     {
-        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
-        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
-        MapHelper.HighlightPOI(mapControl, nearest);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
+            var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
+            var shouldHighlight = nearest != null
+                && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
+            MapHelper.HighlightPOI(mapControl, shouldHighlight ? nearest : null);
+        });
     }
 }

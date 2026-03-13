@@ -103,20 +103,9 @@ public class POIService : IPOIService
             return null;
         }
 
-        POI? nearest = null;
-        double minDistance = double.MaxValue;
-
-        foreach (var poi in source)
-        {
-            var distance = GetDistanceMeters(currentLocation, poi);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearest = poi;
-            }
-        }
-
-        return nearest;
+        return source
+            .OrderBy(poi => GetDistanceMeters(currentLocation, poi))
+            .FirstOrDefault();
     }
 
     public double GetDistanceMeters(Location currentLocation, POI poi)
