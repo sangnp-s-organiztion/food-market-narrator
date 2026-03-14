@@ -22,7 +22,7 @@ public class MainActivity : MauiAppCompatActivity
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         // ⬇ Switch sang main theme TRƯỚC khi base.OnCreate inflate layout
-        SetTheme(Resource.Style.Maui_MainTheme);
+        SetTheme(Resource.Style.Maui_MainTheme_NoActionBar);
         base.OnCreate(savedInstanceState);
     }
 
