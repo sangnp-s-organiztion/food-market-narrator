@@ -47,6 +47,8 @@ public partial class MainPage : ContentPage
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
+
+        await Task.Delay(500); // nhỏ thôi, chờ UI ready
         await _locationService.StartTrackingAsync();
 
         // _narrationFlowService.StartNarration();
