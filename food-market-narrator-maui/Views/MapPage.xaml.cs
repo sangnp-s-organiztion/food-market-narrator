@@ -1,4 +1,5 @@
 using food_market_narrator.Helpers;
+using food_market_narrator.Models;
 using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using Mapsui;
@@ -13,6 +14,7 @@ namespace food_market_narrator.Views;
 
 public partial class MapPage : ContentPage
 {
+    private const double MarkerTapPixelRadius = 28;
     private const int DefaultZoomLevel = 16;
     private const int MinZoomLevel = 3;
     private const int MaxZoomLevel = 20;
@@ -20,6 +22,8 @@ public partial class MapPage : ContentPage
 
     private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
+    private List<POI> _pois = new();
+    private POI? _selectedPoi;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -47,13 +51,23 @@ public partial class MapPage : ContentPage
 
         // Tải dữ liệu bản đồ và hiển thị các POI, cũng như vị trí người dùng nếu đã có
         await MapHelper.LoadMapAsync(
-        mapControl,
-        _poiService,
-        _locationService);
+            mapControl,
+            _poiService,
+            _locationService,
+            initialZoomLevel: DefaultZoomLevel);
+
+        _pois = await _poiService.GetAllPOIsAsync();
+
+        mapControl.MapTapped -= OnMapTapped;
+        mapControl.MapTapped += OnMapTapped;
+
+        HideSelectedPoiCard();
     }
 
     protected override void OnDisappearing()
     {
+        mapControl.MapTapped -= OnMapTapped;
+
         _locationService.LocationChanged -= OnLocationChangedForMap;
         base.OnDisappearing();
     }
@@ -87,7 +101,7 @@ public partial class MapPage : ContentPage
         var currentLocation = await _locationService.GetCurrentLocationAsync();
         if (currentLocation == null)
         {
-            await DisplayAlert("Thông báo", "Không thể lấy vị trí hiện tại.", "OK");
+            await DisplayAlertAsync("Thông báo", "Không thể lấy vị trí hiện tại.", "OK");
             return;
         }
 
@@ -103,10 +117,6 @@ public partial class MapPage : ContentPage
         }
 
         var viewport = mapControl.Map.Navigator.Viewport;
-        if (viewport == null)
-        {
-            return;
-        }
 
         var minResolution = ToResolution(MaxZoomLevel);
         var maxResolution = ToResolution(MinZoomLevel);
@@ -135,5 +145,69 @@ public partial class MapPage : ContentPage
     private static double ToResolution(int zoomLevel)
     {
         return 156543.03392 / Math.Pow(2, zoomLevel);
+    }
+
+    private void OnMapTapped(object? sender, MapEventArgs e)
+    {
+        if (_pois.Count == 0)
+        {
+            HideSelectedPoiCard();
+            return;
+        }
+
+        if (e.WorldPosition == null)
+        {
+            HideSelectedPoiCard();
+            return;
+        }
+
+        var tapLonLat = SphericalMercator.ToLonLat(e.WorldPosition.X, e.WorldPosition.Y);
+        var tappedLocation = new Location(tapLonLat.lat, tapLonLat.lon);
+        var nearestPoi = _poiService.GetNearestPOI(tappedLocation, _pois);
+
+        if (nearestPoi == null)
+        {
+            HideSelectedPoiCard();
+            return;
+        }
+
+        var viewportResolution = mapControl.Map?.Navigator?.Viewport.Resolution ?? ToResolution(DefaultZoomLevel);
+        var tapThresholdMeters = Math.Clamp(viewportResolution * MarkerTapPixelRadius, 12, 150);
+        var distanceMeters = _poiService.GetDistanceMeters(tappedLocation, nearestPoi);
+
+        if (distanceMeters > tapThresholdMeters)
+        {
+            HideSelectedPoiCard();
+            return;
+        }
+
+        ShowSelectedPoiCard(nearestPoi);
+        MapHelper.HighlightPOI(mapControl, nearestPoi);
+    }
+
+    private void ShowSelectedPoiCard(POI poi)
+    {
+        _selectedPoi = poi;
+        SelectedPoiName.Text = string.IsNullOrWhiteSpace(poi.Name) ? poi.restaurantId : poi.Name;
+        SelectedPoiAddress.Text = poi.AddressDisplay;
+        SelectedPoiImage.Source = poi.PrimaryImage;
+        SelectedPoiCard.IsVisible = true;
+    }
+
+    private void HideSelectedPoiCard()
+    {
+        _selectedPoi = null;
+        SelectedPoiCard.IsVisible = false;
+    }
+
+    private async void OnViewDetailClicked(object sender, EventArgs e)
+    {
+        if (_selectedPoi == null || string.IsNullOrWhiteSpace(_selectedPoi.restaurantId))
+        {
+            return;
+        }
+
+        var encodedId = Uri.EscapeDataString(_selectedPoi.restaurantId);
+        await Shell.Current.GoToAsync($"{nameof(POIDetailPage)}?restaurantId={encodedId}");
     }
 }
