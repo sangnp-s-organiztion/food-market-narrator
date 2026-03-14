@@ -12,6 +12,9 @@ public class AudioService : IAudioService
     private bool _isPaused;
     private string? _currentTrackKey;
     private const int MinValidAudioBytes = 256;
+    private const long MaxAudioCacheBytes = 200L * 1024 * 1024;
+    private const long MinDeviceFreeSpaceBytes = 50L * 1024 * 1024;
+    private const string AudioCacheFolderName = "audio_cache";
     public bool IsPlaying => _player?.IsPlaying ?? false;
     public bool IsPaused => _isPaused;
     public string? CurrentTrackKey => _currentTrackKey;
@@ -76,6 +79,7 @@ public class AudioService : IAudioService
 
         if (IsValidAudioFile(cachePath))
         {
+            TouchCacheFile(cachePath);
             return File.OpenRead(cachePath);
         }
 
@@ -102,11 +106,19 @@ public class AudioService : IAudioService
         {
             if (!await TryDownloadAudioToCacheAsync(remoteUrl, cachePath))
             {
+                var onlineOnly = await TryDownloadAudioToMemoryAsync(remoteUrl);
+                if (onlineOnly != null)
+                {
+                    Console.WriteLine($"Playing online-only audio (not cached): {remoteUrl}");
+                    return onlineOnly;
+                }
+
                 continue;
             }
 
             if (IsValidAudioFile(cachePath))
             {
+                TouchCacheFile(cachePath);
                 return File.OpenRead(cachePath);
             }
         }
@@ -199,7 +211,7 @@ public class AudioService : IAudioService
 
     private static string GetAudioCachePath(string language, string normalizedInput)
     {
-        var cacheRoot = Path.Combine(FileSystem.AppDataDirectory, "audio_cache");
+        var cacheRoot = GetAudioCacheRootPath();
         Directory.CreateDirectory(cacheRoot);
 
         var extension = Path.GetExtension(normalizedInput);
@@ -212,6 +224,11 @@ public class AudioService : IAudioService
             $"{language}|{normalizedInput.ToLowerInvariant()}")));
 
         return Path.Combine(cacheRoot, $"{hash}{extension}");
+    }
+
+    private static string GetAudioCacheRootPath()
+    {
+        return Path.Combine(FileSystem.AppDataDirectory, AudioCacheFolderName);
     }
 
     private static bool IsValidAudioFile(string path)
@@ -231,22 +248,56 @@ public class AudioService : IAudioService
         }
     }
 
-    private static async Task SaveAudioCacheAsync(string cachePath, Stream source)
+    private async Task SaveAudioCacheAsync(string cachePath, Stream source)
     {
+        var expectedBytes = source.CanSeek ? source.Length : MinValidAudioBytes;
+        if (!await EnsureStorageForIncomingFileAsync(expectedBytes, cachePath))
+        {
+            Console.WriteLine("Skip caching audio: storage constraints.");
+            return;
+        }
+
         source.Position = 0;
         var tempPath = $"{cachePath}.tmp";
 
-        await using (var output = File.Create(tempPath))
+        try
         {
-            await source.CopyToAsync(output);
-        }
+            await using (var output = File.Create(tempPath))
+            {
+                await source.CopyToAsync(output);
+            }
 
-        if (File.Exists(cachePath))
+            var size = new FileInfo(tempPath).Length;
+            if (size < MinValidAudioBytes)
+            {
+                File.Delete(tempPath);
+                return;
+            }
+
+            if (!await EnsureStorageForIncomingFileAsync(size, cachePath))
+            {
+                File.Delete(tempPath);
+                Console.WriteLine("Skip caching audio after write: storage constraints.");
+                return;
+            }
+
+            if (File.Exists(cachePath))
+            {
+                File.Delete(cachePath);
+            }
+
+            File.Move(tempPath, cachePath);
+            TouchCacheFile(cachePath);
+        }
+        catch
         {
-            File.Delete(cachePath);
-        }
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
 
-        File.Move(tempPath, cachePath);
+            throw;
+        }
     }
 
     private async Task<bool> TryDownloadAudioToCacheAsync(string url, string cachePath)
@@ -256,6 +307,13 @@ public class AudioService : IAudioService
             using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
+                return false;
+            }
+
+            var declaredLength = response.Content.Headers.ContentLength ?? 0;
+            if (declaredLength > 0 && !await EnsureStorageForIncomingFileAsync(declaredLength, cachePath))
+            {
+                Console.WriteLine($"Skip download cache (not enough storage/quota): {url}");
                 return false;
             }
 
@@ -274,12 +332,20 @@ public class AudioService : IAudioService
                 return false;
             }
 
+            if (!await EnsureStorageForIncomingFileAsync(size, cachePath))
+            {
+                File.Delete(tempPath);
+                Console.WriteLine($"Skip download cache after write (not enough storage/quota): {url}");
+                return false;
+            }
+
             if (File.Exists(cachePath))
             {
                 File.Delete(cachePath);
             }
 
             File.Move(tempPath, cachePath);
+            TouchCacheFile(cachePath);
             Console.WriteLine($"Audio downloaded and cached: {url}");
             return true;
         }
@@ -287,6 +353,245 @@ public class AudioService : IAudioService
         {
             Console.WriteLine($"Download audio failed ({url}): {ex.Message}");
             return false;
+        }
+    }
+
+    private async Task<Stream?> TryDownloadAudioToMemoryAsync(string url)
+    {
+        try
+        {
+            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            await using var source = await response.Content.ReadAsStreamAsync();
+            var memory = new MemoryStream();
+            await source.CopyToAsync(memory);
+
+            if (memory.Length < MinValidAudioBytes)
+            {
+                memory.Dispose();
+                return null;
+            }
+
+            memory.Position = 0;
+            return memory;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public Task<long> GetCachedAudioSizeBytesAsync()
+    {
+        return Task.FromResult(GetCacheSizeBytes());
+    }
+
+    public Task ClearAudioCacheAsync()
+    {
+        try
+        {
+            var cacheRoot = GetAudioCacheRootPath();
+            if (!Directory.Exists(cacheRoot))
+            {
+                return Task.CompletedTask;
+            }
+
+            foreach (var file in new DirectoryInfo(cacheRoot).GetFiles("*", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Delete cache file failed ({file.Name}): {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Clear audio cache failed: {ex.Message}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> EnsureStorageForIncomingFileAsync(long incomingBytes, string protectedPath)
+    {
+        if (incomingBytes <= 0)
+        {
+            incomingBytes = MinValidAudioBytes;
+        }
+
+        if (incomingBytes > MaxAudioCacheBytes)
+        {
+            Console.WriteLine($"Incoming audio ({incomingBytes} bytes) exceeds cache quota ({MaxAudioCacheBytes} bytes).");
+            return false;
+        }
+
+        var hasQuotaCapacity = EnsureQuotaCapacity(incomingBytes, protectedPath);
+        if (!hasQuotaCapacity)
+        {
+            return false;
+        }
+
+        var availableSpace = TryGetAvailableSpaceBytes();
+        if (availableSpace.HasValue && availableSpace.Value < incomingBytes + MinDeviceFreeSpaceBytes)
+        {
+            var needToFree = incomingBytes + MinDeviceFreeSpaceBytes - availableSpace.Value;
+            CleanupLruBytes(needToFree, protectedPath);
+            availableSpace = TryGetAvailableSpaceBytes();
+        }
+
+        if (availableSpace.HasValue && availableSpace.Value < incomingBytes + MinDeviceFreeSpaceBytes)
+        {
+            Console.WriteLine("Not enough free storage for audio cache write.");
+            return false;
+        }
+
+        await Task.CompletedTask;
+        return true;
+    }
+
+    private bool EnsureQuotaCapacity(long incomingBytes, string protectedPath)
+    {
+        var existingLength = 0L;
+        if (File.Exists(protectedPath))
+        {
+            try
+            {
+                existingLength = new FileInfo(protectedPath).Length;
+            }
+            catch
+            {
+                existingLength = 0;
+            }
+        }
+
+        var currentCacheSize = GetCacheSizeBytes();
+        var projectedSize = currentCacheSize - existingLength + incomingBytes;
+        if (projectedSize <= MaxAudioCacheBytes)
+        {
+            return true;
+        }
+
+        var needToFree = projectedSize - MaxAudioCacheBytes;
+        CleanupLruBytes(needToFree, protectedPath);
+
+        currentCacheSize = GetCacheSizeBytes();
+        projectedSize = currentCacheSize - existingLength + incomingBytes;
+
+        if (projectedSize > MaxAudioCacheBytes)
+        {
+            Console.WriteLine("Audio cache quota reached and could not free enough files.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private long CleanupLruBytes(long bytesNeeded, string protectedPath)
+    {
+        if (bytesNeeded <= 0)
+        {
+            return 0;
+        }
+
+        var freed = 0L;
+        foreach (var file in EnumerateCacheFilesByLru())
+        {
+            if (string.Equals(file.FullName, protectedPath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            try
+            {
+                var len = file.Length;
+                file.Delete();
+                freed += len;
+
+                if (freed >= bytesNeeded)
+                {
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Cannot delete cache file ({file.Name}): {ex.Message}");
+            }
+        }
+
+        return freed;
+    }
+
+    private static IEnumerable<FileInfo> EnumerateCacheFilesByLru()
+    {
+        var cacheRoot = GetAudioCacheRootPath();
+        if (!Directory.Exists(cacheRoot))
+        {
+            return Enumerable.Empty<FileInfo>();
+        }
+
+        return new DirectoryInfo(cacheRoot)
+            .GetFiles("*", SearchOption.TopDirectoryOnly)
+            .Where(f => !f.Name.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)
+                && !f.Name.EndsWith(".download", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(f => f.LastAccessTimeUtc)
+            .ThenBy(f => f.LastWriteTimeUtc)
+            .ToList();
+    }
+
+    private static long GetCacheSizeBytes()
+    {
+        return EnumerateCacheFilesByLru().Sum(f =>
+        {
+            try
+            {
+                return f.Length;
+            }
+            catch
+            {
+                return 0L;
+            }
+        });
+    }
+
+    private static long? TryGetAvailableSpaceBytes()
+    {
+        try
+        {
+            var cacheRoot = GetAudioCacheRootPath();
+            var root = Path.GetPathRoot(cacheRoot);
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                return null;
+            }
+
+            var drive = new DriveInfo(root);
+            return drive.AvailableFreeSpace;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static void TouchCacheFile(string path)
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+            File.SetLastAccessTimeUtc(path, now);
+            File.SetLastWriteTimeUtc(path, now);
+        }
+        catch
+        {
+            // Ignore access-time update failures.
         }
     }
 
