@@ -5,6 +5,13 @@ namespace food_market_narrator.Services;
 public class LocationService : ILocationService
 {
     private bool _isTracking = false;
+    private CancellationTokenSource? _trackingCts;
+    private Task? _trackingTask;
+
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
+    private static readonly GeolocationRequest TrackingRequest =
+        new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
+
     public event EventHandler<Location>? LocationChanged;
 
     // Lấy vị trí hiện tại của người dùng
@@ -40,19 +47,8 @@ public class LocationService : ILocationService
         try
         {
             _isTracking = true;
-            
-            // Thiết lập lắng nghe liên tục
-            Geolocation.Default.LocationChanged += OnGeolocationLocationChanged;
-            Geolocation.Default.ListeningFailed += OnGeolocationListeningFailed;
-
-            var request = new GeolocationListeningRequest(GeolocationAccuracy.Best)
-            {
-                MinimumTime = TimeSpan.FromSeconds(3), // Tần suất cập nhật
-                // MinimumDistance = 1, // Khoảng cách tối thiểu để nhận cập nhật
-                DesiredAccuracy = GeolocationAccuracy.High
-            };
-
-            await Geolocation.Default.StartListeningForegroundAsync(request);
+            _trackingCts = new CancellationTokenSource();
+            _trackingTask = RunTrackingLoopAsync(_trackingCts.Token);
             Console.WriteLine("Bắt đầu theo dõi vị trí");
         }
         catch (Exception ex)
@@ -68,9 +64,7 @@ public class LocationService : ILocationService
 
         try
         {
-            Geolocation.Default.StopListeningForeground();
-            Geolocation.Default.LocationChanged -= OnGeolocationLocationChanged;
-            Geolocation.Default.ListeningFailed -= OnGeolocationListeningFailed;
+            _trackingCts?.Cancel();
             _isTracking = false;
             Console.WriteLine("Ngừng theo dõi vị trí");
         }
@@ -78,17 +72,40 @@ public class LocationService : ILocationService
         {
             Console.WriteLine($"Error stopping tracking: {ex.Message}");
         }
+        finally
+        {
+            _trackingCts?.Dispose();
+            _trackingCts = null;
+            _trackingTask = null;
+        }
     }
 
-    private void OnGeolocationLocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
+    private async Task RunTrackingLoopAsync(CancellationToken cancellationToken)
     {
-        LocationChanged?.Invoke(this, e.Location);
-    }
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var location = await Geolocation.Default.GetLocationAsync(TrackingRequest);
+                if (location != null)
+                {
+                    LocationChanged?.Invoke(this, location);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Tracking loop error: {ex.Message}");
+            }
 
-    private void OnGeolocationListeningFailed(object? sender, GeolocationListeningFailedEventArgs e)
-    {
-        Console.WriteLine($"Location listening failed: {e.Error}");
-        _isTracking = false; // Hoặc logic thử lại
+            try
+            {
+                await Task.Delay(PollInterval, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+        }
     }
 
     private async Task<PermissionStatus> CheckAndRequestPermissionAsync()

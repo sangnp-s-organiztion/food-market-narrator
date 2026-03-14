@@ -47,8 +47,17 @@ VOICE_CONFIG = {
         'language': 'ko-KR',
         'style': 'cheerful',
         'rate': '+0%'
+        },
+        'zho': {
+                'voice': 'zh-CN-XiaoxiaoNeural', # Giọng nữ Trung Quốc phổ thông
+                'language': 'zh-CN',
+                'style': 'friendly',
+                'rate': '+0%'
     }
 }
+
+DEFAULT_LANGUAGES = ['vie', 'eng', 'jap', 'kor']
+SUPPORTED_LANGUAGES = list(VOICE_CONFIG.keys())
 
 # Import translations từ file generate_audio.py
 # (Copy phần TRANSLATIONS từ file kia, hoặc import)
@@ -392,7 +401,8 @@ Popular spot for night owls in District 4.""",
 빠르고 숙련된 준비로 신선한 재료.
 모임에 적합한 넓은 공간.
 4군의 올빼미족에게 인기 있는 장소입니다.""",
-    }
+        },
+        'zho': {}
 }
 
 
@@ -495,85 +505,121 @@ def get_translated_text(script_name, language):
     return None
 
 
-def main():
-    # Lấy API key và region
-    speech_key = os.environ.get('AZURE_SPEECH_KEY')
-    speech_region = os.environ.get('AZURE_SPEECH_REGION', 'southeastasia')
-    
-    # Parse arguments
-    if len(sys.argv) > 2:
-        if sys.argv[1] == '--key':
-            speech_key = sys.argv[2]
-        if len(sys.argv) > 4 and sys.argv[3] == '--region':
-            speech_region = sys.argv[4]
-    
-    if not speech_key:
-        print("Error: AZURE_SPEECH_KEY not found!")
-        print("\nUsage:")
-        print("  Option 1: Set environment variables")
-        print("    set AZURE_SPEECH_KEY=your-key-here")
-        print("    set AZURE_SPEECH_REGION=southeastasia")
-        print("    python generate_audio_azure.py")
-        print("\n  Option 2: Pass as arguments")
-        print("    python generate_audio_azure.py --key your-key --region southeastasia")
-        sys.exit(1)
-    
-    # Tạo speech config
-    speech_config = speechsdk.SpeechConfig(
-        subscription=speech_key,
-        region=speech_region
-    )
-    speech_config.set_speech_synthesis_output_format(
-        speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
-    )
-    
-    # Lấy danh sách scripts
-    script_files = list(SCRIPT_DIR.glob("*.md"))
-    if not script_files:
-        print(f"No script files found in {SCRIPT_DIR}")
-        sys.exit(1)
-    
-    print(f"Found {len(script_files)} script files")
-    print(f"Region: {speech_region}")
-    print(f"\nGenerating audio for languages: vie, eng, jap, kor\n")
-    
-    total_success = 0
-    total_failed = 0
-    
-    # Process each script
-    for script_file in script_files:
-        script_name = script_file.name
-        base_name = script_name.replace('.md', '')
-        
+def parse_args(args):
+        """Parse tham số CLI đơn giản: --key, --region, --lang"""
+        speech_key = os.environ.get('AZURE_SPEECH_KEY')
+        speech_region = os.environ.get('AZURE_SPEECH_REGION', 'southeastasia')
+        languages = DEFAULT_LANGUAGES.copy()
+
+        i = 0
+        while i < len(args):
+                arg = args[i]
+
+                if arg == '--key' and i + 1 < len(args):
+                        speech_key = args[i + 1]
+                        i += 2
+                        continue
+
+                if arg == '--region' and i + 1 < len(args):
+                        speech_region = args[i + 1]
+                        i += 2
+                        continue
+
+                if arg == '--lang' and i + 1 < len(args):
+                        raw_langs = args[i + 1]
+                        parsed = [x.strip().lower() for x in raw_langs.split(',') if x.strip()]
+                        if parsed:
+                                invalid = [x for x in parsed if x not in SUPPORTED_LANGUAGES]
+                                if invalid:
+                                        print(f"Error: Unsupported language(s): {', '.join(invalid)}")
+                                        print(f"Supported: {', '.join(SUPPORTED_LANGUAGES)}")
+                                        sys.exit(1)
+                                languages = parsed
+                        i += 2
+                        continue
+
+                i += 1
+
+        return speech_key, speech_region, languages
+
+
+def run_for_languages(speech_key, speech_region, languages):
+        """Generate audio cho danh sách ngôn ngữ"""
+        if not speech_key:
+                print("Error: AZURE_SPEECH_KEY not found!")
+                print("\nUsage:")
+                print("  Option 1: Set environment variables")
+                print("    set AZURE_SPEECH_KEY=your-key-here")
+                print("    set AZURE_SPEECH_REGION=southeastasia")
+                print("    python generate_audio_azure.py")
+                print("\n  Option 2: Pass as arguments")
+                print("    python generate_audio_azure.py --key your-key --region southeastasia")
+                print("\n  Option 3: Run selected language(s)")
+                print("    python generate_audio_azure.py --key your-key --lang vie")
+                print("    python generate_audio_azure.py --key your-key --lang eng,jap")
+                sys.exit(1)
+
+        # Tạo speech config
+        speech_config = speechsdk.SpeechConfig(
+                subscription=speech_key,
+                region=speech_region
+        )
+        speech_config.set_speech_synthesis_output_format(
+                speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
+        )
+
+        # Lấy danh sách scripts
+        script_files = list(SCRIPT_DIR.glob("*.md"))
+        if not script_files:
+                print(f"No script files found in {SCRIPT_DIR}")
+                sys.exit(1)
+
+        print(f"Found {len(script_files)} script files")
+        print(f"Region: {speech_region}")
+        print(f"\nGenerating audio for languages: {', '.join(languages)}\n")
+
+        total_success = 0
+        total_failed = 0
+
+        # Process each script
+        for script_file in script_files:
+                script_name = script_file.name
+                base_name = script_name.replace('.md', '')
+
+                print(f"\n{'='*60}")
+                print(f"Processing: {script_name}")
+                print(f"{'='*60}")
+
+                for lang_code in languages:
+                        print(f"\n[{lang_code.upper()}]")
+
+                        text = get_translated_text(script_name, lang_code)
+
+                        if not text:
+                                print(f"  ⚠ Skipping: No translation available")
+                                continue
+
+                        output_dir = AUDIO_DIR / lang_code
+                        output_dir.mkdir(parents=True, exist_ok=True)
+
+                        output_file = output_dir / f"{base_name}.mp3"
+
+                        if generate_audio(speech_config, text, lang_code, output_file):
+                                total_success += 1
+                        else:
+                                total_failed += 1
+
         print(f"\n{'='*60}")
-        print(f"Processing: {script_name}")
+        print(f"SUMMARY")
         print(f"{'='*60}")
-        
-        for lang_code in ['vie', 'eng', 'jap', 'kor']:
-            print(f"\n[{lang_code.upper()}]")
-            
-            text = get_translated_text(script_name, lang_code)
-            
-            if not text:
-                print(f"  ⚠ Skipping: No translation available")
-                continue
-            
-            output_dir = AUDIO_DIR / lang_code
-            output_dir.mkdir(parents=True, exist_ok=True)
-            
-            output_file = output_dir / f"{base_name}.mp3"
-            
-            if generate_audio(speech_config, text, lang_code, output_file):
-                total_success += 1
-            else:
-                total_failed += 1
-    
-    print(f"\n{'='*60}")
-    print(f"SUMMARY")
-    print(f"{'='*60}")
-    print(f"✓ Success: {total_success} files")
-    print(f"✗ Failed:  {total_failed} files")
-    print(f"\nAudio files saved to: {AUDIO_DIR}")
+        print(f"✓ Success: {total_success} files")
+        print(f"✗ Failed:  {total_failed} files")
+        print(f"\nAudio files saved to: {AUDIO_DIR}")
+
+
+def main():
+        speech_key, speech_region, languages = parse_args(sys.argv[1:])
+        run_for_languages(speech_key, speech_region, languages)
 
 
 if __name__ == "__main__":
