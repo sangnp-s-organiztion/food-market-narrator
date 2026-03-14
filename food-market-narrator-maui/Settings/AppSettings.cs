@@ -20,6 +20,7 @@ public static class AppSettings
 
     public const string RestaurantEndpoint = "restaurant";
     public const string LanguageEndpoint = "language";
+    public const double MapHighlightDistanceMeters = 20;
     public const double TriggerDistanceMeters = 30;
     public const double PoiEnterRadiusMeters = 30;
     public const double PoiExitRadiusMeters = 40;

@@ -7,8 +7,10 @@ public class AudioService : IAudioService
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
     private bool _isPaused;
+    private string? _currentTrackKey;
     public bool IsPlaying => _player?.IsPlaying ?? false;
     public bool IsPaused => _isPaused;
+    public string? CurrentTrackKey => _currentTrackKey;
     public TimeSpan Duration => TimeSpan.FromSeconds(_player?.Duration ?? 0d);
     public TimeSpan CurrentPosition => TimeSpan.FromSeconds(_player?.CurrentPosition ?? 0d);
     public event EventHandler? PlaybackEnded;
@@ -35,6 +37,7 @@ public class AudioService : IAudioService
         try
         {
             var path = ResolveAudioPath(language, fileName);
+            _currentTrackKey = path;
             Console.WriteLine($"Loading path: {path}");
 
             var stream = await FileSystem.OpenAppPackageFileAsync(path);
@@ -92,9 +95,21 @@ public class AudioService : IAudioService
         _isPaused = false;
     }
 
+    public bool IsCurrentTrack(string language, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(_currentTrackKey) || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var resolved = ResolveAudioPath(language, fileName);
+        return string.Equals(_currentTrackKey, resolved, StringComparison.OrdinalIgnoreCase);
+    }
+
     private void OnPlaybackEnded(object? sender, EventArgs e)
     {
         _isPaused = false;
+        _currentTrackKey = null;
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 
@@ -108,5 +123,6 @@ public class AudioService : IAudioService
         _player?.Stop();
         _player = null;
         _isPaused = false;
+        _currentTrackKey = null;
     }
 }

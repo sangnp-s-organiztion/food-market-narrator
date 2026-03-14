@@ -57,8 +57,14 @@ public partial class POIDetailPage : ContentPage
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			BindingContext = poi;
-			ResetAudioProgressUi();
+			SyncAudioUiWithService();
 		});
+	}
+
+	protected override void OnAppearing()
+	{
+		base.OnAppearing();
+		SyncAudioUiWithService();
 	}
 
 	private async void OnPlayAudioTapped(object sender, EventArgs e)
@@ -68,8 +74,15 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		// Đang phát → tạm dừng
-		if (_audioService.IsPlaying)
+		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl))
+		{
+			return;
+		}
+
+		var isThisTrack = _audioService.IsCurrentTrack(language, audioUrl);
+
+		// Đang phát đúng track hiện tại của trang -> tạm dừng
+		if (isThisTrack && _audioService.IsPlaying)
 		{
 			_audioService.Pause();
 			SetPlayButtonState(false);
@@ -77,8 +90,8 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		// Đang tạm dừng → tiếp tục phát
-		if (_audioService.IsPaused)
+		// Đang tạm dừng đúng track hiện tại của trang -> tiếp tục phát
+		if (isThisTrack && _audioService.IsPaused)
 		{
 			_audioService.Resume();
 			SetPlayButtonState(true);
@@ -86,24 +99,15 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		// Chưa phát gì → bắt đầu phát mới
-		if (BindingContext is not POI poi)
-		{
-			return;
-		}
-
-		var language = _languageService?.CurrentLanguage ?? "vi-VN";
-		var audioUrl = poi.GetAudioUrl(language);
-
-		if (string.IsNullOrWhiteSpace(audioUrl))
-		{
-			return;
-		}
-
+		// Track khác đang phát hoặc chưa phát gì -> phát track của POI hiện tại
 		ResetAudioProgressUi();
 		await _audioService.PlaySound(language, audioUrl);
 		SetPlayButtonState(_audioService.IsPlaying);
-		StartProgressTimer();
+
+		if (_audioService.IsPlaying)
+		{
+			StartProgressTimer();
+		}
 	}
 
 	private void StartProgressTimer()
@@ -158,6 +162,68 @@ public partial class POIDetailPage : ContentPage
 		TotalTimeLabel.Text = "00:00";
 		AudioProgressBar.Progress = 0;
 		SetPlayButtonState(false);
+	}
+
+	private void SyncAudioUiWithService()
+	{
+		if (_audioService is null)
+		{
+			ResetAudioProgressUi();
+			return;
+		}
+
+		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl))
+		{
+			ResetAudioProgressUi();
+			return;
+		}
+
+		var isThisTrack = _audioService.IsCurrentTrack(language, audioUrl);
+		if (!isThisTrack)
+		{
+			StopProgressTimer();
+			ResetAudioProgressUi();
+			return;
+		}
+
+		if (_audioService.IsPlaying)
+		{
+			SetPlayButtonState(true);
+			UpdateAudioProgressUi();
+			StartProgressTimer();
+			return;
+		}
+
+		StopProgressTimer();
+
+		if (_audioService.IsPaused)
+		{
+			SetPlayButtonState(false);
+			UpdateAudioProgressUi();
+			return;
+		}
+
+		ResetAudioProgressUi();
+	}
+
+	private bool TryGetCurrentPoiAudio(out string language, out string audioUrl)
+	{
+		language = _languageService?.CurrentLanguage ?? "vi-VN";
+		audioUrl = string.Empty;
+
+		if (BindingContext is not POI poi)
+		{
+			return false;
+		}
+
+		var resolvedAudio = poi.GetAudioUrl(language);
+		if (string.IsNullOrWhiteSpace(resolvedAudio))
+		{
+			return false;
+		}
+
+		audioUrl = resolvedAudio;
+		return true;
 	}
 
 	private void SetPlayButtonState(bool isPlaying)

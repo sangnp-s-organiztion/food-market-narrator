@@ -8,8 +8,10 @@ public class AudioService : IAudioService
     private readonly IAudioManager _audioManager;
     private IAudioPlayer? _player;
     private bool _isPaused;
+    private string? _currentTrackKey;
     public bool IsPlaying => _player?.IsPlaying ?? false;
     public bool IsPaused => _isPaused;
+    public string? CurrentTrackKey => _currentTrackKey;
     public TimeSpan Duration => TimeSpan.FromSeconds(_player?.Duration ?? 0d);
     public TimeSpan CurrentPosition => TimeSpan.FromSeconds(_player?.CurrentPosition ?? 0d);
     public event EventHandler? PlaybackEnded;
@@ -36,6 +38,7 @@ public class AudioService : IAudioService
         try
         {
             var path = ResolveAudioPath(language, fileName);
+            _currentTrackKey = path;
             Console.WriteLine($"Loading path: {path}");
 
             var stream = await FileSystem.OpenAppPackageFileAsync(path);
@@ -93,9 +96,21 @@ public class AudioService : IAudioService
         _isPaused = false;
     }
 
+    public bool IsCurrentTrack(string language, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(_currentTrackKey) || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var resolved = ResolveAudioPath(language, fileName);
+        return string.Equals(_currentTrackKey, resolved, StringComparison.OrdinalIgnoreCase);
+    }
+
     private void OnPlaybackEnded(object? sender, EventArgs e)
     {
         _isPaused = false;
+        _currentTrackKey = null;
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 
@@ -109,13 +124,17 @@ public class AudioService : IAudioService
         _player?.Stop();
         _player = null;
         _isPaused = false;
+        _currentTrackKey = null;
     }
 }
 
 ===== LanguageService.cs =====
 using System.Globalization;
+using System.Net.Http.Json;
+using food_market_narrator.Models;
 using food_market_narrator.Resources;
 using food_market_narrator.Resources.Localization;
+using food_market_narrator.Settings;
 
 namespace food_market_narrator.Services;
 
@@ -123,6 +142,13 @@ public class LanguageService : ILanguageService
 {
 
     private const string LANGUAGE_KEY = "AppLanguage";
+    private readonly HttpClient _httpClient;
+    private List<LanguageModel>? _cachedLanguages;
+
+    public LanguageService(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
 
     public string CurrentLanguage
     {
@@ -132,6 +158,63 @@ public class LanguageService : ILanguageService
             return Preferences.Get(LANGUAGE_KEY, "vi-VN"); 
             // máº·c Ä‘á»‹nh tiáº¿ng Viá»‡t (vi-VN) náº¿u chÆ°a cÃ³
         }
+    }
+
+    public async Task<List<LanguageModel>> GetAllLanguagesAsync()
+    {
+        if (_cachedLanguages != null && _cachedLanguages.Count > 0)
+        {
+            return _cachedLanguages;
+        }
+
+        var baseCandidates = new List<string>();
+
+        if (_httpClient.BaseAddress != null)
+        {
+            baseCandidates.Add(_httpClient.BaseAddress.ToString());
+        }
+
+        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+
+        foreach (var baseUrl in baseCandidates
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var requestUrl = new Uri(new Uri(baseUrl), AppSettings.LanguageEndpoint);
+                Console.WriteLine($"[LanguageService] Trying URL = {requestUrl}");
+
+                var data = await _httpClient.GetFromJsonAsync<List<LanguageModel>>(requestUrl);
+
+                if (data == null || data.Count == 0)
+                {
+                    continue;
+                }
+
+                _cachedLanguages = data;
+                Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages.");
+                return _cachedLanguages;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LanguageService] Request failed: {baseUrl} -> {ex.Message}");
+            }
+        }
+
+        return new List<LanguageModel>();
+    }
+
+    public async Task<LanguageModel?> GetLanguageByCodeAsync(string languageCode)
+    {
+        if (string.IsNullOrWhiteSpace(languageCode))
+        {
+            return null;
+        }
+
+        var allLanguages = await GetAllLanguagesAsync();
+        return allLanguages.FirstOrDefault(x =>
+            string.Equals(x.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
     }
 
 	// Thay Ä‘á»•i ngÃ´n ngá»¯ á»©ng dá»¥ng
@@ -148,7 +231,10 @@ public class LanguageService : ILanguageService
         AppResources.Culture = culture;
 
         // Reload AppShell (nháº¹ hÆ¡n recreate toÃ n app)
-        Application.Current.Windows[0].Page = new AppShell();
+        if (Application.Current?.Windows?.Count > 0)
+        {
+            Application.Current.Windows[0].Page = new AppShell();
+        }
 
     }
 }
@@ -206,7 +292,7 @@ public class LocationService : ILocationService
 
             var request = new GeolocationListeningRequest(GeolocationAccuracy.Best)
             {
-                MinimumTime = TimeSpan.FromSeconds(3), // Táº§n suáº¥t cáº­p nháº­t
+                MinimumTime = TimeSpan.FromSeconds(1), // Cáº­p nháº­t thÆ°á»ng xuyÃªn hÆ¡n Ä‘á»ƒ báº¯t chuyá»ƒn Ä‘á»™ng ngáº¯n
                 DesiredAccuracy = GeolocationAccuracy.High
             };
 
@@ -267,19 +353,18 @@ public class LocationService : ILocationService
 ===== NarrationFlowService.cs =====
 using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
+using food_market_narrator.Settings;
 
 namespace food_market_narrator.Services;
 
 public class NarrationFlowService : INarrationFlowService
 {
-    private readonly POIService _poiService;
+    private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
     private readonly IAudioService _audioService;
     private readonly ILanguageService _languageService;
 
     private readonly HashSet<string> _playedPOIs = new();
-
-    private const double TRIGGER_DISTANCE_METERS = 30;
 
     private bool _isNarrationEnabled = false;
 
@@ -288,7 +373,7 @@ public class NarrationFlowService : INarrationFlowService
     public bool IsNarrating => _isNarrationEnabled;
 
     public NarrationFlowService(
-        POIService poiService,
+        IPOIService poiService,
         ILocationService locationService,
         IAudioService audioService,
         ILanguageService languageService)
@@ -379,41 +464,31 @@ public class NarrationFlowService : INarrationFlowService
 
         //Console.WriteLine($"POI COUNT: {pois.Count()}");
 
-        var nearestPOI = pois
-            .Select(p => new
-            {
-                POI = p,
-                Distance = Location.CalculateDistance(
-                    currentLocation,
-                    new Location(p.Latitude, p.Longitude),
-                    DistanceUnits.Kilometers)
-            })
-            .OrderBy(x => x.Distance)
-            .FirstOrDefault();
+        var nearestPoi = _poiService.GetNearestPOI(currentLocation, pois);
 
-        if (nearestPOI == null)
+        if (nearestPoi == null)
         {
             Console.WriteLine("Nearest POI NULL - No valid POI found");
             return;
         }
 
-        var selectedAudio = nearestPOI.POI.GetAudioUrl(_languageService.CurrentLanguage);
+        var selectedAudio = nearestPoi.GetAudioUrl(_languageService.CurrentLanguage);
 
         if (string.IsNullOrWhiteSpace(selectedAudio))
         {
-            Console.WriteLine($"No audio found for POI: {nearestPOI.POI.Name}");
+            Console.WriteLine($"No audio found for POI: {nearestPoi.Name}");
             return;
         }
 
-        double distanceMeters = nearestPOI.Distance * 1000;
-        Console.WriteLine($"Nearest POI: {nearestPOI.POI.restaurantId} - {distanceMeters:F1}m");
+        var distanceMeters = _poiService.GetDistanceMeters(currentLocation, nearestPoi);
+        Console.WriteLine($"Nearest POI: {nearestPoi.restaurantId} - {distanceMeters:F1}m");
 
         // Náº¿u force (manual trigger) hoáº·c trong khoáº£ng cÃ¡ch cho phÃ©p
-        if (force || distanceMeters <= TRIGGER_DISTANCE_METERS)
+        if (force || distanceMeters <= AppSettings.TriggerDistanceMeters)
         {
             Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
 
-            var poiId = nearestPOI.POI.restaurantId;
+            var poiId = nearestPoi.restaurantId;
             var alreadyPlayed = _playedPOIs.Contains(poiId);
 
             // Force luÃ´n cho phÃ©p phÃ¡t láº¡i POI hiá»‡n táº¡i
@@ -422,7 +497,7 @@ public class NarrationFlowService : INarrationFlowService
                 Console.WriteLine("Playing audio...");
 
                 Console.WriteLine("Add to queue...");
-                _playQueue.Enqueue(nearestPOI.POI);
+                _playQueue.Enqueue(nearestPoi);
 
                 if (!alreadyPlayed)
                 {
@@ -438,7 +513,7 @@ public class NarrationFlowService : INarrationFlowService
         }
         else
         {
-            Console.WriteLine($"Too far from nearest POI ({distanceMeters:F1}m > {TRIGGER_DISTANCE_METERS}m)");
+            Console.WriteLine($"Too far from nearest POI ({distanceMeters:F1}m > {AppSettings.TriggerDistanceMeters}m)");
         }
 
         Console.WriteLine("=== CHECK NARRATE END ===");
@@ -487,6 +562,7 @@ public class NarrationFlowService : INarrationFlowService
 
 ===== POIService.cs =====
 using food_market_narrator.Models;
+using food_market_narrator.Settings;
 using System.Net.Http.Json;
 
 
@@ -498,8 +574,6 @@ public class POIService : IPOIService
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
     private List<POI>? _pois;
-    private const double EnterRadius = 30; // mÃ©t
-    private const double ExitRadius = 40;  // mÃ©t
 
     // Danh sach cac POI
     private readonly HttpClient _httpClient;
@@ -507,6 +581,7 @@ public class POIService : IPOIService
     public POIService(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        Console.WriteLine($"[POIService] HttpClient.BaseAddress = {_httpClient.BaseAddress}");
     }
 
     public async Task<List<POI>> GetPOIsAsync()
@@ -514,24 +589,46 @@ public class POIService : IPOIService
         if (_pois != null && _pois.Count > 0)
              return _pois;
 
-        try
+        var baseCandidates = new List<string>();
+
+        if (_httpClient.BaseAddress != null)
         {
-            var url = "http://10.0.2.2:5044/api/restaurant";
-            // Náº¿u cháº¡y Windows local app thÃ¬ dÃ¹ng localhost
-
-            var data = await _httpClient.GetFromJsonAsync<List<POI>>(url);
-
-            if (data == null)
-                return new List<POI>();
-
-            _pois = data; // Cache the data
-            return _pois;
+            baseCandidates.Add(_httpClient.BaseAddress.ToString());
         }
-        catch (Exception ex)
+
+        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+        var uniqueBaseCandidates = baseCandidates
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var baseUrl in uniqueBaseCandidates)
         {
-            Console.WriteLine($"Error fetching POIs: {ex.Message}");
-            return new List<POI>();
+            try
+            {
+                var requestUrl = new Uri(new Uri(baseUrl), AppSettings.RestaurantEndpoint);
+                Console.WriteLine($"[POIService] Trying URL = {requestUrl}");
+
+                var data = await _httpClient.GetFromJsonAsync<List<POI>>(requestUrl);
+
+                if (data == null)
+                {
+                    Console.WriteLine($"[POIService] Empty response from {requestUrl}");
+                    continue;
+                }
+
+                _pois = data;
+                Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from {requestUrl}");
+                return _pois;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[POIService] Request failed: {baseUrl} -> {ex.Message}");
+            }
         }
+
+        Console.WriteLine("[POIService] Error fetching POIs from all candidates.");
+        return new List<POI>();
     }
 
     // Láº¥y táº¥t cáº£ cÃ¡c POIs Ä‘á»“ng bá»™
@@ -558,17 +655,39 @@ public class POIService : IPOIService
 
     public POI? GetNearestPOI(double currentLat, double currentLng)
     {
-        if (_pois == null || !_pois.Any())
+        return GetNearestPOI(new Location(currentLat, currentLng), _pois);
+    }
+
+    public POI? GetNearestPOI(Location currentLocation, IEnumerable<POI>? pois = null)
+    {
+        var source = pois?.ToList() ?? _pois;
+        if (source == null || source.Count == 0)
+        {
             return null;
+        }
 
-        var currentLocation = new Location(currentLat, currentLng);
+        POI? nearest = null;
+        double minDistance = double.MaxValue;
 
-        return _pois
-            .OrderBy(poi => Location.CalculateDistance(
-                currentLocation,
-                new Location(poi.Latitude, poi.Longitude),
-                DistanceUnits.Kilometers))
-            .FirstOrDefault();
+        foreach (var poi in source)
+        {
+            var distance = GetDistanceMeters(currentLocation, poi);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearest = poi;
+            }
+        }
+
+        return nearest;
+    }
+
+    public double GetDistanceMeters(Location currentLocation, POI poi)
+    {
+        return Location.CalculateDistance(
+            currentLocation,
+            new Location(poi.Latitude, poi.Longitude),
+            DistanceUnits.Kilometers) * 1000;
     }
 
     // Láº¥y POI gáº§n nháº¥t dá»±a trÃªn vá»‹ trÃ­ hiá»‡n táº¡i vÃ  cÃ¡c POIs
@@ -579,33 +698,17 @@ public class POIService : IPOIService
 
         var currentLocation = new Location(currentLat, currentLng);
 
-        POI? nearest = null;
-        double minDistance = double.MaxValue;
-
-        // TÃ¬m POI gáº§n nháº¥t
-        foreach (var poi in _pois)
-        {
-            var poiLocation = new Location(poi.Latitude, poi.Longitude);
-
-            var distance = Location.CalculateDistance(
-                currentLocation,
-                poiLocation,
-                DistanceUnits.Kilometers) * 1000; // Ä‘á»•i sang mÃ©t
-
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearest = poi;
-            }
-        }
+        var nearest = GetNearestPOI(currentLocation, _pois);
 
         if (nearest == null)
             return null;
 
+        var minDistance = GetDistanceMeters(currentLocation, nearest);
+
         if (!_isInsidePOI)
         {
             // ChÆ°a á»Ÿ trong POI â†’ xÃ©t EnterRadius
-            if (minDistance <= EnterRadius)
+            if (minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _isInsidePOI = true;
                 _lastNearest = nearest;
@@ -617,7 +720,7 @@ public class POIService : IPOIService
         {
             // Äang á»Ÿ trong POI
             // Náº¿u Ä‘á»•i sang POI khÃ¡c vÃ  Ä‘á»§ gáº§n
-            if (nearest != _lastNearest && minDistance <= EnterRadius)
+            if (nearest != _lastNearest && minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _lastNearest = nearest;
                 return nearest; // Trigger POI má»›i
@@ -635,7 +738,7 @@ public class POIService : IPOIService
                     lastLocation,
                     DistanceUnits.Kilometers) * 1000;
 
-                if (distanceFromLast > ExitRadius)
+                if (distanceFromLast > AppSettings.PoiExitRadiusMeters)
                 {
                     _isInsidePOI = false;
                     _lastNearest = null;
