@@ -84,18 +84,18 @@
 
             <!-- Right Controls -->
             <VerticalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center" Spacing="15" Margin="15">
-                <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
-                     <Border.Shadow>
-                         <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
-                    </Border.Shadow>
-                    <Label Text="&#xf14e;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
-                </Border>
-                 <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
-                     <Border.Shadow>
-                         <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
-                    </Border.Shadow>
-                    <Label Text="&#xf5fd;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
-                </Border>
+                    <!-- <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5"          BackgroundColor="White" StrokeThickness="0">
+                        <Border.Shadow>
+                            <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
+                        </Border.Shadow>
+                        <Label Text="&#xf14e;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
+                    </Border>
+                    <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
+                        <Border.Shadow>
+                            <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
+                        </Border.Shadow>
+                        <Label Text="&#xf5fd;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
+                    </Border> -->
             </VerticalStackLayout>
 
             <!-- Bottom Detail Card -->
@@ -125,7 +125,7 @@
                         <HorizontalStackLayout Spacing="10" Margin="0,5,0,0">
                              <HorizontalStackLayout Spacing="4">
                                   <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#5F6368" FontSize="12" VerticalOptions="Center"/>
-                                  <Label Text="200m" TextColor="#5F6368" FontSize="12" VerticalOptions="Center"/>
+                                  <Label Text="200m" TextColor="#5F6368" FontSize="12" VerticalOptions="Center" />
                              </HorizontalStackLayout>
                              <HorizontalStackLayout Spacing="4">
                                   <Label Text="&#xf017;" FontFamily="FASolid" TextColor="#4CAF50" FontSize="12" VerticalOptions="Center"/>

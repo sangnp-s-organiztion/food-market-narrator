@@ -20,7 +20,7 @@ public partial class MainPage : ContentPage
     private readonly Dictionary<string, Border> _languageOptions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLanguageOptionsLoaded;
-    private bool _isInsidePOIUI = false; // trạng thái UI hiện tại
+    private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
 
     // private static bool _hasShownLanguagePopupThisSession;
     // private bool _languageSelected = Preferences.Get("language_selected", false);
@@ -52,7 +52,7 @@ public partial class MainPage : ContentPage
         // _narrationFlowService.StartNarration();
 
         // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 18);
+        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19); // zoom level cao hơn để tập trung vào khu vực chợ
         // Hiện popup chọn ngôn ngữ khi mới vào app
         bool languageSelected = Preferences.Get("language_selected", false);
         Console.WriteLine("Language selected: " + languageSelected);
@@ -175,6 +175,7 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // Hàm đảm bảo rằng các tùy chọn ngôn ngữ đã được tải và hiển thị trong popup
     private async Task EnsureLanguageOptionsLoadedAsync()
     {
         if (_isLanguageOptionsLoaded)
@@ -196,6 +197,7 @@ public partial class MainPage : ContentPage
         ApplyLanguageSelectionStyle(_languageService.CurrentLanguage);
     }
 
+    // Hàm xây dựng giao diện cho các tùy chọn ngôn ngữ trong popup
     private void BuildLanguageOptions(IEnumerable<LanguageModel> languages)
     {
         LanguageOptionsContainer.Children.Clear();
@@ -270,6 +272,7 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // Hàm xử lý khi người dùng chọn một ngôn ngữ từ popup
     private async Task OnLanguageOptionTappedAsync(string cultureCode)
     {
         if (string.IsNullOrWhiteSpace(cultureCode))
@@ -291,7 +294,8 @@ public partial class MainPage : ContentPage
         _narrationFlowService.StartNarration();
         UpdateFloatingButtonUI();
     }
-
+    
+    // Hàm lấy biểu tượng cờ dựa trên mã ngôn ngữ
     private string GetFlagByLanguageCode(string languageCode)
     {
         return languageCode.ToLowerInvariant() switch

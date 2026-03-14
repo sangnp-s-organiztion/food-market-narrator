@@ -27,14 +27,18 @@ public partial class MapPage : ContentPage
         _locationService = locationService;
     }
 
+    // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
+        // Hủy đăng ký hàm xử lí sự kiện thay đổi vị trí ng dùng để tránh bị đăng ký nhiều lần nếu người dùng vào ra trang nhiều lần
         _locationService.LocationChanged -= OnLocationChangedForMap;
+
+        // Đăng ký lại hàm xử lí sự kiện thay đổi vị trí ng dùng để cập nhật bản đồ khi vị trí thay đổi
         _locationService.LocationChanged += OnLocationChangedForMap;
         await _locationService.StartTrackingAsync();
 
+        // Tải dữ liệu bản đồ và hiển thị các POI, cũng như vị trí người dùng nếu đã có
         await MapHelper.LoadMapAsync(
         mapControl,
         _poiService,
@@ -47,8 +51,10 @@ public partial class MapPage : ContentPage
         base.OnDisappearing();
     }
 
+    // cập nhật vị trí trên bản đồ khi vị trí ng dùng changed và kiểm tra xem có POI nào gần đó để 2light không
     private void OnLocationChangedForMap(object? sender, Location location)
     {
+        // Cập nhật vị trí người dùng trên bản đồ và kiểm tra POI gần nhất
         MainThread.BeginInvokeOnMainThread(() =>
         {
             MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
