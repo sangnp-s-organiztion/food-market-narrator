@@ -84,18 +84,35 @@
 
             <!-- Right Controls -->
             <VerticalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center" Spacing="15" Margin="15">
-                    <!-- <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5"          BackgroundColor="White" StrokeThickness="0">
-                        <Border.Shadow>
-                            <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
-                        </Border.Shadow>
-                        <Label Text="&#xf14e;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
-                    </Border>
-                    <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
-                        <Border.Shadow>
-                            <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
-                        </Border.Shadow>
-                        <Label Text="&#xf5fd;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="20"/>
-                    </Border> -->
+                <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnZoomInTapped"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="&#x2b;" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="22" FontAttributes="Bold"/>
+                </Border>
+
+                <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnZoomOutTapped"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="&#x2212;" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="26" FontAttributes="Bold"/>
+                </Border>
+
+                <Border HeightRequest="45" WidthRequest="45" StrokeShape="RoundRectangle 22.5" BackgroundColor="White" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="#000" Opacity="0.15" Radius="5"/>
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMyLocationTapped"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="&#xf3c5;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="18"/>
+                </Border>
             </VerticalStackLayout>
 
             <!-- Bottom Detail Card -->
