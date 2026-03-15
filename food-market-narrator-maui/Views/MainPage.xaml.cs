@@ -335,6 +335,8 @@ public partial class MainPage : ContentPage
             return;
         }
 
+        var wasNarrating = _narrationFlowService.IsNarrating;
+
         ApplyLanguageSelectionStyle(cultureCode);
         await HideLanguagePopupAsync();
 
@@ -346,7 +348,17 @@ public partial class MainPage : ContentPage
             _languageService.ChangeLanguage(cultureCode);
         }
 
-        _narrationFlowService.StartNarration();
+        if (wasNarrating)
+        {
+            _narrationFlowService.StartNarration();
+        }
+        else
+        {
+            // Keep manual OFF state after shell reload triggered by language change.
+            _hasAutoStartedNarrationThisSession = true;
+            _narrationFlowService.StopNarration();
+        }
+
         UpdateFloatingButtonUI();
     }
     
