@@ -5,15 +5,15 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:food_market_narrator"
-    Title="food_market_narrator">
+    Title="Chợ ẩm thực Vĩnh Khánh">
 
     <ShellContent
-        Title="Home"
+        Title="Trang chủ"
         ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
 
     <ShellContent
-        Title="MapPage"
+        Title="Bản đồ"
         ContentTemplate="{DataTemplate views:MapPage}"
         Route="MapPage" />
     

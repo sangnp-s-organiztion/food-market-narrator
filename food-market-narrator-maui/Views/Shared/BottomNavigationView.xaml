@@ -58,7 +58,7 @@
             <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm để mở Cài đặt -->
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped=""/>
+                    <TapGestureRecognizer Tapped="OpenSettings"/>
                 </VerticalStackLayout.GestureRecognizers>
                 
                 <Label Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>

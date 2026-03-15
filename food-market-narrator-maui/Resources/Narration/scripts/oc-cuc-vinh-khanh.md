@@ -1,5 +1,6 @@
-🎤 Ốc Cúc Vĩnh Khánh Quận 4
+Ớt Xiêm Quán
 
-Một quán ốc khác bạn có thể bắt gặp khi đi dọc phố…
-Quán phục vụ đa dạng các món ốc hải sản hấp xào nướng theo phong cách Sài Gòn…
-Đây là lựa chọn thêm để so sánh hương vị giữa nhiều quán ốc khác nhau trên đường.
+Ớt Xiêm Quán là quán nhậu quen thuộc tại khu ẩm thực Vĩnh Khánh, Quận 4.
+Quán chuyên các món lẩu nóng hổi, cua, ghẹ tươi và nhiều món hải sản hấp dẫn.
+Không gian bình dân, nhộn nhịp, phù hợp đi nhóm bạn hoặc tụ họp buổi tối.
+Nếu bạn thích hương vị đậm đà và thực đơn hải sản đa dạng, Ớt Xiêm Quán là điểm dừng đáng thử.

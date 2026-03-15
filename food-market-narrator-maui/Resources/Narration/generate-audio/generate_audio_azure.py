@@ -1,62 +1,51 @@
-"""
-Script tạo audio sử dụng Azure Speech Services
-Giọng Việt tốt hơn OpenAI TTS, phù hợp cho tiếng Việt
+"""Script tạo audio sử dụng Edge TTS.
 
 Cách sử dụng:
-    python generate_audio_azure.py --key YOUR_AZURE_KEY --region YOUR_REGION
-    
-    Hoặc đặt biến môi trường:
-    set AZURE_SPEECH_KEY=your-key-here
-    set AZURE_SPEECH_REGION=southeastasia
-    python generate_audio_azure.py
+        python generate_audio_azure.py
+        python generate_audio_azure.py --lang vie
+        python generate_audio_azure.py --lang eng,jap,zho
 """
 
-import os
+import asyncio
 import sys
 from pathlib import Path
-import azure.cognitiveservices.speech as speechsdk
+import edge_tts
 import re
 
 # Cấu hình
 SCRIPT_DIR = Path(__file__).parent.parent / "scripts"
 AUDIO_DIR = Path(__file__).parent.parent / "audio" / "languages"
 
-# Cấu hình giọng nói Azure cho từng ngôn ngữ
-# Xem thêm: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support
+# Cấu hình giọng nói Edge TTS cho từng ngôn ngữ
 VOICE_CONFIG = {
     'vie': {
-        'voice': 'vi-VN-NamMinhNeural',  # Giọng nam Việt tự nhiên, trầm ấm
-        'language': 'vi-VN',
-        'style': 'gentle',               # cheerful, friendly, gentle
-        'rate': '-5%'                    # -50% to +100%, chậm hơn 1 chút để tự nhiên
+                'voice': 'vi-VN-NamMinhNeural',
+                'folder': 'vi-VN',
+                'rate': '-5%'
     },
     'eng': {
-        'voice': 'en-US-JennyNeural',    # Giọng nữ Mỹ
-        'language': 'en-US',
-        'style': 'friendly',
+                'voice': 'en-US-JennyNeural',
+                'folder': 'en-US',
         'rate': '+0%'
     },
     'jap': {
-        'voice': 'ja-JP-NanamiNeural',   # Giọng nữ Nhật
-        'language': 'ja-JP',
-        'style': 'cheerful',
+                'voice': 'ja-JP-NanamiNeural',
+                'folder': 'ja-JP',
         'rate': '+0%'
     },
     'kor': {
-        'voice': 'ko-KR-SunHiNeural',    # Giọng nữ Hàn
-        'language': 'ko-KR',
-        'style': 'cheerful',
-        'rate': '+0%'
+                'voice': 'ko-KR-SunHiNeural',
+                'folder': 'ko-KR',
+                'rate': '+0%'
         },
         'zho': {
-                'voice': 'zh-CN-XiaoxiaoNeural', # Giọng nữ Trung Quốc phổ thông
-                'language': 'zh-CN',
-                'style': 'friendly',
+                'voice': 'zh-CN-XiaoxiaoNeural',
+                'folder': 'zh-CN',
                 'rate': '+0%'
     }
 }
 
-DEFAULT_LANGUAGES = ['vie', 'eng', 'jap', 'kor']
+DEFAULT_LANGUAGES = ['vie', 'eng', 'jap', 'kor', 'zho']
 SUPPORTED_LANGUAGES = list(VOICE_CONFIG.keys())
 
 # Import translations từ file generate_audio.py
@@ -162,12 +151,12 @@ Fresh seafood prepared carefully to preserve natural flavors.
 Clean, comfortable space.
 Ideal for those seeking quality shellfish experiences.""",
         
-        'oc-cuc-vinh-khanh': """Oc Cuc Vinh Khanh
+        'oc-cuc-vinh-khanh': """Ot Xiem Quan
 
-Oc Cuc is a familiar name on Vinh Khanh food street.
-Diverse menu from traditional to creative shellfish dishes.
-Lively atmosphere, especially in the evening.
-A must-visit when exploring District 4 cuisine.""",
+Ot Xiem Quan is a familiar drinking spot in the Vinh Khanh food area of District 4.
+The restaurant specializes in hot pot, fresh crab, swimming crab, and a wide variety of seafood dishes.
+The atmosphere is casual, lively, and suitable for friend groups or evening gatherings.
+If you enjoy bold flavors and diverse seafood options, Ot Xiem Quan is worth trying.""",
         
         'quan-oc-thao-quan-4': """Quan Oc Thao District 4
 
@@ -275,12 +264,12 @@ Popular spot for night owls in District 4.""",
 清潔で快適な空間。
 質の高い貝類体験を求める方に理想的です。""",
         
-        'oc-cuc-vinh-khanh': """オック・クック ヴィンカイン
+        'oc-cuc-vinh-khanh': """オットーシエム・クアン
 
-オック・クックは、ヴィンカイン フードストリートで馴染みの名前です。
-伝統的から創造的な貝料理まで多様なメニュー。
-活気ある雰囲気、特に夕方。
-第4区料理を探索する際の必訪スポットです。""",
+オットーシエム・クアンは、4区ヴィンカインのグルメエリアで親しまれている居酒屋スタイルのお店です。
+熱々の鍋料理、鮮度の高いカニやワタリガニ、そして多彩なシーフード料理が看板です。
+カジュアルで活気のある雰囲気なので、友人同士や夜の集まりにぴったりです。
+しっかりした味付けと豊富な海鮮メニューが好きな方におすすめです。""",
         
         'quan-oc-thao-quan-4': """クアン・オック・タオ 第4区
 
@@ -388,12 +377,12 @@ Popular spot for night owls in District 4.""",
 깨끗하고 편안한 공간.
 양질의 조개류 경험을 찾는 분들에게 이상적입니다.""",
         
-        'oc-cuc-vinh-khanh': """옥 컥 빈칸
+        'oc-cuc-vinh-khanh': """엇씨엠 꾸안
 
-옥 컥은 빈칸 푸드 스트리트에서 익숙한 이름입니다.
-전통적인 것부터 창의적인 조개 요리까지 다양한 메뉴.
-특히 저녁에 활기찬 분위기.
-4군 요리를 탐험할 때 꼭 방문해야 할 곳입니다.""",
+엇씨엠 꾸안은 4군 빈칸 먹거리 거리에서 잘 알려진 선술집 스타일의 식당입니다.
+뜨끈한 전골, 신선한 꽃게와 게 요리, 그리고 다양한 해산물 메뉴를 전문으로 합니다.
+분위기는 편하고 활기차서 친구 모임이나 저녁 약속에 잘 어울립니다.
+진한 맛과 다양한 해산물을 좋아한다면 엇씨엠 꾸안을 추천합니다.""",
         
         'quan-oc-thao-quan-4': """콴 옥 타오 4군
 
@@ -402,7 +391,14 @@ Popular spot for night owls in District 4.""",
 모임에 적합한 넓은 공간.
 4군의 올빼미족에게 인기 있는 장소입니다.""",
         },
-        'zho': {}
+        'zho': {
+                'oc-cuc-vinh-khanh': """Ot Xiem餐馆
+
+Ot Xiem餐馆是胡志明市第四郡永庆美食街上很受欢迎的一家夜宵餐馆。
+这里主打热腾腾的火锅、新鲜的螃蟹和梭子蟹，以及多种海鲜料理。
+环境热闹又接地气，适合朋友聚会或晚间小酌。
+如果你喜欢口味浓郁、海鲜选择丰富的餐厅，Ot Xiem餐馆值得一试。"""
+        }
 }
 
 
@@ -414,16 +410,6 @@ def clean_text(text):
     return text
 
 
-def escape_xml(text):
-    """Escape các ký tự đặc biệt XML/HTML cho SSML"""
-    text = text.replace('&', '&amp;')
-    text = text.replace('<', '&lt;')
-    text = text.replace('>', '&gt;')
-    text = text.replace('"', '&quot;')
-    text = text.replace("'", '&apos;')
-    return text
-
-
 def read_script(script_path):
     """Đọc script từ markdown"""
     with open(script_path, 'r', encoding='utf-8') as f:
@@ -431,60 +417,21 @@ def read_script(script_path):
     return clean_text(content)
 
 
-def create_ssml(text, language, config):
-    """Tạo SSML cho Azure TTS với style và rate"""
-    voice = config['voice']
-    style = config.get('style', 'friendly')
-    rate = config.get('rate', '+0%')
-    
-    # Escape các ký tự đặc biệt XML
-    text_escaped = escape_xml(text)
-    
-    ssml = f"""<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" 
-               xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="{language}">
-        <voice name="{voice}">
-            <mstts:express-as style="{style}">
-                <prosody rate="{rate}">
-                    {text_escaped}
-                </prosody>
-            </mstts:express-as>
-        </voice>
-    </speak>"""
-    return ssml
-
-
-def generate_audio(speech_config, text, language, output_path):
-    """Tạo audio sử dụng Azure Speech"""
+async def generate_audio(text, language, output_path):
+        """Tạo audio sử dụng Edge TTS"""
     config = VOICE_CONFIG.get(language, VOICE_CONFIG['vie'])
     
     try:
         print(f"  Generating: {output_path.name}")
         
-        # Cấu hình audio output
-        audio_config = speechsdk.audio.AudioOutputConfig(filename=str(output_path))
-        
-        # Tạo synthesizer
-        speech_config.speech_synthesis_voice_name = config['voice']
-        synthesizer = speechsdk.SpeechSynthesizer(
-            speech_config=speech_config, 
-            audio_config=audio_config
-        )
-        
-        # Tạo SSML
-        ssml = create_ssml(text, config['language'], config)
-        
-        # Synthesize
-        result = synthesizer.speak_ssml_async(ssml).get()
-        
-        if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-            print(f"  ✓ Success: {output_path.name}")
-            return True
-        elif result.reason == speechsdk.ResultReason.Canceled:
-            cancellation = result.cancellation_details
-            print(f"  ✗ Error: {cancellation.reason}")
-            if cancellation.error_details:
-                print(f"     Details: {cancellation.error_details}")
-            return False
+                communicate = edge_tts.Communicate(
+                        text=text,
+                        voice=config['voice'],
+                        rate=config.get('rate', '+0%')
+                )
+                await communicate.save(str(output_path))
+                print(f"  ✓ Success: {output_path.name}")
+                return True
         
     except Exception as e:
         print(f"  ✗ Exception: {str(e)}")
@@ -506,24 +453,12 @@ def get_translated_text(script_name, language):
 
 
 def parse_args(args):
-        """Parse tham số CLI đơn giản: --key, --region, --lang"""
-        speech_key = os.environ.get('AZURE_SPEECH_KEY')
-        speech_region = os.environ.get('AZURE_SPEECH_REGION', 'southeastasia')
+        """Parse tham số CLI đơn giản: --lang"""
         languages = DEFAULT_LANGUAGES.copy()
 
         i = 0
         while i < len(args):
                 arg = args[i]
-
-                if arg == '--key' and i + 1 < len(args):
-                        speech_key = args[i + 1]
-                        i += 2
-                        continue
-
-                if arg == '--region' and i + 1 < len(args):
-                        speech_region = args[i + 1]
-                        i += 2
-                        continue
 
                 if arg == '--lang' and i + 1 < len(args):
                         raw_langs = args[i + 1]
@@ -540,34 +475,11 @@ def parse_args(args):
 
                 i += 1
 
-        return speech_key, speech_region, languages
+        return languages
 
 
-def run_for_languages(speech_key, speech_region, languages):
+def run_for_languages(languages):
         """Generate audio cho danh sách ngôn ngữ"""
-        if not speech_key:
-                print("Error: AZURE_SPEECH_KEY not found!")
-                print("\nUsage:")
-                print("  Option 1: Set environment variables")
-                print("    set AZURE_SPEECH_KEY=your-key-here")
-                print("    set AZURE_SPEECH_REGION=southeastasia")
-                print("    python generate_audio_azure.py")
-                print("\n  Option 2: Pass as arguments")
-                print("    python generate_audio_azure.py --key your-key --region southeastasia")
-                print("\n  Option 3: Run selected language(s)")
-                print("    python generate_audio_azure.py --key your-key --lang vie")
-                print("    python generate_audio_azure.py --key your-key --lang eng,jap")
-                sys.exit(1)
-
-        # Tạo speech config
-        speech_config = speechsdk.SpeechConfig(
-                subscription=speech_key,
-                region=speech_region
-        )
-        speech_config.set_speech_synthesis_output_format(
-                speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
-        )
-
         # Lấy danh sách scripts
         script_files = list(SCRIPT_DIR.glob("*.md"))
         if not script_files:
@@ -575,7 +487,6 @@ def run_for_languages(speech_key, speech_region, languages):
                 sys.exit(1)
 
         print(f"Found {len(script_files)} script files")
-        print(f"Region: {speech_region}")
         print(f"\nGenerating audio for languages: {', '.join(languages)}\n")
 
         total_success = 0
@@ -593,18 +504,23 @@ def run_for_languages(speech_key, speech_region, languages):
                 for lang_code in languages:
                         print(f"\n[{lang_code.upper()}]")
 
+                        config = VOICE_CONFIG.get(lang_code)
+                        if not config:
+                                print("  ⚠ Skipping: Unsupported language config")
+                                continue
+
                         text = get_translated_text(script_name, lang_code)
 
                         if not text:
                                 print(f"  ⚠ Skipping: No translation available")
                                 continue
 
-                        output_dir = AUDIO_DIR / lang_code
+                        output_dir = AUDIO_DIR / config['folder']
                         output_dir.mkdir(parents=True, exist_ok=True)
 
                         output_file = output_dir / f"{base_name}.mp3"
 
-                        if generate_audio(speech_config, text, lang_code, output_file):
+                        if asyncio.run(generate_audio(text, lang_code, output_file)):
                                 total_success += 1
                         else:
                                 total_failed += 1
@@ -618,8 +534,8 @@ def run_for_languages(speech_key, speech_region, languages):
 
 
 def main():
-        speech_key, speech_region, languages = parse_args(sys.argv[1:])
-        run_for_languages(speech_key, speech_region, languages)
+        languages = parse_args(sys.argv[1:])
+        run_for_languages(languages)
 
 
 if __name__ == "__main__":

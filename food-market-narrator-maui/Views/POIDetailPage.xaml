@@ -117,7 +117,7 @@
                             </Grid>
 
                             <Label Grid.Row="1"
-                   Text="{Binding Name}"
+                                   Text="{Binding Name}"
                                    FontSize="35"
                                    TextColor="#1B1F2A"
                                    LineBreakMode="WordWrap"
@@ -126,7 +126,7 @@
                             <VerticalStackLayout Grid.Row="2" Spacing="6">
                                 <HorizontalStackLayout Spacing="6">
                                     <Label Text="&#xf005;" FontFamily="FASolid" FontSize="12" TextColor="#F39C12" />
-                                    <Label Text="N/A" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
+                                    <Label Text="Chưa có" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
                                     <Label Text="(chưa có đánh giá)" FontSize="12" TextColor="#808B96" />
                                 </HorizontalStackLayout>
                                 <!-- HARD_CODE: payload không có rating/review -->
@@ -166,15 +166,18 @@
                                        FontSize="18" />
                             </Border>
                             <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Label Text="Audio Guide" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
-                                <Label Text="{Binding Description}" FontSize="12" TextColor="#6B7280" LineBreakMode="WordWrap" MaxLines="2" />
+                                <Label Text="Thuyết minh" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
+                                <!-- <Label Text="{Binding Description}" FontSize="12" TextColor="#6B7280" LineBreakMode="WordWrap" MaxLines="2" /> -->
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
-                        <Label Text="{Binding AudioLanguagesDisplay, StringFormat='Ngôn ngữ: {0}'}"
-                               FontSize="11"
-                               TextColor="#6B7280"
-                               LineBreakMode="WordWrap" />
+                        <Label 
+                            Text="- Nghe thuyết minh để tìm hiểu thêm về quán, không gian và các món đặc trưng. Mang đến trải nghiệm khám phá sống động.&#10;- Nội dung hỗ trợ tiếng Việt, tiếng Anh, tiếng Trung, tiếng Nhật, tiếng Hàn."
+                            FontSize="13"
+                            TextColor="#6B7280"
+                            LineBreakMode="WordWrap" />
+
+
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                             <Border StrokeThickness="0"
@@ -239,24 +242,24 @@
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D5E1D6">
                                 <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Ảnh chính" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="sortOrder: 1" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                                <!-- <Label Text="Ảnh chính" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                                <Label Text="Thứ tự: 1" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
                         </VerticalStackLayout>
 
                         <VerticalStackLayout WidthRequest="116" Spacing="6">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
                                 <Image Source="{Binding SecondaryDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Ảnh phụ" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="sortOrder: 2" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                            <!-- <Label Text="Ảnh phụ" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="Thứ tự: 2" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
                         </VerticalStackLayout>
 
                         <VerticalStackLayout WidthRequest="116" Spacing="6">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
                                 <Image Source="{Binding ThirdDetailImage}" Aspect="AspectFill" />
                             </Border>
-                            <Label Text="Ảnh bổ sung" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="HARD_CODE" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" />
+                            <!-- <Label Text="Ảnh bổ sung" FontSize="16" TextColor="#2F3640" MaxLines="2" />
+                            <Label Text="Cố định" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                 </ScrollView>
@@ -272,19 +275,19 @@
                            TextColor="#6B7280"
                            LineHeight="1.4" />
 
-                      <Label Text="{Binding restaurantId, StringFormat='restaurantId: {0}'}"
+                      <!-- <Label Text="{Binding restaurantId, StringFormat='Mã quán: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" /> -->
+                      <!-- <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
+                          FontSize="12"
+                          TextColor="#6B7280" /> -->
+                      <Label Text="{Binding CreatedAtDisplay, StringFormat='Ngày mở bán: {0}'}"
                           FontSize="12"
                           TextColor="#6B7280" />
-                      <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
-                          FontSize="12"
-                          TextColor="#6B7280" />
-                      <Label Text="{Binding CreatedAtDisplay, StringFormat='createdAt: {0}'}"
-                          FontSize="12"
-                          TextColor="#6B7280" />
-                      <Label Text="{Binding AudioSummaryDisplay}"
+                      <!-- <Label Text="{Binding AudioSummaryDisplay}"
                           FontSize="12"
                           TextColor="#6B7280"
-                          LineBreakMode="WordWrap" />
+                          LineBreakMode="WordWrap" /> -->
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

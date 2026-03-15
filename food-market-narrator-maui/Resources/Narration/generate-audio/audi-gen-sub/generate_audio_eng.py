@@ -1,4 +1,4 @@
-"""Generate Azure audio for English only (eng)."""
+"""Generate Edge TTS audio for English only (eng)."""
 
 import importlib.util
 from pathlib import Path
@@ -17,8 +17,7 @@ def load_main_module():
 
 def main():
     module = load_main_module()
-    speech_key, speech_region, _ = module.parse_args([])
-    module.run_for_languages(speech_key, speech_region, [LANG_CODE])
+    module.run_for_languages([LANG_CODE])
 
 
 if __name__ == "__main__":

@@ -370,7 +370,7 @@ public partial class MainPage : ContentPage
         }
         else
         {
-            NarratorText.Text = "Bắt đầu thuyết minh";
+            NarratorText.Text = "Bắt đầu thuyết minh tự động";
         }
     }
 }
