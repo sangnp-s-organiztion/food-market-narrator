@@ -4,12 +4,14 @@ using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using System.Collections.Generic;
 using Microsoft.Maui.Controls.Shapes;
+using System.Diagnostics;
 
 namespace food_market_narrator.Views;
 
 public partial class MainPage : ContentPage
 {
     private static bool _hasAutoStartedNarrationThisSession;
+    private static bool _hasShownLanguagePopupThisSession;
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -21,6 +23,10 @@ public partial class MainPage : ContentPage
     private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLanguageOptionsLoaded;
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
+    private bool _isMapLoaded;
+    private bool _isPoiListBound;
+    private Location? _lastKnownLocation;
+    private bool _isInitializingMainPage;
 
     // private static bool _hasShownLanguagePopupThisSession;
     // private bool _languageSelected = Preferences.Get("language_selected", false);
@@ -39,29 +45,30 @@ public partial class MainPage : ContentPage
         _languageService = languageService;
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        await EnsureLanguageOptionsLoadedAsync();
+        var sw = Stopwatch.StartNew();
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
+        LogPerf("OnAppearing: subscribed LocationChanged", sw);
 
-        await Task.Delay(500); // nhỏ thôi, chờ UI ready
-        await _locationService.StartTrackingAsync();
+        // Không chờ tracking để tránh block frame đầu khi vào trang.
+        _ = _locationService.StartTrackingAsync();
 
-        // _narrationFlowService.StartNarration();
+        // Trả giao diện ngay, các phần nặng sẽ được tải nền.
+        if (!_isInitializingMainPage)
+        {
+            _ = InitializeMainPageAsync();
+        }
 
-        // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19); // zoom level cao hơn để tập trung vào khu vực chợ
         // Hiện popup chọn ngôn ngữ khi mới vào app
         bool languageSelected = Preferences.Get("language_selected", false);
-        Console.WriteLine("Language selected: " + languageSelected);
-        if (!languageSelected)
+        // Console.WriteLine("Language selected: " + languageSelected);
+        if (!languageSelected && !_hasShownLanguagePopupThisSession)
         {
-            // _hasShownLanguagePopupThisSession = true;
-            await Task.Delay(300);
+            _hasShownLanguagePopupThisSession = true;
             OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
         }
         else
@@ -74,22 +81,62 @@ public partial class MainPage : ContentPage
             }
         }
 
-        // Hiển thị POI lên giao diện
-        Console.WriteLine("Loading POIs for display...");
-        
-        var allPois = await _poiService.GetAllPOIsAsync();
-        Console.WriteLine("The number of POIs loaded: " + allPois.Count);
-
-        var poisData = await _poiService.GetPOIsAsync();
-        PoiList.ItemsSource = poisData;      
-
         // Cập nhật trạng thái UI dựa trên vị trí hiện tại
-        var currentLocation = await _locationService.GetCurrentLocationAsync();
+        var currentLocation = _lastKnownLocation;
         if (currentLocation != null)
         {
             UpdateUIByLocation(currentLocation);
         }
-        UpdateFloatingButtonUI();       
+        UpdateFloatingButtonUI();
+        LogPerf("OnAppearing: completed", sw);
+    }
+
+    private async Task InitializeMainPageAsync()
+    {
+        if (_isInitializingMainPage)
+        {
+            return;
+        }
+
+        _isInitializingMainPage = true;
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            // Nhường 1 nhịp để UI kịp render frame đầu trước khi chạy tác vụ nặng.
+            await Task.Yield();
+
+            if (!_isMapLoaded)
+            {
+                await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19);
+                _isMapLoaded = true;
+                LogPerf("Initialize: map loaded", sw);
+            }
+
+            if (!_isPoiListBound)
+            {
+                var poisData = await _poiService.GetAllPOIsAsync();
+                PoiList.ItemsSource = poisData;
+                _isPoiListBound = true;
+                LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
+            }
+
+            if (_lastKnownLocation == null)
+            {
+                var currentLocation = await _locationService.GetCurrentLocationAsync();
+                _lastKnownLocation = currentLocation;
+                if (currentLocation != null)
+                {
+                    UpdateUIByLocation(currentLocation);
+                }
+                LogPerf("Initialize: first location acquired", sw);
+            }
+
+            LogPerf("Initialize: completed", sw);
+        }
+        finally
+        {
+            _isInitializingMainPage = false;
+        }
     }
 
     protected override void OnDisappearing()
@@ -103,8 +150,14 @@ public partial class MainPage : ContentPage
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            _lastKnownLocation = location;
             UpdateUIByLocation(location);
         });
+    }
+
+    private static void LogPerf(string message, Stopwatch sw)
+    {
+        // Console.WriteLine($"[Perf][MainPage] {message} at {sw.ElapsedMilliseconds} ms");
     }
 
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh

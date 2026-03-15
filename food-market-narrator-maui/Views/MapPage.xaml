@@ -19,7 +19,7 @@
                     <Border.Shadow>
                         <Shadow Brush="#000" Opacity="0.1" Radius="5"/>
                     </Border.Shadow>
-                    <Grid ColumnDefinitions="Auto, *">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
                         <Label Grid.Column="0"
                            Text="&#xf002;"
                            FontFamily="FASolid"
@@ -28,14 +28,71 @@
                            Margin="0,0,10,0"
                            FontSize="16"/>
 
-                                    <Entry Grid.Column="1"
+                                    <Entry x:Name="SearchEntry"
+                           Grid.Column="1"
                            Placeholder="Tìm món ăn hoặc quán..."
                            VerticalOptions="Center"
                            BackgroundColor="Transparent"
+                           ClearButtonVisibility="WhileEditing"
+                           ReturnType="Search"
+                           Completed="OnSearchSubmitted"
+                           TextChanged="OnSearchTextChanged"
                            FontSize="14"
                            TextColor="#3C4043"
                            PlaceholderColor="#9AA0A6"/> 
+
+                        <Label x:Name="SearchClearButton"
+                           Grid.Column="2"
+                           IsVisible="False"
+                           Text="&#xf00d;"
+                           FontFamily="FASolid"
+                           VerticalOptions="Center"
+                           HorizontalOptions="End"
+                           TextColor="#9AA0A6"
+                           FontSize="14">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnClearSearchTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
                     </Grid>
+                </Border>
+
+                <Border x:Name="SearchSuggestionsContainer"
+                        IsVisible="False"
+                        Margin="0,-4,50,0"
+                        StrokeShape="RoundRectangle 14"
+                        BackgroundColor="White"
+                        StrokeThickness="0"
+                        Padding="6,4">
+                    <Border.Shadow>
+                        <Shadow Brush="#000" Opacity="0.12" Radius="8"/>
+                    </Border.Shadow>
+
+                    <CollectionView x:Name="SearchSuggestionsView"
+                                    SelectionMode="Single"
+                                    SelectionChanged="OnSearchSuggestionSelected"
+                                    HeightRequest="200">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="10,8" RowDefinitions="Auto,Auto" ColumnDefinitions="*">
+                                    <Label Grid.Row="0"
+                                           Text="{Binding Name}"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="#202124"
+                                           LineBreakMode="TailTruncation"/>
+                                    <Label Grid.Row="1"
+                                           Text="{Binding AddressDisplay}"
+                                           FontSize="12"
+                                           TextColor="#5F6368"
+                                           LineBreakMode="TailTruncation"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </Border>
 
                 <!-- Filters -->

@@ -1,4 +1,4 @@
-using Plugin.Maui.Audio;
+﻿using Plugin.Maui.Audio;
 using food_market_narrator.Settings;
 using System.Security.Cryptography;
 
@@ -35,7 +35,7 @@ public class AudioService : IAudioService
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            Console.WriteLine("File name null -> skip");
+            // Console.WriteLine("File name null -> skip");
             return;
         }
 
@@ -45,12 +45,12 @@ public class AudioService : IAudioService
         try
         {
             _currentTrackKey = ResolveAudioPath(language, fileName);
-            Console.WriteLine($"Loading audio key: {_currentTrackKey}");
+            // Console.WriteLine($"Loading audio key: {_currentTrackKey}");
 
             await using var stream = await ResolvePlayableStreamAsync(language, fileName);
             if (stream == null)
             {
-                Console.WriteLine($"Audio not found for input: {fileName}");
+                // Console.WriteLine($"Audio not found for input: {fileName}");
                 _currentTrackKey = null;
                 return;
             }
@@ -63,11 +63,11 @@ public class AudioService : IAudioService
             _player.PlaybackEnded += OnPlaybackEnded;
             _player.Play();
 
-            Console.WriteLine("Audio started");
+            // Console.WriteLine("Audio started");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"ERROR PLAY SOUND: {ex}");
+            // Console.WriteLine($"ERROR PLAY SOUND: {ex}");
             _currentTrackKey = null;
         }
     }
@@ -109,7 +109,7 @@ public class AudioService : IAudioService
                 var onlineOnly = await TryDownloadAudioToMemoryAsync(remoteUrl);
                 if (onlineOnly != null)
                 {
-                    Console.WriteLine($"Playing online-only audio (not cached): {remoteUrl}");
+                    // Console.WriteLine($"Playing online-only audio (not cached): {remoteUrl}");
                     return onlineOnly;
                 }
 
@@ -253,7 +253,7 @@ public class AudioService : IAudioService
         var expectedBytes = source.CanSeek ? source.Length : MinValidAudioBytes;
         if (!await EnsureStorageForIncomingFileAsync(expectedBytes, cachePath))
         {
-            Console.WriteLine("Skip caching audio: storage constraints.");
+            // Console.WriteLine("Skip caching audio: storage constraints.");
             return;
         }
 
@@ -277,7 +277,7 @@ public class AudioService : IAudioService
             if (!await EnsureStorageForIncomingFileAsync(size, cachePath))
             {
                 File.Delete(tempPath);
-                Console.WriteLine("Skip caching audio after write: storage constraints.");
+                // Console.WriteLine("Skip caching audio after write: storage constraints.");
                 return;
             }
 
@@ -313,7 +313,7 @@ public class AudioService : IAudioService
             var declaredLength = response.Content.Headers.ContentLength ?? 0;
             if (declaredLength > 0 && !await EnsureStorageForIncomingFileAsync(declaredLength, cachePath))
             {
-                Console.WriteLine($"Skip download cache (not enough storage/quota): {url}");
+                // Console.WriteLine($"Skip download cache (not enough storage/quota): {url}");
                 return false;
             }
 
@@ -335,7 +335,7 @@ public class AudioService : IAudioService
             if (!await EnsureStorageForIncomingFileAsync(size, cachePath))
             {
                 File.Delete(tempPath);
-                Console.WriteLine($"Skip download cache after write (not enough storage/quota): {url}");
+                // Console.WriteLine($"Skip download cache after write (not enough storage/quota): {url}");
                 return false;
             }
 
@@ -346,12 +346,12 @@ public class AudioService : IAudioService
 
             File.Move(tempPath, cachePath);
             TouchCacheFile(cachePath);
-            Console.WriteLine($"Audio downloaded and cached: {url}");
+            // Console.WriteLine($"Audio downloaded and cached: {url}");
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Download audio failed ({url}): {ex.Message}");
+            // Console.WriteLine($"Download audio failed ({url}): {ex.Message}");
             return false;
         }
     }
@@ -406,15 +406,15 @@ public class AudioService : IAudioService
                 {
                     file.Delete();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine($"Delete cache file failed ({file.Name}): {ex.Message}");
+                    // Console.WriteLine($"Delete cache file failed ({file.Name}): {ex.Message}");
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Clear audio cache failed: {ex.Message}");
+            // Console.WriteLine($"Clear audio cache failed: {ex.Message}");
         }
 
         return Task.CompletedTask;
@@ -429,7 +429,7 @@ public class AudioService : IAudioService
 
         if (incomingBytes > MaxAudioCacheBytes)
         {
-            Console.WriteLine($"Incoming audio ({incomingBytes} bytes) exceeds cache quota ({MaxAudioCacheBytes} bytes).");
+            // Console.WriteLine($"Incoming audio ({incomingBytes} bytes) exceeds cache quota ({MaxAudioCacheBytes} bytes).");
             return false;
         }
 
@@ -449,7 +449,7 @@ public class AudioService : IAudioService
 
         if (availableSpace.HasValue && availableSpace.Value < incomingBytes + MinDeviceFreeSpaceBytes)
         {
-            Console.WriteLine("Not enough free storage for audio cache write.");
+            // Console.WriteLine("Not enough free storage for audio cache write.");
             return false;
         }
 
@@ -487,7 +487,7 @@ public class AudioService : IAudioService
 
         if (projectedSize > MaxAudioCacheBytes)
         {
-            Console.WriteLine("Audio cache quota reached and could not free enough files.");
+            // Console.WriteLine("Audio cache quota reached and could not free enough files.");
             return false;
         }
 
@@ -520,9 +520,9 @@ public class AudioService : IAudioService
                     break;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Cannot delete cache file ({file.Name}): {ex.Message}");
+                // Console.WriteLine($"Cannot delete cache file ({file.Name}): {ex.Message}");
             }
         }
 
@@ -640,3 +640,4 @@ public class AudioService : IAudioService
         _currentTrackKey = null;
     }
 }
+

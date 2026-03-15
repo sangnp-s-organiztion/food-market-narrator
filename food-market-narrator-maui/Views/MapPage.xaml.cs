@@ -5,6 +5,8 @@ using food_market_narrator.Services;
 using Mapsui;
 using Mapsui.Projections;
 using Mapsui.UI.Maui;
+using System.Globalization;
+using System.Text;
 
 namespace food_market_narrator.Views;
 
@@ -23,7 +25,11 @@ public partial class MapPage : ContentPage
     private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
     private List<POI> _pois = new();
+    private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
+    private HashSet<string> _searchHighlightedPoiIds = new(StringComparer.Ordinal);
+    private bool _isMapLoaded;
+    private CancellationTokenSource? _searchDebounceCts;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -49,17 +55,27 @@ public partial class MapPage : ContentPage
         _locationService.LocationChanged += OnLocationChangedForMap;
         await _locationService.StartTrackingAsync();
 
-        // Tải dữ liệu bản đồ và hiển thị các POI, cũng như vị trí người dùng nếu đã có
-        await MapHelper.LoadMapAsync(
-            mapControl,
-            _poiService,
-            _locationService,
-            initialZoomLevel: DefaultZoomLevel);
+        if (!_isMapLoaded)
+        {
+            // Chỉ tải map/layer nặng một lần cho mỗi instance page.
+            await MapHelper.LoadMapAsync(
+                mapControl,
+                _poiService,
+                _locationService,
+                initialZoomLevel: DefaultZoomLevel);
+            _isMapLoaded = true;
+        }
 
-        _pois = await _poiService.GetAllPOIsAsync();
+        if (_pois.Count == 0)
+        {
+            _pois = await _poiService.GetAllPOIsAsync();
+        }
 
         mapControl.MapTapped -= OnMapTapped;
         mapControl.MapTapped += OnMapTapped;
+
+        SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(SearchEntry.Text);
+        SearchSuggestionsContainer.IsVisible = false;
 
         HideSelectedPoiCard();
     }
@@ -69,6 +85,7 @@ public partial class MapPage : ContentPage
         mapControl.MapTapped -= OnMapTapped;
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
+        _searchDebounceCts?.Cancel();
         base.OnDisappearing();
     }
 
@@ -79,6 +96,13 @@ public partial class MapPage : ContentPage
         MainThread.BeginInvokeOnMainThread(() =>
         {
             MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
+
+            if (_searchHighlightedPoiIds.Count > 0)
+            {
+                MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+                return;
+            }
+
             var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
             var shouldHighlight = nearest != null
                 && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
@@ -149,6 +173,9 @@ public partial class MapPage : ContentPage
 
     private void OnMapTapped(object? sender, MapEventArgs e)
     {
+        _searchHighlightedPoiIds.Clear();
+        SearchSuggestionsContainer.IsVisible = false;
+
         if (_pois.Count == 0)
         {
             HideSelectedPoiCard();
@@ -183,6 +210,206 @@ public partial class MapPage : ContentPage
 
         ShowSelectedPoiCard(nearestPoi);
         MapHelper.HighlightPOI(mapControl, nearestPoi);
+    }
+
+    private async void OnSearchSubmitted(object? sender, EventArgs e)
+    {
+        var keyword = SearchEntry.Text?.Trim();
+        SearchSuggestionsContainer.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            ClearSearchState();
+            return;
+        }
+
+        if (_pois.Count == 0)
+        {
+            _pois = await _poiService.GetAllPOIsAsync();
+        }
+
+        var matchedPois = FindMatchingPois(keyword, maxResults: _pois.Count);
+        if (matchedPois.Count == 0)
+        {
+            ClearSearchState();
+            await DisplayAlertAsync("Không tìm thấy", $"Không có quán phù hợp với: {keyword}", "Đóng");
+            return;
+        }
+
+        ApplySearchResults(matchedPois, focusOnFirst: true);
+    }
+
+    private async void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        _searchDebounceCts?.Cancel();
+        _searchDebounceCts?.Dispose();
+        _searchDebounceCts = new CancellationTokenSource();
+        var debounceToken = _searchDebounceCts.Token;
+
+        SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(e.NewTextValue);
+
+        var keyword = e.NewTextValue?.Trim();
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            _searchSuggestions = new List<POI>();
+            SearchSuggestionsView.ItemsSource = null;
+            SearchSuggestionsContainer.IsVisible = false;
+            ClearSearchState();
+            return;
+        }
+
+        try
+        {
+            await Task.Delay(220, debounceToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (debounceToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        if (_pois.Count == 0)
+        {
+            _pois = await _poiService.GetAllPOIsAsync();
+        }
+
+        _searchSuggestions = FindMatchingPois(keyword, maxResults: 6);
+        SearchSuggestionsView.ItemsSource = _searchSuggestions;
+        SearchSuggestionsContainer.IsVisible = _searchSuggestions.Count > 0;
+
+        var highlightedMatches = FindMatchingPois(keyword, maxResults: _pois.Count);
+        if (highlightedMatches.Count > 0)
+        {
+            _searchHighlightedPoiIds = highlightedMatches
+                .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId))
+                .Select(p => p.restaurantId)
+                .ToHashSet(StringComparer.Ordinal);
+            MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+        }
+        else
+        {
+            ClearSearchState();
+        }
+    }
+
+    private void OnSearchSuggestionSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        var selectedPoi = e.CurrentSelection.FirstOrDefault() as POI;
+        if (selectedPoi == null)
+        {
+            return;
+        }
+
+        SearchSuggestionsView.SelectedItem = null;
+        SearchEntry.Text = selectedPoi.Name;
+        SearchSuggestionsContainer.IsVisible = false;
+        ApplySearchResults(new List<POI> { selectedPoi }, focusOnFirst: true);
+    }
+
+    private void OnClearSearchTapped(object? sender, TappedEventArgs e)
+    {
+        SearchEntry.Text = string.Empty;
+        SearchSuggestionsContainer.IsVisible = false;
+        SearchSuggestionsView.ItemsSource = null;
+        ClearSearchState();
+    }
+
+    private void ApplySearchResults(List<POI> pois, bool focusOnFirst)
+    {
+        _searchHighlightedPoiIds = pois
+            .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId))
+            .Select(p => p.restaurantId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var firstPoi = pois.FirstOrDefault();
+        if (firstPoi != null)
+        {
+            ShowSelectedPoiCard(firstPoi);
+            if (focusOnFirst)
+            {
+                CenterMapOn(firstPoi.Latitude, firstPoi.Longitude, MyLocationZoomLevel);
+            }
+        }
+        else
+        {
+            HideSelectedPoiCard();
+        }
+
+        MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+    }
+
+    private void ClearSearchState()
+    {
+        _searchHighlightedPoiIds.Clear();
+        HideSelectedPoiCard();
+        MapHelper.HighlightPOIs(mapControl, null);
+    }
+
+    private List<POI> FindMatchingPois(string keyword, int maxResults)
+    {
+        var normalizedKeyword = NormalizeSearchText(keyword);
+        if (string.IsNullOrWhiteSpace(normalizedKeyword))
+        {
+            return new List<POI>();
+        }
+
+        var matches = _pois
+            .Select(poi => new
+            {
+                Poi = poi,
+                Score = GetSearchScore(poi, normalizedKeyword)
+            })
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .ThenBy(x => x.Poi.Name?.Length ?? int.MaxValue)
+            .Take(Math.Max(1, maxResults))
+            .Select(x => x.Poi)
+            .ToList();
+
+        return matches;
+    }
+
+    private static int GetSearchScore(POI poi, string normalizedKeyword)
+    {
+        var name = NormalizeSearchText(poi.Name ?? string.Empty);
+        var address = NormalizeSearchText(poi.AddressDisplay ?? string.Empty);
+        var id = NormalizeSearchText(poi.restaurantId ?? string.Empty);
+
+        if (name.Equals(normalizedKeyword, StringComparison.Ordinal)) return 300;
+        if (name.StartsWith(normalizedKeyword, StringComparison.Ordinal)) return 200;
+        if (name.Contains(normalizedKeyword, StringComparison.Ordinal)) return 150;
+        if (address.Contains(normalizedKeyword, StringComparison.Ordinal)) return 100;
+        if (id.Contains(normalizedKeyword, StringComparison.Ordinal)) return 80;
+
+        return 0;
+    }
+
+    private static string NormalizeSearchText(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return string.Empty;
+        }
+
+        var normalized = input.Trim().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(normalized.Length);
+
+        foreach (var ch in normalized)
+        {
+            var category = CharUnicodeInfo.GetUnicodeCategory(ch);
+            if (category != UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(char.ToLowerInvariant(ch));
+            }
+        }
+
+        return builder
+            .ToString()
+            .Normalize(NormalizationForm.FormC);
     }
 
     private void ShowSelectedPoiCard(POI poi)

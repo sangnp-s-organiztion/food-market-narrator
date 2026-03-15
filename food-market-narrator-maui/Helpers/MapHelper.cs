@@ -83,42 +83,57 @@ namespace food_market_narrator.Helpers
                     HighlightPOI(mapControl, nearest);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Error loading map: {ex.Message}");
+                // Console.WriteLine($"Error loading map: {ex.Message}");
             }
         }
 
         /// <summary>
         /// Highlight the nearest POI on map without moving camera.
         /// </summary>
-        public static void HighlightPOI(MapControl mapControl, POI? nearest)
+        public static void HighlightPOI(MapControl mapControl, POI? nearest, bool isSearchResult = false)
+        {
+            var ids = nearest?.restaurantId == null
+                ? null
+                : new[] { nearest.restaurantId };
+            HighlightPOIs(mapControl, ids, isSearchResult);
+        }
+
+        public static void HighlightPOIs(MapControl mapControl, IEnumerable<string>? highlightedPoiIds, bool isSearchResult = false)
         {
             var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
             if (poiLayer == null) return;
 
-            PointFeature? highlightedFeature = null;
+            var idSet = highlightedPoiIds == null
+                ? new HashSet<string>()
+                : highlightedPoiIds
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToHashSet(StringComparer.Ordinal);
+
+            var highlightedFeatures = new List<PointFeature>();
 
             foreach (var feature in poiLayer.Features.OfType<PointFeature>())
             {
                 feature.Styles.Clear();
-                bool isHighlighted = nearest != null && feature["id"]?.ToString() == nearest.restaurantId;
-                feature.Styles.Add(CreateMarkerStyle(isHighlighted));
+                var featureId = feature["id"]?.ToString();
+                bool isHighlighted = featureId != null && idSet.Contains(featureId);
+                feature.Styles.Add(CreateMarkerStyle(isHighlighted, isSearchResult && isHighlighted));
                 if (isHighlighted)
                 {
-                    highlightedFeature = feature;
+                    highlightedFeatures.Add(feature);
                 }
             }
 
-            if (highlightedFeature != null)
+            if (highlightedFeatures.Count > 0)
             {
                 var reordered = poiLayer.Features
                     .OfType<PointFeature>()
-                    .Where(f => !ReferenceEquals(f, highlightedFeature))
+                    .Where(f => !highlightedFeatures.Contains(f))
                     .Cast<IFeature>()
                     .ToList();
 
-                reordered.Add(highlightedFeature);
+                reordered.AddRange(highlightedFeatures);
                 poiLayer.Features = reordered;
             }
 
@@ -168,13 +183,17 @@ namespace food_market_narrator.Helpers
             mapControl.Map.Navigator.CenterOnAndZoomTo(new MPoint(spherical.x, spherical.y), resolution);
         }
 
-        private static SymbolStyle CreateMarkerStyle(bool isHighlighted)
+        private static SymbolStyle CreateMarkerStyle(bool isHighlighted, bool isSearchHighlight = false)
         {
+            var highlightColor = isSearchHighlight
+                ? new Mapsui.Styles.Color(0, 170, 145)
+                : new Mapsui.Styles.Color(255, 0, 0);
+
             return new SymbolStyle
             {
-                SymbolScale = isHighlighted ? 0.45 : 0.35,
+                SymbolScale = isHighlighted ? (isSearchHighlight ? 0.5 : 0.45) : 0.35,
                 Fill = new Mapsui.Styles.Brush(isHighlighted
-                    ? new Mapsui.Styles.Color(255, 0, 0)
+                    ? highlightColor
                     : new Mapsui.Styles.Color(244, 140, 6)),
                 Outline = new Pen(new Mapsui.Styles.Color(255, 255, 255), 2),
                 SymbolType = SymbolType.Ellipse
@@ -182,3 +201,4 @@ namespace food_market_narrator.Helpers
         }
     }
 }
+
