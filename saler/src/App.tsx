@@ -17,26 +17,62 @@ import NotFound from "@/pages/NotFound";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitializing } = useAuth();
+  if (isInitializing) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitializing } = useAuth();
+
+  if (isInitializing) {
+    return null;
+  }
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/select-restaurant" replace /> : <LoginPage />} />
-      <Route path="/select-restaurant" element={<ProtectedRoute><SelectRestaurantPage /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/select-restaurant" replace />
+          ) : (
+            <LoginPage />
+          )
+        }
+      />
+      <Route
+        path="/select-restaurant"
+        element={
+          <ProtectedRoute>
+            <SelectRestaurantPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="restaurant" replace />} />
         <Route path="restaurant" element={<RestaurantPage />} />
         <Route path="dishes" element={<DishesPage />} />
         <Route path="images" element={<ImagesPage />} />
         <Route path="audio" element={<AudioPage />} />
       </Route>
-      <Route path="/" element={<Navigate to={isAuthenticated ? "/select-restaurant" : "/login"} replace />} />
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={isAuthenticated ? "/select-restaurant" : "/login"}
+            replace
+          />
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

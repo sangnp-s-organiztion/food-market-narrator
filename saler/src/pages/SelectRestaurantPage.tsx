@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
 export default function SelectRestaurantPage() {
-  const { restaurants, selectRestaurant, selectedRestaurant } = useRestaurant();
+  const { restaurants, selectRestaurant, isLoading } = useRestaurant();
   const navigate = useNavigate();
 
   // Auto-select if only one restaurant
@@ -21,7 +21,25 @@ export default function SelectRestaurantPage() {
     navigate("/dashboard/restaurant", { replace: true });
   };
 
-  if (restaurants.length <= 1) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <p className="text-muted-foreground">Đang tải danh sách nhà hàng...</p>
+      </div>
+    );
+  }
+
+  if (restaurants.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <p className="text-muted-foreground">
+          Không có nhà hàng nào được gán cho tài khoản này.
+        </p>
+      </div>
+    );
+  }
+
+  if (restaurants.length === 1) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

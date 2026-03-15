@@ -13,7 +13,13 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Store, UtensilsCrossed, ImageIcon, Volume2, LogOut } from "lucide-react";
+import {
+  Store,
+  UtensilsCrossed,
+  ImageIcon,
+  Volume2,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -45,7 +51,10 @@ export function DashboardSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.url}
+                  >
                     <NavLink
                       to={item.url}
                       end
@@ -66,12 +75,17 @@ export function DashboardSidebar() {
         {!collapsed && user && (
           <div className="px-2 pb-2">
             <p className="text-xs text-sidebar-muted truncate mb-2">
-              Đăng nhập với <span className="text-sidebar-foreground font-medium">{user.username}</span>
+              Đăng nhập với{" "}
+              <span className="text-sidebar-foreground font-medium">
+                {user.username}
+              </span>
             </p>
             <Button
               variant="ghost"
               size="sm"
-              onClick={logout}
+              onClick={() => {
+                void logout();
+              }}
               className="w-full justify-start text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <LogOut className="w-4 h-4 mr-2" />

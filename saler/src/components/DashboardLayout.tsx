@@ -14,7 +14,16 @@ import { Store } from "lucide-react";
 
 export default function DashboardLayout() {
   const { user } = useAuth();
-  const { restaurants, selectedRestaurant, selectRestaurant } = useRestaurant();
+  const { restaurants, selectedRestaurant, selectRestaurant, isLoading } =
+    useRestaurant();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Đang tải dữ liệu nhà hàng...</p>
+      </div>
+    );
+  }
 
   // Redirect to selection page if no restaurant selected
   if (!selectedRestaurant) {

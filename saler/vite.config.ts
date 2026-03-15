@@ -11,8 +11,48 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/Auth": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Users": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Restaurant": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Dishes": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Images": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Audios": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Audio": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/Language": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+      "/uploads": {
+        target: "http://localhost:5044",
+        changeOrigin: true,
+      },
+    },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger()].filter(
+    Boolean,
+  ),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

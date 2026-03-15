@@ -1,10 +1,22 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import type { User, AuthState } from "@/types";
-import { mockUser } from "@/services/mockData";
+import {
+  isApiError,
+  login as loginApi,
+  logout as logoutApi,
+  me,
+} from "@/services/api";
 
 interface AuthContextType extends AuthState {
+  isInitializing: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -14,21 +26,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     isAuthenticated: false,
   });
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  const login = useCallback(async (username: string, _password: string) => {
-    if (username.trim()) {
-      setAuthState({ user: { ...mockUser, username }, isAuthenticated: true });
-      return true;
-    }
-    return false;
+  useEffect(() => {
+    const bootstrap = async () => {
+      try {
+        const user = await me();
+        setAuthState({ user, isAuthenticated: true });
+      } catch {
+        setAuthState({ user: null, isAuthenticated: false });
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    void bootstrap();
   }, []);
 
-  const logout = useCallback(() => {
+  const login = useCallback(async (username: string, password: string) => {
+    try {
+      const user = await loginApi(username.trim(), password);
+      setAuthState({ user, isAuthenticated: true });
+      return true;
+    } catch (error) {
+      if (!isApiError(error)) {
+        console.error(error);
+      }
+      setAuthState({ user: null, isAuthenticated: false });
+      return false;
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Always clear local auth state even when network call fails.
+    }
     setAuthState({ user: null, isAuthenticated: false });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
+    <AuthContext.Provider
+      value={{ ...authState, isInitializing, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
