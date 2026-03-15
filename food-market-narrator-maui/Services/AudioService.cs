@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace food_market_narrator.Services;
 
-public class AudioService : IAudioService
+public partial class AudioService : IAudioService
 {
     private readonly IAudioManager _audioManager;
     private readonly HttpClient _httpClient;
@@ -26,7 +26,12 @@ public class AudioService : IAudioService
     {
         _audioManager = AudioManager.Current;
         _httpClient = httpClient;
+        InitializePlatformInterruptionHandling();
     }
+
+    partial void InitializePlatformInterruptionHandling();
+    partial void RequestPlatformAudioFocus();
+    partial void ReleasePlatformAudioFocus();
 
 
     // ================ Audio Methods ================
@@ -61,6 +66,7 @@ public class AudioService : IAudioService
 
             _player = _audioManager.CreatePlayer(memoryStream);
             _player.PlaybackEnded += OnPlaybackEnded;
+            RequestPlatformAudioFocus();
             _player.Play();
 
             // Console.WriteLine("Audio started");
@@ -622,6 +628,7 @@ public class AudioService : IAudioService
 
     private void OnPlaybackEnded(object? sender, EventArgs e)
     {
+        ReleasePlatformAudioFocus();
         _isPaused = false;
         _currentTrackKey = null;
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
@@ -636,8 +643,20 @@ public class AudioService : IAudioService
 
         _player?.Stop();
         _player = null;
+        ReleasePlatformAudioFocus();
         _isPaused = false;
         _currentTrackKey = null;
+    }
+
+    internal void StopForPlatformInterruption()
+    {
+        if (!IsPlaying && !IsPaused)
+        {
+            return;
+        }
+
+        StopSound();
+        PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 }
 
