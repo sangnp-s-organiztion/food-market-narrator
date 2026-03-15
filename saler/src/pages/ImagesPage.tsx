@@ -1,5 +1,11 @@
-import { useState, useEffect } from "react";
-import { getRestaurantImages } from "@/services/mockData";
+import { useRef, useState, useEffect, type ChangeEvent } from "react";
+import {
+  deleteImageApi,
+  getRestaurantImagesApi,
+  reorderImagesApi,
+  setPrimaryImageApi,
+  uploadRestaurantImageApi,
+} from "@/services/api";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { RestaurantImage } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -9,48 +15,89 @@ import { Plus, Star, StarOff, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 export default function ImagesPage() {
   const { selectedRestaurant } = useRestaurant();
   const [images, setImages] = useState<RestaurantImage[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (selectedRestaurant) {
-      setImages(getRestaurantImages(selectedRestaurant.restaurant_id));
+      (async () => {
+        try {
+          const data = await getRestaurantImagesApi(selectedRestaurant.restaurant_id);
+          setImages(data ?? []);
+        } catch {
+          toast.error("Không thể tải danh sách hình ảnh");
+        }
+      })();
     }
   }, [selectedRestaurant]);
 
-  const setPrimary = (id: number) => {
-    setImages((prev) =>
-      prev.map((img) => ({ ...img, is_primary: img.image_id === id }))
-    );
-    toast.success("Đã cập nhật ảnh chính");
+  const setPrimary = async (id: number) => {
+    try {
+      await setPrimaryImageApi(id, true);
+      setImages((prev) =>
+        prev.map((img) => ({ ...img, is_primary: img.image_id === id }))
+      );
+      toast.success("Đã cập nhật ảnh chính");
+    } catch {
+      toast.error("Không thể cập nhật ảnh chính");
+    }
   };
 
-  const moveImage = (id: number, direction: "up" | "down") => {
-    setImages((prev) => {
-      const sorted = [...prev].sort((a, b) => a.sort_order - b.sort_order);
+  const moveImage = async (id: number, direction: "up" | "down") => {
+    if (!selectedRestaurant) return;
+
+    try {
+      const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);
       const idx = sorted.findIndex((img) => img.image_id === id);
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-      if (swapIdx < 0 || swapIdx >= sorted.length) return prev;
-      const temp = sorted[idx].sort_order;
-      sorted[idx] = { ...sorted[idx], sort_order: sorted[swapIdx].sort_order };
-      sorted[swapIdx] = { ...sorted[swapIdx], sort_order: temp };
-      return sorted;
-    });
+      if (swapIdx < 0 || swapIdx >= sorted.length) return;
+      const reordered = [...sorted];
+      const temp = reordered[idx].sort_order;
+      reordered[idx] = { ...reordered[idx], sort_order: reordered[swapIdx].sort_order };
+      reordered[swapIdx] = { ...reordered[swapIdx], sort_order: temp };
+
+      setImages(reordered);
+
+      await reorderImagesApi(
+        selectedRestaurant.restaurant_id,
+        reordered.map((x) => ({ image_id: x.image_id, sort_order: x.sort_order }))
+      );
+    } catch {
+      toast.error("Không thể đổi thứ tự ảnh");
+    }
   };
 
-  const deleteImage = (id: number) => {
-    setImages((prev) => prev.filter((img) => img.image_id !== id));
-    toast.success("Đã xóa hình ảnh");
+  const deleteImage = async (id: number) => {
+    try {
+      await deleteImageApi(id);
+      setImages((prev) => prev.filter((img) => img.image_id !== id));
+      toast.success("Đã xóa hình ảnh");
+    } catch {
+      toast.error("Không thể xóa hình ảnh");
+    }
   };
 
   const addImage = () => {
-    const newImage: RestaurantImage = {
-      image_id: Date.now(),
-      restaurant_id: selectedRestaurant!.restaurant_id,
-      image_url: `https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=600&t=${Date.now()}`,
-      is_primary: images.length === 0,
-      sort_order: images.length + 1,
-    };
-    setImages((prev) => [...prev, newImage]);
-    toast.success("Đã thêm hình ảnh (demo)");
+    fileInputRef.current?.click();
+  };
+
+  const onPickImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedRestaurant) return;
+
+    try {
+      const created = await uploadRestaurantImageApi(
+        selectedRestaurant.restaurant_id,
+        file,
+        images.length === 0,
+        images.length + 1,
+      );
+      setImages((prev) => [...prev, created]);
+      toast.success("Tải ảnh lên thành công");
+    } catch {
+      toast.error("Không thể tải ảnh lên");
+    } finally {
+      event.target.value = "";
+    }
   };
 
   const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);
@@ -65,6 +112,13 @@ export default function ImagesPage() {
         <Button onClick={addImage}>
           <Plus className="w-4 h-4 mr-2" /> Tải ảnh lên
         </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onPickImage}
+        />
       </div>
 
       {sorted.length === 0 ? (

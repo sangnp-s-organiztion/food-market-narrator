@@ -4,9 +4,10 @@ import React, {
   useState,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 import type { Restaurant } from "@/types";
-import { getUserRestaurants } from "@/services/mockData";
+import { getRestaurantsApi } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface RestaurantContextType {
@@ -14,6 +15,7 @@ interface RestaurantContextType {
   selectedRestaurant: Restaurant | null;
   selectRestaurant: (restaurantId: string) => void;
   clearSelection: () => void;
+  refreshRestaurants: () => Promise<void>;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | null>(null);
@@ -25,10 +27,38 @@ export function RestaurantProvider({
 }) {
   const { user } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
-  const restaurants = useMemo(() => {
-    if (!user) return [];
-    return getUserRestaurants(user.user_id);
+  const refreshRestaurants = useCallback(async () => {
+    if (!user) {
+      setRestaurants([]);
+      return;
+    }
+
+    const allRestaurants = await getRestaurantsApi();
+    const userRestaurants = allRestaurants.filter((r) => r.user_id === user.user_id);
+    setRestaurants(userRestaurants);
+  }, [user]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!user) {
+        setRestaurants([]);
+        return;
+      }
+      try {
+        const allRestaurants = await getRestaurantsApi();
+        const data = allRestaurants.filter((r) => r.user_id === user.user_id);
+        if (mounted) setRestaurants(data ?? []);
+      } catch {
+        if (mounted) setRestaurants([]);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
   }, [user]);
 
   const selectedRestaurant = useMemo(
@@ -51,6 +81,7 @@ export function RestaurantProvider({
         selectedRestaurant,
         selectRestaurant,
         clearSelection,
+        refreshRestaurants,
       }}
     >
       {children}

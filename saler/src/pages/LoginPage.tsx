@@ -75,7 +75,7 @@ export default function LoginPage() {
           </Button>
 
           <p className="text-xs text-center text-muted-foreground">
-            Demo: Nhập bất kỳ tên đăng nhập và mật khẩu để đăng nhập
+            Vui lòng dùng tài khoản đã được tạo trong hệ thống
           </p>
         </form>
       </div>

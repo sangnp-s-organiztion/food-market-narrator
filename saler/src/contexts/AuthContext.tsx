@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { User, AuthState } from "@/types";
-import { mockUser } from "@/services/mockData";
+import { getMeApi, loginApi, logoutApi } from "@/services/api";
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<boolean>;
@@ -15,15 +15,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
   });
 
-  const login = useCallback(async (username: string, _password: string) => {
-    if (username.trim()) {
-      setAuthState({ user: { ...mockUser, username }, isAuthenticated: true });
-      return true;
+  useEffect(() => {
+    let mounted = true;
+
+    async function bootstrapAuth() {
+      try {
+        const me = await getMeApi();
+        if (mounted) {
+          setAuthState({ user: me, isAuthenticated: true });
+        }
+      } catch {
+        if (mounted) {
+          setAuthState({ user: null, isAuthenticated: false });
+        }
+      }
     }
-    return false;
+
+    bootstrapAuth();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const login = useCallback(async (username: string, password: string) => {
+    try {
+      const user = await loginApi(username, password);
+      setAuthState({ user, isAuthenticated: true });
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
   const logout = useCallback(() => {
+    void logoutApi().catch(() => undefined);
     setAuthState({ user: null, isAuthenticated: false });
   }, []);
 
