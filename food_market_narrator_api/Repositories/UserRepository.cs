@@ -24,5 +24,23 @@ namespace food_market_narrator_api.Repositories
             // FindAsync tối ưu cho search theo PK
             return await _context.User.FindAsync(id);
         }
+
+        public async Task<UserModel?> GetByUsernameAsync(string username)
+        {
+            return await _context.User
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<bool> ValidateCredentialsAsync(string username, string passwordHash)
+        {
+            var user = await GetByUsernameAsync(username);
+            if (user == null || !user.IsActive)
+            {
+                return false;
+            }
+
+            // Current DB stores password_hash; compare directly until hash verification is implemented.
+            return string.Equals(user.Password, passwordHash, StringComparison.Ordinal);
+        }
     }
 }

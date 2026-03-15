@@ -34,11 +34,21 @@ namespace food_market_narrator_api.Models
         [MaxLength(500)]
         public string? Address { get; set; }
 
+        [Column("phone")]
+        [MaxLength(10)]
+        public string? Phone { get; set; }
+
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [Column("open_time")]
+        public TimeSpan? OpenTime { get; set; }
+
+        [Column("close_time")]
+        public TimeSpan? CloseTime { get; set; }
 
         [Column("user_id")]
         public int UserId { get; set; }
@@ -49,5 +59,6 @@ namespace food_market_narrator_api.Models
         // Navigation properties
         public ICollection<RestaurantImageModel> ImageURL { get; set; } = new List<RestaurantImageModel>();
         public ICollection<AudioModel> AudioURL { get; set; } = new List<AudioModel>();
+        public ICollection<DishModel> Dishes { get; set; } = new List<DishModel>();
     }
 }
