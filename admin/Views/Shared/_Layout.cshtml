@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Vinh Khanh Admin</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/admin.styles.css" asp-append-version="true" />
+</head>
+<body data-page="@(ViewData["PageKey"]?.ToString() ?? string.Empty)">
+    @{
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+        string MenuClass(string actionName) => currentAction.Equals(actionName, StringComparison.OrdinalIgnoreCase) ? "menu-item active" : "menu-item";
+    }
+
+    <div class="admin-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-icon">VF</span>
+                <div>
+                    <h2>Vinh Khanh Admin</h2>
+                    <p>Food Street Portal</p>
+                </div>
+            </div>
+
+            <nav class="menu" aria-label="Admin menu">
+                <a class="@MenuClass("Analytics")" asp-controller="Home" asp-action="Analytics">Analytics</a>
+                <a class="@MenuClass("PoiManagement")" asp-controller="Home" asp-action="PoiManagement">POI Management</a>
+                <a class="@MenuClass("PoiEditor")" asp-controller="Home" asp-action="PoiEditor">POI Editor</a>
+                <a class="@MenuClass("ApprovalQueue")" asp-controller="Home" asp-action="ApprovalQueue">Approval Queue</a>
+                <a class="menu-item" asp-controller="Home" asp-action="Privacy">Settings</a>
+            </nav>
+
+            <div class="account-box">
+                <span class="avatar">NA</span>
+                <div>
+                    <h3>Nguyen Admin</h3>
+                    <p>Super Administrator</p>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="logout-link">Sign Out</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <section class="workspace">
+            <header class="topbar">
+                <div>
+                    <h1>@(ViewData["TopbarTitle"] ?? "Street Management Admin")</h1>
+                    <p>@(ViewData["TopbarSubtitle"] ?? "Real-time management for Vinh Khanh Food Street")</p>
+                </div>
+                <div class="topbar-actions">
+                    @if (IsSectionDefined("TopbarActions"))
+                    {
+                        @RenderSection("TopbarActions", required: false)
+                    }
+                </div>
+            </header>
+
+            <main role="main" class="page-content">
+                @RenderBody()
+            </main>
+        </section>
+    </div>
+
+    <script src="~/js/common.js" asp-append-version="true"></script>
+    <script src="~/js/pages/poi-management.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
