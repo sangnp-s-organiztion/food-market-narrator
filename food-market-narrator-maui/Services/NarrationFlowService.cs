@@ -1,4 +1,4 @@
-using Microsoft.Maui.Devices.Sensors;
+﻿using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
 using food_market_narrator.Settings;
 
@@ -39,18 +39,18 @@ public class NarrationFlowService : INarrationFlowService
         if (_isNarrationEnabled) return;
 
         _isNarrationEnabled = true;
-        Console.WriteLine($"IsNarrating: {_isNarrationEnabled}");
+        // Console.WriteLine($"IsNarrating: {_isNarrationEnabled}");
         _locationService.LocationChanged += OnLocationChanged;
         await _locationService.StartTrackingAsync();
 
-        // 👇 THÊM DÒNG NÀY
+        // ðŸ‘‡ THÃŠM DÃ’NG NÃ€Y
         var currentLocation = await _locationService.GetCurrentLocationAsync();
         if (currentLocation != null)
         {
             await CheckAndNarrateAsync(currentLocation);
         }
 
-        Console.WriteLine("Narration STARTED");
+        // Console.WriteLine("Narration STARTED");
     }
 
     public void StopNarration()
@@ -69,13 +69,13 @@ public class NarrationFlowService : INarrationFlowService
         _playQueue.Clear();
         _isProcessingQueue = false;
 
-        // reset POI đã phát để lần Start thủ công tiếp theo có thể phát lại ở cùng vị trí
+        // reset POI Ä‘Ã£ phÃ¡t Ä‘á»ƒ láº§n Start thá»§ cÃ´ng tiáº¿p theo cÃ³ thá»ƒ phÃ¡t láº¡i á»Ÿ cÃ¹ng vá»‹ trÃ­
         _playedPOIs.Clear();
 
-        Console.WriteLine("Narration STOPPED");
+        // Console.WriteLine("Narration STOPPED");
     }
 
-    // Khi thay đổi vị trí thì làm gì đó
+    // Khi thay Ä‘á»•i vá»‹ trÃ­ thÃ¬ lÃ m gÃ¬ Ä‘Ã³
     private async void OnLocationChanged(object? sender, Location location)
     {
         await CheckAndNarrateAsync(location);
@@ -83,11 +83,11 @@ public class NarrationFlowService : INarrationFlowService
 
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
-        Console.WriteLine("=== CHECK NARRATE START ===");
+        // Console.WriteLine("=== CHECK NARRATE START ===");
 
         //if (_audioService.IsPlaying)
         //{
-        //    Console.WriteLine("Audio đang phát, skip...");
+        //    Console.WriteLine("Audio Ä‘ang phÃ¡t, skip...");
         //    return;
         //}
 
@@ -96,7 +96,7 @@ public class NarrationFlowService : INarrationFlowService
 
         if (currentLocation == null)
         {
-            Console.WriteLine("Current location NULL");
+            // Console.WriteLine("Current location NULL");
             return;
         }
 
@@ -105,7 +105,7 @@ public class NarrationFlowService : INarrationFlowService
         var pois = await _poiService.GetAllPOIsAsync();
         if (pois == null || !pois.Any())
         {
-            Console.WriteLine("POI list empty");
+            // Console.WriteLine("POI list empty");
             return;
         }
 
@@ -115,7 +115,7 @@ public class NarrationFlowService : INarrationFlowService
 
         if (nearestPoi == null)
         {
-            Console.WriteLine("Nearest POI NULL - No valid POI found");
+            // Console.WriteLine("Nearest POI NULL - No valid POI found");
             return;
         }
 
@@ -123,27 +123,27 @@ public class NarrationFlowService : INarrationFlowService
 
         if (string.IsNullOrWhiteSpace(selectedAudio))
         {
-            Console.WriteLine($"No audio found for POI: {nearestPoi.Name}");
+            // Console.WriteLine($"No audio found for POI: {nearestPoi.Name}");
             return;
         }
 
         var distanceMeters = _poiService.GetDistanceMeters(currentLocation, nearestPoi);
-        Console.WriteLine($"Nearest POI: {nearestPoi.restaurantId} - {distanceMeters:F1}m");
+        // Console.WriteLine($"Nearest POI: {nearestPoi.restaurantId} - {distanceMeters:F1}m");
 
-        // Nếu force (manual trigger) hoặc trong khoảng cách cho phép
+        // Náº¿u force (manual trigger) hoáº·c trong khoáº£ng cÃ¡ch cho phÃ©p
         if (force || distanceMeters <= AppSettings.TriggerDistanceMeters)
         {
-            Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
+            // Console.WriteLine(force ? "Manual trigger activated" : "Inside trigger radius");
 
             var poiId = nearestPoi.restaurantId;
             var alreadyPlayed = _playedPOIs.Contains(poiId);
 
-            // Force luôn cho phép phát lại POI hiện tại
+            // Force luÃ´n cho phÃ©p phÃ¡t láº¡i POI hiá»‡n táº¡i
             if (force || !alreadyPlayed)
             {
-                Console.WriteLine("Playing audio...");
+                // Console.WriteLine("Playing audio...");
 
-                Console.WriteLine("Add to queue...");
+                // Console.WriteLine("Add to queue...");
                 _playQueue.Enqueue(nearestPoi);
 
                 if (!alreadyPlayed)
@@ -155,15 +155,15 @@ public class NarrationFlowService : INarrationFlowService
             }
             else
             {
-                Console.WriteLine("POI already played (auto-trigger skipped)");
+                // Console.WriteLine("POI already played (auto-trigger skipped)");
             }
         }
         else
         {
-            Console.WriteLine($"Too far from nearest POI ({distanceMeters:F1}m > {AppSettings.TriggerDistanceMeters}m)");
+            // Console.WriteLine($"Too far from nearest POI ({distanceMeters:F1}m > {AppSettings.TriggerDistanceMeters}m)");
         }
 
-        Console.WriteLine("=== CHECK NARRATE END ===");
+        // Console.WriteLine("=== CHECK NARRATE END ===");
     }
 
     private async Task ProcessQueueAsync()
@@ -177,12 +177,12 @@ public class NarrationFlowService : INarrationFlowService
         {
             var poi = _playQueue.Dequeue();
 
-            Console.WriteLine($"Queue playing: {poi.Name}");
+            // Console.WriteLine($"Queue playing: {poi.Name}");
 
             var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
             if (string.IsNullOrWhiteSpace(selectedAudio))
             {
-                Console.WriteLine($"No playable audio for POI: {poi.Name}");
+                // Console.WriteLine($"No playable audio for POI: {poi.Name}");
                 continue;
             }
 
@@ -191,7 +191,7 @@ public class NarrationFlowService : INarrationFlowService
                 selectedAudio
             );
 
-            // đợi audio phát xong
+            // Ä‘á»£i audio phÃ¡t xong
             while (_audioService.IsPlaying)
             {
                 await Task.Delay(300);

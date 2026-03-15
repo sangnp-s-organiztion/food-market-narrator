@@ -1,15 +1,24 @@
 ﻿using food_market_narrator.Services;
+using System.Diagnostics;
 
 namespace food_market_narrator;
 
 public partial class App : Application
 {
     private readonly ILocationService _locationService;
+    private readonly IPOIService _poiService;
+    private readonly ILanguageService _languageService;
+    private bool _warmupStarted;
 
-    public App(ILocationService locationService)
+    public App(
+        ILocationService locationService,
+        IPOIService poiService,
+        ILanguageService languageService)
 	{
 		InitializeComponent();
         _locationService = locationService;
+		_poiService = poiService;
+		_languageService = languageService;
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
@@ -17,11 +26,13 @@ public partial class App : Application
 		return new Window(new AppShell());
 	}
 
-    protected override async void OnStart()
+    protected override void OnStart()
     {
         base.OnStart();
-        // Start tracking immediately when app starts
-        await _locationService.StartTrackingAsync();
+
+        // Không chặn luồng startup: warm-up data chạy nền để lần mở trang đầu mượt hơn.
+        StartWarmupInBackground();
+        _ = _locationService.StartTrackingAsync();
     }
 
     protected override void OnSleep()
@@ -31,4 +42,32 @@ public partial class App : Application
         // We'll leave it running to hope for the best if permission allows background (on Android).
         // If strict lifecycle management is needed, consider StopTracking() here.
     }
+
+    private void StartWarmupInBackground()
+    {
+        if (_warmupStarted)
+        {
+            return;
+        }
+
+        _warmupStarted = true;
+        _ = Task.Run(async () =>
+        {
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                // Console.WriteLine("[Perf][App] Warm-up started");
+                await Task.WhenAll(
+                    _poiService.GetAllPOIsAsync(),
+                    _languageService.GetAllLanguagesAsync());
+                // Console.WriteLine($"[Perf][App] Warm-up finished in {sw.ElapsedMilliseconds} ms");
+            }
+            catch (Exception)
+            {
+                // Console.WriteLine($"[Perf][App] Warm-up failed after {sw.ElapsedMilliseconds} ms: {ex.Message}");
+            }
+        });
+    }
 }
+
+

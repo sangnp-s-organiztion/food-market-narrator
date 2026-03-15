@@ -83,9 +83,9 @@ namespace food_market_narrator.Helpers
                     HighlightPOI(mapControl, nearest);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Error loading map: {ex.Message}");
+                // Console.WriteLine($"Error loading map: {ex.Message}");
             }
         }
 
@@ -201,3 +201,4 @@ namespace food_market_narrator.Helpers
         }
     }
 }
+
