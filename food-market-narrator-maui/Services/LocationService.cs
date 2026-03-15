@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
+using System.Linq;
 
 namespace food_market_narrator.Services;
 
@@ -13,16 +14,17 @@ public class LocationService : ILocationService
     private const double MinPublishDistanceMeters = 6;
     private static readonly GeolocationRequest TrackingRequest =
         new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
+    private bool _backgroundPermissionExplained;
 
     public event EventHandler<Location>? LocationChanged;
 
-    // Láº¥y vá»‹ trÃ­ hiá»‡n táº¡i cá»§a ngÆ°á»i dÃ¹ng
+    // Lay vi tri hien tai cua nguoi dung.
     public async Task<Location?> GetCurrentLocationAsync()
     {
         try
         {
-            var status = await CheckAndRequestPermissionAsync();
-            if (status != PermissionStatus.Granted)
+            var granted = await EnsureTrackingPermissionFlowAsync();
+            if (!granted)
                 return null;
 
             var request = new GeolocationRequest(GeolocationAccuracy.High, TimeSpan.FromSeconds(10));
@@ -39,8 +41,8 @@ public class LocationService : ILocationService
     {
         if (_isTracking) return;
 
-        var status = await CheckAndRequestPermissionAsync();
-        if (status != PermissionStatus.Granted)
+        var granted = await EnsureTrackingPermissionFlowAsync();
+        if (!granted)
         {
             // Console.WriteLine("Location permission not granted");
             return;
@@ -48,10 +50,12 @@ public class LocationService : ILocationService
 
         try
         {
+            StartForegroundTrackingServiceIfNeeded();
+
             _isTracking = true;
             _trackingCts = new CancellationTokenSource();
             _trackingTask = RunTrackingLoopAsync(_trackingCts.Token);
-            // Console.WriteLine("Báº¯t Ä‘áº§u theo dÃµi vá»‹ trÃ­");
+            // Console.WriteLine("Started location tracking");
         }
         catch (Exception)
         {
@@ -68,7 +72,8 @@ public class LocationService : ILocationService
         {
             _trackingCts?.Cancel();
             _isTracking = false;
-            // Console.WriteLine("Ngá»«ng theo dÃµi vá»‹ trÃ­");
+            StopForegroundTrackingServiceIfNeeded();
+            // Console.WriteLine("Stopped location tracking");
         }
         catch (Exception)
         {
@@ -129,18 +134,143 @@ public class LocationService : ILocationService
         return distanceMeters >= MinPublishDistanceMeters;
     }
 
-    private async Task<PermissionStatus> CheckAndRequestPermissionAsync()
+    private async Task<bool> EnsureTrackingPermissionFlowAsync()
     {
-        var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-        if (status == PermissionStatus.Granted)
-            return status;
-
-        if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        if (whileInUseStatus != PermissionStatus.Granted)
         {
-            // Hiá»ƒn thá»‹ cho ngÆ°á»i dÃ¹ng biáº¿t thÃªm thÃ´ng tin vá» lÃ½ do cáº§n quyá»n truy cáº­p
+            if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+            {
+                await ShowInfoAsync(
+                    "Can quyen vi tri",
+                    "Ung dung can quyen truy cap vi tri de phat hien POI gan ban.");
+            }
+
+            whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
         }
 
-        return await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+        if (whileInUseStatus != PermissionStatus.Granted)
+        {
+            return false;
+        }
+
+#if ANDROID
+        if (OperatingSystem.IsAndroidVersionAtLeast(29))
+        {
+            var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+            if (alwaysStatus != PermissionStatus.Granted)
+            {
+                if (!_backgroundPermissionExplained)
+                {
+                    _backgroundPermissionExplained = true;
+                    await ShowInfoAsync(
+                        "Bat tracking nen",
+                        "De theo doi vi tri khi app chay nen, hay chon phep vi tri \"Always allow\".");
+                }
+
+                alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
+            }
+
+            if (alwaysStatus != PermissionStatus.Granted)
+            {
+                var shouldOpenSettings = await ShowConfirmAsync(
+                    "Thieu quyen vi tri nen",
+                    "Android can quyen vi tri nen de tracking on dinh. Ban co muon mo Settings de cap quyen ngay khong?",
+                    "Mo Settings",
+                    "De sau");
+
+                if (shouldOpenSettings)
+                {
+                    AppInfo.Current.ShowSettingsUI();
+                }
+
+                return false;
+            }
+        }
+
+        if (OperatingSystem.IsAndroidVersionAtLeast(33))
+        {
+            // Notification permission is optional for location data, but requested so foreground
+            // notification can be shown reliably on Android 13+.
+            var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+            if (notificationStatus != PermissionStatus.Granted)
+            {
+                _ = await Permissions.RequestAsync<Permissions.PostNotifications>();
+            }
+        }
+#endif
+
+        return true;
+    }
+
+    private static Task ShowInfoAsync(string title, string message)
+    {
+        return MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page != null)
+            {
+                await page.DisplayAlertAsync(title, message, "OK");
+            }
+        });
+    }
+
+    private static Task<bool> ShowConfirmAsync(
+        string title,
+        string message,
+        string accept,
+        string cancel)
+    {
+        return MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page == null)
+            {
+                return false;
+            }
+
+            return await page.DisplayAlertAsync(title, message, accept, cancel);
+        });
+    }
+
+    private static void StartForegroundTrackingServiceIfNeeded()
+    {
+#if ANDROID
+        var context = global::Android.App.Application.Context;
+        var intent = new global::Android.Content.Intent(
+            context,
+            typeof(global::food_market_narrator.Platforms.Android.TrackingForegroundService));
+        intent.SetAction(global::food_market_narrator.Platforms.Android.TrackingForegroundService.ActionStart);
+
+        if (OperatingSystem.IsAndroidVersionAtLeast(26))
+        {
+            context.StartForegroundService(intent);
+        }
+        else
+        {
+            context.StartService(intent);
+        }
+#endif
+    }
+
+    private static void StopForegroundTrackingServiceIfNeeded()
+    {
+#if ANDROID
+        var context = global::Android.App.Application.Context;
+        var stopIntent = new global::Android.Content.Intent(
+            context,
+            typeof(global::food_market_narrator.Platforms.Android.TrackingForegroundService));
+        stopIntent.SetAction(global::food_market_narrator.Platforms.Android.TrackingForegroundService.ActionStop);
+
+        if (OperatingSystem.IsAndroidVersionAtLeast(26))
+        {
+            context.StartForegroundService(stopIntent);
+        }
+        else
+        {
+            context.StartService(stopIntent);
+        }
+#endif
     }
 }
 

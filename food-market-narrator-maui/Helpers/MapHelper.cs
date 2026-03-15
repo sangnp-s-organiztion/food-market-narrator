@@ -176,6 +176,40 @@ namespace food_market_narrator.Helpers
             mapControl.Map.RefreshGraphics();
         }
 
+        public static void CenterOnUserLocation(MapControl mapControl, double lat, double lon, int? zoomLevel = null)
+        {
+            if (mapControl?.Map?.Navigator == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var spherical = SphericalMercator.FromLonLat(lon, lat);
+                var center = new MPoint(spherical.x, spherical.y);
+
+                var viewport = mapControl.Map.Navigator.Viewport;
+                var fallbackResolution = 156543.03392 / Math.Pow(2, 19);
+                var viewportResolution = viewport.Resolution;
+
+                var resolution = zoomLevel.HasValue
+                    ? 156543.03392 / Math.Pow(2, zoomLevel.Value)
+                    : viewportResolution;
+
+                if (double.IsNaN(resolution) || double.IsInfinity(resolution) || resolution <= 0)
+                {
+                    resolution = fallbackResolution;
+                }
+
+                mapControl.Map.Navigator.CenterOnAndZoomTo(center, resolution);
+                mapControl.Map.RefreshGraphics();
+            }
+            catch (Exception)
+            {
+                // Ignore transient map navigation failures and wait for next location tick.
+            }
+        }
+
         private static void NavigateTo(MapControl mapControl, double lat, double lon, int zoomLevel)
         {
             var spherical = SphericalMercator.FromLonLat(lon, lat);
