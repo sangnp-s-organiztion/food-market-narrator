@@ -1,0 +1,113 @@
+.action-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #5f7195;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.action-btn + .action-btn {
+  margin-left: 6px;
+}
+
+.action-btn.edit:hover {
+  border-color: #a8b8d4;
+  color: #364a74;
+}
+
+.action-btn.delete {
+  border-color: #f6cad0;
+  color: #c24151;
+}
+
+.action-btn.delete:hover {
+  background: #fff3f5;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.fallback-panel {
+  margin-top: 18px;
+}
+
+.fallback-panel p {
+  margin-top: 10px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 30, 56, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal-card {
+  width: min(100%, 580px);
+  background: #fff;
+  border: 1px solid #dbe4f3;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 20px 70px rgba(15, 30, 60, 0.2);
+}
+
+.modal-card label {
+  display: block;
+  margin: 10px 0 6px;
+  font-weight: 700;
+  color: #536383;
+}
+
+.modal-sm {
+  width: min(100%, 420px);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #6b7da1;
+  cursor: pointer;
+}
+
+.modal-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-message {
+  margin-top: 8px;
+  color: #556586;
+}
+
+.field-error {
+  display: block;
+  min-height: 18px;
+  margin-top: 3px;
+  color: #d73a49;
+  font-size: 0.8rem;
+  font-weight: 700;
+}

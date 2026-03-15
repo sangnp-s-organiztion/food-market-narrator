@@ -1,0 +1,73 @@
+<div class="section-title">
+    <h2>Edit POI: Oc Dao</h2>
+    <p>Update details, media, and audio for this point of interest.</p>
+</div>
+
+<div class="editor-grid">
+    <article class="panel form-panel">
+        <h3>General Information</h3>
+        <label>POI Name</label>
+        <input type="text" value="Oc Dao - Vinh Khanh" />
+        <div class="form-split">
+            <div>
+                <label>Category</label>
+                <select>
+                    <option>Seafood</option>
+                    <option>Street Stall</option>
+                    <option>Landmark</option>
+                </select>
+            </div>
+            <div>
+                <label>Status</label>
+                <div class="toggle-group">
+                    <button class="toggle active" type="button">Active</button>
+                    <button class="toggle" type="button">Draft</button>
+                </div>
+            </div>
+        </div>
+        <label>Description</label>
+        <textarea rows="6">Oc Dao is a legendary seafood destination on Vinh Khanh Street.</textarea>
+
+        <h3>Media Management</h3>
+        <div class="media-grid">
+            <div class="media-item">Main Photo</div>
+            <div class="media-item">Store Front</div>
+            <div class="media-item">Menu Dish</div>
+            <button class="media-item upload" type="button">Upload</button>
+        </div>
+
+        <h3>Audio and Narrations</h3>
+        <textarea rows="4" placeholder="Enter script for AI voice..."></textarea>
+        <div class="audio-row">
+            <select>
+                <option>English (UK) - Male</option>
+                <option>Vietnamese - Female</option>
+            </select>
+            <button class="cta" type="button">Generate</button>
+        </div>
+        <div class="fake-player">
+            <button type="button">▶</button>
+            <div class="meter"><span style="width:40%"></span></div>
+            <small>0:45</small>
+        </div>
+    </article>
+
+    <aside class="editor-side">
+        <article class="panel">
+            <h3>Location</h3>
+            <div class="mini-map">Lat: 10.7601, Long: 106.7021</div>
+            <input type="text" value="https://maps.app.goo.gl/..." />
+            <button class="ghost-btn wide" type="button">Get Current Location</button>
+        </article>
+
+        <article class="panel metadata">
+            <h3>Metadata</h3>
+            <p><span>Last updated</span><strong>2 hours ago</strong></p>
+            <p><span>Updated by</span><strong>Admin User</strong></p>
+            <p><span>Total Views</span><strong>1,248</strong></p>
+        </article>
+
+        <button class="cta wide" type="button">Save Changes</button>
+        <button class="ghost-btn wide" type="button">Cancel and Discard</button>
+    </aside>
+</div>

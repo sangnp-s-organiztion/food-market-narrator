@@ -1,0 +1,139 @@
+.editor-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+}
+
+.form-panel label {
+  display: block;
+  margin: 10px 0 6px;
+  font-weight: 700;
+  color: #536383;
+}
+
+.form-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f6f9ff;
+  padding: 9px;
+  font-weight: 700;
+}
+
+.toggle.active {
+  background: #d6f4e5;
+  border-color: #97d9be;
+  color: #15714f;
+}
+
+.media-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.media-item {
+  border: 1px dashed #d5deed;
+  border-radius: 10px;
+  padding: 30px 8px;
+  text-align: center;
+  background: #f9fbff;
+  font-weight: 700;
+  color: #7a8bad;
+}
+
+.media-item.upload {
+  background: var(--brand-soft);
+  border-color: #ffc493;
+  color: #ce6a1d;
+}
+
+.audio-row {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.fake-player {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffaf6;
+  border: 1px solid #ffdcbf;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.fake-player button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--brand);
+  color: #fff;
+}
+
+.fake-player small {
+  color: #657592;
+}
+
+.editor-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.mini-map {
+  margin: 10px 0;
+  border-radius: 11px;
+  border: 1px solid #d7e0ef;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  color: #4f5f80;
+  font-weight: 700;
+  background: repeating-linear-gradient(
+    45deg,
+    #ecf3ff 0 10px,
+    #f6f9ff 10px 20px
+  );
+}
+
+.metadata p {
+  margin-top: 9px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.metadata strong {
+  color: #304062;
+}
+
+@media (max-width: 1240px) {
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .form-split,
+  .media-grid,
+  .audio-row {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
