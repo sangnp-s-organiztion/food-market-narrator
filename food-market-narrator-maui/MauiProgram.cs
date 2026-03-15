@@ -1,15 +1,8 @@
-<<<<<<< HEAD
 ﻿using food_market_narrator.Services;
 using food_market_narrator.Settings;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-=======
-﻿using food_market_narrator.Controls;
-using food_market_narrator.Services;
-using food_market_narrator.Views;
-using Microsoft.Extensions.Logging;
->>>>>>> add-api-thieu
 
 
 namespace food_market_narrator;
@@ -59,16 +52,6 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-<<<<<<< HEAD
-=======
-        builder.ConfigureMauiHandlers(handlers =>
-        {
-#if ANDROID
-            handlers.AddHandler<MapWebView, MapWebViewHandler>();
-#endif
-        });
-
->>>>>>> add-api-thieu
         return builder.Build();
     }
 }

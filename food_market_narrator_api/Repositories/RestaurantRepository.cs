@@ -40,6 +40,17 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<RestaurantModel>> GetByUserIdAsync(int userId)
+        {
+            return await _context.Restaurant
+                .Where(r => r.UserId == userId)
+                .Include(r => r.ImageURL)
+                .Include(r => r.AudioURL)
+                    .ThenInclude(a => a.Language)
+                .OrderBy(r => r.RestaurantId)
+                .ToListAsync();
+        }
+
         public async Task<RestaurantModel?> UpdateAsync(string id, DTOs.Restaurant.RestaurantRequestDto dto)
         {
             var restaurant = await GetByIdAsync(id);

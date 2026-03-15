@@ -1,7 +1,6 @@
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
-using food_market_narrator_api.Models;  
+using food_market_narrator_api.Models;
 
 public class AppDbContext : DbContext
 {
@@ -10,7 +9,7 @@ public class AppDbContext : DbContext
     {
     }
 
-    // Bảng nhà hàng
+    // Bang nha hang
     public DbSet<RestaurantModel> Restaurant { get; set; }
     public DbSet<RestaurantImageModel> RestaurantImage { get; set; }
     public DbSet<AudioModel> Audio { get; set; }

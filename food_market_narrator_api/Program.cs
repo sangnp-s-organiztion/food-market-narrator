@@ -13,7 +13,6 @@ public class Program
         builder.Services.AddScoped<RestaurantRepository>();
         builder.Services.AddScoped<RestaurantService>();
         builder.Services.AddScoped<UserRepository>();
-        builder.Services.AddScoped<UserRestaurantRepository>();
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<AudioRepository>();
         builder.Services.AddScoped<AudioService>();

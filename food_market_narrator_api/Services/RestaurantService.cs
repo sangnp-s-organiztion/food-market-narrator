@@ -7,12 +7,10 @@ namespace food_market_narrator_api.Services
     public class RestaurantService
     {
         private readonly RestaurantRepository _restaurantRepository;
-        private readonly UserRestaurantRepository _userRestaurantRepository;
 
-        public RestaurantService(RestaurantRepository restaurantRepository, UserRestaurantRepository userRestaurantRepository)
+        public RestaurantService(RestaurantRepository restaurantRepository)
         {
             _restaurantRepository = restaurantRepository;
-            _userRestaurantRepository = userRestaurantRepository;
         }
 
         public async Task<List<RestaurantResponseDto>> GetAllRestaurantsAsync()
@@ -44,18 +42,8 @@ namespace food_market_narrator_api.Services
 
         public async Task<List<RestaurantResponseDto>> GetRestaurantsByUserIdAsync(int userId)
         {
-            var restaurantIds = await _userRestaurantRepository.GetRestaurantIdsByUserAsync(userId);
-            if (restaurantIds == null || restaurantIds.Count == 0) return new List<RestaurantResponseDto>();
-
-            var restaurants = await _restaurantRepository.GetByIdsAsync(restaurantIds);
-            // maintain order by input ids
-            var ordered = restaurantIds
-                .Select(id => restaurants.FirstOrDefault(r => r.RestaurantId == id))
-                .Where(r => r != null)
-                .Cast<RestaurantModel>()
-                .ToList();
-
-            return ordered.Select(MapToDto).ToList();
+            var restaurants = await _restaurantRepository.GetByUserIdAsync(userId);
+            return restaurants.Select(MapToDto).ToList();
         }
 
         private static RestaurantResponseDto MapToDto(RestaurantModel r)
