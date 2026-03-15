@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Attributes;
 using food_market_narrator_api.DTOs.Auth;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
@@ -21,7 +22,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPost("login")]
-        [AllowAnonymous]
+        [PublicEndpoint]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
