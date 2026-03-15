@@ -1,6 +1,8 @@
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -32,7 +34,27 @@ public class Program
                 options.AccessDeniedPath = "/Auth/login";
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.Events = new CookieAuthenticationEvents
+                {
+                    OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+        builder.Services.AddAuthorization(options =>
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
 
         // Lấy connection string từ appsettings.json
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -74,7 +96,10 @@ public class Program
 
 
         // Add services to the container.
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.Conventions.Add(new PublicEndpointConvention(PublicEndpoints.Definitions));
+        });
         //builder.Services.AddEndpointsApiExplorer();
         //builder.Services.AddSwaggerGen();
         var app = builder.Build();
