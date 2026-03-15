@@ -33,14 +33,17 @@ export default function DashboardLayout() {
                 <Store className="w-4 h-4 text-muted-foreground" />
                 <Select
                   value={String(selectedRestaurant.restaurant_id)}
-                  onValueChange={(val) => selectRestaurant(Number(val))}
+                  onValueChange={(val) => selectRestaurant(val)}
                 >
                   <SelectTrigger className="w-[220px] h-8 text-sm">
                     <SelectValue placeholder="Chọn nhà hàng" />
                   </SelectTrigger>
                   <SelectContent>
                     {restaurants.map((r) => (
-                      <SelectItem key={r.restaurant_id} value={String(r.restaurant_id)}>
+                      <SelectItem
+                        key={r.restaurant_id}
+                        value={String(r.restaurant_id)}
+                      >
                         {r.name}
                       </SelectItem>
                     ))}

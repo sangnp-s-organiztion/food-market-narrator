@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import type { Restaurant } from "@/types";
 import { getUserRestaurants } from "@/services/mockData";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,15 +12,19 @@ import { useAuth } from "@/contexts/AuthContext";
 interface RestaurantContextType {
   restaurants: Restaurant[];
   selectedRestaurant: Restaurant | null;
-  selectRestaurant: (restaurantId: number) => void;
+  selectRestaurant: (restaurantId: string) => void;
   clearSelection: () => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | null>(null);
 
-export function RestaurantProvider({ children }: { children: React.ReactNode }) {
+export function RestaurantProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user } = useAuth();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const restaurants = useMemo(() => {
     if (!user) return [];
@@ -23,10 +33,10 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
 
   const selectedRestaurant = useMemo(
     () => restaurants.find((r) => r.restaurant_id === selectedId) ?? null,
-    [restaurants, selectedId]
+    [restaurants, selectedId],
   );
 
-  const selectRestaurant = useCallback((restaurantId: number) => {
+  const selectRestaurant = useCallback((restaurantId: string) => {
     setSelectedId(restaurantId);
   }, []);
 
@@ -35,7 +45,14 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <RestaurantContext.Provider value={{ restaurants, selectedRestaurant, selectRestaurant, clearSelection }}>
+    <RestaurantContext.Provider
+      value={{
+        restaurants,
+        selectedRestaurant,
+        selectRestaurant,
+        clearSelection,
+      }}
+    >
       {children}
     </RestaurantContext.Provider>
   );
@@ -43,6 +60,7 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
 
 export function useRestaurant() {
   const ctx = useContext(RestaurantContext);
-  if (!ctx) throw new Error("useRestaurant must be used within RestaurantProvider");
+  if (!ctx)
+    throw new Error("useRestaurant must be used within RestaurantProvider");
   return ctx;
 }

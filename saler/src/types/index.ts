@@ -6,12 +6,12 @@ export interface User {
 export interface UserRestaurant {
   id: number;
   user_id: number;
-  restaurant_id: number;
+  restaurant_id: string;
   role: "owner" | "manager";
 }
 
 export interface Restaurant {
-  restaurant_id: number;
+  restaurant_id: string;
   name: string;
   description: string;
   latitude: number;
@@ -19,6 +19,7 @@ export interface Restaurant {
   phone: string;
   address: string;
   is_active: boolean;
+  user_id: number;
   open_time: string;
   close_time: string;
   created_at: string;
@@ -26,7 +27,7 @@ export interface Restaurant {
 
 export interface RestaurantImage {
   image_id: number;
-  restaurant_id: number;
+  restaurant_id: string;
   image_url: string;
   is_primary: boolean;
   sort_order: number;
@@ -37,7 +38,7 @@ export interface Dish {
   name: string;
   price: number;
   description: string;
-  restaurant_id: number;
+  restaurant_id: string;
   image_id: number | null;
   created_at: string;
 }
@@ -50,7 +51,7 @@ export interface Language {
 
 export interface Audio {
   audio_id: number;
-  restaurant_id: number;
+  restaurant_id: string;
   language_id: number;
   audio_url: string;
   version: number;

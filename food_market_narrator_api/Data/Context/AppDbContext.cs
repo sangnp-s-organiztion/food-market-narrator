@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<RestaurantModel> Restaurant { get; set; }
     public DbSet<RestaurantImageModel> RestaurantImage { get; set; }
     public DbSet<AudioModel> Audio { get; set; }
+    public DbSet<DishModel> Dish { get; set; }
     public DbSet<LanguageModel> Language { get; set; }
     public DbSet<UserModel> User { get; set; }
 }

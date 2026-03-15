@@ -16,7 +16,7 @@ export default function SelectRestaurantPage() {
     }
   }, [restaurants, selectRestaurant, navigate]);
 
-  const handleSelect = (restaurantId: number) => {
+  const handleSelect = (restaurantId: string) => {
     selectRestaurant(restaurantId);
     navigate("/dashboard/restaurant", { replace: true });
   };
@@ -34,7 +34,8 @@ export default function SelectRestaurantPage() {
             Chọn nhà hàng để quản lý
           </h1>
           <p className="text-muted-foreground mt-2">
-            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để tiếp tục.
+            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để
+            tiếp tục.
           </p>
         </div>
 
