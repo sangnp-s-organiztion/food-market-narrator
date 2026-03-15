@@ -1,5 +1,4 @@
 ﻿using food_market_narrator_api.Services;
-using food_market_narrator_api.Attributes;
 using food_market_narrator_api.DTOs.Restaurant;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +18,6 @@ namespace food_market_narrator_api.Controllers
         }
     // GET api/restaurant: Lấy danh sách tất cả restaurants
         [HttpGet]
-        [PublicEndpoint]
         public async Task<IActionResult> GetAll()
         {
             var data = await _restaurantService.GetAllRestaurantsAsync();
@@ -28,7 +26,6 @@ namespace food_market_narrator_api.Controllers
 
     // GET api/restaurant/{id}: Lấy thông tin restaurant theo ID
         [HttpGet("{id}")]
-        [PublicEndpoint]
         public async Task<IActionResult> GetById(string id)
         {
             var data = await _restaurantService.GetRestaurantByIdAsync(id);

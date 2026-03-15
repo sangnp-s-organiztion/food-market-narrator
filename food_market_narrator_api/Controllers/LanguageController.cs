@@ -1,4 +1,3 @@
-using food_market_narrator_api.Attributes;
 using food_market_narrator_api.DTOs.Audio;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +16,6 @@ public class LanguageController : ControllerBase
     }
 
     [HttpGet]
-    [PublicEndpoint]
     public async Task<IActionResult> GetAllLanguages()
     {
         var data = await _languageService.GetAllLanguagesAsync();
@@ -28,7 +26,6 @@ public class LanguageController : ControllerBase
     }
 
     [HttpGet("{languageCode}")]
-    [PublicEndpoint]
     public async Task<IActionResult> GetLanguageByCode(string languageCode)
     {
         var data = await _languageService.GetLanguageByCodeAsync(languageCode);

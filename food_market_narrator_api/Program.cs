@@ -1,3 +1,4 @@
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -95,7 +96,10 @@ public class Program
 
 
         // Add services to the container.
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.Conventions.Add(new PublicEndpointConvention(PublicEndpoints.Definitions));
+        });
         //builder.Services.AddEndpointsApiExplorer();
         //builder.Services.AddSwaggerGen();
         var app = builder.Build();
