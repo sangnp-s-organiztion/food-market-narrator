@@ -1,6 +1,7 @@
 using food_market_narrator.Models;
 using food_market_narrator.Settings;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 
 
@@ -11,6 +12,11 @@ public class POIService : IPOIService
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
     private List<POI>? _pois;
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = false
+    };
 
     // Danh sach cac POI
     private readonly HttpClient _httpClient;
@@ -25,6 +31,8 @@ public class POIService : IPOIService
     {
         if (_pois != null && _pois.Count > 0)
              return _pois;
+
+        var cachedPois = await ReadPoisCacheAsync();
 
         var baseCandidates = new List<string>();
 
@@ -55,6 +63,7 @@ public class POIService : IPOIService
                 }
 
                 _pois = data;
+                await SavePoisCacheAsync(_pois);
                 Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from {requestUrl}");
                 return _pois;
             }
@@ -64,8 +73,68 @@ public class POIService : IPOIService
             }
         }
 
+        if (cachedPois.Count > 0)
+        {
+            _pois = cachedPois;
+            Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from offline cache.");
+            return _pois;
+        }
+
         Console.WriteLine("[POIService] Error fetching POIs from all candidates.");
         return new List<POI>();
+    }
+
+    private static string GetPoiCacheFilePath()
+    {
+        var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
+        Directory.CreateDirectory(cacheDir);
+        return Path.Combine(cacheDir, "pois.json");
+    }
+
+    private static async Task<List<POI>> ReadPoisCacheAsync()
+    {
+        var path = GetPoiCacheFilePath();
+        if (!File.Exists(path))
+        {
+            return new List<POI>();
+        }
+
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            var data = await JsonSerializer.DeserializeAsync<List<POI>>(stream, JsonOptions);
+            return data ?? new List<POI>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[POIService] Read cache failed: {ex.Message}");
+            return new List<POI>();
+        }
+    }
+
+    private static async Task SavePoisCacheAsync(List<POI> pois)
+    {
+        try
+        {
+            var path = GetPoiCacheFilePath();
+            var tempPath = $"{path}.tmp";
+
+            await using (var stream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(stream, pois, JsonOptions);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            File.Move(tempPath, path);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[POIService] Save cache failed: {ex.Message}");
+        }
     }
 
     // Lấy tất cả các POIs đồng bộ

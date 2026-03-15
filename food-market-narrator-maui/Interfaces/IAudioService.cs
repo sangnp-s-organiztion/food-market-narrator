@@ -10,6 +10,8 @@ public interface IAudioService
     event EventHandler? PlaybackEnded;
     Task PlaySound(string language, string fileName);
     bool IsCurrentTrack(string language, string fileName);
+    Task<long> GetCachedAudioSizeBytesAsync();
+    Task ClearAudioCacheAsync();
     void Pause();
     void Resume();
     void StopSound();

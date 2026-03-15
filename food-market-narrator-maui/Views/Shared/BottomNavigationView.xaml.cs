@@ -1,4 +1,6 @@
 using food_market_narrator.Enums;
+using food_market_narrator.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace food_market_narrator.Views.Shared;
 
@@ -85,6 +87,74 @@ public partial class BottomNavigationView : ContentView
     {
         // Use absolute route to reset to the main tab/page
         await Shell.Current.GoToAsync("//MainPage");
+    }
+
+    private async void OpenSettings(object sender, EventArgs e)
+    {
+        var page = Shell.Current?.CurrentPage;
+        if (page == null)
+        {
+            return;
+        }
+
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        var audioService = services?.GetService<IAudioService>();
+        if (audioService == null)
+        {
+            await page.DisplayAlertAsync("Cài đặt", "Không tìm thấy dịch vụ audio cache.", "Đóng");
+            return;
+        }
+
+        var cacheBytes = await audioService.GetCachedAudioSizeBytesAsync();
+        var cacheLabel = $"Xóa bộ nhớ audio đã tải ({FormatBytes(cacheBytes)})";
+
+        var action = await page.DisplayActionSheetAsync(
+            "Cài đặt",
+            "Hủy",
+            null,
+            cacheLabel);
+
+        if (action != cacheLabel)
+        {
+            return;
+        }
+
+        var confirm = await page.DisplayAlertAsync(
+            "Xác nhận",
+            "Bạn có chắc muốn xóa toàn bộ audio đã tải về máy?",
+            "Xóa",
+            "Hủy");
+
+        if (!confirm)
+        {
+            return;
+        }
+
+        await audioService.ClearAudioCacheAsync();
+        await page.DisplayAlertAsync("Hoàn tất", "Đã xóa bộ nhớ audio đã tải.", "Đóng");
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024)
+        {
+            return $"{bytes} B";
+        }
+
+        var kb = bytes / 1024d;
+        if (kb < 1024)
+        {
+            return $"{kb:F1} KB";
+        }
+
+        var mb = kb / 1024d;
+        if (mb < 1024)
+        {
+            return $"{mb:F1} MB";
+        }
+
+        var gb = mb / 1024d;
+        return $"{gb:F2} GB";
     }
 
 

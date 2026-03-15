@@ -4,6 +4,7 @@ using food_market_narrator.Models;
 using food_market_narrator.Resources;
 using food_market_narrator.Resources.Localization;
 using food_market_narrator.Settings;
+using System.Text.Json;
 
 namespace food_market_narrator.Services;
 
@@ -13,6 +14,11 @@ public class LanguageService : ILanguageService
     private const string LANGUAGE_KEY = "AppLanguage";
     private readonly HttpClient _httpClient;
     private List<LanguageModel>? _cachedLanguages;
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = false
+    };
 
     public LanguageService(HttpClient httpClient)
     {
@@ -35,6 +41,8 @@ public class LanguageService : ILanguageService
         {
             return _cachedLanguages;
         }
+
+        var cachedLanguages = await ReadLanguagesCacheAsync();
 
         var baseCandidates = new List<string>();
 
@@ -62,6 +70,7 @@ public class LanguageService : ILanguageService
                 }
 
                 _cachedLanguages = data;
+                await SaveLanguagesCacheAsync(_cachedLanguages);
                 Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages.");
                 return _cachedLanguages;
             }
@@ -71,7 +80,67 @@ public class LanguageService : ILanguageService
             }
         }
 
+        if (cachedLanguages.Count > 0)
+        {
+            _cachedLanguages = cachedLanguages;
+            Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages from offline cache.");
+            return _cachedLanguages;
+        }
+
         return new List<LanguageModel>();
+    }
+
+    private static string GetLanguagesCacheFilePath()
+    {
+        var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
+        Directory.CreateDirectory(cacheDir);
+        return Path.Combine(cacheDir, "languages.json");
+    }
+
+    private static async Task<List<LanguageModel>> ReadLanguagesCacheAsync()
+    {
+        var path = GetLanguagesCacheFilePath();
+        if (!File.Exists(path))
+        {
+            return new List<LanguageModel>();
+        }
+
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            var data = await JsonSerializer.DeserializeAsync<List<LanguageModel>>(stream, JsonOptions);
+            return data ?? new List<LanguageModel>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[LanguageService] Read cache failed: {ex.Message}");
+            return new List<LanguageModel>();
+        }
+    }
+
+    private static async Task SaveLanguagesCacheAsync(List<LanguageModel> languages)
+    {
+        try
+        {
+            var path = GetLanguagesCacheFilePath();
+            var tempPath = $"{path}.tmp";
+
+            await using (var stream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(stream, languages, JsonOptions);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            File.Move(tempPath, path);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[LanguageService] Save cache failed: {ex.Message}");
+        }
     }
 
     public async Task<LanguageModel?> GetLanguageByCodeAsync(string languageCode)
