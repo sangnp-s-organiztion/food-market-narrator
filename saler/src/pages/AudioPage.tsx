@@ -11,7 +11,13 @@ import type { Audio, Language } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +28,9 @@ import {
 import { toast } from "sonner";
 import { Pause, Play, Plus, Volume2, Trash2 } from "lucide-react";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:5042";
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "http://localhost:5044";
 
 export default function AudioPage() {
   const { selectedRestaurant } = useRestaurant();
@@ -37,7 +45,9 @@ export default function AudioPage() {
 
   const versionByAudioId = useMemo(() => {
     const sorted = [...audios].sort((a, b) => {
-      const dateDiff = new Date(a.date_generation).getTime() - new Date(b.date_generation).getTime();
+      const dateDiff =
+        new Date(a.date_generation).getTime() -
+        new Date(b.date_generation).getTime();
       if (dateDiff !== 0) return dateDiff;
       return a.audio_id - b.audio_id;
     });
@@ -87,7 +97,9 @@ export default function AudioPage() {
     try {
       await updateAudioActiveApi(id, !current.is_active);
       setAudios((prev) =>
-        prev.map((a) => (a.audio_id === id ? { ...a, is_active: !a.is_active } : a))
+        prev.map((a) =>
+          a.audio_id === id ? { ...a, is_active: !a.is_active } : a,
+        ),
       );
       toast.success("Đã cập nhật trạng thái âm thanh");
     } catch {
@@ -121,7 +133,11 @@ export default function AudioPage() {
     const langId = parseInt(selectedLang);
 
     try {
-      const created = await uploadAudioApi(selectedRestaurant.restaurant_id, langId, selectedFile);
+      const created = await uploadAudioApi(
+        selectedRestaurant.restaurant_id,
+        langId,
+        selectedFile,
+      );
       setAudios((prev) => [...prev, created]);
       setDialogOpen(false);
       setSelectedLang("");
@@ -132,7 +148,8 @@ export default function AudioPage() {
     }
   };
 
-  const getLangName = (id: number) => languages.find((l) => l.language_id === id)?.name ?? `Ngôn ngữ #${id}`;
+  const getLangName = (id: number) =>
+    languages.find((l) => l.language_id === id)?.name ?? `Ngôn ngữ #${id}`;
 
   const resolveAudioUrl = (audio: Audio): string => {
     const raw = audio.audio_url?.trim();
@@ -146,9 +163,14 @@ export default function AudioPage() {
       return new URL(raw, API_BASE).toString();
     }
 
-    const languageCode = languages.find((l) => l.language_id === audio.language_id)?.code;
+    const languageCode = languages.find(
+      (l) => l.language_id === audio.language_id,
+    )?.code;
     if (languageCode) {
-      return new URL(`/maui-audios/languages/${languageCode}/${raw}`, API_BASE).toString();
+      return new URL(
+        `/maui-audios/languages/${languageCode}/${raw}`,
+        API_BASE,
+      ).toString();
     }
 
     return new URL(`/maui-audios/${raw}`, API_BASE).toString();
@@ -199,7 +221,9 @@ export default function AudioPage() {
       <div className="page-header flex items-start justify-between">
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
-          <p className="page-description">Quản lý mô tả âm thanh theo các ngôn ngữ khác nhau</p>
+          <p className="page-description">
+            Quản lý mô tả âm thanh theo các ngôn ngữ khác nhau
+          </p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" /> Tải lên âm thanh
@@ -208,19 +232,28 @@ export default function AudioPage() {
 
       {audios.length === 0 ? (
         <div className="form-section text-center py-12">
-          <p className="text-muted-foreground">Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.</p>
+          <p className="text-muted-foreground">
+            Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
           {audios.map((audio) => (
-            <div key={audio.audio_id} className="dashboard-card flex items-center gap-4">
+            <div
+              key={audio.audio_id}
+              className="dashboard-card flex items-center gap-4"
+            >
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="w-10 h-10 rounded-lg bg-accent shrink-0"
                 onClick={() => togglePlay(audio)}
-                title={playingAudioId === audio.audio_id ? "Tạm dừng" : "Phát âm thanh"}
+                title={
+                  playingAudioId === audio.audio_id
+                    ? "Tạm dừng"
+                    : "Phát âm thanh"
+                }
               >
                 {playingAudioId === audio.audio_id ? (
                   <Pause className="w-5 h-5 text-accent-foreground" />
@@ -229,19 +262,31 @@ export default function AudioPage() {
                 )}
               </Button>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground">{getLangName(audio.language_id)}</h3>
+                <h3 className="font-medium text-foreground">
+                  {getLangName(audio.language_id)}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Phiên bản {versionByAudioId.get(audio.audio_id) ?? 1} · {new Date(audio.date_generation).toLocaleDateString("vi-VN")}
+                  Phiên bản {versionByAudioId.get(audio.audio_id) ?? 1} ·{" "}
+                  {new Date(audio.date_generation).toLocaleDateString("vi-VN")}
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium ${audio.is_active ? "text-success" : "text-muted-foreground"}`}>
+                  <span
+                    className={`text-xs font-medium ${audio.is_active ? "text-success" : "text-muted-foreground"}`}
+                  >
                     {audio.is_active ? "Hoạt động" : "Không hoạt động"}
                   </span>
-                  <Switch checked={audio.is_active} onCheckedChange={() => toggleActive(audio.audio_id)} />
+                  <Switch
+                    checked={audio.is_active}
+                    onCheckedChange={() => toggleActive(audio.audio_id)}
+                  />
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => deleteAudio(audio.audio_id)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => deleteAudio(audio.audio_id)}
+                >
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
@@ -264,7 +309,10 @@ export default function AudioPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map((lang) => (
-                    <SelectItem key={lang.language_id} value={String(lang.language_id)}>
+                    <SelectItem
+                      key={lang.language_id}
+                      value={String(lang.language_id)}
+                    >
                       {lang.name}
                     </SelectItem>
                   ))}
@@ -278,7 +326,11 @@ export default function AudioPage() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Volume2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">{selectedFile ? selectedFile.name : "Nhấp để chọn tệp âm thanh"}</p>
+                <p className="text-sm">
+                  {selectedFile
+                    ? selectedFile.name
+                    : "Nhấp để chọn tệp âm thanh"}
+                </p>
                 <p className="text-xs mt-1">MP3, WAV tối đa 10MB</p>
               </div>
               <input
@@ -291,7 +343,9 @@ export default function AudioPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Hủy</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Hủy
+            </Button>
             <Button onClick={handleUpload}>Tải lên</Button>
           </DialogFooter>
         </DialogContent>

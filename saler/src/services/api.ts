@@ -1,14 +1,31 @@
-import type { Audio, Dish, Language, Restaurant, RestaurantImage, User } from "@/types";
+import type {
+  Audio,
+  Dish,
+  Language,
+  Restaurant,
+  RestaurantImage,
+  User,
+} from "@/types";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:5042";
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "http://localhost:5044";
 
 type RequestOptions = RequestInit & { skipJsonContentType?: boolean };
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const url = new URL(path, API_BASE).toString();
   const headers = new Headers(options.headers ?? {});
 
-  if (!options.skipJsonContentType && !headers.has("Content-Type") && options.body && !(options.body instanceof FormData)) {
+  if (
+    !options.skipJsonContentType &&
+    !headers.has("Content-Type") &&
+    options.body &&
+    !(options.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -177,7 +194,10 @@ type LoginResponse = {
   username: string;
 };
 
-export async function loginApi(username: string, password: string): Promise<User> {
+export async function loginApi(
+  username: string,
+  password: string,
+): Promise<User> {
   const response = await request<LoginResponse>("/Auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
@@ -206,7 +226,10 @@ export async function getRestaurantsApi(): Promise<Restaurant[]> {
   return data.map(mapRestaurant);
 }
 
-export async function updateRestaurantApi(restaurantId: string, restaurant: Restaurant): Promise<Restaurant> {
+export async function updateRestaurantApi(
+  restaurantId: string,
+  restaurant: Restaurant,
+): Promise<Restaurant> {
   const payload = {
     name: restaurant.name,
     description: restaurant.description,
@@ -226,19 +249,30 @@ export async function updateRestaurantApi(restaurantId: string, restaurant: Rest
   return mapRestaurant(data);
 }
 
-export async function updateRestaurantStatusApi(restaurantId: string, isActive: boolean): Promise<void> {
+export async function updateRestaurantStatusApi(
+  restaurantId: string,
+  isActive: boolean,
+): Promise<void> {
   await request<{ message: string }>(`/Restaurant/${restaurantId}/status`, {
     method: "PATCH",
     body: JSON.stringify({ isActive }),
   });
 }
 
-export async function getRestaurantDishesApi(restaurantId: string): Promise<Dish[]> {
-  const data = await request<ApiDish[]>(`/public/Restaurant/${restaurantId}/dishes`, { method: "GET" });
+export async function getRestaurantDishesApi(
+  restaurantId: string,
+): Promise<Dish[]> {
+  const data = await request<ApiDish[]>(
+    `/public/Restaurant/${restaurantId}/dishes`,
+    { method: "GET" },
+  );
   return data.map(mapDish);
 }
 
-export async function createDishApi(restaurantId: string, payload: Omit<Dish, "dish_id" | "restaurant_id" | "created_at">): Promise<Dish> {
+export async function createDishApi(
+  restaurantId: string,
+  payload: Omit<Dish, "dish_id" | "restaurant_id" | "created_at">,
+): Promise<Dish> {
   const body = {
     name: payload.name,
     price: payload.price,
@@ -254,7 +288,10 @@ export async function createDishApi(restaurantId: string, payload: Omit<Dish, "d
   return mapDish(data);
 }
 
-export async function updateDishApi(dishId: number, payload: Omit<Dish, "dish_id" | "restaurant_id" | "created_at">): Promise<Dish> {
+export async function updateDishApi(
+  dishId: number,
+  payload: Omit<Dish, "dish_id" | "restaurant_id" | "created_at">,
+): Promise<Dish> {
   const body = {
     name: payload.name,
     price: payload.price,
@@ -274,12 +311,22 @@ export async function deleteDishApi(dishId: number): Promise<void> {
   await request<{ message: string }>(`/Dishes/${dishId}`, { method: "DELETE" });
 }
 
-export async function getRestaurantImagesApi(restaurantId: string): Promise<RestaurantImage[]> {
-  const data = await request<ApiImage[]>(`/public/Restaurant/${restaurantId}/images`, { method: "GET" });
+export async function getRestaurantImagesApi(
+  restaurantId: string,
+): Promise<RestaurantImage[]> {
+  const data = await request<ApiImage[]>(
+    `/public/Restaurant/${restaurantId}/images`,
+    { method: "GET" },
+  );
   return data.map(mapImage);
 }
 
-export async function uploadRestaurantImageApi(restaurantId: string, file: File, isPrimary = false, sortOrder = 0): Promise<RestaurantImage> {
+export async function uploadRestaurantImageApi(
+  restaurantId: string,
+  file: File,
+  isPrimary = false,
+  sortOrder = 0,
+): Promise<RestaurantImage> {
   const form = new FormData();
   form.append("file", file);
   form.append("is_primary", String(isPrimary));
@@ -295,23 +342,37 @@ export async function uploadRestaurantImageApi(restaurantId: string, file: File,
 }
 
 export async function deleteImageApi(imageId: number): Promise<void> {
-  await request<{ message: string }>(`/Images/${imageId}`, { method: "DELETE" });
+  await request<{ message: string }>(`/Images/${imageId}`, {
+    method: "DELETE",
+  });
 }
 
-export async function setPrimaryImageApi(imageId: number, isPrimary: boolean): Promise<void> {
+export async function setPrimaryImageApi(
+  imageId: number,
+  isPrimary: boolean,
+): Promise<void> {
   await request<{ message: string }>(`/Images/${imageId}/primary`, {
     method: "PATCH",
     body: JSON.stringify({ isPrimary }),
   });
 }
 
-export async function reorderImagesApi(restaurantId: string, items: Array<{ image_id: number; sort_order: number }>): Promise<void> {
-  await request<{ message: string }>(`/Restaurant/${restaurantId}/images/reorder`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      items: items.map((x) => ({ imageId: x.image_id, sortOrder: x.sort_order })),
-    }),
-  });
+export async function reorderImagesApi(
+  restaurantId: string,
+  items: Array<{ image_id: number; sort_order: number }>,
+): Promise<void> {
+  await request<{ message: string }>(
+    `/Restaurant/${restaurantId}/images/reorder`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        items: items.map((x) => ({
+          imageId: x.image_id,
+          sortOrder: x.sort_order,
+        })),
+      }),
+    },
+  );
 }
 
 export async function getLanguagesApi(): Promise<Language[]> {
@@ -319,12 +380,21 @@ export async function getLanguagesApi(): Promise<Language[]> {
   return data.map(mapLanguage);
 }
 
-export async function getRestaurantAudiosApi(restaurantId: string): Promise<Audio[]> {
-  const data = await request<ApiAudio[]>(`/public/Restaurant/${restaurantId}/audios`, { method: "GET" });
+export async function getRestaurantAudiosApi(
+  restaurantId: string,
+): Promise<Audio[]> {
+  const data = await request<ApiAudio[]>(
+    `/public/Restaurant/${restaurantId}/audios`,
+    { method: "GET" },
+  );
   return data.map(mapAudio);
 }
 
-export async function uploadAudioApi(restaurantId: string, languageId: number, file: File): Promise<Audio> {
+export async function uploadAudioApi(
+  restaurantId: string,
+  languageId: number,
+  file: File,
+): Promise<Audio> {
   const form = new FormData();
   form.append("language_id", String(languageId));
   form.append("file", file);
@@ -338,7 +408,10 @@ export async function uploadAudioApi(restaurantId: string, languageId: number, f
   return mapAudio(data);
 }
 
-export async function updateAudioActiveApi(audioId: number, isActive: boolean): Promise<void> {
+export async function updateAudioActiveApi(
+  audioId: number,
+  isActive: boolean,
+): Promise<void> {
   await request<{ message: string }>(`/Audios/${audioId}/active`, {
     method: "PATCH",
     body: JSON.stringify({ isActive }),
@@ -346,5 +419,7 @@ export async function updateAudioActiveApi(audioId: number, isActive: boolean): 
 }
 
 export async function deleteAudioApi(audioId: number): Promise<void> {
-  await request<{ message: string }>(`/Audios/${audioId}`, { method: "DELETE" });
+  await request<{ message: string }>(`/Audios/${audioId}`, {
+    method: "DELETE",
+  });
 }
