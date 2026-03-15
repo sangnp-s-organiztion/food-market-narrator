@@ -7,8 +7,10 @@ public class LocationService : ILocationService
     private bool _isTracking = false;
     private CancellationTokenSource? _trackingCts;
     private Task? _trackingTask;
+    private Location? _lastPublishedLocation;
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
+    private const double MinPublishDistanceMeters = 6;
     private static readonly GeolocationRequest TrackingRequest =
         new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
 
@@ -89,7 +91,11 @@ public class LocationService : ILocationService
                 var location = await Geolocation.Default.GetLocationAsync(TrackingRequest);
                 if (location != null)
                 {
-                    LocationChanged?.Invoke(this, location);
+                    if (ShouldPublish(location))
+                    {
+                        _lastPublishedLocation = location;
+                        LocationChanged?.Invoke(this, location);
+                    }
                 }
             }
             catch (Exception ex)
@@ -106,6 +112,21 @@ public class LocationService : ILocationService
                 break;
             }
         }
+    }
+
+    private bool ShouldPublish(Location location)
+    {
+        if (_lastPublishedLocation == null)
+        {
+            return true;
+        }
+
+        var distanceMeters = Location.CalculateDistance(
+            _lastPublishedLocation,
+            location,
+            DistanceUnits.Kilometers) * 1000;
+
+        return distanceMeters >= MinPublishDistanceMeters;
     }
 
     private async Task<PermissionStatus> CheckAndRequestPermissionAsync()

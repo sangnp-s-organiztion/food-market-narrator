@@ -10,6 +10,7 @@ namespace food_market_narrator.Views;
 public partial class MainPage : ContentPage
 {
     private static bool _hasAutoStartedNarrationThisSession;
+    private static bool _hasShownLanguagePopupThisSession;
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -21,6 +22,8 @@ public partial class MainPage : ContentPage
     private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLanguageOptionsLoaded;
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
+    private bool _isMapLoaded;
+    private bool _isPoiListBound;
 
     // private static bool _hasShownLanguagePopupThisSession;
     // private bool _languageSelected = Preferences.Get("language_selected", false);
@@ -43,25 +46,27 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
 
-        await EnsureLanguageOptionsLoadedAsync();
-
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
 
-        await Task.Delay(500); // nhỏ thôi, chờ UI ready
-        await _locationService.StartTrackingAsync();
+        // Chạy song song các tác vụ không phụ thuộc nhau để giảm thời gian chờ khi vào trang.
+        var ensureLanguageTask = EnsureLanguageOptionsLoadedAsync();
+        var startTrackingTask = _locationService.StartTrackingAsync();
+        Task loadMapTask = Task.CompletedTask;
+        if (!_isMapLoaded)
+        {
+            loadMapTask = MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19);
+        }
 
-        // _narrationFlowService.StartNarration();
+        await Task.WhenAll(ensureLanguageTask, startTrackingTask, loadMapTask);
+        _isMapLoaded = true;
 
-        // Load map data on appearing, reusing helper logic
-        await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19); // zoom level cao hơn để tập trung vào khu vực chợ
         // Hiện popup chọn ngôn ngữ khi mới vào app
         bool languageSelected = Preferences.Get("language_selected", false);
         Console.WriteLine("Language selected: " + languageSelected);
-        if (!languageSelected)
+        if (!languageSelected && !_hasShownLanguagePopupThisSession)
         {
-            // _hasShownLanguagePopupThisSession = true;
-            await Task.Delay(300);
+            _hasShownLanguagePopupThisSession = true;
             OnLanguageButtonTapped(this, EventArgs.Empty); // Tự động mở popup chọn ngôn ngữ
         }
         else
@@ -74,14 +79,12 @@ public partial class MainPage : ContentPage
             }
         }
 
-        // Hiển thị POI lên giao diện
-        Console.WriteLine("Loading POIs for display...");
-        
-        var allPois = await _poiService.GetAllPOIsAsync();
-        Console.WriteLine("The number of POIs loaded: " + allPois.Count);
-
-        var poisData = await _poiService.GetPOIsAsync();
-        PoiList.ItemsSource = poisData;      
+        if (!_isPoiListBound)
+        {
+            var poisData = await _poiService.GetAllPOIsAsync();
+            PoiList.ItemsSource = poisData;
+            _isPoiListBound = true;
+        }
 
         // Cập nhật trạng thái UI dựa trên vị trí hiện tại
         var currentLocation = await _locationService.GetCurrentLocationAsync();

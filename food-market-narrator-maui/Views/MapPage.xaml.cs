@@ -28,6 +28,8 @@ public partial class MapPage : ContentPage
     private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
     private HashSet<string> _searchHighlightedPoiIds = new(StringComparer.Ordinal);
+    private bool _isMapLoaded;
+    private CancellationTokenSource? _searchDebounceCts;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -53,14 +55,21 @@ public partial class MapPage : ContentPage
         _locationService.LocationChanged += OnLocationChangedForMap;
         await _locationService.StartTrackingAsync();
 
-        // Tải dữ liệu bản đồ và hiển thị các POI, cũng như vị trí người dùng nếu đã có
-        await MapHelper.LoadMapAsync(
-            mapControl,
-            _poiService,
-            _locationService,
-            initialZoomLevel: DefaultZoomLevel);
+        if (!_isMapLoaded)
+        {
+            // Chỉ tải map/layer nặng một lần cho mỗi instance page.
+            await MapHelper.LoadMapAsync(
+                mapControl,
+                _poiService,
+                _locationService,
+                initialZoomLevel: DefaultZoomLevel);
+            _isMapLoaded = true;
+        }
 
-        _pois = await _poiService.GetAllPOIsAsync();
+        if (_pois.Count == 0)
+        {
+            _pois = await _poiService.GetAllPOIsAsync();
+        }
 
         mapControl.MapTapped -= OnMapTapped;
         mapControl.MapTapped += OnMapTapped;
@@ -76,6 +85,7 @@ public partial class MapPage : ContentPage
         mapControl.MapTapped -= OnMapTapped;
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
+        _searchDebounceCts?.Cancel();
         base.OnDisappearing();
     }
 
@@ -231,6 +241,11 @@ public partial class MapPage : ContentPage
 
     private async void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
     {
+        _searchDebounceCts?.Cancel();
+        _searchDebounceCts?.Dispose();
+        _searchDebounceCts = new CancellationTokenSource();
+        var debounceToken = _searchDebounceCts.Token;
+
         SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(e.NewTextValue);
 
         var keyword = e.NewTextValue?.Trim();
@@ -240,6 +255,20 @@ public partial class MapPage : ContentPage
             SearchSuggestionsView.ItemsSource = null;
             SearchSuggestionsContainer.IsVisible = false;
             ClearSearchState();
+            return;
+        }
+
+        try
+        {
+            await Task.Delay(220, debounceToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (debounceToken.IsCancellationRequested)
+        {
             return;
         }
 
