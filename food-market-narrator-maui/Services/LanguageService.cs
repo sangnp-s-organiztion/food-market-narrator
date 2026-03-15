@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net.Http.Json;
 using food_market_narrator.Models;
 using food_market_narrator.Resources;
@@ -29,9 +29,9 @@ public class LanguageService : ILanguageService
     {
         get
         {
-            Console.WriteLine($"CurrentLanguage getter called, returning: {Preferences.Get(LANGUAGE_KEY, "vi-VN")}");
+            // Console.WriteLine($"CurrentLanguage getter called, returning: {Preferences.Get(LANGUAGE_KEY, "vi-VN")}");
             return Preferences.Get(LANGUAGE_KEY, "vi-VN"); 
-            // mặc định tiếng Việt (vi-VN) nếu chưa có
+            // máº·c Ä‘á»‹nh tiáº¿ng Viá»‡t (vi-VN) náº¿u chÆ°a cÃ³
         }
     }
 
@@ -60,7 +60,7 @@ public class LanguageService : ILanguageService
             try
             {
                 var requestUrl = new Uri(new Uri(baseUrl), AppSettings.LanguageEndpoint);
-                Console.WriteLine($"[LanguageService] Trying URL = {requestUrl}");
+                // Console.WriteLine($"[LanguageService] Trying URL = {requestUrl}");
 
                 var data = await _httpClient.GetFromJsonAsync<List<LanguageModel>>(requestUrl);
 
@@ -71,19 +71,19 @@ public class LanguageService : ILanguageService
 
                 _cachedLanguages = data;
                 await SaveLanguagesCacheAsync(_cachedLanguages);
-                Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages.");
+                // Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages.");
                 return _cachedLanguages;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[LanguageService] Request failed: {baseUrl} -> {ex.Message}");
+                // Console.WriteLine($"[LanguageService] Request failed: {baseUrl} -> {ex.Message}");
             }
         }
 
         if (cachedLanguages.Count > 0)
         {
             _cachedLanguages = cachedLanguages;
-            Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages from offline cache.");
+            // Console.WriteLine($"[LanguageService] Loaded {_cachedLanguages.Count} languages from offline cache.");
             return _cachedLanguages;
         }
 
@@ -111,9 +111,9 @@ public class LanguageService : ILanguageService
             var data = await JsonSerializer.DeserializeAsync<List<LanguageModel>>(stream, JsonOptions);
             return data ?? new List<LanguageModel>();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[LanguageService] Read cache failed: {ex.Message}");
+            // Console.WriteLine($"[LanguageService] Read cache failed: {ex.Message}");
             return new List<LanguageModel>();
         }
     }
@@ -137,9 +137,9 @@ public class LanguageService : ILanguageService
 
             File.Move(tempPath, path);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[LanguageService] Save cache failed: {ex.Message}");
+            // Console.WriteLine($"[LanguageService] Save cache failed: {ex.Message}");
         }
     }
 
@@ -155,10 +155,10 @@ public class LanguageService : ILanguageService
             string.Equals(x.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
     }
 
-	// Thay đổi ngôn ngữ ứng dụng
+	// Thay Ä‘á»•i ngÃ´n ngá»¯ á»©ng dá»¥ng
 	public void ChangeLanguage(string cultureCode)
     {
-		// Lưu lại để lần sau app mở tự load
+		// LÆ°u láº¡i Ä‘á»ƒ láº§n sau app má»Ÿ tá»± load
         Preferences.Set("AppLanguage", cultureCode);
 
         var culture = new CultureInfo(cultureCode);
@@ -168,7 +168,7 @@ public class LanguageService : ILanguageService
 
         AppResources.Culture = culture;
 
-        // Reload AppShell (nhẹ hơn recreate toàn app)
+        // Reload AppShell (nháº¹ hÆ¡n recreate toÃ n app)
         if (Application.Current?.Windows?.Count > 0)
         {
             Application.Current.Windows[0].Page = new AppShell();
@@ -176,5 +176,7 @@ public class LanguageService : ILanguageService
 
     }
 }
+
+
 
 

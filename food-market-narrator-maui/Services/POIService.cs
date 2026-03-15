@@ -1,4 +1,4 @@
-using food_market_narrator.Models;
+﻿using food_market_narrator.Models;
 using food_market_narrator.Settings;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -24,7 +24,7 @@ public class POIService : IPOIService
     public POIService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        Console.WriteLine($"[POIService] HttpClient.BaseAddress = {_httpClient.BaseAddress}");
+        // Console.WriteLine($"[POIService] HttpClient.BaseAddress = {_httpClient.BaseAddress}");
     }
 
     public async Task<List<POI>> GetPOIsAsync()
@@ -52,35 +52,35 @@ public class POIService : IPOIService
             try
             {
                 var requestUrl = new Uri(new Uri(baseUrl), AppSettings.RestaurantEndpoint);
-                Console.WriteLine($"[POIService] Trying URL = {requestUrl}");
+                // Console.WriteLine($"[POIService] Trying URL = {requestUrl}");
 
                 var data = await _httpClient.GetFromJsonAsync<List<POI>>(requestUrl);
 
                 if (data == null)
                 {
-                    Console.WriteLine($"[POIService] Empty response from {requestUrl}");
+                    // Console.WriteLine($"[POIService] Empty response from {requestUrl}");
                     continue;
                 }
 
                 _pois = data;
                 await SavePoisCacheAsync(_pois);
-                Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from {requestUrl}");
+                // Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from {requestUrl}");
                 return _pois;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[POIService] Request failed: {baseUrl} -> {ex.Message}");
+                // Console.WriteLine($"[POIService] Request failed: {baseUrl} -> {ex.Message}");
             }
         }
 
         if (cachedPois.Count > 0)
         {
             _pois = cachedPois;
-            Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from offline cache.");
+            // Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from offline cache.");
             return _pois;
         }
 
-        Console.WriteLine("[POIService] Error fetching POIs from all candidates.");
+        // Console.WriteLine("[POIService] Error fetching POIs from all candidates.");
         return new List<POI>();
     }
 
@@ -105,9 +105,9 @@ public class POIService : IPOIService
             var data = await JsonSerializer.DeserializeAsync<List<POI>>(stream, JsonOptions);
             return data ?? new List<POI>();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[POIService] Read cache failed: {ex.Message}");
+            // Console.WriteLine($"[POIService] Read cache failed: {ex.Message}");
             return new List<POI>();
         }
     }
@@ -131,13 +131,13 @@ public class POIService : IPOIService
 
             File.Move(tempPath, path);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[POIService] Save cache failed: {ex.Message}");
+            // Console.WriteLine($"[POIService] Save cache failed: {ex.Message}");
         }
     }
 
-    // Lấy tất cả các POIs đồng bộ
+    // Láº¥y táº¥t cáº£ cÃ¡c POIs Ä‘á»“ng bá»™
     public async Task<List<POI>> GetAllPOIsAsync()
     {
         if (_pois == null || !_pois.Any())
@@ -185,7 +185,7 @@ public class POIService : IPOIService
             DistanceUnits.Kilometers) * 1000;
     }
 
-    // Lấy POI gần nhất dựa trên vị trí hiện tại và các POIs
+    // Láº¥y POI gáº§n nháº¥t dá»±a trÃªn vá»‹ trÃ­ hiá»‡n táº¡i vÃ  cÃ¡c POIs
     public POI? UpdateNearestPOI(double currentLat, double currentLng)
     {
         if (_pois == null || !_pois.Any())
@@ -202,26 +202,26 @@ public class POIService : IPOIService
 
         if (!_isInsidePOI)
         {
-            // Chưa ở trong POI → xét EnterRadius
+            // ChÆ°a á»Ÿ trong POI â†’ xÃ©t EnterRadius
             if (minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _isInsidePOI = true;
                 _lastNearest = nearest;
 
-                return nearest; // Trigger khi mới vào
+                return nearest; // Trigger khi má»›i vÃ o
             }
         }
         else
         {
-            // Đang ở trong POI
-            // Nếu đổi sang POI khác và đủ gần
+            // Äang á»Ÿ trong POI
+            // Náº¿u Ä‘á»•i sang POI khÃ¡c vÃ  Ä‘á»§ gáº§n
             if (nearest != _lastNearest && minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _lastNearest = nearest;
-                return nearest; // Trigger POI mới
+                return nearest; // Trigger POI má»›i
             }
 
-            // Nếu đi xa khỏi POI hiện tại > ExitRadius
+            // Náº¿u Ä‘i xa khá»i POI hiá»‡n táº¡i > ExitRadius
             if (_lastNearest != null)
             {
                 var lastLocation = new Location(
@@ -241,6 +241,7 @@ public class POIService : IPOIService
             }
         }
 
-        return null; // Không có thay đổi
+        return null; // KhÃ´ng cÃ³ thay Ä‘á»•i
     }
 }
+

@@ -24,7 +24,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(sp =>
         {
-            Console.WriteLine($"[AppSettings] ApiBaseUrl = {AppSettings.ApiBaseUrl}");
+            // Console.WriteLine($"[AppSettings] ApiBaseUrl = {AppSettings.ApiBaseUrl}");
 
             var handler = new HttpClientHandler
             {
@@ -54,3 +54,4 @@ public static class MauiProgram
         return builder.Build();
     }
 }
+
