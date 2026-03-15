@@ -101,7 +101,7 @@ public partial class MapPage : ContentPage
         var currentLocation = await _locationService.GetCurrentLocationAsync();
         if (currentLocation == null)
         {
-            await DisplayAlertAsync("Thông báo", "Không thể lấy vị trí hiện tại.", "OK");
+            await DisplayAlertAsync("Thông báo", "Không thể lấy vị trí hiện tại.", "Đóng");
             return;
         }
 
