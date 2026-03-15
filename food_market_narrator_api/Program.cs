@@ -1,5 +1,6 @@
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -14,10 +15,24 @@ public class Program
         builder.Services.AddScoped<RestaurantService>();
         builder.Services.AddScoped<AudioRepository>();
         builder.Services.AddScoped<AudioService>();
+        builder.Services.AddScoped<DishRepository>();
+        builder.Services.AddScoped<DishService>();
         builder.Services.AddScoped<LanguageRepository>();
         builder.Services.AddScoped<LanguageService>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<AuthService>();
+
+        builder.Services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.Cookie.Name = "fmn_saler_auth";
+                options.LoginPath = "/Auth/login";
+                options.AccessDeniedPath = "/Auth/login";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            });
 
         // Lấy connection string từ appsettings.json
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -70,6 +85,8 @@ public class Program
         //    app.UseSwaggerUI();
         //}
         app.UseHttpsRedirection();
+        app.UseStaticFiles();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
         app.Run();

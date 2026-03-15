@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace food_market_narrator_api.Models
 {
-    [Table("User")] // nếu tên table là Users
+    [Table("Users")]
     public class UserModel
     {
         [Key]
@@ -12,15 +12,15 @@ namespace food_market_narrator_api.Models
 
         [Required]
         [Column("username")]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Required]
         [Column("password_hash")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         [Required]
         [Column("role")]
-        public string Role { get; set; }
+        public string Role { get; set; } = string.Empty;
 
         [Required]
         [Column("is_active")]

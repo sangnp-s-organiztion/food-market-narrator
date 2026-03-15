@@ -1,0 +1,100 @@
+using food_market_narrator_api.DTOs.Restaurant;
+using food_market_narrator_api.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace food_market_narrator_api.Controllers
+{
+    [ApiController]
+    [Authorize]
+    public class ImagesController : ControllerBase
+    {
+        private readonly RestaurantService _restaurantService;
+        private readonly IWebHostEnvironment _environment;
+
+        public ImagesController(RestaurantService restaurantService, IWebHostEnvironment environment)
+        {
+            _restaurantService = restaurantService;
+            _environment = environment;
+        }
+
+        [HttpGet("/Restaurant/{restaurantId}/images")]
+        public async Task<IActionResult> GetByRestaurant(string restaurantId)
+        {
+            var images = await _restaurantService.GetImagesByRestaurantIdAsync(restaurantId);
+            return Ok(images);
+        }
+
+        [HttpPost("/Restaurant/{restaurantId}/images")]
+        [RequestSizeLimit(50_000_000)]
+        public async Task<IActionResult> Upload(
+            string restaurantId,
+            [FromForm(Name = "file")] IFormFile file,
+            [FromForm(Name = "is_primary")] bool isPrimary = false,
+            [FromForm(Name = "sort_order")] int sortOrder = 0)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "File is required." });
+            }
+
+            string webRoot = _environment.WebRootPath;
+            if (string.IsNullOrWhiteSpace(webRoot))
+            {
+                webRoot = Path.Combine(_environment.ContentRootPath, "wwwroot");
+            }
+
+            string uploadDir = Path.Combine(webRoot, "uploads", "images");
+            Directory.CreateDirectory(uploadDir);
+
+            string extension = Path.GetExtension(file.FileName);
+            string fileName = $"{Guid.NewGuid():N}{extension}";
+            string fullPath = Path.Combine(uploadDir, fileName);
+
+            await using (var stream = System.IO.File.Create(fullPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            string imageUrl = $"/uploads/images/{fileName}";
+            var created = await _restaurantService.AddImageAsync(restaurantId, imageUrl, isPrimary, sortOrder);
+            return Ok(created);
+        }
+
+        [HttpDelete("/Images/{imageId:int}")]
+        public async Task<IActionResult> Delete(int imageId)
+        {
+            bool deleted = await _restaurantService.DeleteImageAsync(imageId);
+            if (!deleted)
+            {
+                return NotFound(new { message = "Image not found." });
+            }
+
+            return Ok(new { message = "Image deleted successfully." });
+        }
+
+        [HttpPatch("/Images/{imageId:int}/primary")]
+        public async Task<IActionResult> SetPrimary(int imageId, [FromBody] SetPrimaryImageRequestDto request)
+        {
+            bool updated = await _restaurantService.SetPrimaryImageAsync(imageId, request.IsPrimary);
+            if (!updated)
+            {
+                return NotFound(new { message = "Image not found." });
+            }
+
+            return Ok(new { message = "Image primary status updated." });
+        }
+
+        [HttpPatch("/Restaurant/{restaurantId}/images/reorder")]
+        public async Task<IActionResult> Reorder(string restaurantId, [FromBody] ReorderImagesRequestDto request)
+        {
+            bool updated = await _restaurantService.ReorderImagesAsync(restaurantId, request.Items);
+            if (!updated)
+            {
+                return NotFound(new { message = "Restaurant or images not found." });
+            }
+
+            return Ok(new { message = "Images reordered successfully." });
+        }
+    }
+}
