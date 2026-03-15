@@ -21,6 +21,15 @@ namespace food_market_narrator_api.DTOs.Restaurant
         [MaxLength(500)]
         public string? Address { get; set; }
 
+        [MaxLength(50)]
+        public string? Phone { get; set; }
+
+        [MaxLength(10)]
+        public string? OpenTime { get; set; }
+
+        [MaxLength(10)]
+        public string? CloseTime { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         public List<RestaurantImageRequestDto> Images { get; set; } = new();

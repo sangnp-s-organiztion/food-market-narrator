@@ -8,6 +8,9 @@ namespace food_market_narrator_api.DTOs.Restaurant
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
         public string? Address { get; set; }
+        public string? Phone { get; set; }
+        public string? OpenTime { get; set; }
+        public string? CloseTime { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
 
