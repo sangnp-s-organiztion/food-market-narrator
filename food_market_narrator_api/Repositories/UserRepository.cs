@@ -11,18 +11,18 @@ namespace food_market_narrator_api.Repositories
             _context = context;
         }
 
-        // get all users
-        public async Task<List<UserModel>> GetAllAsync()
+        public async Task<UserModel?> GetByUsernameAsync(string username)
         {
-            return await _context.User.ToListAsync();
+            return await _context.Set<UserModel>()
+                .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        // get user by id
-        public async Task<UserModel> GetByIdAsync(int id)
+        public async Task<bool> ValidateCredentialsAsync(string username, string passwordHash)
         {
-            // FindAsync sẽ trả về null nếu không tìm thấy
-            // FindAsync tối ưu cho search theo PK
-            return await _context.User.FindAsync(id);
+            var user = await GetByUsernameAsync(username);
+            if (user == null) return false;
+            // For now compare hashes directly. In future use secure hashing verification.
+            return string.Equals(user.PasswordHash, passwordHash, StringComparison.Ordinal);
         }
     }
 }

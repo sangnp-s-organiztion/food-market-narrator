@@ -34,6 +34,18 @@ namespace food_market_narrator_api.Models
         [MaxLength(500)]
         public string? Address { get; set; }
 
+        [Column("phone")]
+        [MaxLength(50)]
+        public string? Phone { get; set; }
+
+        [Column("open_time")]
+        [MaxLength(10)]
+        public string? OpenTime { get; set; }
+
+        [Column("close_time")]
+        [MaxLength(10)]
+        public string? CloseTime { get; set; }
+
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 

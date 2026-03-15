@@ -1,4 +1,5 @@
 using SQLite;
+using System.Linq;
 using System.Globalization;
 
 namespace food_market_narrator.Models;
@@ -23,7 +24,6 @@ public class POI
     public string AudioFile { get; set; } = string.Empty;
     public List<RestaurantImageModel> Images { get; set; } = new();
     public List<AudioModel> Audios { get; set; } = new();
-
 
     
     // Thong tin bo sung

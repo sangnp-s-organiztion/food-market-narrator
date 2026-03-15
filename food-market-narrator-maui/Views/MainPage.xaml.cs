@@ -146,7 +146,7 @@ public partial class MainPage : ContentPage
     }
 
     // Hàm xử lý khi thay đổi vị trí để cập nhật giao diện và thuyết minh
-    private void OnLocationChangedForMap(object? sender, Location location)
+    private async void OnLocationChangedForMap(object? sender, Location location)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {

@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 ﻿using food_market_narrator.Services;
 using food_market_narrator.Settings;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+=======
+﻿using food_market_narrator.Controls;
+using food_market_narrator.Services;
+using food_market_narrator.Views;
+using Microsoft.Extensions.Logging;
+>>>>>>> add-api-thieu
 
 
 namespace food_market_narrator;
@@ -42,6 +49,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPOIService, POIService>(); // POI data cache should be singleton
         builder.Services.AddSingleton<IAudioService, AudioService>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
+        builder.Services.AddSingleton<TileServerService>(); // local offline tile-server
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<MapPage>();
@@ -51,6 +59,16 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
+<<<<<<< HEAD
+=======
+        builder.ConfigureMauiHandlers(handlers =>
+        {
+#if ANDROID
+            handlers.AddHandler<MapWebView, MapWebViewHandler>();
+#endif
+        });
+
+>>>>>>> add-api-thieu
         return builder.Build();
     }
 }

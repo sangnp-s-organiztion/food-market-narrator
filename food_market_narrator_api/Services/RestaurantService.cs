@@ -7,15 +7,60 @@ namespace food_market_narrator_api.Services
     public class RestaurantService
     {
         private readonly RestaurantRepository _restaurantRepository;
-        public RestaurantService(RestaurantRepository repository)
+        private readonly UserRestaurantRepository _userRestaurantRepository;
+
+        public RestaurantService(RestaurantRepository restaurantRepository, UserRestaurantRepository userRestaurantRepository)
         {
-            _restaurantRepository = repository;
+            _restaurantRepository = restaurantRepository;
+            _userRestaurantRepository = userRestaurantRepository;
         }
+
         public async Task<List<RestaurantResponseDto>> GetAllRestaurantsAsync()
         {
             var restaurants = await _restaurantRepository.GetAllAsync();
+            return restaurants.Select(MapToDto).ToList();
+        }
 
-            return restaurants.Select(r => new RestaurantResponseDto
+        public async Task<RestaurantResponseDto?> GetRestaurantByIdAsync(string id)
+        {
+            var restaurant = await _restaurantRepository.GetByIdAsync(id);
+            if (restaurant == null) return null;
+            return MapToDto(restaurant);
+        }
+
+        public async Task<RestaurantResponseDto?> UpdateRestaurantAsync(string id, DTOs.Restaurant.RestaurantRequestDto dto)
+        {
+            var updated = await _restaurantRepository.UpdateAsync(id, dto);
+            if (updated == null) return null;
+            return MapToDto(updated);
+        }
+
+        public async Task<RestaurantResponseDto?> SetActiveAsync(string id, bool isActive)
+        {
+            var updated = await _restaurantRepository.SetActiveAsync(id, isActive);
+            if (updated == null) return null;
+            return MapToDto(updated);
+        }
+
+        public async Task<List<RestaurantResponseDto>> GetRestaurantsByUserIdAsync(int userId)
+        {
+            var restaurantIds = await _userRestaurantRepository.GetRestaurantIdsByUserAsync(userId);
+            if (restaurantIds == null || restaurantIds.Count == 0) return new List<RestaurantResponseDto>();
+
+            var restaurants = await _restaurantRepository.GetByIdsAsync(restaurantIds);
+            // maintain order by input ids
+            var ordered = restaurantIds
+                .Select(id => restaurants.FirstOrDefault(r => r.RestaurantId == id))
+                .Where(r => r != null)
+                .Cast<RestaurantModel>()
+                .ToList();
+
+            return ordered.Select(MapToDto).ToList();
+        }
+
+        private static RestaurantResponseDto MapToDto(RestaurantModel r)
+        {
+            return new RestaurantResponseDto
             {
                 RestaurantId = r.RestaurantId,
                 Name = r.Name,
@@ -23,6 +68,9 @@ namespace food_market_narrator_api.Services
                 Latitude = r.Latitude,
                 Longitude = r.Longitude,
                 Address = r.Address,
+                Phone = r.Phone,
+                OpenTime = r.OpenTime,
+                CloseTime = r.CloseTime,
                 IsActive = r.IsActive,
                 CreatedAt = r.CreatedAt,
                 Images = r.ImageURL
@@ -36,51 +84,6 @@ namespace food_market_narrator_api.Services
                     })
                     .ToList(),
                 Audios = r.AudioURL
-                    .OrderBy(a => a.LanguageId)
-                    .ThenBy(a => a.Version)
-                    .Select(a => new AudioResponseDto
-                    {
-                        AudioId = a.AudioId,
-                        LanguageId = a.LanguageId,
-                        LanguageName = a.Language?.LanguageName ?? string.Empty,
-                        LanguageCode = a.Language?.LanguageCode ?? string.Empty,
-                        AudioUrl = a.AudioUrl,
-                        Version = a.Version,
-                        IsActive = a.IsActive,
-                        DateGeneration = a.DateGeneration
-                    })
-                    .ToList()
-            }).ToList();
-        }
-    
-        public async Task<RestaurantResponseDto> GetRestaurantByIdAsync(string id)
-        {
-            var restaurant = await _restaurantRepository.GetByIdAsync(id);
-
-            if (restaurant == null)
-                return null;
-
-            return new RestaurantResponseDto
-            {
-                RestaurantId = restaurant.RestaurantId,
-                Name = restaurant.Name,
-                Description = restaurant.Description,
-                Latitude = restaurant.Latitude,
-                Longitude = restaurant.Longitude,
-                Address = restaurant.Address,
-                IsActive = restaurant.IsActive,
-                CreatedAt = restaurant.CreatedAt,
-                Images = restaurant.ImageURL
-                    .OrderBy(i => i.SortOrder)
-                    .Select(i => new RestaurantImageResponseDto
-                    {
-                        ImageId = i.ImageId,
-                        ImageUrl = i.ImageUrl,
-                        IsPrimary = i.IsPrimary,
-                        SortOrder = i.SortOrder
-                    })
-                    .ToList(),
-                Audios = restaurant.AudioURL
                     .OrderBy(a => a.LanguageId)
                     .ThenBy(a => a.Version)
                     .Select(a => new AudioResponseDto

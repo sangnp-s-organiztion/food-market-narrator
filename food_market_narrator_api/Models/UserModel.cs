@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
 namespace food_market_narrator_api.Models
 {
-    [Table("User")] // nếu tên table là Users
+    [Table("Users")]
     public class UserModel
     {
         [Key]

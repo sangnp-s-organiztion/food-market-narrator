@@ -42,6 +42,7 @@ public partial class MapPage : ContentPage
         InitializeComponent();
         _poiService = poiService;
         _locationService = locationService;
+        _tileServerService = tileServerService;
     }
 
     // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
