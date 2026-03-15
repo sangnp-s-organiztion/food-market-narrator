@@ -398,7 +398,18 @@ public partial class MainPage : ContentPage
     // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất
     private void UpdateUIByLocation(Location location)
     {
-        MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
+        if (_isMapLoaded)
+        {
+            try
+            {
+                MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
+                MapHelper.CenterOnUserLocation(mapControl, location.Latitude, location.Longitude);
+            }
+            catch (Exception)
+            {
+                // Ignore transient map-camera errors while map is attaching/re-rendering.
+            }
+        }
 
         var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
 

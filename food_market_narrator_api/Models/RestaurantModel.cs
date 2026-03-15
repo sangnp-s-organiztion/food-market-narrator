@@ -24,10 +24,10 @@ namespace food_market_narrator_api.Models
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-        [Column("latitude", TypeName = "decimal(9,6)")]
+        [Column("latitude", TypeName = "decimal(10,6)")]
         public decimal? Latitude { get; set; }
 
-        [Column("longitude", TypeName = "decimal(9,6)")]
+        [Column("longitude", TypeName = "decimal(10,6)")]
         public decimal? Longitude { get; set; }
 
         [Column("address")]
