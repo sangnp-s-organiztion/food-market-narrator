@@ -4,6 +4,7 @@ using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 
 public class Program
@@ -54,6 +55,26 @@ public class Program
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
+        });
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("SalerCors", policy =>
+            {
+                policy
+                    .SetIsOriginAllowed(origin =>
+                    {
+                        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                        {
+                            return false;
+                        }
+
+                        return string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase);
+                    })
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
         });
 
         // Lấy connection string từ appsettings.json
@@ -109,8 +130,53 @@ public class Program
         //    app.UseSwagger();
         //    app.UseSwaggerUI();
         //}
-        app.UseHttpsRedirection();
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHttpsRedirection();
+        }
+        app.UseCors("SalerCors");
         app.UseStaticFiles();
+        var mauiImagesDir = Path.GetFullPath(
+            Path.Combine(
+                app.Environment.ContentRootPath,
+                "..",
+                "food-market-narrator-maui",
+                "Resources",
+                "Images"));
+        Directory.CreateDirectory(mauiImagesDir);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(mauiImagesDir),
+            RequestPath = "/maui-images"
+        });
+
+        var mauiNarrationAudioDir = Path.GetFullPath(
+            Path.Combine(
+                app.Environment.ContentRootPath,
+                "..",
+                "food-market-narrator-maui",
+                "Resources",
+                "Narration",
+                "audio"));
+        Directory.CreateDirectory(mauiNarrationAudioDir);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(mauiNarrationAudioDir),
+            RequestPath = "/maui-audios"
+        });
+
+        var uploadedAudiosDir = Path.GetFullPath(
+            Path.Combine(
+                app.Environment.ContentRootPath,
+                "wwwroot",
+                "uploads",
+                "audios"));
+        Directory.CreateDirectory(uploadedAudiosDir);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(uploadedAudiosDir),
+            RequestPath = "/uploads/audios"
+        });
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

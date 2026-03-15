@@ -38,13 +38,13 @@ namespace food_market_narrator_api.Controllers
                 return BadRequest(new { message = "File is required." });
             }
 
-            string webRoot = _environment.WebRootPath;
-            if (string.IsNullOrWhiteSpace(webRoot))
-            {
-                webRoot = Path.Combine(_environment.ContentRootPath, "wwwroot");
-            }
-
-            string uploadDir = Path.Combine(webRoot, "uploads", "images");
+            string uploadDir = Path.GetFullPath(
+                Path.Combine(
+                    _environment.ContentRootPath,
+                    "..",
+                    "food-market-narrator-maui",
+                    "Resources",
+                    "Images"));
             Directory.CreateDirectory(uploadDir);
 
             string extension = Path.GetExtension(file.FileName);
@@ -56,7 +56,7 @@ namespace food_market_narrator_api.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            string imageUrl = $"/uploads/images/{fileName}";
+            string imageUrl = $"/maui-images/{fileName}";
             var created = await _restaurantService.AddImageAsync(restaurantId, imageUrl, isPrimary, sortOrder);
             return Ok(created);
         }
