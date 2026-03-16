@@ -1,46 +1,81 @@
-# Narration Trigger Theo Geofence
+# Luồng Narration Trigger và Geofence (trạng thái hiện tại)
 
-## 1) Muc tieu
+Tài liệu này mô tả đúng theo code hiện tại.
 
-Dong bo narration auto-trigger theo geofence transition da du debounce/cooldown.
+## 1) Tổng quan nhanh
 
-Khac voi cach cu (chi dua vao distance <= TriggerDistanceMeters), cach moi trigger dua tren event vao vung hop le.
+- NarrationFlowService sử dụng POIService.UpdateNearestPOI(...) để phát hiện geofence transition.
+- Có hai cơ chế chống lặp: \_playedPOIs (theo phiên) và cooldown 60 giây (theo thời gian).
+- Enter radius: 30m, Exit radius: 40m (hysteresis chống rung biên).
 
-## 2) Thay doi trong NarrationFlowService
+## 2) Luồng thực thi hiện tại
 
-Trong CheckAndNarrateAsync(Location? currentLocation = null, bool force = false):
+### 2.1 Bật narration
 
-- Force mode:
-  - Van lay nearest POI truc tiep.
-  - Dung cho manual trigger (nguoi dung bam nut).
+Khi gọi StartNarration():
 
-- Auto mode:
-  - Goi \_poiService.UpdateNearestPOI(lat, lng).
-  - Chi khi ham nay tra ve POI (nghia la pass geofence + debounce + cooldown) moi enqueue phat audio.
+1. Đánh dấu isNarrationEnabled = true.
+2. Clear các state: \_playedPOIs, \_poiLastPlayedTime, \_lastProcessedLocation.
+3. Subscribe LocationChanged từ LocationService.
+4. Bắt đầu tracking.
+5. Lấy vị trí hiện tại và gọi CheckAndNarrateAsync(...) ngay một lần.
 
-## 3) Dieu chinh co che chong lap narration
+### 2.2 Auto trigger khi vị trí thay đổi
 
-Trong huong trien khai moi, replay gating duoc chuyen ve geofence cooldown.
+Mỗi LocationChanged sẽ gọi CheckAndNarrateAsync(location, force: false):
 
-Vi vay co the bo HashSet played forever o NarrationFlowService de tranh xung dot voi cooldown theo thoi gian.
+1. Bỏ qua nếu đang phát audio (trừ force).
+2. Lấy danh sách POI.
+3. Gọi UpdateNearestPOI(lat, lng) để kiểm tra geofence transition.
+4. Nếu có POI mới (enter hoặc switch POI) HOẶC force = true:
+   - Nếu force: dùng GetNearestPOI.
+   - Nếu auto: dùng POI trả về từ UpdateNearestPOI.
+5. Kiểm tra khoảng cách <= TriggerDistanceMeters (30m).
+6. Kiểm tra cooldown 60 giây.
+7. Kiểm tra đã phát trong phiên chưa (\_playedPOIs).
+8. Nếu hợp lệ: enqueue và phát audio.
 
-## 4) Luong xu ly sau khi doi
+### 2.3 Manual trigger
 
-1. LocationService phat LocationChanged.
-2. NarrationFlowService nhan update vi tri.
-3. Auto mode goi UpdateNearestPOI.
-4. Neu null -> khong phat (chua du dieu kien).
-5. Neu co POI hop le -> day vao queue, phat audio theo ngon ngu hien tai.
+Khi force = true:
 
-## 5) Loi ich
+- Bỏ qua kiểm tra IsPlaying.
+- Bỏ qua kiểm tra khoảng cách 30m.
+- Bỏ qua kiểm tra cooldown.
+- Cho phép phát lại POI đã phát trong phiên.
 
-- Narration auto trigger on dinh hon trong khu POI day.
-- Tranh tinh trang trigger ao do dao dong nearest.
-- Manual trigger van giu hanh vi mong muon cua user.
+## 3) Cơ chế chống lặp hiện tại
+
+- **\_playedPOIs**: HashSet lưu POI đã phát trong phiên narration. Reset khi StopNarration().
+- **\_poiLastPlayedTime**: Dictionary lưu thời gian phát gần nhất mỗi POI (cooldown 60 giây).
+- **Queue**: \_playQueue để xử lý tuần tự nhiều POI chờ phát.
+
+## 4) Geofence trong POIService
+
+POIService.UpdateNearestPOI(lat, lng) có state machine:
+
+- Enter radius: 30m (PoiEnterRadiusMeters).
+- Exit radius: 40m (PoiExitRadiusMeters).
+- Trả về POI mới khi:
+  - Chưa ở trong POI nào và vào vùng 30m.
+  - Đang trong POI và chuyển sang POI khác trong vùng 30m.
+- Reset trạng thái khi ra khỏi vùng exit (40m).
+
+## 5) Audio queue và xử lý
+
+NarrationFlowService dùng queue để xử lý tuần tự:
+
+1. Khi trigger hợp lệ, POI được enqueue.
+2. ProcessQueueAsync xử lý từng POI:
+   - Gọi AudioService.PlaySound.
+   - Lưu vào History khi bắt đầu phát thành công.
+   - Chờ audio phát xong mới xử lý tiếp.
 
 ## 6) Checklist test nhanh
 
-- Auto mode ON, dung sat ranh gioi: khong phat ngay.
-- Auto mode ON, vao vung va giu on dinh: phat 1 lan.
-- Auto mode ON, o lai trong cooldown: khong phat lap.
-- Bam trigger manual: van phat du nearest co dang cooldown.
+1. Bật narration tự động, đi vào vùng <= 30m của POI mới: audio phát.
+2. Đứng yên trong vùng đó: không phát lặp lại (cooldown 60 giây).
+3. Đi ra ngoài 40m rồi vào lại: có thể phát lại.
+4. Tắt rồi bật narration lại ở cùng vị trí: có thể phát lại do \_playedPOIs đã reset.
+5. Trigger manual với force=true: phát ngay nearest POI dù đang xa hơn ngưỡng 30m.
+6. Test chuyển giữa 2 POI gần nhau trong vùng 30m: phát lần lượt từng quán.

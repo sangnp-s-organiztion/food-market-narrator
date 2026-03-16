@@ -1,142 +1,168 @@
-# Tong quan tinh nang hien co - MAUI app
+# Tổng quan tính năng hiện có - MAUI app
 
-Tai lieu nay tom tat cac tinh nang dang ton tai trong phan ung dung MAUI (food-market-narrator-maui) dua tren code hien tai.
+Tài liệu này tổng hợp trạng thái tính năng thực tế của dự án food-market-narrator-maui theo code hiện tại.
 
-## 1) Man hinh va dieu huong
+## 1) Màn hình và điều hướng
 
-- Shell da cau hinh 2 man hinh chinh:
-  - MainPage (Trang chu)
-  - MapPage (Ban do)
-- Da dang ky route den POIDetailPage, cho phep mo trang chi tiet qua restaurantId.
-- Bottom navigation hien thi cac tab: Trang chu, Ban do, Yeu thich, Lich su, Cai dat.
-- Hien tai chi co 2 tab da co dieu huong thuc te:
-  - Trang chu -> MainPage
-  - Ban do -> MapPage
-- Cac tab Yeu thich/Lich su/Cai dat moi la khung UI, chua co handler chuc nang.
+- AppShell đang khai báo các ShellContent chính:
+  - MainPage (Trang chủ)
+  - MapPage (Bản đồ)
+  - FavoritePage (Yêu thích)
+  - HistoryPage (Lịch sử)
+  - SettingsPage (Cài đặt)
+- Đã đăng ký route POIDetailPage để mở chi tiết theo restaurantId.
+- Bottom navigation custom hiển thị 5 mục (Trang chủ, Bản đồ, Yêu thích, Lịch sử, Cài đặt), tất cả đều đã có handler thực thi.
 
-## 2) Tai du lieu va quan ly POI
+## 2) Nguồn dữ liệu và POI
 
-- POIService goi API /api/restaurant de lay danh sach quan an/POI.
-- Co co che cache danh sach POI trong bo nho de tai su dung.
-- Ho tro:
-  - Lay toan bo POI
-  - Lay POI theo restaurantId
-  - Tim POI gan nhat theo vi tri nguoi dung
-- Co logic enter/exit radius trong service (30m vao, 40m ra) de xac dinh vao/ra khu vuc POI.
+- POIService tải dữ liệu từ endpoint restaurant qua HttpClient.
+- Có fallback base URL theo AppSettings.ApiFallbackBaseUrls.
+- Có cache offline POI vào file cục bộ: offline_cache/pois.json.
+- Cung cấp các hàm:
+  - GetAllPOIsAsync
+  - GetPOIByIdAsync
+  - GetNearestPOI
+  - UpdateNearestPOI (mô hình geofence 30m/40m)
 
-## 3) Dinh vi va theo doi vi tri
+## 3) Theo dõi vị trí
 
-- LocationService xin quyen LocationWhenInUse.
-- Ho tro lay vi tri hien tai (GetCurrentLocationAsync).
-- Ho tro theo doi vi tri lien tuc foreground (StartTrackingAsync), phat su kien LocationChanged.
-- MainPage va MapPage deu subscribe su kien thay doi vi tri de cap nhat ban do/POI gan nhat.
+- LocationService dùng polling loop 2 giây.
+- GeolocationRequest: Best, timeout 10 giây.
+- Chỉ publish event khi dịch chuyển >= 6m.
+- Trên Android:
+  - Có luồng xin quyền theo tầng: WhenInUse -> Always (Android 10+) -> PostNotifications (Android 13+).
+  - Có foreground service TrackingForegroundService để theo dõi nền.
 
-## 4) Ban do (Mapsui + OSM)
+## 4) Bản đồ (Mapsui + OSM)
 
-- Da tich hop Mapsui va tai tile OpenStreetMap.
-- Co cache tile ban do trong thu muc cache cua app.
-- Co helper MapHelper de:
-  - Load ban do + layer OSM
-  - Ve cac marker POI
-  - Highlight POI gan nhat (doi mau/kich thuoc marker)
-  - Zoom/center den vi tri can focus
-  - Cap nhat marker vi tri nguoi dung (co ham, chua thay goi thuong xuyen trong flow hien tai)
+- Dùng Mapsui và tile OpenStreetMap.
+- Tile cache trong FileSystem.CacheDirectory/osm_tiles.
+- MapHelper chịu trách nhiệm:
+  - Load layer map + marker POI.
+  - Highlight một hoặc nhiều POI.
+  - Cập nhật marker vị trí người dùng.
+  - Center map theo vị trí.
+  - Force refresh dữ liệu/graphics để tránh trễ render.
 
-## 5) Chuc nang tren MainPage
+## 5) MainPage
 
-- Hien thi:
-  - Header + nut chon ngon ngu
-  - Search UI (dang la giao dien)
-  - Ban do nhung
-  - Danh muc mon an (dang la giao dien)
-  - Danh sach quan ngon noi bat (CollectionView tu POIService)
-- Khi chon item trong danh sach POI se dieu huong sang POIDetailPage theo restaurantId.
-- Co floating button "Bat dau/Dung thuyet minh":
-  - Chi hien khi nguoi dung nam trong ban kinh <= 30m tinh tu POI gan nhat
-  - Dong bo trang thai theo NarrationFlowService.IsNarrating
-- Lan dau vao app se tu dong mo popup chon ngon ngu.
+- Thành phần chính:
+  - Bản đồ nhúng.
+  - Danh sách POI (CollectionView) và điều hướng sang POIDetailPage.
+  - Nút floating bật/tắt thuyết minh tự động.
+  - Popup chọn ngôn ngữ.
+- Khi mới vào app:
+  - Nếu chưa chọn ngôn ngữ: tự mở popup chọn ngôn ngữ.
+  - Nếu đã chọn: tự bật narration 1 lần cho mỗi phiên chạy app.
+- Floating button chỉ hiện khi ở trong phạm vi TriggerDistanceMeters (30m) so với POI gần nhất.
 
-## 6) Ngon ngu
+## 6) MapPage
 
-- LanguageService luu ngon ngu da chon trong Preferences (key: AppLanguage).
-- Ho tro cac ngon ngu UI/chon audio:
-  - vi-VN, en-US, zh-CN, ko-KR, ja-JP
-- Khi doi ngon ngu:
-  - Cap nhat CurrentCulture/CurrentUICulture
-  - Gan lai AppResources.Culture
-  - Reload AppShell de cap nhat giao dien
-- Sau khi doi ngon ngu o MainPage, flow se bat dau thuyet minh lai.
+- Có nút Zoom In, Zoom Out, My Location.
+- Có search theo từ khóa (debounce 220ms), gợi ý kết quả và highlight POI tìm được.
+- Có popup card POI khi tap gần marker:
+  - Tên, ảnh, địa chỉ.
+  - Nút Xem chi tiết sang POIDetailPage.
+- Ngưỡng tap marker động theo zoom:
+  - Clamp(viewportResolution \* 28, 12m, 150m).
 
-## 7) Thuyet minh tu dong theo vi tri
+## 7) Ngôn ngữ
 
-- NarrationFlowService quan ly che do thuyet minh.
-- StartNarration:
-  - Bat co narration
-  - Dang ky LocationChanged
-  - Kiem tra ngay vi tri hien tai de trigger audio neu du dieu kien
-- CheckAndNarrateAsync:
-  - Tim POI gan nhat
-  - Kiem tra khoang cach trigger (<= 30m)
-  - Chon audio theo ngon ngu hien tai
-  - Co queue phat audio de tranh trung lap
-  - Danh dau POI da phat de tranh auto trigger lap lai
-- StopNarration:
-  - Huy subscribe location
-  - Dung audio
-  - Xoa queue va reset danh sach POI da phat
+- LanguageService lấy danh sách ngôn ngữ từ API language.
+- Mã ngôn ngữ đang dùng: vi-VN, en-US, zh-CN, ko-KR, ja-JP.
+- Lựa chọn ngôn ngữ được lưu Preferences.
+- Khi đổi ngôn ngữ, UI được cập nhật và luồng audio sử dụng audio tương ứng theo ngôn ngữ mới.
 
-## 8) Audio
+## 8) Narration flow
 
-- AudioService dung Plugin.Maui.Audio.
-- Ho tro:
-  - PlaySound(language, fileName)
+- NarrationFlowService quản lý bật/tắt narration tự động.
+- Khi bật:
+  - Subscribe LocationChanged.
+  - Theo dõi vị trí và gọi CheckAndNarrateAsync.
+- Cơ chế trigger hiện tại:
+  - Sử dụng UpdateNearestPOI từ POIService để phát hiện geofence transition (enter/switch POI).
+  - Enter radius: 30m (PoiEnterRadiusMeters).
+  - Exit radius: 40m (PoiExitRadiusMeters).
+  - Chỉ phát audio khi khoảng cách <= TriggerDistanceMeters (30m).
+  - \_playedPOIs chặn phát lặp trong cùng phiên narration.
+  - Có cooldown 60 giây giữa các lần phát cho cùng POI.
+  - force=true (manual) cho phép phát ngay và bỏ qua kiểm tra khoảng cách.
+
+## 9) Audio
+
+- AudioService dùng Plugin.Maui.Audio.
+- Hỗ trợ:
+  - PlaySound
   - Pause, Resume, StopSound
-  - Theo doi IsPlaying, IsPaused, Duration, CurrentPosition
+  - Theo dõi IsPlaying, IsPaused, Duration, CurrentPosition
   - Event PlaybackEnded
-- Co logic ResolveAudioPath de xu ly nhieu format duong dan audio (audio/, narration/, resources/narration/...).
+- Cơ chế lấy audio:
+  - Cache local -> Package -> Network.
+- Có quản lý dung lượng cache (200MB), giữ trống tối thiểu (50MB), dọn LRU khi cần.
 
-## 9) Trang chi tiet POI (POIDetailPage)
+## 10) POIDetailPage
 
-- Nhan restaurantId tu route query.
-- Tu load du lieu chi tiet POI theo id va bind len UI.
-- Co module Audio Guide:
-  - Nut play/stop
-  - Ho tro pause/resume
-  - Progress bar + current time/total time
-  - Timer cap nhat tien trinh moi 200ms
-- Co nut quay lai MainPage.
-- Co cac nut UI "Duong di" va "Goi dien ngay" (hien tai chua thay code xu ly su kien click).
+- Nhận restaurantId từ query route.
+- Tải POI theo id và bind dữ liệu lên UI.
+- Có module audio guide:
+  - Play/Pause/Resume theo trạng thái track hiện tại.
+  - Đồng bộ icon và progress bar.
+  - Timer cập nhật tiến trình mỗi 200ms.
+- Có nút back về MainPage.
+- Hai nút Đường đi và Gọi điện ngay hiện là UI, chưa thấy handler code-behind.
 
-## 10) Trang thai tinh nang (da co vs placeholder)
+## 11) FavoritePage (Yêu thích)
 
-Da co logic hoat dong:
+- Lấy danh sách yêu thích từ FavoriteService (lưu vào Preferences).
+- Hiển thị danh sách POI yêu thích với ảnh, tên, địa chỉ, trạng thái.
+- Có nút xóa khỏi yêu thích (heart broken icon).
+- Tap vào item để mở POIDetailPage.
+- Hiển thị empty state khi không có yêu thích.
 
-- Lay du lieu POI tu API + cache
-- Ban do OSM + marker POI + highlight POI gan nhat
-- Theo doi vi tri lien tuc
-- Trigger thuyet minh theo vi tri
-- Chon ngon ngu va luu Preferences
-- Trang chi tiet POI + phat audio + progress
-- Dieu huong MainPage <-> MapPage <-> POIDetailPage
+## 12) HistoryPage (Lịch sử)
 
-Dang o muc giao dien/chua noi day du logic:
+- Lấy lịch sử xem từ HistoryService (lưu trong memory - reset khi đóng app).
+- Hiển thị danh sách POI đã xem theo thứ tự thời gian (mới nhất trước).
+- Tap vào item để mở POIDetailPage.
+- Hiển thị empty state khi không có lịch sử.
 
-- Search/filter tren MainPage/MapPage
-- Tab Yeu thich, Lich su, Cai dat
-- Nut Favorite/Share tren POIDetailPage
-- Nut "Duong di" va "Goi dien ngay" tren POIDetailPage
-- Mot so card/noi dung tren MapPage dang hard-code mau
+## 13) FavoriteService
 
-## 11) Phu thuoc chinh dang su dung
+- Interface: IFavoriteService
+- Lưu danh sách restaurantId yêu thích vào Preferences (JSON).
+- Các phương thức: GetFavorites, AddFavorite, RemoveFavorite, IsFavorite.
+- Dữ liệu không mất khi đóng app.
 
-- .NET MAUI
-- Mapsui.UI.Maui
-- BruTile (tile source/cache)
-- Plugin.Maui.Audio
-- SQLite attributes trong model POI
-- HttpClient (goi API)
+## 14) HistoryService
 
-## 12) Ghi chu moi truong API
+- Interface: IHistoryService
+- Lưu danh sách restaurantId đã xem vào memory (List<string>).
+- Giới hạn tối đa 50 items.
+- Các phương thức: GetHistory, AddToHistory, RemoveFromHistory, ClearHistory, IsInHistory.
+- Dữ liệu reset khi đóng app.
 
-- MAUI app dang cau hinh base URL ve host local: http://10.0.2.2:5044/
-- Day la setup phu hop cho Android Emulator truy cap localhost may host.
+## 15) Các phần đã có và chưa hoàn thiện
+
+Đã có logic chạy thực tế:
+
+- POI load từ API + cache offline.
+- Theo dõi vị trí foreground/background (Android).
+- Map OSM + marker + highlight + search trên MapPage.
+- Auto narration theo geofence transition + manual trigger.
+- POI detail + audio player theo ngôn ngữ.
+- Favorite/History pages với đầy đủ chức năng (thêm/xóa/hiển thị).
+
+Chưa hoàn thiện hoặc mới ở mức khung:
+
+- Filter chip danh mục trên MapPage chưa có logic lọc dữ liệu.
+- Nút Share trên POIDetailPage chưa nối logic.
+- Nút Đường đi/Gọi điện trên POIDetailPage chưa xử lý sự kiện.
+
+## 16) Cấu hình API hiện tại
+
+- AppSettings dùng host động trên Android:
+  - Emulator: 10.0.2.2
+  - Thiết bị thật: LocalApiHost (hiện tại là 192.168.1.7)
+- Port mặc định:
+  - HTTP: 5044
+  - HTTPS: 7041

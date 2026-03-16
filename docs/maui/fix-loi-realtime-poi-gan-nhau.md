@@ -1,294 +1,86 @@
-# Fix loi khong cap nhat POI gan nhau theo thoi gian thuc
+# Khắc phục cập nhật POI gần nhau theo thời gian thực
 
-## 1) Tom tat van de
+Tài liệu này mô tả các thay đổi đã triển khai để giảm hiện tượng map hiển thị chậm khi người dùng di chuyển giữa các POI nằm sát nhau.
 
-Trong qua trinh test tren Android Emulator (khu vuc duong Vinh Khanh), app gap hien tuong:
+## 1) Vấn đề quan sát được
 
-- Khi di chuyen giua 2 POI xa nhau thi marker va highlight POI cap nhat binh thuong.
-- Khi di chuyen giua 2 POI gan nhau (vi du Oc Loan va Oc Vu), marker/highlight co luc khong doi ngay.
-- Man hinh map chi hien thi dung sau khi reload trang (vao lai page) hoac sau mot lan render khac.
+Trong khu vực có mật độ POI dày, từng xuất hiện các triệu chứng:
 
-Anh huong den UX:
+- Marker người dùng đã di chuyển nhưng highlight POI chưa đổi ngay.
+- POI nổi bật đôi khi chỉ đúng sau khi chuyển trang hoặc render lại.
+- Trải nghiệm “nearest POI” thiếu ổn định khi khoảng cách giữa các quán rất gần.
 
-- Nguoi dung thay map "tre" so voi vi tri hien tai.
-- Poi gan nhat bi sai trong mot khoang thoi gian.
-- Cac logic phu thuoc nearest POI (UI, narration trigger) khong on dinh trong khu vuc mat do cao.
+## 2) Nguyên nhân kỹ thuật chính
 
----
+1. Tần suất cập nhật vị trí và nhiễu GPS làm nearest dao động liên tục.
+2. Layer map chưa được invalidate đủ mạnh trong một số trường hợp style thay đổi nhưng viewport gần như không đổi.
+3. Marker highlight có thể bị che nếu không được ưu tiên thứ tự vẽ.
+4. Cần tách ngưỡng highlight map với ngưỡng trigger thuyết minh để giảm nhấp nháy.
 
-## 2) Boi canh truoc khi fix (co che cu)
+## 3) Các thay đổi đã áp dụng
 
-### 2.1 Luong cap nhat vi tri
+### 3.1 Tách ngưỡng highlight riêng cho map
 
-- `LocationService` phat su kien `LocationChanged`.
-- `MainPage` va `MapPage` subscribe su kien nay de cap nhat marker user va POI nearest.
+- File: food-market-narrator-maui/Settings/AppSettings.cs
+- Giá trị hiện tại:
+  - MapHighlightDistanceMeters = 20
+  - TriggerDistanceMeters = 30
 
-Truoc do, service tung dung co che listening event cua geolocation. Sau do da duoc doi sang polling loop theo chu ky de on dinh hon trong emulator.
+Ý nghĩa: map chỉ highlight POI khi rất gần (20m), trong khi trigger thuyết minh/floating button vẫn theo 30m.
 
-### 2.2 Cach tim POI gan nhat
+### 3.2 Tính nearest POI ổn định theo khoảng cách thực
 
-Co ham `GetNearestPOI(...)` trong `POIService`, duoc goi moi khi co location moi.
+- File: food-market-narrator-maui/Services/POIService.cs
+- Hàm GetNearestPOI(...) hiện sắp xếp POI theo GetDistanceMeters(...) rồi lấy phần tử đầu tiên.
 
-### 2.3 Cach ve highlight tren Mapsui
+Ý nghĩa: mỗi lần có location mới đều recompute nearest từ dữ liệu hiện có, không phụ thuộc trạng thái UI cũ.
 
-- `MapHelper.HighlightPOI(...)` clear style va gan lai style cho tung feature.
-- Sau do goi refresh map.
+### 3.3 Cập nhật highlight ở cả MainPage và MapPage
 
-Van de o map renderer:
+- Files:
+  - food-market-narrator-maui/Views/MainPage.xaml.cs
+  - food-market-narrator-maui/Views/MapPage.xaml.cs
+- Luồng xử lý:
+  - Tính nearest mỗi lần nhận LocationChanged.
+  - Chỉ highlight nếu khoảng cách < MapHighlightDistanceMeters.
+  - Nếu xa hơn ngưỡng thì bỏ highlight (truyền null).
 
-- Trong mot so case 2 POI rat gan nhau, style change co the khong render ra man hinh ngay neu layer/cache khong bi invalidation du manh.
-- Marker highlight co the bi marker khac "de" len neu thu tu feature rendering khong uu tien marker duoc highlight.
+### 3.4 Force refresh mạnh hơn trong MapHelper
 
----
+- File: food-market-narrator-maui/Helpers/MapHelper.cs
+- Thay đổi trong HighlightPOIs(...):
+  - Reorder feature được highlight xuống cuối danh sách để vẽ sau cùng.
+  - Gọi poiLayer.DataHasChanged().
+  - Gọi mapControl.Map.RefreshData() và RefreshGraphics().
+- Thay đổi trong UpdateUserLocation(...):
+  - Sau khi cập nhật marker user cũng gọi RefreshData() + RefreshGraphics().
 
-## 3) Nguyen nhan goc (root cause)
+Ý nghĩa: đảm bảo renderer cập nhật ngay cả khi viewport ít thay đổi.
 
-Tong hop tu hanh vi thuc te va code path:
+### 3.5 Theo dõi vị trí bằng polling loop 2 giây
 
-1. Tan suat update vi tri va do nhiu GPS:
+- File: food-market-narrator-maui/Services/LocationService.cs
+- Cơ chế hiện tại:
+  - PollInterval = 2 giây.
+  - GeolocationRequest(Best, timeout 10 giây).
+  - Chỉ phát sự kiện khi người dùng di chuyển tối thiểu 6m.
 
-- Khi 2 POI sat nhau, sai so vi tri hoac update truyen den cham lam nearest dao dong/khong doi kip.
+Ý nghĩa: ổn định hơn trên emulator và giảm spam event nhỏ.
 
-2. Render layer chua du "force":
+## 4) Kết quả sau thay đổi
 
-- Chi refresh thong thuong co the chua du de buoc Mapsui repaint trong kich ban feature gan nhau + viewport it thay doi.
+- Cập nhật marker + highlight nhất quán hơn khi di chuyển trong cụm POI gần nhau.
+- Không còn phụ thuộc thao tác reload trang để thấy highlight đúng trong phần lớn trường hợp.
+- Marker được highlight rõ hơn do được ưu tiên thứ tự vẽ.
 
-3. Thu tu ve marker:
+## 5) Lưu ý phạm vi
 
-- Marker do (highlight) neu khong duoc ve sau cung co the bi marker khac che, gay cam giac "khong cap nhat".
+- Đợt này chưa tích hợp native Android FusedLocationProviderClient.
+- Cơ chế hiện tại vẫn dựa trên MAUI Geolocation polling + foreground service Android.
 
-4. Trigger khong tach ro cho map highlight:
+## 6) Checklist kiểm thử đề xuất
 
-- Highlight map can nguong rieng de tranh nhap nhay khi dung xa cum POI.
-
----
-
-## 4) Muc tieu fix
-
-- Luon recompute nearest POI theo vi tri moi.
-- Chi highlight khi user du gan (nguong 20m) de giam nhieu.
-- Force refresh map du manh de thay doi style hien thi ngay.
-- Cap nhat vi tri theo loop lien tuc de on dinh tren emulator.
-
----
-
-## 5) Cac thay doi da ap dung
-
-## 5.1 Them nguong highlight rieng cho map
-
-File:
-
-- `food-market-narrator-maui/Settings/AppSettings.cs`
-
-Thay doi:
-
-- Them `MapHighlightDistanceMeters = 20`.
-
-Y nghia:
-
-- Tach biet nguong "map highlight" (20m) voi cac nguong khac nhu trigger narration/floating button (30m).
-
----
-
-## 5.2 Luon recompute nearest bang sap xep khoang cach
-
-File:
-
-- `food-market-narrator-maui/Services/POIService.cs`
-
-Thay doi:
-
-- Trong `GetNearestPOI(Location currentLocation, IEnumerable<POI>? pois = null)`, doi ve:
-  - sort theo `GetDistanceMeters(...)`
-  - lay phan tu dau tien
-
-Tu duy:
-
-- Don gian hoa logic nearest.
-- Bao dam moi location moi deu tinh nearest tu danh sach hien tai.
-
----
-
-## 5.3 Update map highlight theo trigger 20m tren ca 2 man hinh
-
-Files:
-
-- `food-market-narrator-maui/Views/MapPage.xaml.cs`
-- `food-market-narrator-maui/Views/MainPage.xaml.cs`
-
-Thay doi:
-
-- Tinh nearest moi lan co location event.
-- Kiem tra distance voi nearest:
-  - neu `< MapHighlightDistanceMeters` thi highlight nearest
-  - nguoc lai truyen `null` de bo highlight
-
-Loi ich:
-
-- Giam flicker khi dung xa cum diem.
-- Nearest trong vung quan tam duoc cap nhat ro rang.
-
----
-
-## 5.4 Force refresh manh hon trong MapHelper
-
-File:
-
-- `food-market-narrator-maui/Helpers/MapHelper.cs`
-
-Thay doi trong `HighlightPOI(...)`:
-
-1. Reorder feature:
-
-- Dua feature duoc highlight xuong cuoi danh sach de ve sau cung.
-
-2. Force invalidation + redraw:
-
-- `poiLayer.DataHasChanged();`
-- `mapControl.Map.RefreshData();`
-- `mapControl.Map.RefreshGraphics();`
-
-Thay doi trong `UpdateUserLocation(...)`:
-
-- Sau khi thay marker user, goi:
-  - `mapControl.Map.RefreshData();`
-  - `mapControl.Map.RefreshGraphics();`
-
-Y nghia:
-
-- Buoc renderer cap nhat du lieu va repaint ngay ca khi viewport khong doi nhieu.
-
----
-
-## 5.5 Doi co che tracking sang polling loop 2 giay
-
-File:
-
-- `food-market-narrator-maui/Services/LocationService.cs`
-
-Thay doi chinh:
-
-- Them `PollInterval = TimeSpan.FromSeconds(2)`.
-- Them `TrackingRequest = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10))`.
-- Trong `StartTrackingAsync()`:
-  - tao `CancellationTokenSource`
-  - chay `RunTrackingLoopAsync(token)`
-- Trong loop:
-  - `GetLocationAsync(TrackingRequest)`
-  - neu co location thi raise `LocationChanged`
-  - `Task.Delay(2 giay)`
-- Trong `StopTracking()`:
-  - cancel token + dispose.
-
-Y nghia:
-
-- Dong bo voi yeu cau "tracking loop".
-- Giam phu thuoc vao callback listening behavior cua platform trong moi truong emulator.
-
----
-
-## 6) So sanh truoc va sau fix
-
-## 6.1 Ve cap nhat vi tri
-
-Truoc:
-
-- Co the phu thuoc vao listening callback va cach platform day event.
-- Case POI rat gan nhau de gap "tre" update.
-
-Sau:
-
-- Polling loop dinh ky 2s, moi nhat quan hon tren emulator.
-- Moi chu ky deu co co hoi recompute nearest.
-
-## 6.2 Ve nearest POI
-
-Truoc:
-
-- Logic nearest co the khong du ro rang trong mot so path.
-
-Sau:
-
-- Nearest duoc recompute ro rang bang sort distance moi lan goi.
-
-## 6.3 Ve hien thi highlight
-
-Truoc:
-
-- Highlight co the khong thay doi ngay do cache/render behavior.
-- Marker do co the bi marker khac de len khi gan nhau.
-
-Sau:
-
-- Co invalidation + refresh graphics sau moi update.
-- Marker highlight duoc ve tren cung.
-- Chi highlight trong vung 20m de giam nhieu/nhap nhay.
-
-## 6.4 Ve UI cam nhan
-
-Truoc:
-
-- Nguoi dung co the phai reload page moi thay POI dung.
-
-Sau:
-
-- Chuyen dong giua POI gan nhau cap nhat ro rang hon.
-- Khong can reload trang trong flow su dung thong thuong.
-
----
-
-## 7) Pham vi fix va diem can luu y
-
-Da fix:
-
-- Recompute nearest, trigger 20m, force refresh, tracking loop.
-
-Chua lam trong dot nay:
-
-- Chua tich hop native Android `FusedLocationProviderClient` rieng.
-
-Ly do:
-
-- Can bo sung package Play Services + implement service theo Android platform + DI cho da nen tang.
-- Dot nay uu tien fix nhanh, an toan, chay ngay tren kien truc MAUI hien tai.
-
-Huong nang cap tiep theo (neu can):
-
-- Tao `IAndroidFusedLocationProvider` tren Android.
-- Fallback sang MAUI Geolocation tren iOS/Windows.
-- Them bo loc accuracy/smoothing (vd bo diem co Accuracy > 30m) de nearest on dinh hon nua.
-
----
-
-## 8) Kiem thu de xac nhan fix
-
-Checklist de test:
-
-1. Mo app, vao map o khu vuc co 2 POI gan nhau (Oc Loan, Oc Vu).
-2. Gia lap di chuyen GPS qua lai giua 2 diem.
-3. Xac nhan:
-
-- Marker user di chuyen theo update moi.
-- POI do (highlight) doi dung theo nearest trong vung <20m.
-- Khong can reload page de thay doi highlight.
-
-Regression test:
-
-1. Di chuyen giua 2 POI xa nhau (vd Lau Met Nuong 79K va Oc Vu).
-2. Dam bao behavior khong bi anh huong xau.
-3. Dam bao floating button narration van obey nguong 30m nhu cu.
-
----
-
-## 9) Ket luan
-
-Ban fix nay giai quyet dung van de chinh: map khong cap nhat nearest/highlight o cum POI gan nhau.
-
-Gia tri lon nhat den tu 4 diem ket hop:
-
-- Recompute nearest lien tuc.
-- Trigger highlight 20m.
-- Force refresh renderer du manh.
-- Tracking loop 2 giay on dinh tren emulator.
-
-Khi can do chinh xac cao hon nua (muc Google Maps), buoc tiep theo nen la tich hop FusedLocationProviderClient tren Android kem bo loc nhieu toa do.
+1. Di chuyển qua lại giữa 2 POI rất gần nhau trên emulator.
+2. Xác nhận marker user cập nhật liên tục, highlight đổi đúng nearest trong phạm vi 20m.
+3. Kiểm tra lại khu vực POI xa nhau để đảm bảo không bị regression.
+4. Kiểm tra floating button thuyết minh vẫn theo ngưỡng 30m.

@@ -1,162 +1,91 @@
-# Hoan thien tinh nang POI popup tren MapPage
+# Hoàn thiện tính năng POI popup trên MapPage
 
-Tai lieu nay tong hop nhung gi da duoc implement cho tinh nang tren `MapPage`:
+Tài liệu này tổng hợp trạng thái hiện tại của tính năng chọn POI trên bản đồ và hiển thị popup chi tiết.
 
-- Them nut `Zoom In`, `Zoom Out`, `My Location`
-- Tap vao POI tren map se hien popup card duoi
-- Popup card hien dung thong tin POI vua tap (ten, anh, dia chi)
-- Nut `View Details` dieu huong sang `POIDetailPage` dung `restaurantId`
-- Xoa nut `Share` trong popup card
-- Fix cac loi compile do API Mapsui 5.0.2 khac voi gia dinh API truoc do
+## 1) Phạm vi liên quan
 
----
+- food-market-narrator-maui/Views/MapPage.xaml
+- food-market-narrator-maui/Views/MapPage.xaml.cs
+- food-market-narrator-maui/Helpers/MapHelper.cs
 
-## 1) Pham vi file da cap nhat
+## 2) Thành phần UI đã có
 
-- `food-market-narrator-maui/Views/MapPage.xaml`
-- `food-market-narrator-maui/Views/MapPage.xaml.cs`
+### 2.1 Cụm điều khiển bên phải
 
----
+- Zoom In: OnZoomInTapped
+- Zoom Out: OnZoomOutTapped
+- My Location: OnMyLocationTapped
 
-## 2) UI da cap nhat tren MapPage
+Ghi chú:
 
-### 2.1 Cum nut dieu khien ben phai map
+- Zoom dùng thay đổi resolution của viewport, có clamp theo MinZoomLevel/MaxZoomLevel.
+- My Location lấy vị trí hiện tại, center map và cập nhật marker user.
 
-Da them 3 nut:
+### 2.2 Popup card POI phía dưới
 
-- Zoom In (`OnZoomInTapped`)
-- Zoom Out (`OnZoomOutTapped`)
-- My Location (`OnMyLocationTapped`)
+Card được bind theo POI đang chọn, gồm:
 
-Y nghia:
+- Ảnh: SelectedPoiImage
+- Tên: SelectedPoiName
+- Địa chỉ: SelectedPoiAddress
+- Nút Xem chi tiết: OnViewDetailClicked
 
-- Zoom In/Out thay doi viewport resolution co clamp min/max zoom
-- My Location lay vi tri hien tai, center map den vi tri user va cap nhat marker user
+Mặc định card ẩn (IsVisible = false) và chỉ hiện khi tap trúng POI hợp lệ.
 
-### 2.2 Popup card POI duoi man hinh
+## 3) Luồng tap map để chọn POI
 
-Card demo da duoc doi sang card du lieu dong:
+Trong OnMapTapped:
 
-- Them `x:Name="SelectedPoiCard"` va set `IsVisible="False"` mac dinh
-- Anh: `SelectedPoiImage`
-- Ten: `SelectedPoiName`
-- Dia chi: `SelectedPoiAddress`
-- Nut `View Details`: da gan su kien `OnViewDetailClicked`
+1. Lấy điểm tap từ e.WorldPosition.
+2. Chuyển world coordinate sang lat/lon bằng SphericalMercator.ToLonLat(...).
+3. Tìm nearest POI từ danh sách \_pois.
+4. Tính tap threshold theo zoom:
+   - tapThresholdMeters = Clamp(viewportResolution \* 28, 12, 150)
+5. Nếu distance tới nearest <= threshold thì:
+   - Hiển thị popup card bằng ShowSelectedPoiCard(...)
+   - Highlight POI bằng MapHelper.HighlightPOI(...)
+6. Nếu không đạt ngưỡng thì ẩn card.
 
-Da bo hoan toan nut `Share` trong card.
+Ý nghĩa: thao tác tap ổn định hơn ở nhiều mức zoom khác nhau.
 
----
+## 4) Tìm kiếm POI trên MapPage
 
-## 3) Logic tap POI tren map
+Ngoài popup từ map tap, MapPage hiện có thêm luồng search:
 
-### 3.1 Dang ky su kien tap map
+- Search bar với debounce 220ms.
+- Gợi ý tối đa 6 kết quả.
+- Chuẩn hóa từ khóa có bỏ dấu (Normalize FormD + bỏ NonSpacingMark) để tìm gần đúng.
+- Highlight nhiều POI theo kết quả tìm kiếm bằng MapHelper.HighlightPOIs(..., isSearchResult: true).
+- Khi chọn suggestion, map tự focus về POI đầu tiên.
 
-Trong `OnAppearing`:
+## 5) Điều hướng sang trang chi tiết
 
-- Dang ky `mapControl.MapTapped += OnMapTapped`
-- Tranh dang ky trung bang cach unsubscribe truoc khi subscribe lai
+Nút Xem chi tiết sẽ:
 
-Trong `OnDisappearing`:
+1. Lấy restaurantId từ \_selectedPoi.
+2. Encode bằng Uri.EscapeDataString(...).
+3. Điều hướng route: POIDetailPage?restaurantId={encodedId}.
 
-- `mapControl.MapTapped -= OnMapTapped`
+## 6) Tối ưu render marker/hightlight
 
-### 3.2 Xu ly tap vao map de tim POI
+MapHelper đã có các cải tiến để tránh hiện tượng “đổi trạng thái nhưng không vẽ lại ngay”:
 
-`OnMapTapped` duoc implement theo luong:
+- Reorder feature được highlight xuống cuối để vẽ trên cùng.
+- Gọi poiLayer.DataHasChanged().
+- Gọi mapControl.Map.RefreshData() + RefreshGraphics().
 
-1. Kiem tra danh sach POI da co du lieu (`_pois`)
-2. Lay diem tap tu `e.WorldPosition`
-3. Chuyen doi world coordinate -> lat/lon qua `SphericalMercator.ToLonLat(...)`
-4. Tim POI gan nhat bang `_poiService.GetNearestPOI(...)`
-5. Tinh nguong tap theo zoom hien tai:
-   - `tapThresholdMeters = viewportResolution * MarkerTapPixelRadius`
-   - Co clamp nguong trong khoang [12m, 150m]
-6. Neu khoang cach den POI gan nhat <= nguong thi:
-   - Hien popup card voi dung du lieu POI
-   - Goi `MapHelper.HighlightPOI(...)`
-7. Neu khong hop le thi an card
+Các bước này áp dụng cho cả highlight POI và cập nhật marker vị trí người dùng.
 
-### 3.3 State card POI duoc chon
+## 7) Trạng thái hiện tại
 
-Da them state:
+- Đã hoạt động: tap POI, popup card, zoom, my location, view detail, search + suggestion + highlight.
+- Chưa triển khai logic thật cho các filter chip (Tất cả, Hải sản, Ốc...) ở phần UI phía trên map.
 
-- `_selectedPoi` de giu POI dang duoc chon
+## 8) Checklist kiểm thử
 
-Da them helper:
-
-- `ShowSelectedPoiCard(POI poi)`
-- `HideSelectedPoiCard()`
-
----
-
-## 4) Dieu huong View Details
-
-`OnViewDetailClicked`:
-
-- Lay `restaurantId` tu `_selectedPoi`
-- Encode query bang `Uri.EscapeDataString(...)`
-- Dieu huong:
-  - `$"{nameof(POIDetailPage)}?restaurantId={encodedId}"`
-
-Ket qua:
-
-- Trang `POIDetailPage` mo dung POI ma user vua tap tren map
-
----
-
-## 5) Cac fix API/compile lien quan Mapsui
-
-Trong qua trinh implement da gap mot so mismatch API. Da fix nhu sau:
-
-1. `MapEventArgs` khong co `Position`
-
-- Dung `e.WorldPosition` thay vi `e.Position`
-
-2. `Viewport` la non-null type
-
-- Bo null-check `if (viewport == null)`
-- Truy cap resolution theo `mapControl.Map?.Navigator?.Viewport.Resolution`
-
-3. `SphericalMercator.ToLonLat` tra ve tuple `(lon, lat)`
-
-- Dung `tapLonLat.lon` va `tapLonLat.lat`
-- Khong dung `x/y`
-
-4. Canh bao obsolete voi alert
-
-- Doi `DisplayAlert(...)` -> `DisplayAlertAsync(...)`
-
----
-
-## 6) Hanh vi sau khi hoan thien
-
-- User co the zoom map bang nut + / -
-- User co the bam nut My Location de quay lai vi tri hien tai
-- User tap marker POI tren map se thay popup card duoi dung theo POI da tap
-- Popup hien ten + anh + dia chi
-- Bam `View Details` mo trang chi tiet dung `restaurantId`
-- Da bo nut `Share` khoi card
-
----
-
-## 7) Checklist test de xac nhan tinh nang
-
-1. Mo `MapPage`
-2. Bam `+` va `-`:
-   - Xac nhan zoom thay doi va khong vuot gioi han
-3. Bam `My Location`:
-   - Xac nhan map center ve vi tri user
-4. Tap vao marker POI:
-   - Xac nhan card hien
-   - Xac nhan ten/anh/dia chi dung theo marker da tap
-5. Tap `View Details`:
-   - Xac nhan mo dung `POIDetailPage` cua POI vua chon
-6. Tap vao vung map khong gan marker:
-   - Xac nhan card an
-
----
-
-## 8) Ghi chu ky thuat
-
-- Nguong hit-test theo pixel da duoc map sang meters dua tren viewport resolution, de thao tac tap marker on dinh hon o nhieu muc zoom.
-- Logic nay hien uu tien tim POI gan nhat va so voi nguong; neu mat do marker qua day, co the nang cap tiep bang map hit-test theo feature trong layer de chon POI chinh xac hon.
+1. Mở MapPage, thử zoom in/out và xác nhận giới hạn zoom hợp lệ.
+2. Bấm My Location để center về vị trí hiện tại.
+3. Tap vào marker gần và xác nhận card hiển thị đúng tên/ảnh/địa chỉ.
+4. Tap xa marker để xác nhận card tự ẩn.
+5. Gõ từ khóa có dấu/không dấu, xác nhận suggestion và highlight hoạt động.
+6. Bấm Xem chi tiết, xác nhận mở đúng POIDetailPage theo restaurantId.

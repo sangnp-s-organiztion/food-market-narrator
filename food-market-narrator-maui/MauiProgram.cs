@@ -45,8 +45,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAudioService, AudioService>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
+        builder.Services.AddSingleton<IFavoriteService, FavoriteService>();
+        builder.Services.AddSingleton<IHistoryService, HistoryService>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<MapPage>();
+        builder.Services.AddTransient<POIDetailPage>();
+        builder.Services.AddTransient<FavoritePage>();
+        builder.Services.AddTransient<HistoryPage>();
+        builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddSingleton<ILocationService, LocationService>(); // Updated class name to singular
 
 #if DEBUG
