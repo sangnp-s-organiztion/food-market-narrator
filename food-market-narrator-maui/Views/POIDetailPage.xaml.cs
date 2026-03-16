@@ -1,6 +1,7 @@
 using food_market_narrator.Services;
 using food_market_narrator.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui;
 
 namespace food_market_narrator.Views;
 
@@ -10,10 +11,15 @@ public partial class POIDetailPage : ContentPage
 	private readonly IPOIService? _poiService;
 	private readonly IAudioService? _audioService;
 	private readonly ILanguageService? _languageService;
+	private readonly IFavoriteService? _favoriteService;
+	private readonly IHistoryService? _historyService;
 	private IDispatcherTimer? _progressTimer;
 	private string _restaurantId = string.Empty;
+	private POI? _currentPoi;
 	private const string PlayGlyph = "\uf04b";
 	private const string StopGlyph = "\uf04c";
+	private const string HeartSolid = "\uf004"; // filled heart
+	private const string HeartRegular = "\uf08a"; // outline heart
 
 	public string RestaurantId
 	{
@@ -32,6 +38,8 @@ public partial class POIDetailPage : ContentPage
 		_poiService = services?.GetService<IPOIService>();
 		_audioService = services?.GetService<IAudioService>();
 		_languageService = services?.GetService<ILanguageService>();
+		_favoriteService = services?.GetService<IFavoriteService>();
+		_historyService = services?.GetService<IHistoryService>();
 
 		if (_audioService != null)
 		{
@@ -54,11 +62,33 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
+		// Load dishes từ API
+		var dishes = await _poiService.GetDishesByRestaurantIdAsync(_restaurantId);
+		if (dishes != null && dishes.Count > 0)
+		{
+			poi.Dishes = dishes;
+		}
+
+		_currentPoi = poi;
+
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			BindingContext = poi;
 			SyncAudioUiWithService();
+			UpdateFavoriteIcon();
 		});
+	}
+
+	private void UpdateFavoriteIcon()
+	{
+		if (_currentPoi == null || FavoriteIcon == null)
+			return;
+
+		var isFavorite = _favoriteService?.IsFavorite(_currentPoi.restaurantId) ?? false;
+		// FavoriteIcon.Text = isFavorite ? HeartSolid : HeartRegular;
+		FavoriteIcon.TextColor = isFavorite
+        ? Colors.Red
+        : Color.FromArgb("#ffffff");
 	}
 
 	protected override void OnAppearing()
@@ -96,6 +126,7 @@ public partial class POIDetailPage : ContentPage
 			_audioService.Resume();
 			SetPlayButtonState(true);
 			StartProgressTimer();
+			AddCurrentPoiToHistoryIfPlaying();
 			return;
 		}
 
@@ -107,7 +138,23 @@ public partial class POIDetailPage : ContentPage
 		if (_audioService.IsPlaying)
 		{
 			StartProgressTimer();
+			AddCurrentPoiToHistoryIfPlaying();
 		}
+	}
+
+	private void AddCurrentPoiToHistoryIfPlaying()
+	{
+		if (_audioService is null || !_audioService.IsPlaying)
+		{
+			return;
+		}
+
+		if (_currentPoi == null || string.IsNullOrWhiteSpace(_currentPoi.restaurantId))
+		{
+			return;
+		}
+
+		_historyService?.AddToHistory(_currentPoi.restaurantId);
 	}
 
 	private void StartProgressTimer()
@@ -276,5 +323,88 @@ public partial class POIDetailPage : ContentPage
 	private async void OnBackButtonTapped(object sender, EventArgs e)
 	{
 		await Shell.Current.GoToAsync("//MainPage");
+	}
+
+	// Hàm xử lý khi nhấn nút Đường đi
+	private async void OnGetDirectionClicked(object sender, EventArgs e)
+	{
+		if (BindingContext is not POI poi)
+		{
+			return;
+		}
+
+		// Mở Google Maps hoặc ứng dụng bản đồ mặc định
+		var destination = $"{poi.Latitude},{poi.Longitude}";
+		var label = Uri.EscapeDataString(poi.Name ?? "Điểm đến");
+
+		try
+		{
+			// Thử mở Google Maps trước
+			var googleMapsUrl = $"https://www.google.com/maps/dir/?api=1&destination={destination}&destination_place_id={poi.restaurantId}";
+			await Launcher.OpenAsync(googleMapsUrl);
+		}
+		catch (Exception)
+		{
+			// Nếu không mở được, thử mở ứng dụng bản đồ mặc định
+			try
+			{
+				var mapsUrl = $"geo:{destination}?q={destination}({label})";
+				await Launcher.OpenAsync(mapsUrl);
+			}
+			catch
+			{
+				// Hiển thị thông báo lỗi nếu không mở được bất kỳ ứng dụng nào
+				await DisplayAlert("Lỗi", "Không thể mở ứng dụng bản đồ", "OK");
+			}
+		}
+	}
+
+	// Hàm xử lý khi nhấn nút Gọi điện
+	private async void OnCallNowClicked(object sender, EventArgs e)
+	{
+		if (BindingContext is not POI poi)
+		{
+			return;
+		}
+
+		// Kiểm tra có số điện thoại không
+		if (string.IsNullOrWhiteSpace(poi.Phone))
+		{
+			await DisplayAlert("Thông báo", "Quán chưa có số điện thoại", "OK");
+			return;
+		}
+
+		// Mở ứng dụng gọi điện
+		try
+		{
+			var phoneUrl = $"tel:{poi.Phone}";
+			await Launcher.OpenAsync(phoneUrl);
+		}
+		catch (Exception)
+		{
+			await DisplayAlert("Lỗi", "Không thể mở ứng dụng gọi điện", "OK");
+		}
+	}
+
+	// Hàm xử lý khi nhấn nút Yêu thích
+	private void OnFavoriteTapped(object sender, EventArgs e)
+	{
+		if (_currentPoi == null)
+			return;
+
+		var restaurantId = _currentPoi.restaurantId;
+		var isFavorite = _favoriteService?.IsFavorite(restaurantId) ?? false;
+
+		if (isFavorite)
+		{
+			_favoriteService?.RemoveFavorite(restaurantId);
+		}
+		else
+		{
+			_favoriteService?.AddFavorite(restaurantId);
+		}
+
+		// Cập nhật icon
+		UpdateFavoriteIcon();
 	}
 }

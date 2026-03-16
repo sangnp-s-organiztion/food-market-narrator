@@ -19,7 +19,25 @@ public partial class App : Application
         _locationService = locationService;
 		_poiService = poiService;
 		_languageService = languageService;
+
+        // Xử lý deep link khi app được mở từ QR code hoặc URL scheme
+        HandleAppStart(Environment.GetCommandLineArgs());
 	}
+
+    private void HandleAppStart(string[] args)
+    {
+        // Command line args chứa URL khi app được mở từ deep link
+        foreach (var arg in args)
+        {
+            if (arg.StartsWith("foodmarketnarrator://", StringComparison.OrdinalIgnoreCase))
+            {
+                // Deep link format: foodmarketnarrator://open
+                // App sẽ mở MainPage mặc định
+                Debug.WriteLine($"[App] Deep link received: {arg}");
+                break;
+            }
+        }
+    }
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
