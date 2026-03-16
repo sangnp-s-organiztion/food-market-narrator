@@ -1,5 +1,9 @@
 using food_market_narrator.Services;
 using Microsoft.Extensions.DependencyInjection;
+using food_market_narrator.Models;
+using Microsoft.Maui.Controls.Shapes;
+using System.Collections.Generic;
+using food_market_narrator.Helpers;
 
 namespace food_market_narrator.Views;
 
@@ -9,6 +13,13 @@ public partial class SettingsPage : ContentPage
     private readonly ILanguageService? _languageService;
     private readonly IFavoriteService? _favoriteService;
     private readonly IHistoryService? _historyService;
+    private readonly NarrationFlowService? _narrationFlowService;
+
+    private readonly Dictionary<string, Border> _languageOptions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
+    private bool _isLanguageOptionsLoaded;
+    private VerticalStackLayout? _languageOptionsContainer;
+    private Grid? _languagePopupOverlay;
 
     public SettingsPage()
     {
@@ -18,6 +29,7 @@ public partial class SettingsPage : ContentPage
         _languageService = services?.GetService<ILanguageService>();
         _favoriteService = services?.GetService<IFavoriteService>();
         _historyService = services?.GetService<IHistoryService>();
+        _narrationFlowService = services?.GetService<NarrationFlowService>();
     }
 
     protected override async void OnAppearing()
@@ -44,13 +56,13 @@ public partial class SettingsPage : ContentPage
 
     private string GetLanguageDisplayName(string code)
     {
-        return code switch
+        return code.ToLowerInvariant() switch
         {
-            "vi-VN" => "Tiếng Việt",
-            "en-US" => "English",
-            "zh-CN" => "中文",
-            "ko-KR" => "한국어",
-            "ja-JP" => "日本語",
+            "vi-vn" or "vi-vn" => "Tiếng Việt",
+            "en-us" or "en-US" => "English",
+            "zh-cn" or "zh-CN" => "中文",
+            "ko-kr" or "ko-KR" => "한국어",
+            "ja-jp" or "ja-JP" => "日本語",
             _ => code
         };
     }
@@ -70,11 +82,260 @@ public partial class SettingsPage : ContentPage
 
     private async void OnLanguageTapped(object sender, EventArgs e)
     {
-        // Mở popup chọn ngôn ngữ (tái sử dụng từ MainPage)
-        if (Application.Current?.MainPage is Page mainPage)
+        // Tạo và hiển thị popup chọn ngôn ngữ
+        await ShowLanguagePopupAsync();
+    }
+
+    private async Task ShowLanguagePopupAsync()
+    {
+        // Tạo overlay
+        _languagePopupOverlay = new Grid
         {
-            await mainPage.DisplayAlert("Ngôn ngữ", "Vui lòng chọn ngôn ngữ từ trang chủ", "OK");
+            BackgroundColor = Color.FromArgb("#80000000"),
+            InputTransparent = false
+        };
+
+        // Tạo nội dung popup
+        var popupContent = new Border
+        {
+            BackgroundColor = Colors.White,
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 28 },
+            Padding = new Thickness(20, 12, 20, 24),
+            VerticalOptions = LayoutOptions.End
+        };
+
+        var contentStack = new VerticalStackLayout { Spacing = 16 };
+
+        // Title
+        var titleGrid = new Grid();
+        titleGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+        titleGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+
+        var titleLabel = new Label
+        {
+            Text = "Chọn ngôn ngữ thuyết minh",
+            FontSize = 20,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#1A1A1A"),
+            VerticalOptions = LayoutOptions.Center
+        };
+        titleGrid.Add(titleLabel, 0, 0);
+
+        var closeButton = new Border
+        {
+            BackgroundColor = Color.FromArgb("#F1EDE9"),
+            HeightRequest = 32,
+            WidthRequest = 32,
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 16 }
+        };
+        var closeLabel = new Label
+        {
+            Text = "\uF00D",
+            FontFamily = "FASolid",
+            FontSize = 14,
+            TextColor = Color.FromArgb("#7D746D"),
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+        closeButton.Content = closeLabel;
+        closeButton.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await HideLanguagePopupAsync())
+        });
+        titleGrid.Add(closeButton, 1, 0);
+        contentStack.Add(titleGrid);
+
+        // Ngôn ngữ options container
+        _languageOptionsContainer = new VerticalStackLayout { Spacing = 12 };
+        contentStack.Add(_languageOptionsContainer);
+
+        popupContent.Content = contentStack;
+
+        // Stack chính
+        var mainStack = new VerticalStackLayout { VerticalOptions = LayoutOptions.End };
+        mainStack.Add(popupContent);
+
+        _languagePopupOverlay.Add(mainStack, 0, 0);
+
+        // Thêm vào page
+        if (Content is Layout mainLayout)
+        {
+            mainLayout.Children.Add(_languagePopupOverlay);
+            await BuildLanguageOptionsAsync();
+            await _languagePopupOverlay.FadeTo(1, 180);
         }
+    }
+
+    private async Task HideLanguagePopupAsync()
+    {
+        if (_languagePopupOverlay != null)
+        {
+            await _languagePopupOverlay.FadeTo(0, 140);
+            if (Content is Layout mainLayout)
+            {
+                mainLayout.Children.Remove(_languagePopupOverlay);
+            }
+            _languagePopupOverlay = null;
+        }
+    }
+
+    private async Task BuildLanguageOptionsAsync()
+    {
+        if (_languageOptionsContainer == null || _languageService == null)
+            return;
+
+        if (_isLanguageOptionsLoaded)
+            return;
+
+        var languages = await _languageService.GetAllLanguagesAsync();
+        if (languages.Count == 0)
+        {
+            languages = new List<LanguageModel>
+            {
+                new() { LanguageCode = _languageService.CurrentLanguage, LanguageName = _languageService.CurrentLanguage }
+            };
+        }
+
+        _languageOptionsContainer.Children.Clear();
+        _languageOptions.Clear();
+        _languageChecks.Clear();
+
+        foreach (var language in languages)
+        {
+            if (string.IsNullOrWhiteSpace(language.LanguageCode))
+                continue;
+
+            var optionBorder = new Border
+            {
+                BackgroundColor = Color.FromArgb("#F1EDE9"),
+                StrokeThickness = 0,
+                StrokeShape = new RoundRectangle { CornerRadius = 14 },
+                Padding = new Thickness(14, 12)
+            };
+
+            optionBorder.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                CommandParameter = language.LanguageCode,
+                Command = new Command(async () => await OnLanguageOptionTappedAsync(language.LanguageCode))
+            });
+
+            var row = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Auto)
+                },
+                ColumnSpacing = 10,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            // Flag
+            var flagLabel = new Label
+            {
+                Text = GetFlagByLanguageCode(language.LanguageCode),
+                FontSize = 20,
+                VerticalOptions = LayoutOptions.Center
+            };
+            row.Add(flagLabel, 0, 0);
+
+            // Language name
+            var nameLabel = new Label
+            {
+                Text = language.LanguageName,
+                FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#1A1A1A"),
+                VerticalOptions = LayoutOptions.Center
+            };
+            row.Add(nameLabel, 1, 0);
+
+            // Checkmark
+            var checkLabel = new Label
+            {
+                Text = "✓",
+                FontSize = 16,
+                TextColor = Color.FromArgb("#F48C06"),
+                FontAttributes = FontAttributes.Bold,
+                VerticalOptions = LayoutOptions.Center,
+                IsVisible = false
+            };
+            row.Add(checkLabel, 2, 0);
+
+            optionBorder.Content = row;
+
+            _languageOptions[language.LanguageCode] = optionBorder;
+            _languageChecks[language.LanguageCode] = checkLabel;
+            _languageOptionsContainer.Children.Add(optionBorder);
+        }
+
+        _isLanguageOptionsLoaded = true;
+        ApplyLanguageSelectionStyle(_languageService.CurrentLanguage);
+    }
+
+    private void ApplyLanguageSelectionStyle(string cultureCode)
+    {
+        foreach (var option in _languageOptions)
+        {
+            var isSelected = option.Key.Equals(cultureCode, StringComparison.OrdinalIgnoreCase);
+
+            option.Value.BackgroundColor = isSelected
+                ? Color.FromArgb("#F7F3EF")
+                : Color.FromArgb("#F1EDE9");
+
+            option.Value.StrokeThickness = isSelected ? 1.5 : 0;
+            option.Value.Stroke = isSelected
+                ? Color.FromArgb("#F48C06")
+                : Colors.Transparent;
+
+            if (_languageChecks.TryGetValue(option.Key, out var checkLabel))
+            {
+                checkLabel.IsVisible = isSelected;
+            }
+        }
+    }
+
+    private async Task OnLanguageOptionTappedAsync(string cultureCode)
+    {
+        if (string.IsNullOrWhiteSpace(cultureCode) || _languageService == null)
+            return;
+
+        var wasNarrating = _narrationFlowService?.IsNarrating ?? false;
+
+        ApplyLanguageSelectionStyle(cultureCode);
+        await HideLanguagePopupAsync();
+
+        Preferences.Set("language_selected", true);
+        Preferences.Set("language", cultureCode);
+
+        if (_languageService.CurrentLanguage != cultureCode)
+        {
+            _languageService.ChangeLanguage(cultureCode);
+        }
+
+        // Cập nhật label hiển thị
+        CurrentLanguageLabel.Text = GetLanguageDisplayName(cultureCode);
+
+        if (wasNarrating)
+        {
+            _narrationFlowService?.StartNarration();
+        }
+    }
+
+    private string GetFlagByLanguageCode(string languageCode)
+    {
+        return languageCode.ToLowerInvariant() switch
+        {
+            "vi-vn" => "🇻🇳",
+            "en-us" => "🇺🇸",
+            "zh-cn" => "🇨🇳",
+            "ko-kr" => "🇰🇷",
+            "ja-jp" => "🇯🇵",
+            _ => "🌐"
+        };
     }
 
     private async void OnClearCacheClicked(object sender, EventArgs e)
