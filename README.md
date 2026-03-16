@@ -157,8 +157,24 @@ Ví dụ:
 
 Sửa tại `food-market-narrator-maui/Settings/AppSettings.cs`.
 
-- Android emulator: `http://10.0.2.2:5044/`
-- Desktop/local: `http://localhost:5044/`
+App đã gom cấu hình host về 1 chỗ:
+
+- `LocalApiHost`: IP LAN hoặc hostname của máy đang chạy API.
+- Emulator Android sẽ tự dùng `10.0.2.2`.
+- Android máy thật sẽ tự dùng `LocalApiHost`.
+
+Ví dụ đổi host khi chạy Android máy thật:
+
+```csharp
+private const string LocalApiHost = "192.168.1.7";
+```
+
+Lưu ý khi chạy trên Android máy thật:
+
+1. Điện thoại và máy chạy API phải cùng mạng Wi-Fi/LAN.
+2. API phải đang chạy ở cổng `5044` (HTTP) hoặc `7041` (HTTPS).
+3. Mở firewall cho cổng API trên máy chạy backend nếu cần.
+4. Nếu IP hay thay đổi, nên đặt DHCP reservation trên router hoặc dùng hostname nội bộ.
 
 ## 7. Chạy local nhanh
 

@@ -2,6 +2,7 @@
 using food_market_narrator.Settings;
 using food_market_narrator.Views;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Devices;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
 
@@ -24,7 +25,8 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(sp =>
         {
-            // Console.WriteLine($"[AppSettings] ApiBaseUrl = {AppSettings.ApiBaseUrl}");
+            Console.WriteLine(DeviceInfo.DeviceType);
+            Console.WriteLine(AppSettings.ApiBaseUrl);
 
             var handler = new HttpClientHandler
             {
