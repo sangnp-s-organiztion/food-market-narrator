@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { Restaurant } from "@/types";
+import { updateRestaurantApi, updateRestaurantStatusApi } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +25,8 @@ function isWithinSchedule(openTime: string, closeTime: string): boolean {
 }
 
 export default function RestaurantPage() {
-  const { selectedRestaurant } = useRestaurant();
-  const [restaurant, setRestaurant] = useState<Restaurant>({ ...selectedRestaurant! });
+  const { selectedRestaurant, refreshRestaurants } = useRestaurant();
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(selectedRestaurant ? { ...selectedRestaurant } : null);
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
 
@@ -38,14 +39,14 @@ export default function RestaurantPage() {
   }, [selectedRestaurant]);
 
   const updateField = <K extends keyof Restaurant>(key: K, value: Restaurant[K]) => {
-    setRestaurant((prev) => ({ ...prev, [key]: value }));
+    setRestaurant((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
   const updateAutoStatus = useCallback(() => {
-    if (!autoMode) return;
+    if (!autoMode || !restaurant) return;
     const shouldBeActive = isWithinSchedule(restaurant.open_time, restaurant.close_time);
-    setRestaurant((prev) => (prev.is_active !== shouldBeActive ? { ...prev, is_active: shouldBeActive } : prev));
-  }, [autoMode, restaurant.open_time, restaurant.close_time]);
+    setRestaurant((prev) => (prev && prev.is_active !== shouldBeActive ? { ...prev, is_active: shouldBeActive } : prev));
+  }, [autoMode, restaurant?.open_time, restaurant?.close_time]);
 
   useEffect(() => {
     updateAutoStatus();
@@ -60,6 +61,7 @@ export default function RestaurantPage() {
 
   const handleAutoModeToggle = (value: boolean) => {
     setAutoMode(value);
+    if (!restaurant) return;
     if (value) {
       const shouldBeActive = isWithinSchedule(restaurant.open_time, restaurant.close_time);
       updateField("is_active", shouldBeActive);
@@ -67,13 +69,22 @@ export default function RestaurantPage() {
   };
 
   const handleSave = async () => {
+    if (!restaurant) return;
+
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
-    toast.success("Lưu thay đổi thành công!");
+    try {
+      const updatedRestaurant = await updateRestaurantApi(restaurant.restaurant_id, restaurant);
+      await updateRestaurantStatusApi(restaurant.restaurant_id, restaurant.is_active);
+      setRestaurant(updatedRestaurant);
+      await refreshRestaurants();
+      toast.success("Lưu thay đổi thành công!");
+    } catch {
+      toast.error("Không thể lưu thay đổi");
+    }
     setSaving(false);
   };
 
-  if (!selectedRestaurant) return null;
+  if (!selectedRestaurant || !restaurant) return null;
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">

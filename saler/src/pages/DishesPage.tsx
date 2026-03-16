@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { getRestaurantDishes } from "@/services/mockData";
+import {
+  createDishApi,
+  deleteDishApi,
+  getRestaurantDishesApi,
+  updateDishApi,
+} from "@/services/api";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { Dish } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -32,7 +37,14 @@ export default function DishesPage() {
 
   useEffect(() => {
     if (selectedRestaurant) {
-      setDishes(getRestaurantDishes(selectedRestaurant.restaurant_id));
+      (async () => {
+        try {
+          const data = await getRestaurantDishesApi(selectedRestaurant.restaurant_id);
+          setDishes(data ?? []);
+        } catch {
+          toast.error("Không thể tải danh sách món ăn");
+        }
+      })();
     }
   }, [selectedRestaurant]);
 
@@ -48,32 +60,40 @@ export default function DishesPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error("Vui lòng nhập tên món ăn");
       return;
     }
-    if (editing) {
-      setDishes((prev) =>
-        prev.map((d) => (d.dish_id === editing.dish_id ? { ...d, ...form } : d))
-      );
-      toast.success("Cập nhật món ăn thành công");
-    } else {
-      const newDish: Dish = {
-        dish_id: Date.now(),
-        restaurant_id: selectedRestaurant!.restaurant_id,
-        created_at: new Date().toISOString(),
-        ...form,
-      };
-      setDishes((prev) => [...prev, newDish]);
-      toast.success("Thêm món ăn thành công");
+
+    if (!selectedRestaurant) return;
+
+    try {
+      if (editing) {
+        const updated = await updateDishApi(editing.dish_id, form);
+        setDishes((prev) =>
+          prev.map((d) => (d.dish_id === editing.dish_id ? updated : d))
+        );
+        toast.success("Cập nhật món ăn thành công");
+      } else {
+        const created = await createDishApi(selectedRestaurant.restaurant_id, form);
+        setDishes((prev) => [...prev, created]);
+        toast.success("Thêm món ăn thành công");
+      }
+      setDialogOpen(false);
+    } catch {
+      toast.error("Không thể lưu món ăn");
     }
-    setDialogOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    setDishes((prev) => prev.filter((d) => d.dish_id !== id));
-    toast.success("Xóa món ăn thành công");
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteDishApi(id);
+      setDishes((prev) => prev.filter((d) => d.dish_id !== id));
+      toast.success("Xóa món ăn thành công");
+    } catch {
+      toast.error("Không thể xóa món ăn");
+    }
   };
 
   return (

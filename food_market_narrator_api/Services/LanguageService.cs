@@ -22,6 +22,7 @@ namespace food_market_narrator_api.Services
 
             return new LanguageResponse
             {
+                LanguageId = languageModel.LanguageId,
                 LanguageCode = languageModel.LanguageCode,
                 LanguageName = languageModel.LanguageName
             };
@@ -33,6 +34,7 @@ namespace food_market_narrator_api.Services
 
             return languageModels.Select(l => new LanguageResponse
             {
+                LanguageId = l.LanguageId,
                 LanguageCode = l.LanguageCode,
                 LanguageName = l.LanguageName
             }).ToList();

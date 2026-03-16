@@ -10,6 +10,9 @@ public static class PublicEndpoints
         new("GET", "/Language/{languageCode}"),
         new("GET", "/Restaurant"),
         new("GET", "/Restaurant/{id}"),
-        new("GET", "/audio")
+        new("GET", "/audio"),
+        new("GET", "/public/Restaurant/{restaurantId}/dishes"),
+        new("GET", "/public/Restaurant/{restaurantId}/images"),
+        new("GET", "/public/Restaurant/{restaurantId}/audios")
     ];
 }
