@@ -111,7 +111,7 @@ public class Program
 
 
 
-
+        builder.WebHost.UseUrls("http://0.0.0.0:5044");
 
 
 
