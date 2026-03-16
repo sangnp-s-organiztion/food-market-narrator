@@ -53,6 +53,10 @@ public partial class BottomNavigationView : ContentView
             case BottomTab.History:
                 SetActive(HistoryIcon, HistoryText);
                 break;
+
+            case BottomTab.Setting:
+                SetActive(SettingIcon, SettingText);
+                break;
         }
     }
 
@@ -75,6 +79,12 @@ public partial class BottomNavigationView : ContentView
             HistoryIcon.TextColor = InactiveColor;
         if (HistoryText != null)
             HistoryText.TextColor = InactiveColor;
+
+        // Set màu cho SettingIcon
+        if (SettingIcon != null)
+            SettingIcon.TextColor = InactiveColor;
+        if (SettingText != null)
+            SettingText.TextColor = InactiveColor;
     }
 
     private void SetActive(Label icon, Label text)

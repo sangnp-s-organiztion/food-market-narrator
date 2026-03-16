@@ -61,8 +61,8 @@
                     <TapGestureRecognizer Tapped="OpenSettings"/>
                 </VerticalStackLayout.GestureRecognizers>
                 
-                <Label Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
-                <Label Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
+                <Label x:Name="SettingIcon" Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
+                <Label x:Name="SettingText" Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </Grid>
     </Border>
