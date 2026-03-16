@@ -24,7 +24,7 @@
 
                             <Grid Padding="14,14,14,0" ColumnDefinitions="Auto,*,Auto,Auto" VerticalOptions="Start" ColumnSpacing="8">
                                 <Border StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">
@@ -45,22 +45,27 @@
 
                                 <Border Grid.Column="2"
                                         StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">
                                     <!-- Button favorite -->
-                                    <Label Text="&#xf004;"
+                                    <Label x:Name="FavoriteIcon"
+                                           Text="&#xf004;"
                                            FontFamily="FASolid"
                                            FontSize="14"
                                            TextColor="White"
                                            HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
+                                           VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnFavoriteTapped"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
                                 </Border>
 
                                 <Border Grid.Column="3"
                                         StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">
@@ -296,24 +301,28 @@
         <!-- Thanh CTA cố định dưới cùng: Đường đi + Gọi điện -->
         <Grid Grid.Row="1" BackgroundColor="#EEEEEE" Padding="14,10,14,16" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
+                    x:Name="BtnGetDirection"
                     Text="Đường đi"
                     FontAttributes="Bold"
                     TextColor="#F39C12"
                     BackgroundColor="White"
                     BorderColor="#F39C12"
                     BorderWidth="1"
-                    CornerRadius="24">
+                    CornerRadius="24"
+                    Clicked="OnGetDirectionClicked">
                 <Button.ImageSource>
                     <FontImageSource Glyph="&#xf5eb;" FontFamily="FASolid" Size="14" Color="#F39C12" />
                 </Button.ImageSource>
             </Button>
 
             <Button Grid.Column="1"
+                    x:Name="BtnCallNow"
                     Text="Gọi điện ngay"
                     FontAttributes="Bold"
                     TextColor="White"
                     BackgroundColor="#F39C12"
-                    CornerRadius="24">
+                    CornerRadius="24"
+                    Clicked="OnCallNowClicked">
                 <Button.ImageSource>
                     <FontImageSource Glyph="&#xf095;" FontFamily="FASolid" Size="14" Color="White" />
                 </Button.ImageSource>

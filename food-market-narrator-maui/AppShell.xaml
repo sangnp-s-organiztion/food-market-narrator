@@ -16,5 +16,20 @@
         Title="Bản đồ"
         ContentTemplate="{DataTemplate views:MapPage}"
         Route="MapPage" />
-    
+
+    <ShellContent
+        Title="Yêu thích"
+        ContentTemplate="{DataTemplate views:FavoritePage}"
+        Route="FavoritePage" />
+
+    <ShellContent
+        Title="Lịch sử"
+        ContentTemplate="{DataTemplate views:HistoryPage}"
+        Route="HistoryPage" />
+
+    <ShellContent
+        Title="Cài đặt"
+        ContentTemplate="{DataTemplate views:SettingsPage}"
+        Route="SettingsPage" />
+
 </Shell>
