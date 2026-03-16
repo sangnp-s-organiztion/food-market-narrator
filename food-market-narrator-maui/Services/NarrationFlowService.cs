@@ -10,6 +10,7 @@ public class NarrationFlowService : INarrationFlowService
     private readonly ILocationService _locationService;
     private readonly IAudioService _audioService;
     private readonly ILanguageService _languageService;
+    private readonly IHistoryService _historyService;
 
     // Track POI đã phát audio trong phiên
     private readonly HashSet<string> _playedPOIs = new();
@@ -31,12 +32,14 @@ public class NarrationFlowService : INarrationFlowService
         IPOIService poiService,
         ILocationService locationService,
         IAudioService audioService,
-        ILanguageService languageService)
+        ILanguageService languageService,
+        IHistoryService historyService)
     {
         _poiService = poiService;
         _locationService = locationService;
         _audioService = audioService;
         _languageService = languageService;
+        _historyService = historyService;
     }
 
     public async void StartNarration()
@@ -220,6 +223,12 @@ public class NarrationFlowService : INarrationFlowService
                 _languageService.CurrentLanguage,
                 selectedAudio
             );
+
+            // Khi audio auto narration đã bắt đầu phát thành công, lưu POI vào lịch sử.
+            if (_audioService.IsPlaying && !string.IsNullOrWhiteSpace(poi.restaurantId))
+            {
+                _historyService.AddToHistory(poi.restaurantId);
+            }
 
             // Chờ audio phát xong
             while (_audioService.IsPlaying)

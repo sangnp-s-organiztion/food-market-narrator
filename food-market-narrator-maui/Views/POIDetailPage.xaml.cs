@@ -69,9 +69,6 @@ public partial class POIDetailPage : ContentPage
 			poi.Dishes = dishes;
 		}
 
-		// Lưu vào lịch sử
-		_historyService?.AddToHistory(_restaurantId);
-
 		_currentPoi = poi;
 
 		MainThread.BeginInvokeOnMainThread(() =>
@@ -129,6 +126,7 @@ public partial class POIDetailPage : ContentPage
 			_audioService.Resume();
 			SetPlayButtonState(true);
 			StartProgressTimer();
+			AddCurrentPoiToHistoryIfPlaying();
 			return;
 		}
 
@@ -140,7 +138,23 @@ public partial class POIDetailPage : ContentPage
 		if (_audioService.IsPlaying)
 		{
 			StartProgressTimer();
+			AddCurrentPoiToHistoryIfPlaying();
 		}
+	}
+
+	private void AddCurrentPoiToHistoryIfPlaying()
+	{
+		if (_audioService is null || !_audioService.IsPlaying)
+		{
+			return;
+		}
+
+		if (_currentPoi == null || string.IsNullOrWhiteSpace(_currentPoi.restaurantId))
+		{
+			return;
+		}
+
+		_historyService?.AddToHistory(_currentPoi.restaurantId);
 	}
 
 	private void StartProgressTimer()
