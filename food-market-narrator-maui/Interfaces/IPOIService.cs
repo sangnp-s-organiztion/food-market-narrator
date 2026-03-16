@@ -12,4 +12,5 @@ public interface IPOIService
     POI? GetNearestPOI(Location currentLocation, IEnumerable<POI>? pois = null);
     double GetDistanceMeters(Location currentLocation, POI poi);
     POI? UpdateNearestPOI(double currentLat, double currentLng);
+    Task<List<DishModel>> GetDishesByRestaurantIdAsync(string restaurantId);
 }

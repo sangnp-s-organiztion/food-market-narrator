@@ -243,5 +243,32 @@ public class POIService : IPOIService
 
         return null; // KhÃ´ng cÃ³ thay Ä‘á»•i
     }
+
+    // Láº¥y danh sÃ¡ch mÃ³n Äƒn theo restaurant
+    public async Task<List<DishModel>> GetDishesByRestaurantIdAsync(string restaurantId)
+    {
+        if (string.IsNullOrWhiteSpace(restaurantId))
+        {
+            return new List<DishModel>();
+        }
+
+        var baseUrl = _httpClient.BaseAddress?.ToString();
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            return new List<DishModel>();
+        }
+
+        try
+        {
+            var url = $"{baseUrl.TrimEnd('/')}/Restaurant/{restaurantId}/dishes";
+            var dishes = await _httpClient.GetFromJsonAsync<List<DishModel>>(url);
+            return dishes ?? new List<DishModel>();
+        }
+        catch (Exception)
+        {
+            // Console.WriteLine($"[POIService] GetDishes failed: {ex.Message}");
+            return new List<DishModel>();
+        }
+    }
 }
 
