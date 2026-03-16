@@ -24,7 +24,7 @@
 
                             <Grid Padding="14,14,14,0" ColumnDefinitions="Auto,*,Auto,Auto" VerticalOptions="Start" ColumnSpacing="8">
                                 <Border StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">
@@ -45,7 +45,7 @@
 
                                 <Border Grid.Column="2"
                                         StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">
@@ -65,7 +65,7 @@
 
                                 <Border Grid.Column="3"
                                         StrokeThickness="0"
-                                        BackgroundColor="#80FFFFFF"
+                                        BackgroundColor="#B0B0B0"
                                         HeightRequest="34"
                                         WidthRequest="34"
                                         StrokeShape="RoundRectangle 17">

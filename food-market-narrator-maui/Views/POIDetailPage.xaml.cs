@@ -88,7 +88,10 @@ public partial class POIDetailPage : ContentPage
 			return;
 
 		var isFavorite = _favoriteService?.IsFavorite(_currentPoi.restaurantId) ?? false;
-		FavoriteIcon.Text = isFavorite ? HeartSolid : HeartRegular;
+		// FavoriteIcon.Text = isFavorite ? HeartSolid : HeartRegular;
+		FavoriteIcon.TextColor = isFavorite
+        ? Colors.Red
+        : Color.FromArgb("#ffffff");
 	}
 
 	protected override void OnAppearing()
