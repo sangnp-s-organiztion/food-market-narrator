@@ -34,9 +34,9 @@
 
             <!-- Yêu thích -->
             <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
+                <!-- Gọi hàm OpenFavorite khi nhấn vào nút yêu thích -->
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped=""/>
+                    <TapGestureRecognizer Tapped="OpenFavorite"/>
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf004;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="FavoriteIcon"/>
@@ -45,13 +45,13 @@
 
             <!-- Lịch sử -->
             <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                <!-- Gọi hàm để mở lịch sử -->
+                <!-- Gọi hàm OpenHistory để mở lịch sử -->
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped=""/>
+                    <TapGestureRecognizer Tapped="OpenHistory"/>
                 </VerticalStackLayout.GestureRecognizers>
-                
-                <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
-                <Label Text="Lịch sử" FontSize="10" HorizontalOptions="Center"/>
+
+                <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="HistoryIcon"/>
+                <Label Text="Lịch sử" FontSize="10" HorizontalOptions="Center" x:Name="HistoryText"/>
             </VerticalStackLayout>
 
             <!-- Cài đặt -->
@@ -61,8 +61,8 @@
                     <TapGestureRecognizer Tapped="OpenSettings"/>
                 </VerticalStackLayout.GestureRecognizers>
                 
-                <Label Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
-                <Label Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
+                <Label x:Name="SettingIcon" Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
+                <Label x:Name="SettingText" Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </Grid>
     </Border>

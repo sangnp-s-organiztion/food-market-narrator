@@ -1,7 +1,9 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Graphics;
 using Android.OS;
+using Android.Views;
 
 namespace food_market_narrator;
 
@@ -24,6 +26,18 @@ public class MainActivity : MauiAppCompatActivity
         // ⬇ Switch sang main theme TRƯỚC khi base.OnCreate inflate layout
         SetTheme(Resource.Style.Maui_MainTheme_NoActionBar);
         base.OnCreate(savedInstanceState);
+
+        // Đồng bộ thanh status bar theo tông sáng của app, tránh dải tím mặc định.
+        if (Window != null)
+        {
+            Window.SetStatusBarColor(Android.Graphics.Color.White);
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            {
+                var flags = (StatusBarVisibility)SystemUiFlags.LightStatusBar;
+                Window.DecorView.SystemUiVisibility = flags;
+            }
+        }
     }
 
     protected override void OnNewIntent(Android.Content.Intent? intent)

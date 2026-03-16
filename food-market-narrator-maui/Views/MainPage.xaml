@@ -27,13 +27,13 @@
                         <Label Text="Khám phá thiên đường ẩm thực" FontSize="12" TextColor="#9E9E9E"/>
                     </VerticalStackLayout>
 
-                    <!-- Language Button -->
+                    <!-- User Icon (chưa đăng nhập) -->
                     <Border Grid.Column="2" StrokeThickness="0" BackgroundColor="#F0F0F0"
                             HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20">
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLanguageButtonTapped"/>
+                            <TapGestureRecognizer Tapped="OnUserIconTapped"/>
                         </Border.GestureRecognizers>
-                            <Label Text="&#xf57e;" FontFamily="FASolid" TextColor="#1A1A1A"
+                            <Label Text="&#xf007;" FontFamily="FASolid" TextColor="#1A1A1A"
                                HorizontalOptions="Center" VerticalOptions="Center" FontSize="18"/>
                     </Border>
                 </Grid>
@@ -247,59 +247,6 @@
                     <Label x:Name="NarratorText" Text="Bắt đầu thuyết minh tự động" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </Border>
-
-            <Grid x:Name="LanguagePopupOverlay"
-                  IsVisible="False"
-                  Opacity="0"
-                  BackgroundColor="#80000000"
-                  InputTransparent="False"
-                  RowDefinitions="*,Auto">
-                <BoxView Grid.Row="0" Color="Transparent">
-                    <BoxView.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnLanguageOverlayTapped"/>
-                    </BoxView.GestureRecognizers>
-                </BoxView>
-
-                <Grid Grid.Row="1" VerticalOptions="End">
-                    <Border BackgroundColor="White"
-                            StrokeThickness="0"
-                            StrokeShape="RoundRectangle 28,28,0,0"
-                            Padding="20,12,20,24">
-                        <VerticalStackLayout Spacing="16">
-                            <BoxView HeightRequest="4"
-                                     WidthRequest="52"
-                                     HorizontalOptions="Center"
-                                     CornerRadius="2"
-                                     Color="#E7E2DD"/>
-
-                            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                                <Label Text="Chọn ngôn ngữ thuyết minh"
-                                       FontSize="30"
-                                       FontAttributes="Bold"
-                                       TextColor="#1A1A1A"
-                                       VerticalOptions="Center"/>
-                                <Border Grid.Column="1"
-                                        BackgroundColor="#F1EDE9"
-                                        HeightRequest="32"
-                                        WidthRequest="32"
-                                        StrokeShape="RoundRectangle 16"
-                                        StrokeThickness="0">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLanguageCloseTapped"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="&#xf00d;" FontFamily="FASolid"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center"
-                                           FontSize="14"
-                                           TextColor="#7D746D"/>
-                                </Border>
-                            </Grid>
-                            <!-- Ngôn ngữ  -->
-                            <VerticalStackLayout x:Name="LanguageOptionsContainer" Spacing="12"/>
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
-            </Grid>
         </Grid>
 
         <!-- Bottom Navigation Bar -->
