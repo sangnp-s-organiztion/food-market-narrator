@@ -1,105 +1,168 @@
-# 🍜 Food Market Narrator
+# Food Market Narrator
 
-Ứng dụng hỗ trợ khám phá khu ẩm thực bằng bản đồ và thuyết minh tự động theo vị trí người dùng.
+Nền tảng thuyết minh tự động cho phố ẩm thực Vĩnh Khánh, giúp khách tham quan khám phá quán ăn qua bản đồ, vị trí thời gian thực và audio theo ngôn ngữ.
 
-## 📌 Tổng quan
+## 1. Tổng quan
 
-Dự án gồm 2 thành phần chính:
+Workspace này gồm nhiều ứng dụng chạy cùng một hệ sinh thái:
 
-- 🧠 **Backend API** (`food_market_narrator_api`): cung cấp dữ liệu nhà hàng/điểm POI từ SQL Server.
-- 📱 **Frontend MAUI** (`food-market-narrator-maui`): ứng dụng đa nền tảng (Android, iOS), hiển thị bản đồ và phát audio khi người dùng đến gần POI.
+- `food_market_narrator_api`: Backend ASP.NET Core Web API + EF Core + SQL Server.
+- `food-market-narrator-maui`: Ứng dụng mobile cho visitor (MAUI).
+- `saler`: Web app cho seller/chủ quán (React + Vite + TypeScript).
+- `admin`: Cổng quản trị nội bộ (ASP.NET Core MVC, có thể chuyển dần sang React theo roadmap tài liệu).
+- `docs`: Tài liệu sản phẩm, kiến trúc, feature, PRD.
 
-## ✨ Tính năng chính
+## 2. Kiến trúc nhanh
 
-- 🗺️ Hiển thị POI trên bản đồ (Google Maps trên Android).
-- 🔎 Xem chi tiết các POIs.
-- 📍 Theo dõi vị trí người dùng theo chu kỳ.
-- 🎯 Tự động xác định POI gần nhất theo bán kính kích hoạt.
-- 🔊 Tự động phát file thuyết minh theo ngôn ngữ đã chọn.
-- 📶 Hoạt động ngay cả khi không có kết nối mạng
+```text
+Mobile MAUI / Seller Web / Admin Portal
+                |
+                v
+     food_market_narrator_api (REST)
+                |
+                +--> SQL Server (dữ liệu nghiệp vụ)
+                +--> Static media (/images, /audios, /audios)
+```
 
-## 🏗️ Kiến trúc dự án
+## 3. Công nghệ chính
+
+- Backend: .NET 10, ASP.NET Core Web API, EF Core SQL Server.
+- Mobile: .NET MAUI (Android/iOS/Windows), Mapsui, Plugin.Maui.Audio.
+- Seller Web: React 18, Vite 5, TypeScript, React Query.
+- Admin: ASP.NET Core MVC (.NET 10).
+- API format: REST/JSON.
+- Auth: Cookie authentication + role-based authorization.
+
+## 4. Cấu trúc thư mục
 
 ```text
 food-market-narrator/
-├─ food_market_narrator_api/       # ASP.NET Core Web API + EF Core + SQL Server
-└─ food-market-narrator-maui/      # .NET MAUI app (maps + narration)
+├─ food_market_narrator_api/
+├─ food-market-narrator-maui/
+├─ saler/
+├─ admin/
+├─ docs/
+├─ db.sql
+└─ README.md
 ```
 
-### ⚙️ Backend (ASP.NET Core)
+## Quick Start
 
-- Framework: .NET 10 (`net10.0`)
-- Data access: Entity Framework Core + SQL Server
-- Mô hình tách lớp:
-  - `Controllers/RestaurantController.cs`
-  - `Services/RestaurantService.cs`
-  - `Repositories/RestaurantRepository.cs`
-  - `Data/Context/AppDbContext.cs`
+### Prerequisites
 
-### 📲 Mobile App (MAUI)
+- .NET 10 SDK
+- Node.js 20+ và npm
+- SQL Server (local hoặc remote)
+- MAUI workload (nếu chạy mobile): `dotnet workload install maui`
 
-- Framework: .NET MAUI (.NET 10)
-- Bản đồ: `Microsoft.Maui.Controls.Maps`
-- Audio: `Plugin.Maui.Audio`
-- Networking: `HttpClient`
-- Luồng chính:
-  1. Tải POI từ API.
-  2. Hiển thị marker trên bản đồ.
-  3. Theo dõi vị trí hiện tại.
-  4. Khi vào vùng gần POI, phát audio tương ứng.
+### Setup
 
-## 🧰 Yêu cầu môi trường
+```bash
+# Clone source
+git clone <repo-url>
+cd food-market-narrator
+
+# Backend API
+cd food_market_narrator_api
+dotnet restore
+dotnet run
+
+# Seller frontend (terminal mới)
+cd ../saler
+npm install
+npm run dev
+
+# Admin portal (terminal mới)
+cd ../admin
+dotnet restore
+dotnet run
+
+# MAUI app (terminal mới, optional)
+cd ../food-market-narrator-maui
+dotnet restore
+dotnet run -f net10.0-android
+```
+
+### Services
+
+| Service               | URL                    |
+| --------------------- | ---------------------- |
+| Backend API (HTTP)    | http://localhost:5044  |
+| Backend API (HTTPS)   | https://localhost:7041 |
+| Seller Web (Vite dev) | http://localhost:8080  |
+| Admin Portal (HTTP)   | http://localhost:5104  |
+| Admin Portal (HTTPS)  | https://localhost:7168 |
+
+### Commands
+
+```bash
+# API
+cd food_market_narrator_api
+dotnet run                     # Run API
+dotnet build                   # Build API
+
+# Seller frontend
+cd saler
+npm run dev                    # Start dev server (port 8080)
+npm run build                  # Production build
+npm run lint                   # ESLint
+npm run test                   # Unit tests (Vitest)
+
+# Admin portal
+cd admin
+dotnet run                     # Run admin portal
+dotnet build                   # Build admin portal
+
+# MAUI app
+cd food-market-narrator-maui
+dotnet build                   # Build MAUI app
+dotnet run -f net10.0-android  # Run on Android target
+```
+
+## 5. Yêu cầu môi trường
+
+### 5.1 Bắt buộc
 
 - .NET SDK 10.x
-- SQL Server (Local hoặc remote)
-- Workload .NET MAUI
+- SQL Server (local hoặc remote)
+- Node.js 20+ (khuyến nghị LTS)
+- npm hoặc bun (repo có `bun.lockb`, nhưng npm vẫn dùng được)
+
+### 5.2 Cho MAUI
+
+- MAUI workload: `dotnet workload install maui`
 - Android SDK/Emulator (nếu chạy Android)
-- Visual Studio 2022 hoặc VS Code + MAUI toolchain
+- Visual Studio 2022 hoặc toolchain MAUI đầy đủ
 
-## 🔧 Cấu hình
+## 6. Cấu hình
 
-### 1) 🗄️ API connection string
+### 6.1 API connection string
 
-Cập nhật chuỗi kết nối trong:
+Sửa tại:
 
 - `food_market_narrator_api/appsettings.json`
+- `food_market_narrator_api/appsettings.Development.json`
 
 Ví dụ:
 
 ```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=food_market_narrator;User Id=sa;Password=***;TrustServerCertificate=True;"
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=food_market_narrator;User Id=sa;Password=***;TrustServerCertificate=True;"
+  }
 }
 ```
 
-### 2) 🌐 API base URL cho MAUI
+### 6.2 Base URL cho MAUI
 
-Hiện tại app MAUI gọi API qua địa chỉ Android emulator host:
+Sửa tại `food-market-narrator-maui/Settings/AppSettings.cs`.
 
-- `http://10.0.2.2:5044/`
+- Android emulator: `http://10.0.2.2:5044/`
+- Desktop/local: `http://localhost:5044/`
 
-Cấu hình nằm trong:
+## 7. Chạy local nhanh
 
-- `food-market-narrator-maui/MauiProgram.cs`
-- `food-market-narrator-maui/Services/POIService.cs`
-
-> Nếu chạy trên Windows desktop app hoặc thiết bị thật, cần đổi sang địa chỉ server phù hợp (ví dụ `http://localhost:5044` hoặc LAN IP).
-
-### 3) 🗝️ Google Maps API Key
-
-Dự án Android đã khai báo key trong:
-
-- `food-market-narrator-maui/Platforms/Android/AndroidManifest.xml`
-
-Khuyến nghị:
-
-- Key sử dụng ở đây chỉ là key hoạt động trên local và đã được hạn chế (restricted).
-- Không hard-code key ở môi trường production.
-- Chuyển sang cơ chế cấu hình bảo mật (build config/secret manager/CI variables).
-
-## 🚀 Chạy dự án (local)
-
-### Bước 1: ▶️ chạy backend API
+### 7.1 Chạy backend API
 
 ```bash
 cd food_market_narrator_api
@@ -107,12 +170,28 @@ dotnet restore
 dotnet run
 ```
 
-Mặc định API chạy ở:
+Mặc định:
 
 - `http://localhost:5044`
 - `https://localhost:7041`
 
-### Bước 2: ▶️ chạy ứng dụng MAUI
+### 7.2 Chạy Seller web
+
+```bash
+cd saler
+npm install
+npm run dev
+```
+
+### 7.3 Chạy Admin portal
+
+```bash
+cd admin
+dotnet restore
+dotnet run
+```
+
+### 7.4 Chạy MAUI app
 
 ```bash
 cd food-market-narrator-maui
@@ -120,52 +199,62 @@ dotnet restore
 dotnet build
 ```
 
-Sau đó chạy target mong muốn (Android/iOS/Windows) từ IDE hoặc CLI.
-
-Ví dụ Android emulator:
+Ví dụ chạy Android:
 
 ```bash
-dotnet build -f net10.0-android
 dotnet run -f net10.0-android
 ```
 
-## 🔌 API hiện có
+## 8. API public cho visitor
 
-### GET `/api/restaurant`
+Các endpoint đọc dữ liệu công khai chính:
 
-Trả về danh sách nhà hàng/POI.
+- `GET /Restaurant`
+- `GET /Restaurant/{id}`
+- `GET /Language`
+- `GET /Language/{languageCode}`
+- `GET /public/Restaurant/{restaurantId}/images`
+- `GET /public/Restaurant/{restaurantId}/dishes`
+- `GET /public/Restaurant/{restaurantId}/audios`
 
-Một số trường dữ liệu chính:
+## 9. Luồng dữ liệu chính
 
-- `restaurantId`
-- `name`
-- `description`
-- `latitude`
-- `longitude`
-- `address`
-- `isActive`
-- `createdAt`
+### 9.1 Visitor
 
-## 📚 Tài nguyên liên quan
+1. App MAUI gọi `GET /Restaurant` để lấy POI.
+2. Người dùng chọn POI, app gọi các endpoint public chi tiết (ảnh/món/audio).
+3. Khi bật narration, app theo dõi GPS, tìm POI gần nhất và phát audio theo ngôn ngữ.
+4. Nếu mạng lỗi, app fallback về cache local (POI/audio).
 
-- `maui-theory.md`
-- `maui-ui-cheatsheet.md`
+### 9.2 Seller/Admin
 
-## 🛡️ Ghi chú phát triển
+1. Đăng nhập qua cookie auth.
+2. Gọi protected APIs để CRUD restaurant, dish, image, audio, user/role.
+3. API ghi SQL + cập nhật media storage.
+4. Dữ liệu mới được visitor nhận ở lần đồng bộ tiếp theo.
 
-- Mã nguồn hiện có một số thông tin nhạy cảm ở dạng hard-code (ví dụ connection string, API key).
-- Trước khi đưa lên môi trường dùng thật, nên:
-  - Di chuyển secrets khỏi source code.
-  - Thêm cấu hình theo môi trường (Development/Staging/Production).
-  - Bật logging/monitoring phù hợp.
+## 10. Tài liệu liên quan
 
-## 📄 License
+- `docs/prd.md`
+- `docs/architecture.md`
+- `docs/feature/visitor-feature.md`
+- `docs/maui/`
+- `docs/saler/`
 
-Chưa khai báo. Thêm file `LICENSE` nếu bạn muốn công bố điều khoản sử dụng.
+## 11. Lưu ý bảo mật
 
----
+- Không commit secrets thật (connection string production, API key, token).
+- Ưu tiên dùng biến môi trường hoặc secret manager.
+- Kiểm tra kỹ quyền truy cập endpoint trước khi deploy.
 
-## Copyright
+## 12. Đóng góp
 
-© 2026 **Nguyen Phuoc Sang** · **Nguyen Gia Thieu**  
-All rights reserved.
+Quy trình khuyến nghị:
+
+1. Tạo branch theo feature/bugfix.
+2. Cập nhật code + tài liệu liên quan trong `docs`.
+3. Chạy test/lint/build tương ứng từng app trước khi tạo PR.
+
+## 13. License
+
+Chưa khai báo. Nếu cần public dự án, thêm file `LICENSE` tại thư mục gốc.
