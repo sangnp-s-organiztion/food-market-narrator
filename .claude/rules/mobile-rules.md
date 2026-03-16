@@ -21,17 +21,16 @@ Các trách nhiệm chính:
 
 Ứng dụng theo dõi vị trí người dùng khi chế độ narration được bật.
 
-Yêu cầu:
+Cấu hình hiện tại:
 
-- Location update phải được **debounced** để tránh xử lý quá nhiều lần.
-- Chỉ xử lý khi:
-  - người dùng di chuyển vượt quá khoảng cách tối thiểu, hoặc
-  - sau một khoảng thời gian nhất định.
+- PollInterval: 2 giây
+- MinPublishDistanceMeters: 6 mét
+- GeolocationRequest: Best accuracy, timeout 10 giây
+- Chỉ publish event khi di chuyển >= 6m
 
-Ví dụ cấu hình:
-
-- location_update_interval: 2–5 seconds
-- location_min_distance: 5–10 meters
+Trên Android:
+- Xin quyền theo tầng: WhenInUse -> Always (Android 10+) -> PostNotifications (Android 13+)
+- Có foreground service TrackingForegroundService để theo dõi nền
 
 ---
 
@@ -48,30 +47,37 @@ Restaurant gần nhất sẽ được xác định để kiểm tra điều ki�
 
 ### Geofence Trigger
 
-Mỗi restaurant được coi là một **Point of Interest (POI)** với một bán kính kích hoạt.
+Mỗi restaurant được coi là một **Point of Interest (POI)** với bán kính enter/exit.
 
-Narration được kích hoạt khi:
+Cấu hình hiện tại (trong AppSettings):
 
-distance(user_location, restaurant_location) <= trigger_radius
+- PoiEnterRadiusMeters: 30m (kích hoạt khi vào vùng)
+- PoiExitRadiusMeters: 40m (thoát vùng - hysteresis chống rung biên)
+- TriggerDistanceMeters: 30m (ngưỡng phát audio)
 
-Ví dụ:
-
-- trigger_radius = 25 meters
-
-Khi người dùng đi vào vùng này, hệ thống sẽ kiểm tra điều kiện phát narration.
+State machine trong POIService.UpdateNearestPOI():
+- Enter: chưa trong POI nào -> vào vùng 30m
+- Switch: đang trong POI này -> chuyển sang POI khác trong vùng 30m
+- Exit: ra khỏi vùng 40m của POI hiện tại
 
 ---
 
 ### Narration Trigger Rules
 
-Narration chỉ được **auto-play một lần cho mỗi restaurant trong cùng một session**.
+Có hai cơ chế chống lặp:
+
+1. **Theo phiên narration**: HashSet \_playedPOIs lưu các restaurant đã phát trong phiên. Reset khi StopNarration().
+
+2. **Theo thời gian**: Cooldown 60 giây giữa các lần phát cho cùng một POI.
 
 Session narration được định nghĩa là khoảng thời gian từ khi người dùng bật narration cho đến khi tắt narration.
 
 Luật hoạt động:
 
-- Khi user **enter geofence** → narration có thể được phát.
-- Nếu restaurant đã được phát trước đó trong session → không auto-play lại.
+- Khi user **enter geofence** (vào vùng 30m) → narration có thể được phát.
+- Nếu restaurant đã được phát trong phiên → không auto-play lại (trừ khi hết cooldown).
+- Nếu chưa hết 60 giây kể từ lần phát cuối → không phát.
+- **Force/manual trigger** cho phép phát ngay và bỏ qua mọi kiểm tra khoảng cách/cooldown.
 - Người dùng vẫn có thể **phát lại audio thủ công** từ màn hình chi tiết POI.
 
 ---
@@ -110,16 +116,21 @@ Lưu ý:
 
 ### Offline Support
 
-Mobile app nên cache các dữ liệu sau:
+Mobile app cache các dữ liệu sau:
 
-- danh sách POI
-- hình ảnh restaurant
-- audio narration đã phát
+- **POI**: Lưu vào file offline_cache/pois.json trong FileSystem.AppDataDirectory.
+- **Audio**: Lưu vào thư mục audio_cache với tên file là hash SHA256 (language|path).
+
+Chính sách cache audio:
+- Giới hạn tổng: 200MB
+- Dung lượng trống tối thiểu: 50MB
+- Cơ chế dọn LRU khi gần đầy
+- Cache ưu tiên: local -> package -> network
 
 Khi mất kết nối mạng:
-
-- app đọc dữ liệu từ cache
-- narration vẫn hoạt động nếu audio đã được cache trước đó.
+- App đọc POI từ cache offline
+- Narration vẫn hoạt động nếu audio đã được cache trước đó
+- Nếu chưa cache và không có mạng -> không phát audio
 
 ---
 
