@@ -1,0 +1,35 @@
+CHỨC NĂNG ADMIN
+
+1.  Quản lý dữ liệu POI
+
+Admin là người quản trị hệ thống và có quyền quản lý toàn bộ các điểm
+POI.
+
+Các chức năng chính: - Xem danh sách tất cả POI - Duyệt POI do seller
+tạo - Chỉnh sửa thông tin POI - Xóa POI nếu nội dung không phù hợp
+
+Admin có thể quản lý các dữ liệu sau: - Tên địa điểm - Mô tả văn bản -
+Ảnh minh họa - File audio hoặc script TTS - Link bản đồ
+
+Mục đích: - Đảm bảo thông tin chính xác - Kiểm soát chất lượng nội dung
+trong hệ thống
+
+2.  Phân tích dữ liệu người dùng (Analytics)
+
+Hệ thống cung cấp các công cụ phân tích dữ liệu để giúp admin hiểu hành
+vi người dùng.
+
+Các loại dữ liệu phân tích:
+
+1.  Lưu tuyến di chuyển (ẩn danh) Hệ thống lưu lại lộ trình di chuyển
+    của người dùng trong khu phố ẩm thực dưới dạng dữ liệu ẩn danh để
+    phân tích hành vi di chuyển.
+
+2.  Top địa điểm được nghe nhiều nhất Thống kê các POI có số lượt nghe
+    thuyết minh nhiều nhất.
+
+3.  Thời gian trung bình nghe 1 POI Tính toán thời gian trung bình người
+    dùng nghe nội dung thuyết minh tại mỗi POI.
+
+4.  Heatmap vị trí người dùng Hiển thị bản đồ nhiệt dựa trên vị trí
+    người dùng để xác định những khu vực tập trung đông khách.
