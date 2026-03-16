@@ -195,7 +195,7 @@
 
                         <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
-                                <Label Text="&#xf132;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Label Text="&#xf3ed;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                             <Label Grid.Column="1" Text="Chính sách bảo mật" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
