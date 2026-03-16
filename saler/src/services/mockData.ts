@@ -169,18 +169,44 @@ export const mockAudios: Audio[] = [
   },
 ];
 
-export function getUserRestaurants(userId: number): Restaurant[] {
-  return mockRestaurants.filter((r) => r.user_id === userId);
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) ?? "";
+
+async function fetchJson<T>(path: string): Promise<T> {
+  const url = API_BASE ? `${API_BASE}${path}` : path;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+  return await res.json();
 }
 
-export function getRestaurantDishes(restaurantId: string): Dish[] {
-  return mockDishes.filter((d) => d.restaurant_id === restaurantId);
+export async function getUserRestaurants(userId: number): Promise<Restaurant[]> {
+  try {
+    const all = await fetchJson<Restaurant[]>("/Restaurant");
+    return all.filter((r) => r.user_id === userId);
+  } catch (err) {
+    return mockRestaurants.filter((r) => r.user_id === userId);
+  }
 }
 
-export function getRestaurantImages(restaurantId: string): RestaurantImage[] {
-  return mockImages.filter((i) => i.restaurant_id === restaurantId);
+export async function getRestaurantDishes(restaurantId: string): Promise<Dish[]> {
+  try {
+    return await fetchJson<Dish[]>(`/public/Restaurant/${restaurantId}/dishes`);
+  } catch (err) {
+    return mockDishes.filter((d) => d.restaurant_id === restaurantId);
+  }
 }
 
-export function getRestaurantAudios(restaurantId: string): Audio[] {
-  return mockAudios.filter((a) => a.restaurant_id === restaurantId);
+export async function getRestaurantImages(restaurantId: string): Promise<RestaurantImage[]> {
+  try {
+    return await fetchJson<RestaurantImage[]>(`/public/Restaurant/${restaurantId}/images`);
+  } catch (err) {
+    return mockImages.filter((i) => i.restaurant_id === restaurantId);
+  }
+}
+
+export async function getRestaurantAudios(restaurantId: string): Promise<Audio[]> {
+  try {
+    return await fetchJson<Audio[]>(`/public/Restaurant/${restaurantId}/audios`);
+  } catch (err) {
+    return mockAudios.filter((a) => a.restaurant_id === restaurantId);
+  }
 }
