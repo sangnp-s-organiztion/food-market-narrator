@@ -157,12 +157,14 @@ public partial class SettingsPage : ContentPage
         var mainStack = new VerticalStackLayout { VerticalOptions = LayoutOptions.End };
         mainStack.Add(popupContent);
 
-        _languagePopupOverlay.Add(mainStack, 0, 0);
+        _languagePopupOverlay.Add(mainStack, 0, 1);
 
         // Thêm vào page
-        if (Content is Layout mainLayout)
+        if (Content is Grid mainGrid)
         {
-            mainLayout.Children.Add(_languagePopupOverlay);
+            Grid.SetRowSpan(_languagePopupOverlay, 3);   // phủ toàn bộ 3 row
+            mainGrid.Children.Add(_languagePopupOverlay);
+
             await BuildLanguageOptionsAsync();
             await _languagePopupOverlay.FadeTo(1, 180);
         }
@@ -173,9 +175,9 @@ public partial class SettingsPage : ContentPage
         if (_languagePopupOverlay != null)
         {
             await _languagePopupOverlay.FadeTo(0, 140);
-            if (Content is Layout mainLayout)
+            if (Content is Grid mainGrid)
             {
-                mainLayout.Children.Remove(_languagePopupOverlay);
+                mainGrid.Children.Remove(_languagePopupOverlay);
             }
             _languagePopupOverlay = null;
         }
