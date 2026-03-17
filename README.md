@@ -6,8 +6,8 @@ Nền tảng thuyết minh tự động cho phố ẩm thực Vĩnh Khánh, giú
 
 Workspace này gồm nhiều ứng dụng chạy cùng một hệ sinh thái:
 
-- `food_market_narrator_api`: Backend ASP.NET Core Web API + EF Core + SQL Server.
-- `food-market-narrator-maui`: Ứng dụng mobile cho visitor (MAUI).
+- `FoodMarketNarrator.Api`: Backend ASP.NET Core Web API + EF Core + SQL Server.
+- `FoodMarketNarrator.Maui`: Ứng dụng mobile cho visitor (MAUI).
 - `saler`: Web app cho seller/chủ quán (React + Vite + TypeScript).
 - `admin`: Cổng quản trị nội bộ (ASP.NET Core MVC, có thể chuyển dần sang React theo roadmap tài liệu).
 - `docs`: Tài liệu sản phẩm, kiến trúc, feature, PRD.
@@ -18,7 +18,7 @@ Workspace này gồm nhiều ứng dụng chạy cùng một hệ sinh thái:
 Mobile MAUI / Seller Web / Admin Portal
                 |
                 v
-     food_market_narrator_api (REST)
+     FoodMarketNarrator.Api (REST)
                 |
                 +--> SQL Server (dữ liệu nghiệp vụ)
                 +--> Static media (/images, /audios, /audios)
@@ -36,11 +36,15 @@ Mobile MAUI / Seller Web / Admin Portal
 ## 4. Cấu trúc thư mục
 
 ```text
-food-market-narrator/
-├─ food_market_narrator_api/
-├─ food-market-narrator-maui/
+FoodMarketNarrator/
+├─ FoodMarketNarrator.Api/
+├─ FoodMarketNarrator.Maui/
 ├─ saler/
 ├─ admin/
+├─ test/
+│   └─ maui-testing/
+│       ├─ FoodMarketNarrator.Api.IntegrationTests/
+│       └─ FoodMarketNarrator.Maui.UnitTests/
 ├─ docs/
 ├─ db.sql
 └─ README.md
@@ -60,10 +64,10 @@ food-market-narrator/
 ```bash
 # Clone source
 git clone <repo-url>
-cd food-market-narrator
+cd FoodMarketNarrator
 
 # Backend API
-cd food_market_narrator_api
+cd FoodMarketNarrator.Api
 dotnet restore
 dotnet run
 
@@ -78,7 +82,7 @@ dotnet restore
 dotnet run
 
 # MAUI app (terminal mới, optional)
-cd ../food-market-narrator-maui
+cd ../FoodMarketNarrator.Maui
 dotnet restore
 dotnet run -f net10.0-android
 ```
@@ -90,14 +94,14 @@ dotnet run -f net10.0-android
 | Backend API (HTTP)    | http://localhost:5044  |
 | Backend API (HTTPS)   | https://localhost:7041 |
 | Seller Web (Vite dev) | http://localhost:8080  |
-| Admin Portal (HTTP)   | http://localhost:5104  |
-| Admin Portal (HTTPS)  | https://localhost:7168 |
+| Admin Portal (HTTP)   | http://localhost:5104 |
+| Admin Portal (HTTPS) | https://localhost:7168 |
 
 ### Commands
 
 ```bash
 # API
-cd food_market_narrator_api
+cd FoodMarketNarrator.Api
 dotnet run                     # Run API
 dotnet build                   # Build API
 
@@ -114,7 +118,7 @@ dotnet run                     # Run admin portal
 dotnet build                   # Build admin portal
 
 # MAUI app
-cd food-market-narrator-maui
+cd FoodMarketNarrator.Maui
 dotnet build                   # Build MAUI app
 dotnet run -f net10.0-android  # Run on Android target
 ```
@@ -140,8 +144,8 @@ dotnet run -f net10.0-android  # Run on Android target
 
 Sửa tại:
 
-- `food_market_narrator_api/appsettings.json`
-- `food_market_narrator_api/appsettings.Development.json`
+- `FoodMarketNarrator.Api/appsettings.json`
+- `FoodMarketNarrator.Api/appsettings.Development.json`
 
 Ví dụ:
 
@@ -155,7 +159,7 @@ Ví dụ:
 
 ### 6.2 Base URL cho MAUI
 
-Sửa tại `food-market-narrator-maui/Settings/AppSettings.cs`.
+Sửa tại `FoodMarketNarrator.Maui/Settings/AppSettings.cs`.
 
 App đã gom cấu hình host về 1 chỗ:
 
@@ -181,7 +185,7 @@ Lưu ý khi chạy trên Android máy thật:
 ### 7.1 Chạy backend API
 
 ```bash
-cd food_market_narrator_api
+cd FoodMarketNarrator.Api
 dotnet restore
 dotnet run
 ```
@@ -210,7 +214,7 @@ dotnet run
 ### 7.4 Chạy MAUI app
 
 ```bash
-cd food-market-narrator-maui
+cd FoodMarketNarrator.Maui
 dotnet restore
 dotnet build
 ```

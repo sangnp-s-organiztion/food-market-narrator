@@ -188,8 +188,8 @@ public partial class SettingsPage : ContentPage
         if (_languageOptionsContainer == null || _languageService == null)
             return;
 
-        if (_isLanguageOptionsLoaded)
-            return;
+        // if (_isLanguageOptionsLoaded)
+        //     return;
 
         var languages = await _languageService.GetAllLanguagesAsync();
         if (languages.Count == 0)
