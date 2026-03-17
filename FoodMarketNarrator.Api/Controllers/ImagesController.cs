@@ -42,7 +42,7 @@ namespace food_market_narrator_api.Controllers
                 Path.Combine(
                     _environment.ContentRootPath,
                     "..",
-                    "food-market-narrator-maui",
+                    "FoodMarketNarrator.Maui",
                     "Resources",
                     "Images"));
             Directory.CreateDirectory(uploadDir);

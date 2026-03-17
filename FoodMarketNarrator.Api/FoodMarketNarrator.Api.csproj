@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>food_market_narrator_api</RootNamespace>
+    <AssemblyName>food_market_narrator_api</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -140,7 +140,7 @@ public class Program
             Path.Combine(
                 app.Environment.ContentRootPath,
                 "..",
-                "food-market-narrator-maui",
+                "FoodMarketNarrator.Maui",
                 "Resources",
                 "Images"));
         Directory.CreateDirectory(mauiImagesDir);
@@ -154,7 +154,7 @@ public class Program
             Path.Combine(
                 app.Environment.ContentRootPath,
                 "..",
-                "food-market-narrator-maui",
+                "FoodMarketNarrator.Maui",
                 "Resources",
                 "Narration",
                 "audio"));
