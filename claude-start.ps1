@@ -1,59 +1,84 @@
-# ===== 0. Set env + flag =====
+# ===== 0. ENV =====
 $env:CLAUDE_CODE_MAX_OUTPUT_TOKENS = "64000"
 
-# ===== 1. Load core files =====
+# ===== 1. CHỌN MODE =====
+Write-Host "Choose mode:" -ForegroundColor Cyan
+Write-Host "1. Backend (.NET WebAPI)"
+Write-Host "2. Frontend (.NET MAUI)"
+
+$choice = Read-Host "Enter your choice (1 or 2)"
+
+# ===== 2. LOAD CORE =====
 $coreContent = @()
 
-# file chính
-if (Test-Path ".\CLAUDE.md") {
-    $coreContent += Get-Content ".\CLAUDE.md" -Encoding UTF8
+if (Test-Path ".\CLAUDE.MD") {
+    $coreContent += Get-Content ".\CLAUDE.MD" -Encoding UTF8
 }
 
-# docs (recursive)
-if (Test-Path ".\docs") {
-    $coreContent += Get-ChildItem ".\docs" -Filter *.md -Recurse -ErrorAction SilentlyContinue |
-        ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
+if (Test-Path ".\docs\prd.md") {
+    $coreContent += Get-Content ".\docs\prd.md" -Encoding UTF8
 }
 
-# .claude (recursive)
-if (Test-Path ".\.claude") {
-    $coreContent += Get-ChildItem ".\.claude" -Filter *.md -Recurse -ErrorAction SilentlyContinue |
-        ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
-}
+# ===== 3. LOAD THEO MODE =====
+$modeContent = @()
 
-# ===== 2. Feature =====
-$featureContent = @()
+if ($choice -eq "1") {
+    Write-Host "Mode: Backend" -ForegroundColor Yellow
 
-if (Test-Path ".\docs\feature-requirment") {
-    $featureContent += Get-ChildItem ".\docs\feature-requirment" -Filter *.md -Recurse -ErrorAction SilentlyContinue |
-        ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
-}
-
-# ===== 3. Optional =====
-$optionalContent = @()
-$optionalFolders = @(".\docs\maui", ".\docs\saler")
-
-foreach ($folder in $optionalFolders) {
-    if (Test-Path $folder) {
-        $optionalContent += Get-ChildItem $folder -Filter *.md -ErrorAction SilentlyContinue |
+    # feature requirements
+    if (Test-Path ".\docs\feature-requirment") {
+        $modeContent += Get-ChildItem ".\docs\feature-requirment" -Recurse -Filter *.md |
             ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
     }
+
+    # saler (backend logic)
+    if (Test-Path ".\docs\saler") {
+        $modeContent += Get-ChildItem ".\docs\saler" -Filter *.md |
+            ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
+    }
+
+    $systemNote = "You are a senior .NET backend developer using ASP.NET Core WebAPI."
 }
 
-# ===== 4. Context =====
+elseif ($choice -eq "2") {
+    Write-Host "Mode: Frontend (MAUI)" -ForegroundColor Yellow
+
+    # maui docs
+    if (Test-Path ".\docs\maui") {
+        $modeContent += Get-ChildItem ".\docs\maui" -Filter *.md |
+            ForEach-Object { Get-Content $_.FullName -Encoding UTF8 }
+    }
+
+    # root maui docs
+    if (Test-Path ".\maui-theory.md") {
+        $modeContent += Get-Content ".\maui-theory.md" -Encoding UTF8
+    }
+
+    if (Test-Path ".\maui-ui-cheatsheet.md") {
+        $modeContent += Get-Content ".\maui-ui-cheatsheet.md" -Encoding UTF8
+    }
+
+    $systemNote = "You are a senior .NET MAUI developer using XAML and code-behind (.xaml.cs)."
+}
+
+else {
+    Write-Host "Invalid choose" -ForegroundColor Red
+    exit
+}
+
+# ===== 4. CONTEXT =====
 $context = @(
     $coreContent
-    $featureContent
-    $optionalContent
+    $modeContent
 ) -join "`n`n"
 
-# ===== 5. Prompt =====
-Write-Host "Enter ur prompt:" -ForegroundColor Cyan
+# ===== 5. NHẬP PROMPT =====
+Write-Host "Enter ur promt: " -ForegroundColor Cyan
 $prompt = Read-Host
 
-# ===== 6. Full input =====
+# ===== 6. FULL INPUT =====
 $fullInput = @"
-You are working on this project.
+$systemNote
 
 ==== PROJECT CONTEXT ====
 $context
@@ -62,5 +87,5 @@ $context
 $prompt
 "@
 
-# ===== 7. Run Claude =====
+# ===== 7. RUN =====
 $fullInput | claude --dangerously-skip-permissions
