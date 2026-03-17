@@ -1,7 +1,11 @@
+// Using global using to make AppDbContext available project-wide
+global using AppDbContext = food_market_narrator_api.Data.Context.AppDbContext;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
-using food_market_narrator_api.Models;  
+using food_market_narrator_api.Models;
+
+namespace food_market_narrator_api.Data.Context;
 
 public class AppDbContext : DbContext
 {
