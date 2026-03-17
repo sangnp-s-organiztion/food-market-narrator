@@ -1,6 +1,6 @@
 # Tổng quan tính năng hiện có - MAUI app
 
-Tài liệu này tổng hợp trạng thái tính năng thực tế của dự án food-market-narrator-maui theo code hiện tại.
+Tài liệu này tổng hợp trạng thái tính năng thực tế của dự án FoodMarketNarrator.Maui theo code hiện tại.
 
 ## 1) Màn hình và điều hướng
 

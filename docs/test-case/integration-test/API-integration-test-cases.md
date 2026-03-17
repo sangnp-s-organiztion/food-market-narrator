@@ -312,16 +312,17 @@ public async Task NewTestCase_ReturnsExpected()
 #### 7.1 Cấu Trúc Project
 
 ```
-food_market_narrator/
-├── food_market_narrator_api/     # Backend API
-│   ├── Controllers/              # API Controllers
-│   ├── Services/                 # Business Logic
-│   ├── Repositories/             # Data Access
-│   ├── Models/                   # Entity Models
-│   └── DTOs/                     # Data Transfer Objects
+FoodMarketNarrator/
+├── FoodMarketNarrator.Api/        # Backend API
+│   ├── Controllers/                # API Controllers
+│   ├── Services/                   # Business Logic
+│   ├── Repositories/               # Data Access
+│   ├── Models/                     # Entity Models
+│   └── DTOs/                      # Data Transfer Objects
+├── FoodMarketNarrator.Maui/        # Mobile App
 ├── test/
-│   └── Integration/              # Integration Tests
-│       ├── IntegrationTests.csproj
+│   └── maui-testing/
+│       └── FoodMarketNarrator.Api.IntegrationTests/
 │       └── ApiIntegrationTests.cs
 └── docs/
     └── test/

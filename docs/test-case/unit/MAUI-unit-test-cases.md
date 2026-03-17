@@ -45,7 +45,7 @@ MAUI Mobile App (Client)
 ```
 test/
 └── maui-testing/
-    ├── unit-test/
+    ├── FoodMarketNarrator.Maui.UnitTests/
     │   ├── unit-test.csproj                    # Project file
     │   ├── Models/
     │   │   └── POI_Model_Tests.cs              # Tests cho POI model
@@ -53,7 +53,7 @@ test/
     │       ├── HistoryService_Tests.cs          # Tests cho HistoryService
     │       ├── POIService_Tests.cs             # Tests cho POIService
     │       └── NarrationFlowService_Tests.cs   # Tests cho NarrationFlowService
-    └── Integration/                            # Integration tests cho API
+    └── FoodMarketNarrator.Api.IntegrationTests/ # Integration tests cho API
 ```
 
 #### 2.2 Dependencies
@@ -72,7 +72,7 @@ test/
 
 ```bash
 # Chạy tất cả tests
-cd test/maui-testing/unit-test
+cd test/maui-testing/FoodMarketNarrator.Maui.UnitTests
 dotnet test
 
 # Chạy tests cho từng module
@@ -310,7 +310,7 @@ dotnet test --filter "FullyQualifiedName~NarrationFlowService_Tests"
 - **Ngày tạo:** 2026-03-17
 - **Người tạo:** Claude Sonnet 4.6
 - **Framework:** .NET 10.0 + xUnit
-- **Source:** `test/maui-testing/unit-test/`
+- **Source:** `test/maui-testing/FoodMarketNarrator.Maui.UnitTests/`
 
 ---
 

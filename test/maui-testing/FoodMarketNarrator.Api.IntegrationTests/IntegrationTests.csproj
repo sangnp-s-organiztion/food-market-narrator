@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\food_market_narrator_api\food_market_narrator_api.csproj" />
+    <ProjectReference Include="..\..\..\FoodMarketNarrator.Api\FoodMarketNarrator.Api.csproj" />
   </ItemGroup>
 
 </Project>
