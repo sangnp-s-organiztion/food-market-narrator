@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet test:*)",
+      "Bash(mv Integration maui-testing/)",
+      "Bash(mv unit-test:*)"
     ]
   }
 }

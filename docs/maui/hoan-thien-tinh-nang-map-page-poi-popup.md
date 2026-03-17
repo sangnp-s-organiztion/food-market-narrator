@@ -4,9 +4,9 @@ Tài liệu này tổng hợp trạng thái hiện tại của tính năng chọ
 
 ## 1) Phạm vi liên quan
 
-- food-market-narrator-maui/Views/MapPage.xaml
-- food-market-narrator-maui/Views/MapPage.xaml.cs
-- food-market-narrator-maui/Helpers/MapHelper.cs
+- FoodMarketNarrator.Maui/Views/MapPage.xaml
+- FoodMarketNarrator.Maui/Views/MapPage.xaml.cs
+- FoodMarketNarrator.Maui/Helpers/MapHelper.cs
 
 ## 2) Thành phần UI đã có
 

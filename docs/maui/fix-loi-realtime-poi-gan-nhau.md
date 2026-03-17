@@ -21,7 +21,7 @@ Trong khu vực có mật độ POI dày, từng xuất hiện các triệu ch�
 
 ### 3.1 Tách ngưỡng highlight riêng cho map
 
-- File: food-market-narrator-maui/Settings/AppSettings.cs
+- File: FoodMarketNarrator.Maui/Settings/AppSettings.cs
 - Giá trị hiện tại:
   - MapHighlightDistanceMeters = 20
   - TriggerDistanceMeters = 30
@@ -30,7 +30,7 @@ Trong khu vực có mật độ POI dày, từng xuất hiện các triệu ch�
 
 ### 3.2 Tính nearest POI ổn định theo khoảng cách thực
 
-- File: food-market-narrator-maui/Services/POIService.cs
+- File: FoodMarketNarrator.Maui/Services/POIService.cs
 - Hàm GetNearestPOI(...) hiện sắp xếp POI theo GetDistanceMeters(...) rồi lấy phần tử đầu tiên.
 
 Ý nghĩa: mỗi lần có location mới đều recompute nearest từ dữ liệu hiện có, không phụ thuộc trạng thái UI cũ.
@@ -38,8 +38,8 @@ Trong khu vực có mật độ POI dày, từng xuất hiện các triệu ch�
 ### 3.3 Cập nhật highlight ở cả MainPage và MapPage
 
 - Files:
-  - food-market-narrator-maui/Views/MainPage.xaml.cs
-  - food-market-narrator-maui/Views/MapPage.xaml.cs
+  - FoodMarketNarrator.Maui/Views/MainPage.xaml.cs
+  - FoodMarketNarrator.Maui/Views/MapPage.xaml.cs
 - Luồng xử lý:
   - Tính nearest mỗi lần nhận LocationChanged.
   - Chỉ highlight nếu khoảng cách < MapHighlightDistanceMeters.
@@ -47,7 +47,7 @@ Trong khu vực có mật độ POI dày, từng xuất hiện các triệu ch�
 
 ### 3.4 Force refresh mạnh hơn trong MapHelper
 
-- File: food-market-narrator-maui/Helpers/MapHelper.cs
+- File: FoodMarketNarrator.Maui/Helpers/MapHelper.cs
 - Thay đổi trong HighlightPOIs(...):
   - Reorder feature được highlight xuống cuối danh sách để vẽ sau cùng.
   - Gọi poiLayer.DataHasChanged().
@@ -59,7 +59,7 @@ Trong khu vực có mật độ POI dày, từng xuất hiện các triệu ch�
 
 ### 3.5 Theo dõi vị trí bằng polling loop 2 giây
 
-- File: food-market-narrator-maui/Services/LocationService.cs
+- File: FoodMarketNarrator.Maui/Services/LocationService.cs
 - Cơ chế hiện tại:
   - PollInterval = 2 giây.
   - GeolocationRequest(Best, timeout 10 giây).
