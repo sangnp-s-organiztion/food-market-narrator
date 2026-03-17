@@ -3,7 +3,7 @@
 Tai lieu nay tong hop cac API can co de chay day du cac man trong module saler, doi chieu voi backend hien tai.
 Cap nhat moi nhat: da implement day du nhom API P0 va P1 ben duoi.
 
-## 1) API hien co (food_market_narrator_api)
+## 1) API hien co (FoodMarketNarrator.Api)
 
 - `POST /Auth/login`
 - `POST /Auth/logout`

@@ -1,17 +1,17 @@
 # Tổng quan tính năng hiện có - MAUI app
 
-Tài liệu này tổng hợp trạng thái tính năng thực tế của dự án food-market-narrator-maui theo code hiện tại.
+Tài liệu này tổng hợp trạng thái tính năng thực tế của dự án FoodMarketNarrator.Maui theo code hiện tại.
 
 ## 1) Màn hình và điều hướng
 
-- AppShell đang khai báo 2 ShellContent chính:
+- AppShell đang khai báo các ShellContent chính:
   - MainPage (Trang chủ)
   - MapPage (Bản đồ)
+  - FavoritePage (Yêu thích)
+  - HistoryPage (Lịch sử)
+  - SettingsPage (Cài đặt)
 - Đã đăng ký route POIDetailPage để mở chi tiết theo restaurantId.
-- Bottom navigation custom hiển thị 5 mục (Trang chủ, Bản đồ, Yêu thích, Lịch sử, Cài đặt), nhưng:
-  - Điều hướng thật hiện có: Trang chủ, Bản đồ.
-  - Yêu thích/Lịch sử chưa có handler thực thi.
-  - Cài đặt đang dùng action sheet để xóa audio cache.
+- Bottom navigation custom hiển thị 5 mục (Trang chủ, Bản đồ, Yêu thích, Lịch sử, Cài đặt), tất cả đều đã có handler thực thi.
 
 ## 2) Nguồn dữ liệu và POI
 
@@ -80,14 +80,13 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
   - Subscribe LocationChanged.
   - Theo dõi vị trí và gọi CheckAndNarrateAsync.
 - Cơ chế trigger hiện tại:
-  - Lấy nearest bằng GetNearestPOI.
-  - Nếu khoảng cách <= 30m thì enqueue phát audio.
-  - \_playedPOIs chặn phát lặp trong cùng phiên.
+  - Sử dụng UpdateNearestPOI từ POIService để phát hiện geofence transition (enter/switch POI).
+  - Enter radius: 30m (PoiEnterRadiusMeters).
+  - Exit radius: 40m (PoiExitRadiusMeters).
+  - Chỉ phát audio khi khoảng cách <= TriggerDistanceMeters (30m).
+  - \_playedPOIs chặn phát lặp trong cùng phiên narration.
+  - Có cooldown 60 giây giữa các lần phát cho cùng POI.
   - force=true (manual) cho phép phát ngay và bỏ qua kiểm tra khoảng cách.
-
-Lưu ý quan trọng:
-
-- POIService đã có UpdateNearestPOI theo geofence enter/exit, nhưng NarrationFlowService hiện chưa dùng hàm này cho auto trigger.
 
 ## 9) Audio
 
@@ -112,24 +111,54 @@ Lưu ý quan trọng:
 - Có nút back về MainPage.
 - Hai nút Đường đi và Gọi điện ngay hiện là UI, chưa thấy handler code-behind.
 
-## 11) Các phần đã có và chưa hoàn thiện
+## 11) FavoritePage (Yêu thích)
+
+- Lấy danh sách yêu thích từ FavoriteService (lưu vào Preferences).
+- Hiển thị danh sách POI yêu thích với ảnh, tên, địa chỉ, trạng thái.
+- Có nút xóa khỏi yêu thích (heart broken icon).
+- Tap vào item để mở POIDetailPage.
+- Hiển thị empty state khi không có yêu thích.
+
+## 12) HistoryPage (Lịch sử)
+
+- Lấy lịch sử xem từ HistoryService (lưu trong memory - reset khi đóng app).
+- Hiển thị danh sách POI đã xem theo thứ tự thời gian (mới nhất trước).
+- Tap vào item để mở POIDetailPage.
+- Hiển thị empty state khi không có lịch sử.
+
+## 13) FavoriteService
+
+- Interface: IFavoriteService
+- Lưu danh sách restaurantId yêu thích vào Preferences (JSON).
+- Các phương thức: GetFavorites, AddFavorite, RemoveFavorite, IsFavorite.
+- Dữ liệu không mất khi đóng app.
+
+## 14) HistoryService
+
+- Interface: IHistoryService
+- Lưu danh sách restaurantId đã xem vào memory (List<string>).
+- Giới hạn tối đa 50 items.
+- Các phương thức: GetHistory, AddToHistory, RemoveFromHistory, ClearHistory, IsInHistory.
+- Dữ liệu reset khi đóng app.
+
+## 15) Các phần đã có và chưa hoàn thiện
 
 Đã có logic chạy thực tế:
 
 - POI load từ API + cache offline.
 - Theo dõi vị trí foreground/background (Android).
 - Map OSM + marker + highlight + search trên MapPage.
-- Auto narration theo vị trí và manual trigger.
+- Auto narration theo geofence transition + manual trigger.
 - POI detail + audio player theo ngôn ngữ.
+- Favorite/History pages với đầy đủ chức năng (thêm/xóa/hiển thị).
 
 Chưa hoàn thiện hoặc mới ở mức khung:
 
-- Tab Yêu thích/Lịch sử chưa có hành vi điều hướng.
 - Filter chip danh mục trên MapPage chưa có logic lọc dữ liệu.
-- Nút Favorite/Share trên POIDetailPage chưa nối logic.
+- Nút Share trên POIDetailPage chưa nối logic.
 - Nút Đường đi/Gọi điện trên POIDetailPage chưa xử lý sự kiện.
 
-## 12) Cấu hình API hiện tại
+## 16) Cấu hình API hiện tại
 
 - AppSettings dùng host động trên Android:
   - Emulator: 10.0.2.2
