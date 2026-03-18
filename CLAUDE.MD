@@ -121,3 +121,27 @@ Layered Architecture:
 # Mobile Considerations
 - Optimize performance for mobile devices
 - Minimize API latency
+
+# Data Transfer Rules
+- Do NOT return Entity models directly
+- Use DTOs for all API responses
+- Use mapping (manual or AutoMapper)
+
+# API Rules
+- Use RESTful conventions
+- All responses must be JSON
+- Standard response format:
+
+{
+  "success": true,
+  "data": ...,
+  "message": ""
+}
+
+- Use proper HTTP status codes (200, 400, 401, 404, 500)
+
+# Authentication & Authorization
+- Use Cookie authentication
+- Protect endpoints based on roles (Admin, Seller)
+- Public endpoint is used for visitor.
+- Do not expose sensitive data
