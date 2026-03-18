@@ -14,7 +14,11 @@ The system includes:
 
 ---
 
-## Tech Stack
+# Tech Stack (.NET 10)
+- Mobile UI: .NET Maui
+- Backend: ASP.NET Core Web API (.NET 6+)
+- Database: SQL Server
+- ORM: Entity Framework Core
 
 ### Mobile
 
@@ -28,7 +32,7 @@ Responsibilities:
 - Play audio narration
 
 Location:
-mobile/
+FoodMarketNarrator.Maui
 
 ---
 
@@ -45,8 +49,7 @@ Responsibilities:
 - Order and restaurant management
 
 Location:
-backend/
-
+FoodMarketNarrator.Api
 ---
 
 ### Web Dashboard
@@ -66,7 +69,8 @@ Responsibilities:
 - Manage orders
 
 Location:
-saler/
+saler/ for saler UI
+admin/ for admin UI
 
 ---
 
@@ -83,3 +87,37 @@ SQL Server
 Web Dashboard
 ↓
 ASP.NET Web API
+
+## Architecture
+
+Layered Architecture:
+- Controller: def api for UI call
+- Service: write logic of feature, it is seperate with controller to help pj is cleaner
+- Repository: interact with Database
+- Model: def table in Database
+
+# Database Rules
+- Use existing schema (do not invent new tables unless asked)
+- Use parameterized queries (avoid SQL injection)
+- Keep queries efficient
+
+# Coding Rules
+- Keep code simple and readable (YAGNI)
+- Avoid duplication (DRY)
+- Use meaningful naming
+- Do not over-engineer
+
+# Important Notes
+- The goal is a smooth user experience for discovering food via audio narration
+- Prioritize clarity, performance, and maintainability
+
+# Behavior Rules
+- Do not start coding immediately
+- Always present a plan first
+- Only modify necessary parts of the code
+- Do not rewrite entire files unless required
+- Ask before making major architectural changes
+
+# Mobile Considerations
+- Optimize performance for mobile devices
+- Minimize API latency
