@@ -6,11 +6,11 @@ on:
       - main
       - develop
       - release
-      - 'backup-*'
+      - "backup-*"
     paths:
-      - 'FoodMarketNarrator.Maui/**'
-      - 'FoodMarketNarrator.Api/**'
-      - 'test/maui-testing/**'
+      - "FoodMarketNarrator.Maui/**"
+      - "FoodMarketNarrator.Api/**"
+      - "test/maui-testing/**"
 
 jobs:
   # ─────────────────────────────────────────────────────────────
@@ -27,7 +27,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
+
+      - name: Restore workloads
+        run: dotnet workload restore
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -60,7 +63,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
