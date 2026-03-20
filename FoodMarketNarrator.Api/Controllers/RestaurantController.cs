@@ -38,7 +38,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateRestaurantRequestDto request)
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateRestaurantRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -55,7 +55,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateRestaurantStatusRequestDto request)
+        public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateRestaurantStatusRequest request)
         {
             bool updated = await _restaurantService.UpdateRestaurantStatusAsync(id, request.IsActive);
             if (!updated)

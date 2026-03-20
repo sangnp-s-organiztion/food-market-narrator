@@ -30,7 +30,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPost("/Restaurant/{restaurantId}/dishes")]
-        public async Task<IActionResult> Create(string restaurantId, [FromBody] CreateDishRequestDto request)
+        public async Task<IActionResult> Create(string restaurantId, [FromBody] CreateDishRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -42,7 +42,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPut("/Dishes/{dishId:int}")]
-        public async Task<IActionResult> Update(int dishId, [FromBody] UpdateDishRequestDto request)
+        public async Task<IActionResult> Update(int dishId, [FromBody] UpdateDishRequest request)
         {
             if (!ModelState.IsValid)
             {

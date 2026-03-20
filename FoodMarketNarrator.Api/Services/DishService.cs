@@ -13,13 +13,13 @@ namespace food_market_narrator_api.Services
             _dishRepository = dishRepository;
         }
 
-        public async Task<List<DishResponseDto>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize)
+        public async Task<List<DishResponse>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize)
         {
             var dishes = await _dishRepository.GetByRestaurantIdAsync(restaurantId, page, pageSize);
             return dishes.Select(Map).ToList();
         }
 
-        public async Task<DishResponseDto?> CreateAsync(string restaurantId, CreateDishRequestDto request)
+        public async Task<DishResponse?> CreateAsync(string restaurantId, CreateDishRequest request)
         {
             var dish = new DishModel
             {
@@ -35,7 +35,7 @@ namespace food_market_narrator_api.Services
             return Map(created);
         }
 
-        public async Task<DishResponseDto?> UpdateAsync(int dishId, UpdateDishRequestDto request)
+        public async Task<DishResponse?> UpdateAsync(int dishId, UpdateDishRequest request)
         {
             var existing = await _dishRepository.GetByIdAsync(dishId);
             if (existing == null)
@@ -62,9 +62,9 @@ namespace food_market_narrator_api.Services
             return await _dishRepository.DeleteAsync(dishId);
         }
 
-        private static DishResponseDto Map(DishModel dish)
+        private static DishResponse Map(DishModel dish)
         {
-            return new DishResponseDto
+            return new DishResponse
             {
                 DishId = dish.DishId,
                 Name = dish.Name,

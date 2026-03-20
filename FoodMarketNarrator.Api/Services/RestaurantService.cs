@@ -11,14 +11,14 @@ namespace food_market_narrator_api.Services
         {
             _restaurantRepository = repository;
         }
-        public async Task<List<RestaurantResponseDto>> GetAllRestaurantsAsync()
+        public async Task<List<RestaurantResponse>> GetAllRestaurantsAsync()
         {
             var restaurants = await _restaurantRepository.GetAllAsync();
 
             return restaurants.Select(MapRestaurant).ToList();
         }
     
-        public async Task<RestaurantResponseDto> GetRestaurantByIdAsync(string id)
+        public async Task<RestaurantResponse> GetRestaurantByIdAsync(string id)
         {
             var restaurant = await _restaurantRepository.GetByIdAsync(id);
 
@@ -28,13 +28,13 @@ namespace food_market_narrator_api.Services
             return MapRestaurant(restaurant);
         }
 
-        public async Task<List<RestaurantResponseDto>> GetRestaurantsByUserIdAsync(int userId)
+        public async Task<List<RestaurantResponse>> GetRestaurantsByUserIdAsync(int userId)
         {
             var restaurants = await _restaurantRepository.GetByUserIdAsync(userId);
             return restaurants.Select(MapRestaurant).ToList();
         }
 
-        public async Task<RestaurantResponseDto?> UpdateRestaurantAsync(string restaurantId, UpdateRestaurantRequestDto request)
+        public async Task<RestaurantResponse?> UpdateRestaurantAsync(string restaurantId, UpdateRestaurantRequest request)
         {
             var existing = await _restaurantRepository.GetByIdAsync(restaurantId);
             if (existing == null)
@@ -66,10 +66,10 @@ namespace food_market_narrator_api.Services
             return await _restaurantRepository.UpdateStatusAsync(restaurantId, isActive);
         }
 
-        public async Task<List<RestaurantImageResponseDto>> GetImagesByRestaurantIdAsync(string restaurantId)
+        public async Task<List<RestaurantImageResponse>> GetImagesByRestaurantIdAsync(string restaurantId)
         {
             var images = await _restaurantRepository.GetImagesByRestaurantIdAsync(restaurantId);
-            return images.Select(i => new RestaurantImageResponseDto
+            return images.Select(i => new RestaurantImageResponse
             {
                 ImageId = i.ImageId,
                 ImageUrl = i.ImageUrl,
@@ -78,7 +78,7 @@ namespace food_market_narrator_api.Services
             }).ToList();
         }
 
-        public async Task<RestaurantImageResponseDto> AddImageAsync(string restaurantId, string imageUrl, bool isPrimary, int sortOrder)
+        public async Task<RestaurantImageResponse> AddImageAsync(string restaurantId, string imageUrl, bool isPrimary, int sortOrder)
         {
             var created = await _restaurantRepository.AddImageAsync(new RestaurantImageModel
             {
@@ -88,7 +88,7 @@ namespace food_market_narrator_api.Services
                 SortOrder = sortOrder
             });
 
-            return new RestaurantImageResponseDto
+            return new RestaurantImageResponse
             {
                 ImageId = created.ImageId,
                 ImageUrl = created.ImageUrl,
@@ -107,15 +107,15 @@ namespace food_market_narrator_api.Services
             return await _restaurantRepository.SetPrimaryImageAsync(imageId, isPrimary);
         }
 
-        public async Task<bool> ReorderImagesAsync(string restaurantId, List<ReorderImageItemDto> items)
+        public async Task<bool> ReorderImagesAsync(string restaurantId, List<ReorderImageItem> items)
         {
             var mappedItems = items.Select(i => (i.ImageId, i.SortOrder)).ToList();
             return await _restaurantRepository.ReorderImagesAsync(restaurantId, mappedItems);
         }
 
-        private static RestaurantResponseDto MapRestaurant(RestaurantModel r)
+        private static RestaurantResponse MapRestaurant(RestaurantModel r)
         {
-            return new RestaurantResponseDto
+            return new RestaurantResponse
             {
                 RestaurantId = r.RestaurantId,
                 Name = r.Name,
@@ -131,7 +131,7 @@ namespace food_market_narrator_api.Services
                 CreatedAt = r.CreatedAt,
                 Images = r.ImageURL
                     .OrderBy(i => i.SortOrder)
-                    .Select(i => new RestaurantImageResponseDto
+                    .Select(i => new RestaurantImageResponse
                     {
                         ImageId = i.ImageId,
                         ImageUrl = i.ImageUrl,
@@ -142,7 +142,7 @@ namespace food_market_narrator_api.Services
                 Audios = r.AudioURL
                     .OrderBy(a => a.LanguageId)
                     .ThenBy(a => a.Version)
-                    .Select(a => new AudioResponseDto
+                    .Select(a => new AudioResponse
                     {
                         AudioId = a.AudioId,
                         LanguageId = a.LanguageId,

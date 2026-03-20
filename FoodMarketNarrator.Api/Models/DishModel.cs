@@ -30,6 +30,9 @@ namespace food_market_narrator_api.Models
         [MaxLength(100)]
         public string RestaurantId { get; set; } = string.Empty;
 
+        [Column("is_active")]
+        public bool? IsActive { get; set; }
+
         [Column("image_id")]
         public int? ImageId { get; set; }
 

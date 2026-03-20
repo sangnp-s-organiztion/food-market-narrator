@@ -1,6 +1,6 @@
 namespace food_market_narrator_api.DTOs.Restaurant
 {
-    public class RestaurantResponseDto
+    public class RestaurantResponse
     {
         public string RestaurantId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -15,11 +15,11 @@ namespace food_market_narrator_api.DTOs.Restaurant
         public TimeSpan? CloseTime { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public List<RestaurantImageResponseDto> Images { get; set; } = new();
-        public List<AudioResponseDto> Audios { get; set; } = new();
+        public List<RestaurantImageResponse> Images { get; set; } = new();
+        public List<AudioResponse> Audios { get; set; } = new();
     }
 
-    public class RestaurantImageResponseDto
+    public class RestaurantImageResponse
     {
         public int ImageId { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
@@ -27,7 +27,7 @@ namespace food_market_narrator_api.DTOs.Restaurant
         public int SortOrder { get; set; }
     }
 
-    public class AudioResponseDto
+    public class AudioResponse
     {
         public int AudioId { get; set; }
         public int LanguageId { get; set; }
