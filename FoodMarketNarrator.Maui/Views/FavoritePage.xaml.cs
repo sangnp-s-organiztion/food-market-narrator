@@ -69,6 +69,7 @@ public partial class FavoritePage : ContentPage
 
         var grid = new Grid
         {
+            ColumnSpacing = 12,
             ColumnDefinitions = new ColumnDefinitionCollection
             {
                 new ColumnDefinition { Width = new GridLength(80) },
@@ -83,7 +84,8 @@ public partial class FavoritePage : ContentPage
             Source = poi.PrimaryImage,
             Aspect = Aspect.AspectFill,
             WidthRequest = 80,
-            HeightRequest = 80
+            HeightRequest = 80,
+            Margin = new Thickness(0, 0, 8, 0)
         };
         image.Clip = new EllipseGeometry
         {
@@ -126,11 +128,12 @@ public partial class FavoritePage : ContentPage
         // Nút xóa yêu thích
         var deleteBtn = new Label
         {
-            Text = "\uf57f", // Heart broken icon
+            Text = "\uf2ed", // Heart broken icon
             FontFamily = "FASolid",
             FontSize = 24,
             TextColor = Color.FromArgb("#E57373"),
-            VerticalOptions = LayoutOptions.Center
+            VerticalOptions = LayoutOptions.Center,
+            Margin = new Thickness(8, 0, 0, 0)
         };
         var deleteTap = new TapGestureRecognizer();
         deleteTap.Tapped += async (s, e) =>
