@@ -18,7 +18,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   test-maui:
     name: Test MAUI
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
