@@ -44,7 +44,7 @@ jobs:
         run: dotnet restore FoodMarketNarrator.Maui/food-market-narrator.sln
 
       - name: Build MAUI solution
-        run: dotnet build FoodMarketNarrator.Maui/food-market-narrator.sln --configuration Release --no-restore
+        run: dotnet build FoodMarketNarrator.Maui/food-market-narrator.sln --configuration Release --no-restore -f net10.0-android
 
       - name: Run MAUI unit tests
         run: dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj --configuration Release --verbosity normal
