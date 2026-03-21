@@ -8,6 +8,7 @@ namespace food_market_narrator_api.DTOs.Dish
         public string? Description { get; set; }
         public string RestaurantId { get; set; } = string.Empty;
         public int? ImageId { get; set; }
+        public string? ImageFileName { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }

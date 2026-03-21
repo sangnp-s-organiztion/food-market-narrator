@@ -64,6 +64,13 @@ namespace food_market_narrator_api.Services
 
         private static DishResponse Map(DishModel dish)
         {
+            // Extract filename từ ImageUrl (ví dụ: /maui-images/dish_1.jpg -> dish_1.jpg)
+            string? imageFileName = null;
+            if (!string.IsNullOrWhiteSpace(dish.Image?.ImageUrl))
+            {
+                imageFileName = Path.GetFileName(dish.Image.ImageUrl);
+            }
+
             return new DishResponse
             {
                 DishId = dish.DishId,
@@ -72,6 +79,7 @@ namespace food_market_narrator_api.Services
                 Description = dish.Description,
                 RestaurantId = dish.RestaurantId,
                 ImageId = dish.ImageId,
+                ImageFileName = imageFileName,
                 CreatedAt = dish.CreatedAt
             };
         }

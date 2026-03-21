@@ -252,7 +252,7 @@ public class POIService : IPOIService
             return new List<DishModel>();
         }
 
-        var baseUrl = _httpClient.BaseAddress?.ToString();
+        var baseUrl = AppSettings.ApiBaseUrl;
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
             return new List<DishModel>();
@@ -261,12 +261,22 @@ public class POIService : IPOIService
         try
         {
             var url = $"{baseUrl.TrimEnd('/')}/Restaurant/{restaurantId}/dishes";
+            System.Diagnostics.Debug.WriteLine($"[POIService] Requesting dishes from: {url}");
             var dishes = await _httpClient.GetFromJsonAsync<List<DishModel>>(url);
+
+            if (dishes != null)
+            {
+                foreach (var dish in dishes)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[POIService] Dish: {dish.Name}, ImageFileName: {dish.ImageFileName}");
+                }
+            }
+
             return dishes ?? new List<DishModel>();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Console.WriteLine($"[POIService] GetDishes failed: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[POIService] GetDishes failed: {ex.Message}");
             return new List<DishModel>();
         }
     }

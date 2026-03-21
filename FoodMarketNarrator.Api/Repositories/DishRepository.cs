@@ -16,6 +16,7 @@ namespace food_market_narrator_api.Repositories
         {
             return await _context.Dish
                 .Where(d => d.RestaurantId == restaurantId)
+                .Include(d => d.Image)
                 .OrderByDescending(d => d.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

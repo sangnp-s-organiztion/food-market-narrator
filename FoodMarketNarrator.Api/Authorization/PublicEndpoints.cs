@@ -11,8 +11,8 @@ public static class PublicEndpoints
         new("GET", "/Restaurant"),
         new("GET", "/Restaurant/{id}"),
         new("GET", "/audio"),
-        new("GET", "/public/Restaurant/{restaurantId}/dishes"),
-        new("GET", "/public/Restaurant/{restaurantId}/images"),
-        new("GET", "/public/Restaurant/{restaurantId}/audios")
+        new("GET", "/Restaurant/{restaurantId}/dishes"),
+        new("GET", "/Restaurant/{restaurantId}/images"),
+        new("GET", "/Restaurant/{restaurantId}/audios")
     ];
 }

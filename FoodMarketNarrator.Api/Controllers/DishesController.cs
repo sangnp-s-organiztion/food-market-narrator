@@ -17,6 +17,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpGet("/Restaurant/{restaurantId}/dishes")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByRestaurantId(
             string restaurantId,
             [FromQuery] int page = 1,
