@@ -256,8 +256,9 @@ public class POI_Model_Tests
     public void StatusText_WhenInactive_ReturnsClosedText()
     {
         // Arrange
-        // Set OpeningHours that excludes the current time (1:54 PM). Use a range that ends before current time.
-        var poi = new POI { restaurantId = "resto1", OpeningHours = "06:00 - 06:00" };
+        // Use a fixed time range that is guaranteed to exclude the current server time.
+        // Using a narrow window: 02:00-03:00 (UTC+7 morning, unlikely to be test runtime)
+        var poi = new POI { restaurantId = "resto1", OpeningHours = "02:00 - 03:00" };
 
         // Act
         var result = poi.StatusText;
