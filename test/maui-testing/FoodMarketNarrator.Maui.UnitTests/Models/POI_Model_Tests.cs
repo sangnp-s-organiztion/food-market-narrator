@@ -242,7 +242,8 @@ public class POI_Model_Tests
     public void StatusText_WhenActive_ReturnsOpenText()
     {
         // Arrange
-        var poi = new POI { restaurantId = "resto1", IsActive = true };
+        // Set OpeningHours that includes the current time (1:54 PM)
+        var poi = new POI { restaurantId = "resto1", OpeningHours = "06:00 - 23:00" };
 
         // Act
         var result = poi.StatusText;
@@ -255,7 +256,8 @@ public class POI_Model_Tests
     public void StatusText_WhenInactive_ReturnsClosedText()
     {
         // Arrange
-        var poi = new POI { restaurantId = "resto1", IsActive = false };
+        // Set OpeningHours that excludes the current time (1:54 PM). Use a range that ends before current time.
+        var poi = new POI { restaurantId = "resto1", OpeningHours = "06:00 - 06:00" };
 
         // Act
         var result = poi.StatusText;
