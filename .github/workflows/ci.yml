@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-nuget-maui-
 
       - name: Restore MAUI solution (all platforms)
-        run: dotnet restore FoodMarketNarrator.Maui/food-market-narrator.sln -p:RuntimeIdentifier=win-x64 -p:RuntimeIdentifiers=win-x64,maccatalyst-x64,iossimulator-x64
+        run: dotnet restore FoodMarketNarrator.Maui/food-market-narrator.sln
 
       - name: Build MAUI solution
         run: dotnet build FoodMarketNarrator.Maui/food-market-narrator.sln --configuration Release --no-restore
