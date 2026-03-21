@@ -1,0 +1,88 @@
+name: CI
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - develop
+      - release
+      - "backup-*"
+    paths:
+      - "FoodMarketNarrator.Maui/**"
+      - "FoodMarketNarrator.Api/**"
+      - "test/maui-testing/**"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # 1. Test MAUI – unit tests
+  # ─────────────────────────────────────────────────────────────
+  test-maui:
+    name: Test MAUI
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore workloads
+        run: dotnet workload restore --project FoodMarketNarrator.Maui/food-market-narrator.csproj
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-maui-${{ hashFiles('**/FoodMarketNarrator.Maui/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-maui-
+
+      - name: Restore MAUI solution (all platforms)
+        run: dotnet restore FoodMarketNarrator.Maui/food-market-narrator.sln
+
+      - name: Build MAUI solution
+        run: dotnet build FoodMarketNarrator.Maui/food-market-narrator.sln --configuration Release --no-restore -f net10.0-android
+
+      - name: Run MAUI unit tests
+        run: dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj --configuration Release --verbosity normal
+
+  # ─────────────────────────────────────────────────────────────
+  # 2. Test API – integration tests
+  # ─────────────────────────────────────────────────────────────
+  test-api:
+    name: Test API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-api-${{ hashFiles('**/FoodMarketNarrator.Api/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-api-
+
+      - name: Restore API project
+        run: dotnet restore FoodMarketNarrator.Api/FoodMarketNarrator.Api.csproj
+
+      - name: Build API project
+        run: dotnet build FoodMarketNarrator.Api/FoodMarketNarrator.Api.csproj --configuration Release --no-restore
+
+      - name: Run API integration tests
+        run: dotnet test test/maui-testing/FoodMarketNarrator.Api.IntegrationTests/IntegrationTests.csproj --configuration Release --verbosity normal
+

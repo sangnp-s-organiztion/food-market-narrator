@@ -2,18 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace food_market_narrator_api.DTOs.Dish
 {
-    public class DishResponseDto
-    {
-        public int DishId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public decimal? Price { get; set; }
-        public string? Description { get; set; }
-        public string RestaurantId { get; set; } = string.Empty;
-        public int? ImageId { get; set; }
-        public DateTime? CreatedAt { get; set; }
-    }
-
-    public class CreateDishRequestDto
+    public class CreateDishRequest
     {
         [Required]
         [MaxLength(255)]
@@ -27,7 +16,7 @@ namespace food_market_narrator_api.DTOs.Dish
         public int? ImageId { get; set; }
     }
 
-    public class UpdateDishRequestDto
+    public class UpdateDishRequest
     {
         [Required]
         [MaxLength(255)]

@@ -74,7 +74,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPatch("/Images/{imageId:int}/primary")]
-        public async Task<IActionResult> SetPrimary(int imageId, [FromBody] SetPrimaryImageRequestDto request)
+        public async Task<IActionResult> SetPrimary(int imageId, [FromBody] SetPrimaryImageRequest request)
         {
             bool updated = await _restaurantService.SetPrimaryImageAsync(imageId, request.IsPrimary);
             if (!updated)
@@ -86,7 +86,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPatch("/Restaurant/{restaurantId}/images/reorder")]
-        public async Task<IActionResult> Reorder(string restaurantId, [FromBody] ReorderImagesRequestDto request)
+        public async Task<IActionResult> Reorder(string restaurantId, [FromBody] ReorderImagesRequest request)
         {
             bool updated = await _restaurantService.ReorderImagesAsync(restaurantId, request.Items);
             if (!updated)

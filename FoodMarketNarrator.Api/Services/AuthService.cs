@@ -24,7 +24,7 @@ namespace food_market_narrator_api.Services
             return await _userRepository.GetByUsernameAsync(username);
         }
 
-        public async Task<LoginResponseDto?> LoginAsync(string username, string password)
+        public async Task<LoginResponse?> LoginAsync(string username, string password)
         {
             UserModel? user = await ValidateCredentialsAsync(username, password);
             if (user == null)
@@ -32,7 +32,7 @@ namespace food_market_narrator_api.Services
                 return null;
             }
 
-            return new LoginResponseDto
+            return new LoginResponse
             {
                 UserId = user.UserId,
                 Username = user.Username,
@@ -41,7 +41,7 @@ namespace food_market_narrator_api.Services
             };
         }
 
-        public async Task<MeResponseDto?> GetMeAsync(string username)
+        public async Task<MeResponse?> GetMeAsync(string username)
         {
             UserModel? user = await _userRepository.GetByUsernameAsync(username);
             if (user == null || !user.IsActive)
@@ -49,7 +49,7 @@ namespace food_market_narrator_api.Services
                 return null;
             }
 
-            return new MeResponseDto
+            return new MeResponse
             {
                 UserId = user.UserId,
                 Username = user.Username,

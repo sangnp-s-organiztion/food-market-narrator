@@ -69,7 +69,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPatch("/Audios/{audioId:int}/active")]
-        public async Task<IActionResult> UpdateActive(int audioId, [FromBody] UpdateAudioActiveRequestDto request)
+        public async Task<IActionResult> UpdateActive(int audioId, [FromBody] UpdateAudioActiveRequest request)
         {
             bool updated = await _audioService.UpdateActiveAsync(audioId, request.IsActive);
             if (!updated)
