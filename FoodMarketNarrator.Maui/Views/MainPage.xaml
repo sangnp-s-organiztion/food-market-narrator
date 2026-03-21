@@ -195,16 +195,8 @@
                                         </Label> -->
 
                                         <!-- Trạng thái -->
-                                        <Label FontSize="12">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="Trạng thái: "
-                                                        TextColor="#757575"/>
-                                                    <Span Text="{Binding StatusText}"
-                                                        TextColor="#4CAF50"/>
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
+                                        <Label FontSize="12" Text="Trạng thái: " TextColor="#757575" />
+                                        <Label FontSize="12" Text="{Binding StatusText}" TextColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}}" FontAttributes="Bold" />
 
                                         <!-- CreatedAt -->
                                         <!-- <Label Text="{Binding CreatedAt,

@@ -91,13 +91,13 @@
                         <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                 <Border StrokeThickness="0"
-                                        BackgroundColor="#C8E6C9"
+                                        BackgroundColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}, ConverterParameter=background}"
                                         StrokeShape="RoundRectangle 10"
                                         Padding="8,2">
                                     <Label Text="{Binding StatusText}"
                                          FontSize="10"
                                          FontAttributes="Bold"
-                                         TextColor="#2E7D32"
+                                         TextColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}}"
                                          HorizontalTextAlignment="Center"
                                          VerticalTextAlignment="Center" />
                                 </Border>
@@ -226,9 +226,9 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Header phần món ăn đặc sắc -->
+                <!-- Header phần thực đơn -->
                 <Grid Padding="10,0,10,0" ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                    <Label Text="Hình ảnh nổi bật"
+                    <Label Text="Thực đơn"
                            FontSize="32"
                            FontFamily="OpenSansSemibold"
                            TextColor="#1F2937" />
@@ -242,30 +242,46 @@
 
                 <!-- Danh sách món ăn dạng cuộn ngang -->
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout Spacing="12" Padding="10,0,10,0">
-                        <VerticalStackLayout WidthRequest="116" Spacing="6">
-                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D5E1D6">
-                                <Image Source="{Binding PrimaryDetailImage}" Aspect="AspectFill" />
-                            </Border>
-                                <!-- <Label Text="Ảnh chính" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                                <Label Text="Thứ tự: 1" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
-                        </VerticalStackLayout>
+                    <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Dishes}" Spacing="12" Padding="10,0,10,0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:DishModel">
+                                <VerticalStackLayout WidthRequest="150" Spacing="6">
+                                    <!-- Ảnh món ăn / placeholder -->
+                                    <Border StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 20"
+                                            HeightRequest="150"
+                                            WidthRequest="150"
+                                            BackgroundColor="#FFE0B2">
+                                        <Grid>
+                                            <!-- Placeholder icon (hiển thị khi không có ảnh) -->
+                                            <!-- <Label Text="🍜"
+                                                   FontSize="48"
+                                                   HorizontalOptions="Center"
+                                                   VerticalOptions="Center"
+                                                   IsVisible="{Binding ImageFileName, Converter={StaticResource NullOrEmptyToVisibilityConverter}, ConverterParameter=inverse, FallbackValue=True}" /> -->
+                                            <!-- Ảnh món ăn (bind ImageResourceName — đã strip extension) -->
+                                            <Image Source="{Binding ImageResourceName}"
+                                                   Aspect="AspectFill"
+                                                   IsVisible="{Binding ImageResourceName, Converter={StaticResource NullOrEmptyToVisibilityConverter}, ConverterParameter=inverse, FallbackValue=False}" />
+                                        </Grid>
+                                    </Border>
 
-                        <VerticalStackLayout WidthRequest="116" Spacing="6">
-                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
-                                <Image Source="{Binding SecondaryDetailImage}" Aspect="AspectFill" />
-                            </Border>
-                            <!-- <Label Text="Ảnh phụ" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="Thứ tự: 2" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
-                        </VerticalStackLayout>
+                                    <!-- Tên món ăn -->
+                                    <Label Text="{Binding Name}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="#2F3640"
+                                           MaxLines="2"
+                                           LineBreakMode="WordWrap" />
 
-                        <VerticalStackLayout WidthRequest="116" Spacing="6">
-                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28" HeightRequest="116" WidthRequest="116" BackgroundColor="#D8DBD2">
-                                <Image Source="{Binding ThirdDetailImage}" Aspect="AspectFill" />
-                            </Border>
-                            <!-- <Label Text="Ảnh bổ sung" FontSize="16" TextColor="#2F3640" MaxLines="2" />
-                            <Label Text="Cố định" FontSize="12" FontAttributes="Bold" TextColor="#E67E22" /> -->
-                        </VerticalStackLayout>
+                                    <!-- Giá món ăn -->
+                                    <Label Text="{Binding Price, StringFormat='{}{0:N0} đ'}"
+                                           FontSize="13"
+                                           TextColor="#E67E22"
+                                           FontAttributes="Bold" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
                     </HorizontalStackLayout>
                 </ScrollView>
 

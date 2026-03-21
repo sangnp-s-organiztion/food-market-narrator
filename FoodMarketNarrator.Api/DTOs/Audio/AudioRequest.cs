@@ -12,4 +12,9 @@ namespace food_market_narrator_api.DTOs.Audio
         public bool IsActive { get; set; }
         public DateTime DateGeneration { get; set; }
     }
+
+    public class UpdateAudioActiveRequest
+    {
+        public bool IsActive { get; set; }
+    }
 }
