@@ -156,7 +156,7 @@ public class NarrationFlowService_Tests
     #region CheckAndNarrateAsync - Basic Logic Tests
 
     [Fact]
-    public void CheckAndNarrateAsync_WhenAudioPlaying_DoesNotTrigger()
+    public async Task CheckAndNarrateAsync_WhenAudioPlaying_DoesNotTrigger()
     {
         // Arrange
         _mockAudioService.Setup(x => x.IsPlaying).Returns(true);
@@ -169,8 +169,7 @@ public class NarrationFlowService_Tests
             .ReturnsAsync(new List<POI>());
 
         // Act
-        var task = _narrationService.CheckAndNarrateAsync();
-        task.Wait(TimeSpan.FromSeconds(2));
+        await _narrationService.CheckAndNarrateAsync();
 
         // Assert - should return early without checking POIs
         _mockPoiService.Verify(x => x.UpdateNearestPOI(It.IsAny<double>(), It.IsAny<double>()), Times.Never);
