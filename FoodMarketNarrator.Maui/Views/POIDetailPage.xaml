@@ -91,13 +91,13 @@
                         <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                 <Border StrokeThickness="0"
-                                        BackgroundColor="#C8E6C9"
+                                        BackgroundColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}, ConverterParameter=background}"
                                         StrokeShape="RoundRectangle 10"
                                         Padding="8,2">
                                     <Label Text="{Binding StatusText}"
                                          FontSize="10"
                                          FontAttributes="Bold"
-                                         TextColor="#2E7D32"
+                                         TextColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}}"
                                          HorizontalTextAlignment="Center"
                                          VerticalTextAlignment="Center" />
                                 </Border>

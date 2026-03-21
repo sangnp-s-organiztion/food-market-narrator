@@ -13,6 +13,7 @@
 
             <!-- Converters -->
             <converters:NullOrEmptyToVisibilityConverter x:Key="NullOrEmptyToVisibilityConverter" />
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

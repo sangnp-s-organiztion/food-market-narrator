@@ -17,7 +17,62 @@ public class POI
     public bool IsActive { get; set; }
 
     [Ignore]
-    public string StatusText => IsActive ? "Đang mở cửa" : "Đóng cửa";
+    public bool IsCurrentlyOpen
+    {
+        get
+        {
+            // Nếu không có giờ mở cửa, coi như luôn mở
+            if (string.IsNullOrWhiteSpace(OpeningHours))
+                return true;
+
+            var parts = OpeningHours.Split('-');
+            if (parts.Length != 2)
+                return true;
+
+            var now = DateTime.Now.TimeOfDay;
+
+            // Parse giờ mở và giờ đóng
+            // Hỗ trợ format: "6:00 - 22:00" hoặc "06:00-22:00"
+            var openStr = parts[0].Trim();
+            var closeStr = parts[1].Trim();
+
+            // Parse giờ mở
+            var openParts = openStr.Split(':');
+            if (openParts.Length < 2) return true;
+            if (!TimeSpan.TryParse(openStr, out var openTime))
+            {
+                if (openParts.Length == 2 &&
+                    int.TryParse(openParts[0], out var h1) &&
+                    int.TryParse(openParts[1], out var m1))
+                    openTime = new TimeSpan(h1, m1, 0);
+                else
+                    return true;
+            }
+
+            // Parse giờ đóng
+            var closeParts = closeStr.Split(':');
+            if (closeParts.Length < 2) return true;
+            if (!TimeSpan.TryParse(closeStr, out var closeTime))
+            {
+                if (closeParts.Length == 2 &&
+                    int.TryParse(closeParts[0], out var h2) &&
+                    int.TryParse(closeParts[1], out var m2))
+                    closeTime = new TimeSpan(h2, m2, 0);
+                else
+                    return true;
+            }
+
+            // So sánh với giờ hiện tại
+            if (closeTime > openTime)
+                return now >= openTime && now <= closeTime;
+            else
+                // Trường hợp đóng sau nửa đêm (vd: 18:00 - 02:00)
+                return now >= openTime || now <= closeTime;
+        }
+    }
+
+    [Ignore]
+    public string StatusText => IsCurrentlyOpen ? "Đang mở cửa" : "Đóng cửa";
     
     public DateTime CreatedAt { get; set; }
     public string AudioFile { get; set; } = string.Empty;
