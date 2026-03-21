@@ -188,7 +188,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(responseBody, new JsonSerializerOptions
+        var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -262,7 +262,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var meResponse = JsonSerializer.Deserialize<MeResponseDto>(responseBody, new JsonSerializerOptions
+        var meResponse = JsonSerializer.Deserialize<MeResponse>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -361,7 +361,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var restaurants = JsonSerializer.Deserialize<List<RestaurantResponseDto>>(responseBody, new JsonSerializerOptions
+        var restaurants = JsonSerializer.Deserialize<List<RestaurantResponse>>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -380,7 +380,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var restaurant = JsonSerializer.Deserialize<RestaurantResponseDto>(responseBody, new JsonSerializerOptions
+        var restaurant = JsonSerializer.Deserialize<RestaurantResponse>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -470,7 +470,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var restaurants = JsonSerializer.Deserialize<List<RestaurantResponseDto>>(responseBody, new JsonSerializerOptions
+        var restaurants = JsonSerializer.Deserialize<List<RestaurantResponse>>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -520,7 +520,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var cookie = await LoginAndGetCookie("seller1", "seller123");
-        var updateRequest = new UpdateRestaurantRequestDto
+        var updateRequest = new UpdateRestaurantRequest
         {
             Name = "Quán Cập Nhật",
             Description = "Mô tả mới",
@@ -541,7 +541,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var restaurant = JsonSerializer.Deserialize<RestaurantResponseDto>(responseBody, new JsonSerializerOptions
+        var restaurant = JsonSerializer.Deserialize<RestaurantResponse>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -633,7 +633,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var cookie = await LoginAndGetCookie("seller1", "seller123");
-        var createRequest = new CreateDishRequestDto
+        var createRequest = new CreateDishRequest
         {
             Name = "Món Mới",
             Description = "Mô tả món ăn",
@@ -658,7 +658,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var cookie = await LoginAndGetCookie("seller1", "seller123");
 
         // First create a dish
-        var createRequest = new CreateDishRequestDto
+        var createRequest = new CreateDishRequest
         {
             Name = "Món Test",
             Description = "Test",
@@ -672,7 +672,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, createResponse.StatusCode);
 
         // Now update - use a non-existent dish ID
-        var updateRequest = new UpdateDishRequestDto
+        var updateRequest = new UpdateDishRequest
         {
             Name = "Món Đã Cập Nhật",
             Description = "Mô tả mới",
