@@ -47,8 +47,7 @@ namespace food_market_narrator_api.Controllers
                     "Images"));
             Directory.CreateDirectory(uploadDir);
 
-            string extension = Path.GetExtension(file.FileName);
-            string fileName = $"{Guid.NewGuid():N}{extension}";
+            string fileName = BuildImageFileName(file.FileName);
             string fullPath = Path.Combine(uploadDir, fileName);
 
             await using (var stream = System.IO.File.Create(fullPath))
@@ -59,6 +58,40 @@ namespace food_market_narrator_api.Controllers
             string imageUrl = $"/maui-images/{fileName}";
             var created = await _restaurantService.AddImageAsync(restaurantId, imageUrl, isPrimary, sortOrder);
             return Ok(created);
+        }
+
+        private static string BuildImageFileName(string originalFileName)
+        {
+            string extension = Path.GetExtension(originalFileName);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".jpg";
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            string baseName = Path.GetFileNameWithoutExtension(originalFileName).Trim();
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                baseName = "upload";
+            }
+
+            var sanitizedChars = baseName
+                .Select(ch => invalidChars.Contains(ch) || char.IsWhiteSpace(ch) ? '_' : ch)
+                .ToArray();
+
+            string sanitizedName = new string(sanitizedChars).Trim('_');
+            while (sanitizedName.Contains("__"))
+            {
+                sanitizedName = sanitizedName.Replace("__", "_");
+            }
+
+            if (string.IsNullOrWhiteSpace(sanitizedName))
+            {
+                sanitizedName = "upload";
+            }
+
+            string uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
+            return $"img_{sanitizedName}_{uniqueSuffix}{extension.ToLowerInvariant()}";
         }
 
         [HttpDelete("/Images/{imageId:int}")]
