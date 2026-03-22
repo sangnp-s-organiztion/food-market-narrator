@@ -1,0 +1,157 @@
+Build started 3/21/2026 9:30:09 PM.
+     1>Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" on node 1 (Restore target(s)).
+     1>_GetAllRestoreProjectPathItems:
+         Determining projects to restore...
+     1>Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (1) is building "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (1:6) on node 1 (_GenerateProjectRestoreGraph target(s)).
+     1>AddPrunePackageReferences:
+         Loading prune package data from PrunePackageData folder
+         Failed to load prune package data from PrunePackageData folder, loading from targeting packs instead
+         Looking for targeting packs in C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref
+         Pack directories found: C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.4
+         Found package overrides file C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.4\data\PackageOverrides.txt
+     1>Done Building Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (_GenerateProjectRestoreGraph target(s)).
+     1>Restore:
+         X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+         X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+         Assets file has not changed. Skipping assets file writing. Path: D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\obj\project.assets.json
+         Restored D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj (in 97 ms).
+         
+         NuGet Config files used:
+             C:\Users\phuoc\AppData\Roaming\NuGet\NuGet.Config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.FallbackLocation.config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.Offline.config
+         
+         Feeds used:
+             https://api.nuget.org/v3/index.json
+             C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+             C:\Program Files\dotnet\library-packs
+         All projects are up-to-date for restore.
+     1>Done Building Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (Restore target(s)).
+   1:7>Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" on node 1 (VSTest target(s)).
+     1>BuildProject:
+         Build started, please wait...
+   1:7>Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (1:7) is building "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (1:8) on node 1 (default targets).
+     1>GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       CoreGenerateAssemblyInfo:
+       Skipping target "CoreGenerateAssemblyInfo" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Release\net10.0\unit-test.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       _CopyOutOfDateSourceItemsToOutputDirectory:
+       Skipping target "_CopyOutOfDateSourceItemsToOutputDirectory" because all output files are up-to-date with respect to the input files.
+       GenerateBuildDependencyFile:
+       Skipping target "GenerateBuildDependencyFile" because all output files are up-to-date with respect to the input files.
+       GenerateBuildRuntimeConfigurationFiles:
+       Skipping target "GenerateBuildRuntimeConfigurationFiles" because all output files are up-to-date with respect to the input files.
+       CopyFilesToOutputDirectory:
+         unit-test -> D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\bin\Release\net10.0\unit-test.dll
+     1>Done Building Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (default targets).
+     1>BuildProject:
+         Build completed.
+         
+Test run for D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\bin\Release\net10.0\unit-test.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.4)
+[xUnit.net 00:00:00.15]   Discovering: unit-test
+[xUnit.net 00:00:00.23]   Discovered:  unit-test
+[xUnit.net 00:00:00.29]   Starting:    unit-test
+  Passed unit_test.Services.HistoryService_Tests.IsInHistory_ExistingItem_ReturnsTrue [6 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithMatchingLanguage_ReturnsCorrectAudio [13 ms]
+  Passed unit_test.Models.POI_Model_Tests.OpeningHoursDisplay_WithValue_ReturnsValue [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.GetNearestPOI_MultiplePOIs_ReturnsNearest [15 ms]
+  Passed unit_test.Services.POIService_Tests.GetNearestPOI_EmptyList_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_OutsideRadius_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_EmptyPOIs_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_FirstEnter_ReturnsPOI [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_EnterThenExit_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.GetNearestPOI_NullList_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.GetDistanceMeters_DifferentLocations_ReturnsDistance [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_EnterThenStay_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.GetNearestPOI_WithCoordinates_ReturnsNearest [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.UpdateNearestPOI_NullPOIs_ReturnsNull [< 1 ms]
+  Passed unit_test.Services.POIService_Tests.GetDistanceMeters_SameLocation_ReturnsZero [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_MultipleItems_AddsInOrder [6 ms]
+  Passed unit_test.Services.POIService_Tests.GetNearestPOI_SinglePOI_ReturnsThatPOI [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.GetHistory_ReturnsCopy_NotReference [4 ms]
+  Passed unit_test.Services.HistoryService_Tests.RemoveFromHistory_NonExistingItem_DoesNothing [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_WhitespaceString_DoesNothing [2 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_EmptyString_DoesNothing [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.ClearHistory_Empty_DoesNothing [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.IsInHistory_NonExistingItem_ReturnsFalse [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_ExistingItem_MovesToBeginning [< 1 ms]
+[xUnit.net 00:00:00.46]       Assert.Equal() Failure: Strings differ
+[xUnit.net 00:00:00.46]                   ↓ (pos 1)
+[xUnit.net 00:00:00.46]       Expected: "Đóng cửa"
+[xUnit.net 00:00:00.46]       Actual:   "Đang mở cửa"
+[xUnit.net 00:00:00.46]                   ↑ (pos 1)
+[xUnit.net 00:00:00.46]       Stack Trace:
+[xUnit.net 00:00:00.46]         D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\Models\POI_Model_Tests.cs(266,0): at unit_test.Models.POI_Model_Tests.StatusText_WhenInactive_ReturnsClosedText()
+[xUnit.net 00:00:00.46]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.46]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_NewItem_AddsToBeginning [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.IsInHistory_AfterRemove_ReturnsFalse [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.GetHistory_Empty_ReturnsEmptyList [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.ClearHistory_WithItems_ClearsAll [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.RemoveFromHistory_ExistingItem_RemovesItem [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_ExceedsMaxLimit_RemovesOldest [< 1 ms]
+  Passed unit_test.Services.HistoryService_Tests.AddToHistory_NullString_DoesNothing [< 1 ms]
+  Failed unit_test.Models.POI_Model_Tests.StatusText_WhenInactive_ReturnsClosedText [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+            ↓ (pos 1)
+Expected: "Đóng cửa"
+Actual:   "Đang mở cửa"
+            ↑ (pos 1)
+  Stack Trace:
+     at unit_test.Models.POI_Model_Tests.StatusText_WhenInactive_ReturnsClosedText() in D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\Models\POI_Model_Tests.cs:line 266
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithMultipleVersions_ReturnsHighestVersion [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.AudioLanguagesDisplay_WithActiveAudios_ReturnsLanguageNames [14 ms]
+  Passed unit_test.Models.POI_Model_Tests.AddressDisplay_WithValue_ReturnsValue [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.StatusText_WhenActive_ReturnsOpenText [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithEmptyAudioUrl_ReturnsEmptyString [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.AudioSummaryDisplay_WithNoActiveAudios_ReturnsDefaultText [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.PrimaryImage_WithPathPrefix_RemovesPrefix [2 ms]
+  Passed unit_test.Models.POI_Model_Tests.AudioSummaryDisplay_WithActiveAudios_ReturnsCount [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.AudioLanguagesDisplay_WithNoActiveAudios_ReturnsDefaultText [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithCaseInsensitiveLanguage_ReturnsCorrectAudio [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.AddressDisplay_WithoutValue_ReturnsDefault [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.PrimaryImage_WithPrimaryImage_ReturnsPrimaryImage [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.OpeningHoursDisplay_WithoutValue_ReturnsDefault [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.PrimaryImage_WithNoPrimaryImage_ReturnsFirstBySortOrder [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithNoActiveAudios_ReturnsNull [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithInactiveAudios_ReturnsNull [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.CoordinatesDisplay_ReturnsFormattedCoordinates [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.GetAudioUrl_WithNoMatchingLanguage_ReturnsFirstActiveAudio [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.PrimaryImage_WithNoImages_ReturnsDefaultImage [< 1 ms]
+  Passed unit_test.Models.POI_Model_Tests.AudioLanguagesDisplay_WithoutLanguageName_ReturnsLanguageCode [< 1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_OutsideTriggerDistance_DoesNotPlay [159 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_WithNoPOIs_DoesNotPlay [2 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_NoAudioAvailable_DoesNotPlay [2 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_WhenAudioPlaying_DoesNotTrigger [1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.StartNarration_FirstTime_SetsNarrationEnabled [7 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_UsesCurrentLanguageFromService [5 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.StopNarration_WhileEnabled_DisablesNarration [1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.StopNarration_WhileEnabled_StopsAudio [1 ms]
+[xUnit.net 00:00:00.54]   Finished:    unit-test
+  Passed unit_test.Services.NarrationFlowService_Tests.CheckAndNarrateAsync_WithNoLocation_DoesNotPlay [1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.StartNarration_AlreadyEnabled_DoesNotStartAgain [< 1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.ResetPlayedPOIs_ResetsInternalState [< 1 ms]
+  Passed unit_test.Services.NarrationFlowService_Tests.StopNarration_WhileDisabled_DoesNothing [< 1 ms]
+
+Total tests: 64
+     Passed: 63
+     Failed: 1
+ Total time: 1.3225 Seconds
+       _VSTestConsole:
+         MSB4181: The "VSTestTask" task returned false but did not log an error.
+     1>Done Building Project "D:\Program\food-market-narrator\test\maui-testing\FoodMarketNarrator.Maui.UnitTests\unit-test.csproj" (VSTest target(s)) -- FAILED.
+
+Build FAILED.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.65

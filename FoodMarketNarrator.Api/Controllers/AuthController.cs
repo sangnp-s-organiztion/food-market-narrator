@@ -21,7 +21,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
@@ -53,7 +53,7 @@ namespace food_market_narrator_api.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
-            return Ok(new LoginResponseDto
+            return Ok(new LoginResponse
             {
                 UserId = user.UserId,
                 Username = user.Username,
@@ -80,7 +80,7 @@ namespace food_market_narrator_api.Controllers
                 return Unauthorized(new { message = "Unauthorized." });
             }
 
-            MeResponseDto? me = await _authService.GetMeAsync(username);
+            MeResponse? me = await _authService.GetMeAsync(username);
             if (me == null)
             {
                 return Unauthorized(new { message = "Unauthorized." });

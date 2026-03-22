@@ -1,6 +1,7 @@
 ﻿using food_market_narrator.Services;
 using food_market_narrator.Settings;
 using food_market_narrator.Views;
+using food_market_narrator.Converters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices;
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -54,6 +55,7 @@ public static class MauiProgram
         builder.Services.AddTransient<HistoryPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddSingleton<ILocationService, LocationService>(); // Updated class name to singular
+        builder.Services.AddSingleton<StatusToColorConverter>();
 
 #if DEBUG
         builder.Logging.AddDebug();
