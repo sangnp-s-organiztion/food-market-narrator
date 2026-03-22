@@ -1,161 +1,206 @@
-import { useRef, useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   deleteImageApi,
+  getRestaurantDishesApi,
   getRestaurantImagesApi,
-  reorderImagesApi,
-  setPrimaryImageApi,
   uploadRestaurantImageApi,
+  updateDishApi,
 } from "@/services/api";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { RestaurantImage } from "@/types";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Star, StarOff, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import { ImageIcon, Upload } from "lucide-react";
 
 export default function ImagesPage() {
   const { selectedRestaurant } = useRestaurant();
   const [images, setImages] = useState<RestaurantImage[]>([]);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load all images on mount / restaurant change
   useEffect(() => {
     if (selectedRestaurant) {
       (async () => {
         try {
           const data = await getRestaurantImagesApi(selectedRestaurant.restaurant_id);
-          setImages(data ?? []);
+          // Avatar page only uses is_primary = 1 images.
+          setImages((data ?? []).filter((img) => img.is_primary));
         } catch {
-          toast.error("Không thể tải danh sách hình ảnh");
+          toast.error("Không thể tải hình ảnh");
         }
       })();
     }
   }, [selectedRestaurant]);
 
-  const setPrimary = async (id: number) => {
-    try {
-      await setPrimaryImageApi(id, true);
-      setImages((prev) =>
-        prev.map((img) => ({ ...img, is_primary: img.image_id === id }))
-      );
-      toast.success("Đã cập nhật ảnh chính");
-    } catch {
-      toast.error("Không thể cập nhật ảnh chính");
+  // Avatar display: page state already contains only is_primary = 1 images.
+  const avatarImage = [...images].sort((a, b) => a.sort_order - b.sort_order)[0] ?? null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !selectedRestaurant) {
+      toast.error("Vui lòng chọn ảnh");
+      return;
     }
-  };
-
-  const moveImage = async (id: number, direction: "up" | "down") => {
-    if (!selectedRestaurant) return;
 
     try {
-      const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);
-      const idx = sorted.findIndex((img) => img.image_id === id);
-      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-      if (swapIdx < 0 || swapIdx >= sorted.length) return;
-      const reordered = [...sorted];
-      const temp = reordered[idx].sort_order;
-      reordered[idx] = { ...reordered[idx], sort_order: reordered[swapIdx].sort_order };
-      reordered[swapIdx] = { ...reordered[swapIdx], sort_order: temp };
+      const oldPrimaryIds = images.map((img) => img.image_id);
 
-      setImages(reordered);
-
-      await reorderImagesApi(
-        selectedRestaurant.restaurant_id,
-        reordered.map((x) => ({ image_id: x.image_id, sort_order: x.sort_order }))
-      );
-    } catch {
-      toast.error("Không thể đổi thứ tự ảnh");
-    }
-  };
-
-  const deleteImage = async (id: number) => {
-    try {
-      await deleteImageApi(id);
-      setImages((prev) => prev.filter((img) => img.image_id !== id));
-      toast.success("Đã xóa hình ảnh");
-    } catch {
-      toast.error("Không thể xóa hình ảnh");
-    }
-  };
-
-  const addImage = () => {
-    fileInputRef.current?.click();
-  };
-
-  const onPickImage = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedRestaurant) return;
-
-    try {
       const created = await uploadRestaurantImageApi(
         selectedRestaurant.restaurant_id,
-        file,
-        images.length === 0,
-        images.length + 1,
+        selectedFile,
+        true, // Upload as primary; backend will demote old primary automatically.
+        1,
       );
-      setImages((prev) => [...prev, created]);
-      toast.success("Tải ảnh lên thành công");
+
+      if (oldPrimaryIds.length > 0) {
+        const dishes = await getRestaurantDishesApi(selectedRestaurant.restaurant_id);
+        const affectedDishes = dishes.filter(
+          (dish) => dish.image_id !== null && oldPrimaryIds.includes(dish.image_id),
+        );
+
+        // Clear dish references before deleting old avatar images to satisfy FK constraints.
+        await Promise.all(
+          affectedDishes.map((dish) =>
+            updateDishApi(dish.dish_id, {
+              name: dish.name,
+              price: dish.price,
+              description: dish.description,
+              image_id: null,
+            }),
+          ),
+        );
+
+        await Promise.all(oldPrimaryIds.map((imageId) => deleteImageApi(imageId)));
+      }
+
+      setImages([created]);
+      toast.success("Cập nhật ảnh nhà hàng thành công");
+      resetDialog();
     } catch {
       toast.error("Không thể tải ảnh lên");
-    } finally {
-      event.target.value = "";
     }
   };
 
-  const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);
+  const handleDelete = async () => {
+    if (!avatarImage) return;
+    try {
+      await deleteImageApi(avatarImage.image_id);
+      setImages([]);
+      toast.success("Đã xóa ảnh");
+    } catch {
+      toast.error("Không thể xóa ảnh");
+    }
+  };
+
+  const resetDialog = () => {
+    setDialogOpen(false);
+    setPreview(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
+      {/* Page header — matched from hub-restaurant */}
       <div className="page-header flex items-start justify-between">
         <div>
           <h1 className="page-title">Hình ảnh nhà hàng</h1>
-          <p className="page-description">Quản lý hình ảnh của nhà hàng</p>
+          <p className="page-description">Ảnh đại diện của nhà hàng</p>
         </div>
-        <Button onClick={addImage}>
-          <Plus className="w-4 h-4 mr-2" /> Tải ảnh lên
+        <Button onClick={() => setDialogOpen(true)}>
+          <Upload className="w-4 h-4 mr-2" /> Thay ảnh
         </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={onPickImage}
-        />
       </div>
 
-      {sorted.length === 0 ? (
-        <div className="form-section text-center py-12">
-          <p className="text-muted-foreground">Chưa có hình ảnh nào. Tải lên hình ảnh đầu tiên.</p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {sorted.map((img, i) => (
-            <div key={img.image_id} className="dashboard-card p-0 overflow-hidden group relative">
-              <div className="aspect-video relative">
-                <img src={img.image_url} alt={`Hình ảnh nhà hàng ${i + 1}`} className="w-full h-full object-cover" />
-                {img.is_primary && (
-                  <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
-                    Ảnh chính
-                  </span>
-                )}
-              </div>
-              <div className="p-3 flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={() => setPrimary(img.image_id)} title={img.is_primary ? "Ảnh chính" : "Đặt làm ảnh chính"}>
-                  {img.is_primary ? <Star className="w-4 h-4 text-primary fill-primary" /> : <StarOff className="w-4 h-4" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => moveImage(img.image_id, "up")} disabled={i === 0}>
-                  <ArrowUp className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => moveImage(img.image_id, "down")} disabled={i === sorted.length - 1}>
-                  <ArrowDown className="w-4 h-4" />
-                </Button>
-                <div className="flex-1" />
-                <Button variant="ghost" size="icon" onClick={() => deleteImage(img.image_id)}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
+      {/* Single avatar image display — matched from hub-restaurant */}
+      <div className="form-section">
+        {avatarImage ? (
+          <div className="rounded-lg overflow-hidden border">
+            <img
+              src={avatarImage.image_url}
+              alt="Ảnh nhà hàng"
+              className="w-full aspect-video object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
+            <ImageIcon className="w-12 h-12 opacity-40" />
+            <p>Chưa có ảnh. Nhấn "Thay ảnh" để tải lên.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Upload / Replace dialog — matched from hub-restaurant */}
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) resetDialog();
+          else setDialogOpen(true);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Thay ảnh nhà hàng</DialogTitle>
+            <DialogDescription>
+              Chọn ảnh mới để thay thế. Ảnh cũ sẽ bị xóa hoàn toàn.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="max-h-48 mx-auto rounded-md object-contain"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Upload className="w-8 h-8" />
+                  <p className="text-sm">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                  <p className="text-xs">JPG, PNG, WEBP (tối đa 5MB)</p>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetDialog}>
+              Hủy
+            </Button>
+            <Button onClick={handleUpload} disabled={!selectedFile}>
+              Tải lên
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

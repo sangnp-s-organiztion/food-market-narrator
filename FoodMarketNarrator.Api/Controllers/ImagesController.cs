@@ -64,13 +64,49 @@ namespace food_market_narrator_api.Controllers
         [HttpDelete("/Images/{imageId:int}")]
         public async Task<IActionResult> Delete(int imageId)
         {
+            var existing = await _restaurantService.GetImageByIdAsync(imageId);
+            if (existing == null)
+            {
+                return NotFound(new { message = "Image not found." });
+            }
+
             bool deleted = await _restaurantService.DeleteImageAsync(imageId);
             if (!deleted)
             {
                 return NotFound(new { message = "Image not found." });
             }
 
+            DeletePhysicalImage(existing.ImageUrl);
+
             return Ok(new { message = "Image deleted successfully." });
+        }
+
+        private void DeletePhysicalImage(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return;
+            }
+
+            string fileName = Path.GetFileName(imageUrl.Replace('\\', '/'));
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            string uploadDir = Path.GetFullPath(
+                Path.Combine(
+                    _environment.ContentRootPath,
+                    "..",
+                    "FoodMarketNarrator.Maui",
+                    "Resources",
+                    "Images"));
+
+            string fullPath = Path.Combine(uploadDir, fileName);
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
 
         [HttpPatch("/Images/{imageId:int}/primary")]

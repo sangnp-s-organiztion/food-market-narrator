@@ -102,6 +102,23 @@ namespace food_market_narrator_api.Services
             return await _restaurantRepository.DeleteImageAsync(imageId);
         }
 
+        public async Task<RestaurantImageResponse?> GetImageByIdAsync(int imageId)
+        {
+            var image = await _restaurantRepository.GetImageByIdAsync(imageId);
+            if (image == null)
+            {
+                return null;
+            }
+
+            return new RestaurantImageResponse
+            {
+                ImageId = image.ImageId,
+                ImageUrl = image.ImageUrl,
+                IsPrimary = image.IsPrimary,
+                SortOrder = image.SortOrder,
+            };
+        }
+
         public async Task<bool> SetPrimaryImageAsync(int imageId, bool isPrimary)
         {
             return await _restaurantRepository.SetPrimaryImageAsync(imageId, isPrimary);
