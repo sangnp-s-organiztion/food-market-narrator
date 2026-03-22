@@ -59,6 +59,7 @@ Dish
 - restaurant_id
 - image_id
 - created_at
+- is_active
 
 Audio
 

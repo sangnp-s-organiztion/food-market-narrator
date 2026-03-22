@@ -113,6 +113,16 @@ namespace food_market_narrator_api.Repositories
                 return false;
             }
 
+            // Break FK references from dishes before deleting the image record.
+            var referencingDishes = await _context.Dish
+                .Where(d => d.ImageId == imageId)
+                .ToListAsync();
+
+            foreach (var dish in referencingDishes)
+            {
+                dish.ImageId = null;
+            }
+
             _context.RestaurantImage.Remove(image);
             await _context.SaveChangesAsync();
             return true;
