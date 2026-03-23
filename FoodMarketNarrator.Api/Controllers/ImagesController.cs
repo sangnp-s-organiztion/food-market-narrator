@@ -90,8 +90,7 @@ namespace food_market_narrator_api.Controllers
                 sanitizedName = "upload";
             }
 
-            string uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
-            return $"img_{sanitizedName}_{uniqueSuffix}{extension.ToLowerInvariant()}";
+            return $"img_{sanitizedName}{extension.ToLowerInvariant()}";
         }
 
         [HttpDelete("/Images/{imageId:int}")]
