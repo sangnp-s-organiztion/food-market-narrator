@@ -40,7 +40,7 @@ public partial class AudioService : IAudioService
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            // Console.WriteLine("File name null -> skip");
+            System.Diagnostics.Debug.WriteLine($"[AudioService] File name null -> skip");
             return;
         }
 
@@ -50,12 +50,12 @@ public partial class AudioService : IAudioService
         try
         {
             _currentTrackKey = ResolveAudioPath(language, fileName);
-            // Console.WriteLine($"Loading audio key: {_currentTrackKey}");
+            System.Diagnostics.Debug.WriteLine($"[AudioService] Loading audio key: {_currentTrackKey}");
 
             await using var stream = await ResolvePlayableStreamAsync(language, fileName);
             if (stream == null)
             {
-                // Console.WriteLine($"Audio not found for input: {fileName}");
+                System.Diagnostics.Debug.WriteLine($"[AudioService] Audio not found for input: {fileName}");
                 _currentTrackKey = null;
                 return;
             }
@@ -63,17 +63,27 @@ public partial class AudioService : IAudioService
             var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
+            System.Diagnostics.Debug.WriteLine($"[AudioService] Stream loaded, size={memoryStream.Length} bytes");
+
+            // Validate: ensure stream looks like an audio file, not an HTML error page
+            if (!IsLikelyAudioStream(memoryStream))
+            {
+                System.Diagnostics.Debug.WriteLine($"[AudioService] Stream does NOT look like audio data (size={memoryStream.Length}). Possibly HTML error page.");
+                memoryStream.Dispose();
+                _currentTrackKey = null;
+                return;
+            }
 
             _player = _audioManager.CreatePlayer(memoryStream);
             _player.PlaybackEnded += OnPlaybackEnded;
             RequestPlatformAudioFocus();
             _player.Play();
 
-            // Console.WriteLine("Audio started");
+            System.Diagnostics.Debug.WriteLine($"[AudioService] Audio started, IsPlaying={_player.IsPlaying}, Duration={_player.Duration}s");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Console.WriteLine($"ERROR PLAY SOUND: {ex}");
+            System.Diagnostics.Debug.WriteLine($"[AudioService] ERROR PLAY SOUND: {ex}");
             _currentTrackKey = null;
         }
     }
@@ -102,20 +112,21 @@ public partial class AudioService : IAudioService
                 memory.Position = 0;
                 return memory;
             }
-            catch
+            catch (Exception ex)
             {
-                // Continue with next candidate.
+                System.Diagnostics.Debug.WriteLine($"[AudioService] Package path failed '{packagePath}': {ex.Message}");
             }
         }
 
         foreach (var remoteUrl in BuildRemoteUrlCandidates(language, normalizedInput))
         {
+            System.Diagnostics.Debug.WriteLine($"[AudioService] Trying remote URL: {remoteUrl}");
             if (!await TryDownloadAudioToCacheAsync(remoteUrl, cachePath))
             {
                 var onlineOnly = await TryDownloadAudioToMemoryAsync(remoteUrl);
                 if (onlineOnly != null)
                 {
-                    // Console.WriteLine($"Playing online-only audio (not cached): {remoteUrl}");
+                    System.Diagnostics.Debug.WriteLine($"[AudioService] Playing online-only audio (not cached): {remoteUrl}, size={onlineOnly.Length}");
                     return onlineOnly;
                 }
 
@@ -237,6 +248,36 @@ public partial class AudioService : IAudioService
         return Path.Combine(FileSystem.AppDataDirectory, AudioCacheFolderName);
     }
 
+    private static bool IsLikelyAudioStream(MemoryStream stream)
+    {
+        if (stream.Length < MinValidAudioBytes)
+        {
+            return false;
+        }
+
+        // Check for HTML error page markers in first 200 bytes
+        var previewLength = (int)Math.Min(stream.Length, 200);
+        var preview = new byte[previewLength];
+        var originalPosition = stream.Position;
+        stream.Position = 0;
+        stream.Read(preview, 0, previewLength);
+        stream.Position = originalPosition;
+
+        var previewText = System.Text.Encoding.UTF8.GetString(preview);
+
+        // Common HTML error page patterns
+        if (previewText.Contains("<html", StringComparison.OrdinalIgnoreCase)
+            || previewText.Contains("<!DOCTYPE", StringComparison.OrdinalIgnoreCase)
+            || previewText.Contains("Not Found", StringComparison.OrdinalIgnoreCase)
+            || previewText.Contains("404", StringComparison.OrdinalIgnoreCase)
+            || previewText.Contains("Error", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private static bool IsValidAudioFile(string path)
     {
         if (!File.Exists(path))
@@ -355,9 +396,9 @@ public partial class AudioService : IAudioService
             // Console.WriteLine($"Audio downloaded and cached: {url}");
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Console.WriteLine($"Download audio failed ({url}): {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[AudioService] Download audio failed ({url}): {ex.Message}");
             return false;
         }
     }

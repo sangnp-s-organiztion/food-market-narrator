@@ -22,6 +22,7 @@ public partial class AudioService
     {
         if (_platformAudioManager == null || _platformAudioFocusListener == null)
         {
+            System.Diagnostics.Debug.WriteLine("[AudioService.Android] AudioManager or FocusListener is null, skipping focus request");
             return;
         }
 
@@ -30,71 +31,33 @@ public partial class AudioService
             if (_platformAudioFocusRequest == null)
             {
                 var attributesBuilder = new AudioAttributes.Builder();
-                if (attributesBuilder == null)
-                {
-                    return;
-                }
-
                 var usageBuilder = attributesBuilder.SetUsage(AudioUsageKind.Media);
-                if (usageBuilder == null)
-                {
-                    return;
-                }
-
                 var contentBuilder = usageBuilder.SetContentType(AudioContentType.Speech);
-                if (contentBuilder == null)
-                {
-                    return;
-                }
-
                 var attributes = contentBuilder.Build();
-
-                if (attributes == null)
-                {
-                    return;
-                }
-
                 var focusRequestBuilder = new AudioFocusRequestClass.Builder(AudioFocus.Gain);
-                if (focusRequestBuilder == null)
-                {
-                    return;
-                }
-
                 var audioAttributesBuilder = focusRequestBuilder.SetAudioAttributes(attributes);
-                if (audioAttributesBuilder == null)
-                {
-                    return;
-                }
-
                 var duckBuilder = audioAttributesBuilder.SetWillPauseWhenDucked(true);
-                if (duckBuilder == null)
-                {
-                    return;
-                }
-
                 var listenerBuilder = duckBuilder.SetOnAudioFocusChangeListener(_platformAudioFocusListener);
-                if (listenerBuilder == null)
-                {
-                    return;
-                }
-
                 _platformAudioFocusRequest = listenerBuilder.Build();
             }
 
             if (_platformAudioFocusRequest == null)
             {
+                System.Diagnostics.Debug.WriteLine("[AudioService.Android] AudioFocusRequest is null after build, skipping focus request");
                 return;
             }
 
-            _platformAudioManager.RequestAudioFocus(_platformAudioFocusRequest);
+            var result = _platformAudioManager.RequestAudioFocus(_platformAudioFocusRequest);
+            System.Diagnostics.Debug.WriteLine($"[AudioService.Android] AudioFocus requested (Android 26+), result={result}");
             return;
         }
 
 #pragma warning disable CA1422
-        _platformAudioManager.RequestAudioFocus(
+        var legacyResult = _platformAudioManager.RequestAudioFocus(
             _platformAudioFocusListener,
             Android.Media.Stream.Music,
             AudioFocus.Gain);
+        System.Diagnostics.Debug.WriteLine($"[AudioService.Android] AudioFocus requested (legacy), result={legacyResult}");
 #pragma warning restore CA1422
     }
 

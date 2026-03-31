@@ -225,7 +225,8 @@ public class NarrationFlowService : INarrationFlowService
             );
 
             // Khi audio auto narration đã bắt đầu phát thành công, lưu POI vào lịch sử.
-            if (_audioService.IsPlaying && !string.IsNullOrWhiteSpace(poi.restaurantId))
+            // Save ngay sau khi PlaySound trả về (không đợi IsPlaying check vì audio có thể đã started)
+            if (!string.IsNullOrWhiteSpace(poi.restaurantId))
             {
                 _historyService.AddToHistory(poi.restaurantId);
             }
