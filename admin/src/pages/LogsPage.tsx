@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { analyticsApi } from "@/lib/analyticsApi";
 import { cn } from "@/lib/utils";
 
-const LIMIT = 50;
+const PAGE_SIZE = 10;
 
 // Map action type from duration-based heuristics
 function inferAction(duration: number): { label: string; cls: string } {
@@ -39,18 +40,42 @@ function formatTimestamp(iso: string): string {
 }
 
 const LogsPage = () => {
+  const [page, setPage] = useState(1);
+
   const {
     data: activityResponse,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["analytics", "recent-activity", LIMIT],
-    queryFn: () => analyticsApi.getRecentActivity(LIMIT),
+    queryKey: ["analytics", "recent-activity", page, PAGE_SIZE],
+    queryFn: () => analyticsApi.getRecentActivity(page, PAGE_SIZE),
     staleTime: 30_000,
     refetchInterval: 30_000, // auto-refresh every 30s for live-ish feed
   });
 
   const activity = activityResponse?.items ?? [];
+  const totalPages = activityResponse?.totalPages ?? 0;
+  const totalCount = activityResponse?.totalCount ?? 0;
+
+  useEffect(() => {
+    if (totalPages > 0 && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  const pageWindow = useMemo(() => {
+    if (totalPages <= 0) return [] as number[];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, start + 4);
+    const adjustedStart = Math.max(1, end - 4);
+    return Array.from(
+      { length: end - adjustedStart + 1 },
+      (_, i) => adjustedStart + i,
+    );
+  }, [page, totalPages]);
+
+  const hasPrev = page > 1;
+  const hasNext = totalPages > 0 && page < totalPages;
 
   return (
     <AdminLayout>
@@ -165,10 +190,52 @@ const LogsPage = () => {
           </table>
 
           {!isLoading && !isError && activity.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-3 px-1">
-              Hiển thị {activity.length} bản ghi gần nhất từ MongoDB AudioLogs.
-              Nhật ký tự động cập nhật mỗi 30 giây.
-            </p>
+            <div className="mt-3 px-1 flex flex-col gap-3">
+              <p className="text-xs text-muted-foreground">
+                Hiển thị {activity.length} / {totalCount} bản ghi. Nhật ký tự
+                động cập nhật mỗi 30 giây.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                  disabled={!hasPrev}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Trang trước
+                </button>
+
+                {pageWindow.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    className={cn(
+                      "px-3 py-1.5 rounded-md border text-xs font-medium",
+                      p === page
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "hover:bg-muted",
+                    )}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                  disabled={!hasNext}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Trang sau
+                </button>
+
+                <span className="text-xs text-muted-foreground ml-1">
+                  Trang {page} / {Math.max(totalPages, 1)}
+                </span>
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -73,12 +73,16 @@ export interface RecentActivity {
 export interface RecentActivityResponse {
   items: RecentActivity[];
   count: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 }
 
 // ─── Dashboard Chart Types ───────────────────────────────────────────────────
 
 export interface DailyListenData {
-  date: string;      // "dd/MM" e.g. "12/04"
+  date: string; // "dd/MM" e.g. "12/04"
   listens: number;
 }
 

@@ -145,12 +145,25 @@ public class AnalyticsService
     }
 
     // ─── Recent Activity Feed ──────────────────────────────────────────────────
-    public async Task<RecentActivityResponse> GetRecentActivityAsync(int limit = 20)
+    public async Task<RecentActivityResponse> GetRecentActivityAsync(int page = 1, int pageSize = 10)
     {
-        var activities = await _analyticsRepository.GetRecentActivityAsync(limit);
+        var safePage = Math.Max(page, 1);
+        var safePageSize = Math.Max(pageSize, 1);
+
+        var paged = await _analyticsRepository.GetRecentActivityAsync(safePage, safePageSize);
+        var activities = paged.Items;
+        var totalCount = paged.TotalCount;
 
         if (!activities.Any())
-            return new RecentActivityResponse { Items = [], Count = 0 };
+            return new RecentActivityResponse
+            {
+                Items = [],
+                Count = 0,
+                Page = safePage,
+                PageSize = safePageSize,
+                TotalCount = totalCount,
+                TotalPages = 0
+            };
 
         // Enrich with restaurant names from MSSQL
         var restaurantIds = activities.Select(a => a.RestaurantId).Distinct().ToList();
@@ -171,7 +184,11 @@ public class AnalyticsService
         return new RecentActivityResponse
         {
             Items = items,
-            Count = items.Count
+            Count = items.Count,
+            Page = safePage,
+            PageSize = safePageSize,
+            TotalCount = totalCount,
+            TotalPages = totalCount > 0 ? (int)Math.Ceiling(totalCount / (double)safePageSize) : 0
         };
     }
 

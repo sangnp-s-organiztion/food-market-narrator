@@ -41,7 +41,7 @@ export const analyticsApi = {
    */
   async getHeatmap(hours = 24): Promise<HeatmapResponse> {
     return analyticsFetch<HeatmapResponse>(
-      `/api/analytics/heatmap?hours=${hours}`
+      `/api/analytics/heatmap?hours=${hours}`,
     );
   },
 
@@ -52,7 +52,7 @@ export const analyticsApi = {
    */
   async getTopAudios(limit = 10): Promise<TopAudiosResponse> {
     return analyticsFetch<TopAudiosResponse>(
-      `/api/analytics/top-audios?limit=${limit}`
+      `/api/analytics/top-audios?limit=${limit}`,
     );
   },
 
@@ -62,7 +62,7 @@ export const analyticsApi = {
    */
   async getTopRestaurants(limit = 10): Promise<TopRestaurantsResponse> {
     return analyticsFetch<TopRestaurantsResponse>(
-      `/api/analytics/top-restaurants?limit=${limit}`
+      `/api/analytics/top-restaurants?limit=${limit}`,
     );
   },
 
@@ -71,21 +71,22 @@ export const analyticsApi = {
    * Returns anonymous GPS paths (ordered per session).
    * @param sessionLimit - max sessions to return (default 100, max 500)
    */
-  async getMovementPaths(
-    sessionLimit = 100
-  ): Promise<MovementPathsResponse> {
+  async getMovementPaths(sessionLimit = 100): Promise<MovementPathsResponse> {
     return analyticsFetch<MovementPathsResponse>(
-      `/api/analytics/movement-paths?sessionLimit=${sessionLimit}`
+      `/api/analytics/movement-paths?sessionLimit=${sessionLimit}`,
     );
   },
 
   /**
-   * GET /api/analytics/recent-activity?limit=20
-   * Returns recent valid audio plays with restaurant names.
+   * GET /api/analytics/recent-activity?page=1&pageSize=10
+   * Returns paginated recent valid audio plays with restaurant names.
    */
-  async getRecentActivity(limit = 20): Promise<RecentActivityResponse> {
+  async getRecentActivity(
+    page = 1,
+    pageSize = 10,
+  ): Promise<RecentActivityResponse> {
     return analyticsFetch<RecentActivityResponse>(
-      `/api/analytics/recent-activity?limit=${limit}`
+      `/api/analytics/recent-activity?page=${page}&pageSize=${pageSize}`,
     );
   },
 

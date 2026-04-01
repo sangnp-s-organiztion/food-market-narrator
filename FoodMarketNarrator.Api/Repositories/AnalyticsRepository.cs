@@ -219,8 +219,12 @@ public class AnalyticsRepository
     }
 
     // ─── Recent Activity: AudioLogs sorted by timestamp DESC ──────────────────
-    public async Task<List<ActivityRecord>> GetRecentActivityAsync(int limit = 20)
+    public async Task<(List<ActivityRecord> Items, long TotalCount)> GetRecentActivityAsync(int page = 1, int pageSize = 10)
     {
+        var safePage = Math.Max(page, 1);
+        var safePageSize = Math.Max(pageSize, 1);
+        var skip = (safePage - 1) * safePageSize;
+
         var pipeline = new[]
         {
             new BsonDocument("$addFields",
@@ -246,29 +250,56 @@ public class AnalyticsRepository
                 }),
             new BsonDocument("$sort",
                 new BsonDocument("event_time", -1)),
-            new BsonDocument("$limit", limit),
-            new BsonDocument("$project",
+            new BsonDocument("$facet",
                 new BsonDocument
                 {
-                    { "_id", 0 },
-                    { "audio_id", 1 },
-                    { "restaurant_id", 1 },
-                    { "duration", 1 },
-                    { "timestamp", "$event_time" }
+                    {
+                        "items", new BsonArray
+                        {
+                            new BsonDocument("$skip", skip),
+                            new BsonDocument("$limit", safePageSize),
+                            new BsonDocument("$project",
+                                new BsonDocument
+                                {
+                                    { "_id", 0 },
+                                    { "audio_id", 1 },
+                                    { "restaurant_id", 1 },
+                                    { "duration", 1 },
+                                    { "timestamp", "$event_time" }
+                                })
+                        }
+                    },
+                    {
+                        "totalCount", new BsonArray
+                        {
+                            new BsonDocument("$count", "count")
+                        }
+                    }
                 })
         };
 
-        var results = await _db.GetCollection<BsonDocument>("AudioLogs")
+        var facetResult = await _db.GetCollection<BsonDocument>("AudioLogs")
             .Aggregate<BsonDocument>(pipeline)
-            .ToListAsync();
+            .FirstOrDefaultAsync();
 
-        return results.Select(r => new ActivityRecord
+        if (facetResult == null)
+            return ([], 0);
+
+        var itemsArray = facetResult.GetValue("items", new BsonArray()).AsBsonArray;
+        var totalCountArray = facetResult.GetValue("totalCount", new BsonArray()).AsBsonArray;
+        var totalCount = totalCountArray.Count > 0
+            ? GetIntValue(totalCountArray[0].AsBsonDocument, "count")
+            : 0;
+
+        var items = itemsArray.Select(x => x.AsBsonDocument).Select(r => new ActivityRecord
         {
             AudioId = GetIntValue(r, "audio_id"),
             RestaurantId = GetStringValue(r, "restaurant_id"),
             Duration = GetIntValue(r, "duration"),
             Timestamp = GetDateTimeValue(r, "timestamp", "end_time", "start_time", "created_at")
         }).ToList();
+
+        return (items, totalCount);
     }
 
     private static int GetIntValue(BsonDocument doc, string key, int defaultValue = 0)
