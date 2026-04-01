@@ -14,10 +14,12 @@ namespace food_market_narrator_api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly AuditLogService _auditLogService;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService, AuditLogService auditLogService)
         {
             _authService = authService;
+            _auditLogService = auditLogService;
         }
 
         [HttpPost("login")]
@@ -53,6 +55,17 @@ namespace food_market_narrator_api.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
+            await _auditLogService.WriteLogAsync(new AuditLog
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Action = "LOGIN",
+                TargetType = "User",
+                TargetId = user.UserId.ToString(),
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                CreatedAt = DateTime.UtcNow
+            });
+
             return Ok(new LoginResponse
             {
                 UserId = user.UserId,
@@ -66,6 +79,23 @@ namespace food_market_narrator_api.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.Identity?.Name ?? "unknown";
+
+            if (int.TryParse(userIdClaim, out var uid))
+            {
+                await _auditLogService.WriteLogAsync(new AuditLog
+                {
+                    UserId = uid,
+                    Username = username,
+                    Action = "LOGOUT",
+                    TargetType = "User",
+                    TargetId = uid.ToString(),
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Ok(new { message = "Logged out successfully." });
         }

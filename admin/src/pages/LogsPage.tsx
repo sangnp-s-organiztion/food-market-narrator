@@ -145,6 +145,4 @@ const LogsPage = () => {
       </div>
     </AdminLayout>
   );
-};
-
-export default LogsPage;
+}

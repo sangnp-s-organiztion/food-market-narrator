@@ -102,4 +102,25 @@ public class AnalyticsController : ControllerBase
         var result = await _analyticsService.GetRecentActivityAsync(clamped);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Total counts of key entities (restaurants, audios, users, dishes).
+    /// </summary>
+    [HttpGet("entity-counts")]
+    public async Task<IActionResult> GetEntityCounts()
+    {
+        var result = await _analyticsService.GetEntityCountsAsync();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Daily listen counts timeseries from AudioLogs (valid plays only, duration >= 5s).
+    /// Query param: days (int, default 14, max 90).
+    /// </summary>
+    [HttpGet("listens-timeseries")]
+    public async Task<IActionResult> GetListensTimeseries([FromQuery] int days = 14)
+    {
+        var result = await _analyticsService.GetListensTimeseriesAsync(days);
+        return Ok(result);
+    }
 }
