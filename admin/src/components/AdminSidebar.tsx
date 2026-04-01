@@ -4,6 +4,7 @@ import {
   Store,
   Users,
   ScrollText,
+  Route,
   AudioWaveform,
   LogOut,
 } from "lucide-react";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", label: "Tổng quan", icon: LayoutDashboard },
+  { path: "/trajectory", label: "Tuyến di chuyển", icon: Route },
   { path: "/restaurants", label: "Nhà hàng", icon: Store },
   { path: "/users", label: "Người dùng", icon: Users },
   { path: "/logs", label: "Nhật ký", icon: ScrollText },
@@ -37,8 +39,14 @@ const AdminSidebar = () => {
         className="flex items-center gap-2.5 px-5 py-5 border-b"
         style={{ borderColor: "rgba(255,255,255,0.08)" }}
       >
-        <AudioWaveform className="h-7 w-7" style={{ color: "hsl(221, 83%, 53%)" }} />
-        <span className="text-base font-semibold tracking-tight" style={{ color: "white" }}>
+        <AudioWaveform
+          className="h-7 w-7"
+          style={{ color: "hsl(221, 83%, 53%)" }}
+        />
+        <span
+          className="text-base font-semibold tracking-tight"
+          style={{ color: "white" }}
+        >
           SonicMap
         </span>
         <span
@@ -59,10 +67,7 @@ const AdminSidebar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={cn(
-                "sidebar-item w-full",
-                isActive ? "active" : ""
-              )}
+              className={cn("sidebar-item w-full", isActive ? "active" : "")}
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
@@ -84,10 +89,16 @@ const AdminSidebar = () => {
             {user?.username?.charAt(0).toUpperCase() ?? "A"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color: "white" }}>
+            <p
+              className="text-sm font-medium truncate"
+              style={{ color: "white" }}
+            >
               {user?.username ?? "Admin"}
             </p>
-            <p className="text-xs truncate" style={{ color: "hsl(215, 20%, 65%)" }}>
+            <p
+              className="text-xs truncate"
+              style={{ color: "hsl(215, 20%, 65%)" }}
+            >
               {user?.role ?? ""}
             </p>
           </div>
@@ -96,7 +107,10 @@ const AdminSidebar = () => {
             className="p-1.5 rounded-md transition-colors hover:bg-white/10"
             title="Đăng xuất"
           >
-            <LogOut className="h-4 w-4" style={{ color: "hsl(215, 20%, 65%)" }} />
+            <LogOut
+              className="h-4 w-4"
+              style={{ color: "hsl(215, 20%, 65%)" }}
+            />
           </button>
         </div>
       </div>

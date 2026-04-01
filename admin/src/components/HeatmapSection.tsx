@@ -2,18 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
-import { Flame, MapPin, Route } from "lucide-react";
-import type {
-  HeatmapPoint,
-  MovementPath,
-  TopRestaurant,
-} from "@/types/analytics";
+import { MapPin } from "lucide-react";
+import type { HeatmapPoint, TopRestaurant } from "@/types/analytics";
 
 interface HeatmapSectionProps {
   /** Geo points from GET /api/analytics/heatmap */
   points?: HeatmapPoint[];
-  /** Movement paths from GET /api/analytics/movement-paths */
-  movementPaths?: MovementPath[];
   /** Restaurant list for POI markers on map */
   restaurantPois?: TopRestaurant[];
   /** Current lookback window (hours) */
@@ -59,18 +53,15 @@ function paletteToGradient(palette: string[]): Record<number, string> {
 
 export function HeatmapSection({
   points = [],
-  movementPaths = [],
   restaurantPois = [],
   lookbackHours,
   onLookbackHoursChange,
 }: HeatmapSectionProps) {
-  const [viewMode, setViewMode] = useState<"heatmap" | "trajectory">("heatmap");
   const [baseLayer, setBaseLayer] = useState<"map" | "satellite">("map");
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const heatLayerRef = useRef<L.HeatLayer | null>(null);
   const poiLayerRef = useRef<L.LayerGroup | null>(null);
-  const pathLayerRef = useRef<L.LayerGroup | null>(null);
   const tileLayersRef = useRef<{
     map: L.TileLayer;
     satellite: L.TileLayer;
@@ -106,26 +97,9 @@ export function HeatmapSection({
       );
   }, [restaurantPois]);
 
-  const pathCoordinates = useMemo(
-    () =>
-      movementPaths.flatMap((path) =>
-        path.points.map((p) => [p.latitude, p.longitude] as L.LatLngTuple),
-      ),
-    [movementPaths],
-  );
-
   const handleRecenterMap = () => {
     const map = mapInstanceRef.current;
     if (!map) return;
-
-    if (viewMode === "trajectory" && pathCoordinates.length > 0) {
-      map.fitBounds(L.latLngBounds(pathCoordinates), {
-        padding: [40, 40],
-        animate: true,
-        duration: 0.8,
-      });
-      return;
-    }
 
     if (weightedHeatPoints.length > 0) {
       const bounds = L.latLngBounds(
@@ -178,7 +152,6 @@ export function HeatmapSection({
     };
 
     poiLayerRef.current = L.layerGroup().addTo(map);
-    pathLayerRef.current = L.layerGroup().addTo(map);
 
     mapInstanceRef.current = map;
 
@@ -187,7 +160,6 @@ export function HeatmapSection({
       mapInstanceRef.current = null;
       heatLayerRef.current = null;
       poiLayerRef.current = null;
-      pathLayerRef.current = null;
     };
   }, []);
 
@@ -217,134 +189,60 @@ export function HeatmapSection({
   useEffect(() => {
     const map = mapInstanceRef.current;
     const poiLayer = poiLayerRef.current;
-    const pathLayer = pathLayerRef.current;
-    if (!map || !poiLayer || !pathLayer) return;
+    if (!map || !poiLayer) return;
 
     poiLayer.clearLayers();
-    pathLayer.clearLayers();
 
     if (heatLayerRef.current) {
       map.removeLayer(heatLayerRef.current);
       heatLayerRef.current = null;
     }
 
-    if (viewMode === "heatmap") {
-      if (weightedHeatPoints.length > 0) {
-        const layer = L.heatLayer(weightedHeatPoints, {
-          radius: 30,
-          blur: 24,
-          maxZoom: 19,
-          minOpacity: 0.08,
-          max: 0.95,
-          gradient: activeGradient,
-        }).addTo(map);
-        heatLayerRef.current = layer;
-      }
-
-      restaurantPois.forEach((r) => {
-        const lat = (r as TopRestaurant & { latitude?: number }).latitude;
-        const lng = (r as TopRestaurant & { longitude?: number }).longitude;
-        if (typeof lat !== "number" || typeof lng !== "number") return;
-        const name = r.restaurantName ?? "";
-
-        L.circleMarker([lat, lng], {
-          radius: 5,
-          fillColor: "hsl(199, 89%, 48%)",
-          color: "hsl(199, 89%, 48%)",
-          weight: 2,
-          fillOpacity: 0.8,
-        })
-          .bindPopup(
-            `<strong>${name}</strong><br/><span style="color:#666">${r.playCount ? `${r.playCount} lượt nghe` : ""}</span>`,
-          )
-          .addTo(poiLayer);
-      });
-
-      if (weightedHeatPoints.length > 0) {
-        const bounds = L.latLngBounds(
-          weightedHeatPoints.map((p) => [p[0], p[1]] as L.LatLngTuple),
-        );
-        map.fitBounds(bounds, { padding: [40, 40] });
-      }
-
-      return;
+    if (weightedHeatPoints.length > 0) {
+      const layer = L.heatLayer(weightedHeatPoints, {
+        radius: 30,
+        blur: 24,
+        maxZoom: 19,
+        minOpacity: 0.08,
+        max: 0.95,
+        gradient: activeGradient,
+      }).addTo(map);
+      heatLayerRef.current = layer;
     }
 
-    movementPaths.forEach((path, idx) => {
-      const color = PATH_COLORS[idx % PATH_COLORS.length];
+    restaurantPois.forEach((r) => {
+      const lat = (r as TopRestaurant & { latitude?: number }).latitude;
+      const lng = (r as TopRestaurant & { longitude?: number }).longitude;
+      if (typeof lat !== "number" || typeof lng !== "number") return;
+      const name = r.restaurantName ?? "";
 
-      const latlngs = path.points.map(
-        (p) => [p.latitude, p.longitude] as L.LatLngTuple,
-      );
-
-      if (latlngs.length === 0) {
-        return;
-      }
-
-      if (latlngs.length > 1) {
-        L.polyline(latlngs, {
-          color,
-          weight: 2,
-          opacity: 0.65,
-        }).addTo(pathLayer);
-      }
-
-      latlngs.forEach((point, pointIdx) => {
-        L.circleMarker(point, {
-          radius: pointIdx === 0 ? 5 : 6,
-          fillColor: color,
-          color,
-          weight: 2,
-          fillOpacity: 0.7,
-        })
-          .bindPopup(
-            `<strong>${path.sessionId.slice(0, 8)}…</strong><br/>Điểm ${pointIdx + 1} / ${latlngs.length}`,
-          )
-          .addTo(pathLayer);
-      });
+      L.circleMarker([lat, lng], {
+        radius: 5,
+        fillColor: "hsl(199, 89%, 48%)",
+        color: "hsl(199, 89%, 48%)",
+        weight: 2,
+        fillOpacity: 0.8,
+      })
+        .bindPopup(
+          `<strong>${name}</strong><br/><span style="color:#666">${r.playCount ? `${r.playCount} lượt nghe` : ""}</span>`,
+        )
+        .addTo(poiLayer);
     });
 
-    if (pathCoordinates.length > 0) {
-      map.fitBounds(L.latLngBounds(pathCoordinates), { padding: [40, 40] });
+    if (weightedHeatPoints.length > 0) {
+      const bounds = L.latLngBounds(
+        weightedHeatPoints.map((p) => [p[0], p[1]] as L.LatLngTuple),
+      );
+      map.fitBounds(bounds, { padding: [40, 40] });
     }
-  }, [
-    viewMode,
-    weightedHeatPoints,
-    activeGradient,
-    restaurantPois,
-    movementPaths,
-    pathCoordinates,
-  ]);
+  }, [weightedHeatPoints, activeGradient, restaurantPois]);
 
   return (
     <div className="stat-card">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-1">
-          <button
-            type="button"
-            onClick={() => setViewMode("heatmap")}
-            className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              viewMode === "heatmap"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Flame className="h-3.5 w-3.5" />
-            Heatmap
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("trajectory")}
-            className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              viewMode === "trajectory"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Route className="h-3.5 w-3.5" />
-            Trajectory
-          </button>
-        </div>
+        <h3 className="text-sm font-semibold text-foreground">
+          Bản đồ nhiệt vị trí người dùng nghe âm thanh
+        </h3>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             Khoảng thời gian
@@ -371,17 +269,12 @@ export function HeatmapSection({
         </div>
       </div>
 
-      {viewMode === "heatmap" && points.length === 0 && (
+      {points.length === 0 && (
         <p className="text-xs text-muted-foreground mb-2">
           Chưa có dữ liệu GPS — hiển thị vị trí nhà hàng tham chiếu
         </p>
       )}
-      {viewMode === "trajectory" && movementPaths.length === 0 && (
-        <p className="text-xs text-muted-foreground mb-2">
-          Chưa có dữ liệu tuyến di chuyển người dùng
-        </p>
-      )}
-      {viewMode === "heatmap" && points.length > 0 && (
+      {points.length > 0 && (
         <div className="mb-2 flex items-center gap-2 text-[11px] text-muted-foreground">
           <span>Lạnh</span>
           <div
@@ -391,10 +284,10 @@ export function HeatmapSection({
             }}
           />
           <div className="flex items-center gap-1 text-[10px]">
-            <span>7 mức</span>
-            <span className="text-muted-foreground/70">(loang mượt)</span>
+            <span>Nóng</span>
+            {/* <span className="text-muted-foreground/70">(loang mượt)</span> */}
           </div>
-          <span>Nóng</span>
+          {/* <span>(7 mức)</span> */}
         </div>
       )}
       <div className="relative">

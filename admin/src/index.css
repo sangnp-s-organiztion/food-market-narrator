@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -52,8 +52,10 @@
     --chart-success: 152 69% 31%;
     --chart-warning: 38 92% 50%;
 
-    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --shadow-elevated: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-card:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-elevated:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 215 20% 65%;
@@ -94,17 +96,17 @@
     @apply text-xs font-medium text-destructive;
   }
   .status-active {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center justify-center text-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium;
     background: hsl(var(--status-active-bg));
     color: hsl(var(--status-active));
   }
   .status-inactive {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center justify-center text-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium;
     background: hsl(var(--status-inactive-bg));
     color: hsl(var(--status-inactive));
   }
   .status-banned {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center justify-center text-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium;
     background: hsl(0 84% 95%);
     color: hsl(var(--destructive));
   }
@@ -145,7 +147,7 @@
     @apply text-xl font-semibold text-foreground;
   }
   .mono {
-    font-family: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
+    font-family: "Geist Mono", "SF Mono", "Fira Code", monospace;
     font-variant-numeric: tabular-nums;
   }
 }
