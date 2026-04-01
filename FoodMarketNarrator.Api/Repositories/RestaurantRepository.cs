@@ -20,6 +20,11 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.Restaurant.CountAsync();
+        }
+
         public async Task<RestaurantModel> GetByIdAsync(string id)
         {
             return await _context.Restaurant
@@ -38,6 +43,14 @@ namespace food_market_narrator_api.Repositories
                     .ThenInclude(a => a.Language)
                 .ToListAsync();
         }
+
+            public async Task<RestaurantModel> AddAsync(RestaurantModel restaurant)
+            {
+                _context.Restaurant.Add(restaurant);
+                await _context.SaveChangesAsync();
+
+                return await GetByIdAsync(restaurant.RestaurantId) ?? restaurant;
+            }
 
         public async Task<bool> UpdateAsync(RestaurantModel restaurant)
         {
@@ -111,6 +124,16 @@ namespace food_market_narrator_api.Repositories
             if (image == null)
             {
                 return false;
+            }
+
+            // Break FK references from dishes before deleting the image record.
+            var referencingDishes = await _context.Dish
+                .Where(d => d.ImageId == imageId)
+                .ToListAsync();
+
+            foreach (var dish in referencingDishes)
+            {
+                dish.ImageId = null;
             }
 
             _context.RestaurantImage.Remove(image);

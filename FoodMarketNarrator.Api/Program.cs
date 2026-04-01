@@ -1,10 +1,13 @@
 using food_market_narrator_api.Authorization;
+using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 
 public class Program
@@ -24,7 +27,15 @@ public class Program
         builder.Services.AddScoped<LanguageService>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<AuditLogService>();
+        builder.Services.AddScoped<AnalyticsService>();
         builder.Services.AddScoped<AuthService>();
+        builder.Services.AddScoped<MongoHealthRepository>();
+        builder.Services.AddScoped<MongoHealthService>();
+        builder.Services.AddScoped<AnalyticsRepository>();
+        builder.Services.AddScoped<LocationLogRepository>();
+        builder.Services.AddScoped<LocationLogService>();
+
 
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -83,6 +94,19 @@ public class Program
         // Đăng ký context
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+        builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDb"));
+        builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
+        {
+            var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            return new MongoClient(mongoSettings.ConnectionString);
+        });
+        builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
+        {
+            var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            var mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
+            return mongoClient.GetDatabase(mongoSettings.DatabaseName);
+        });
 
         
 
@@ -179,6 +203,7 @@ public class Program
         });
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<food_market_narrator_api.Middleware.AuditLoggingMiddleware>();
         app.MapControllers();
         app.Run();
     }

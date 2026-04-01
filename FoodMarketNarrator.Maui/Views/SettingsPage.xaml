@@ -112,6 +112,25 @@
 
                         <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="Vị trí nền" FontSize="15" TextColor="#1F2937"/>
+                                <Label x:Name="BackgroundPermissionStatusLabel" Text="Chưa kiểm tra" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                            <Switch x:Name="BackgroundPermissionSwitch"
+                                    Grid.Column="2"
+                                    IsToggled="False"
+                                    Toggled="OnBackgroundLocationToggled"
+                                    OnColor="#F48C06"
+                                    ThumbColor="White"
+                                    VerticalOptions="Center"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#F3ECE5"/>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf186;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                             <Label Grid.Column="1" Text="Chế độ tối" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>

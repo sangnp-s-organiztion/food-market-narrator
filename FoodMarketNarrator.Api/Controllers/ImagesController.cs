@@ -47,8 +47,7 @@ namespace food_market_narrator_api.Controllers
                     "Images"));
             Directory.CreateDirectory(uploadDir);
 
-            string extension = Path.GetExtension(file.FileName);
-            string fileName = $"{Guid.NewGuid():N}{extension}";
+            string fileName = BuildImageFileName(file.FileName);
             string fullPath = Path.Combine(uploadDir, fileName);
 
             await using (var stream = System.IO.File.Create(fullPath))
@@ -61,16 +60,85 @@ namespace food_market_narrator_api.Controllers
             return Ok(created);
         }
 
+        private static string BuildImageFileName(string originalFileName)
+        {
+            string extension = Path.GetExtension(originalFileName);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".jpg";
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            string baseName = Path.GetFileNameWithoutExtension(originalFileName).Trim();
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                baseName = "upload";
+            }
+
+            var sanitizedChars = baseName
+                .Select(ch => invalidChars.Contains(ch) || char.IsWhiteSpace(ch) ? '_' : ch)
+                .ToArray();
+
+            string sanitizedName = new string(sanitizedChars).Trim('_');
+            while (sanitizedName.Contains("__"))
+            {
+                sanitizedName = sanitizedName.Replace("__", "_");
+            }
+
+            if (string.IsNullOrWhiteSpace(sanitizedName))
+            {
+                sanitizedName = "upload";
+            }
+
+            return $"img_{sanitizedName}{extension.ToLowerInvariant()}";
+        }
+
         [HttpDelete("/Images/{imageId:int}")]
         public async Task<IActionResult> Delete(int imageId)
         {
+            var existing = await _restaurantService.GetImageByIdAsync(imageId);
+            if (existing == null)
+            {
+                return NotFound(new { message = "Image not found." });
+            }
+
             bool deleted = await _restaurantService.DeleteImageAsync(imageId);
             if (!deleted)
             {
                 return NotFound(new { message = "Image not found." });
             }
 
+            DeletePhysicalImage(existing.ImageUrl);
+
             return Ok(new { message = "Image deleted successfully." });
+        }
+
+        private void DeletePhysicalImage(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return;
+            }
+
+            string fileName = Path.GetFileName(imageUrl.Replace('\\', '/'));
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            string uploadDir = Path.GetFullPath(
+                Path.Combine(
+                    _environment.ContentRootPath,
+                    "..",
+                    "FoodMarketNarrator.Maui",
+                    "Resources",
+                    "Images"));
+
+            string fullPath = Path.Combine(uploadDir, fileName);
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
 
         [HttpPatch("/Images/{imageId:int}/primary")]
