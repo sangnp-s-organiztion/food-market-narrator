@@ -7,17 +7,20 @@ public partial class App : Application
 {
     private readonly ILocationService _locationService;
     private readonly IPOIService _poiService;
+    private readonly IAudioService _audioService;
     private readonly ILanguageService _languageService;
     private bool _warmupStarted;
 
     public App(
         ILocationService locationService,
         IPOIService poiService,
+        IAudioService audioService,
         ILanguageService languageService)
 	{
 		InitializeComponent();
         _locationService = locationService;
 		_poiService = poiService;
+		_audioService = audioService;
 		_languageService = languageService;
 
         // Xử lý deep link khi app được mở từ QR code hoặc URL scheme
@@ -75,9 +78,11 @@ public partial class App : Application
             try
             {
                 // Console.WriteLine("[Perf][App] Warm-up started");
-                await Task.WhenAll(
-                    _poiService.GetAllPOIsAsync(),
-                    _languageService.GetAllLanguagesAsync());
+                var poiTask = _poiService.GetAllPOIsAsync();
+                var langTask = _languageService.GetAllLanguagesAsync();
+
+                await Task.WhenAll(poiTask, langTask);
+                await _audioService.PreloadAllActiveAudiosAsync(poiTask.Result);
                 // Console.WriteLine($"[Perf][App] Warm-up finished in {sw.ElapsedMilliseconds} ms");
             }
             catch (Exception)

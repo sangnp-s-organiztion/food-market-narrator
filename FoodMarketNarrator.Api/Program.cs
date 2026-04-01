@@ -159,10 +159,19 @@ public class Program
                 "Narration",
                 "audio"));
         Directory.CreateDirectory(mauiNarrationAudioDir);
+
+        // Serve audio files at /maui-audios (existing)
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(mauiNarrationAudioDir),
             RequestPath = "/maui-audios"
+        });
+
+        // Serve audio files at /audio (for mobile app preload and playback)
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(mauiNarrationAudioDir),
+            RequestPath = "/audio"
         });
 
         var uploadedAudiosDir = Path.GetFullPath(

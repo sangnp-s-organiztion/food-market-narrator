@@ -14,10 +14,12 @@ public partial class SettingsPage : ContentPage
     private readonly IFavoriteService? _favoriteService;
     private readonly IHistoryService? _historyService;
     private readonly NarrationFlowService? _narrationFlowService;
+    private readonly ILocationService? _locationService;
 
     private readonly Dictionary<string, Border> _languageOptions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLanguageOptionsLoaded;
+    private bool _isApplyingToggleState;
     private VerticalStackLayout? _languageOptionsContainer;
     private Grid? _languagePopupOverlay;
 
@@ -30,12 +32,29 @@ public partial class SettingsPage : ContentPage
         _favoriteService = services?.GetService<IFavoriteService>();
         _historyService = services?.GetService<IHistoryService>();
         _narrationFlowService = services?.GetService<NarrationFlowService>();
+        _locationService = services?.GetService<ILocationService>();
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_audioService != null)
+        {
+            _audioService.CacheSizeChanged -= OnCacheSizeChanged;
+            _audioService.CacheSizeChanged += OnCacheSizeChanged;
+        }
+
         await LoadSettingsAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        if (_audioService != null)
+        {
+            _audioService.CacheSizeChanged -= OnCacheSizeChanged;
+        }
+
+        base.OnDisappearing();
     }
 
     private async Task LoadSettingsAsync()
@@ -51,6 +70,13 @@ public partial class SettingsPage : ContentPage
         {
             var cacheBytes = await _audioService.GetCachedAudioSizeBytesAsync();
             CacheSizeLabel.Text = FormatBytes(cacheBytes);
+        }
+
+        if (_locationService != null)
+        {
+            _isApplyingToggleState = true;
+            BackgroundTrackingSwitch.IsToggled = _locationService.IsBackgroundTrackingModeEnabled;
+            _isApplyingToggleState = false;
         }
     }
 
@@ -345,6 +371,13 @@ public partial class SettingsPage : ContentPage
         if (_audioService == null)
             return;
 
+        var currentSize = await _audioService.GetCachedAudioSizeBytesAsync();
+        if (currentSize <= 0)
+        {
+            await DisplayAlert("Thông báo", "Hiện không có audio nào được tải.", "OK");
+            return;
+        }
+
         var confirm = await DisplayAlert(
             "Xóa cache",
             "Bạn có chắc muốn xóa toàn bộ audio đã tải về máy?",
@@ -402,5 +435,32 @@ public partial class SettingsPage : ContentPage
         }
 
         await DisplayAlert("Hoàn tất", "Đã xóa tất cả yêu thích", "OK");
+    }
+
+    private async void OnBackgroundTrackingToggled(object sender, ToggledEventArgs e)
+    {
+        if (_isApplyingToggleState || _locationService == null)
+            return;
+
+        var success = await _locationService.SetBackgroundTrackingModeAsync(e.Value);
+        if (!success && e.Value)
+        {
+            _isApplyingToggleState = true;
+            BackgroundTrackingSwitch.IsToggled = false;
+            _isApplyingToggleState = false;
+
+            await DisplayAlert(
+                "Chưa bật được",
+                "Bạn cần chọn 'Allow all the time' để bật theo dõi vị trí nền.",
+                "OK");
+        }
+    }
+
+    private void OnCacheSizeChanged(object? sender, long bytes)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            CacheSizeLabel.Text = FormatBytes(bytes);
+        });
     }
 }

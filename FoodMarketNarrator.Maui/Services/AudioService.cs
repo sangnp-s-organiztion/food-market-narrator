@@ -1,4 +1,5 @@
 ﻿using Plugin.Maui.Audio;
+using food_market_narrator.Models;
 using food_market_narrator.Settings;
 using System.Security.Cryptography;
 
@@ -15,12 +16,15 @@ public partial class AudioService : IAudioService
     private const long MaxAudioCacheBytes = 200L * 1024 * 1024;
     private const long MinDeviceFreeSpaceBytes = 50L * 1024 * 1024;
     private const string AudioCacheFolderName = "audio_cache";
+    private readonly SemaphoreSlim _preloadLock = new(1, 1);
+    private bool _preloadAttempted;
     public bool IsPlaying => _player?.IsPlaying ?? false;
     public bool IsPaused => _isPaused;
     public string? CurrentTrackKey => _currentTrackKey;
     public TimeSpan Duration => TimeSpan.FromSeconds(_player?.Duration ?? 0d);
     public TimeSpan CurrentPosition => TimeSpan.FromSeconds(_player?.CurrentPosition ?? 0d);
     public event EventHandler? PlaybackEnded;
+    public event EventHandler<long>? CacheSizeChanged;
 
     public AudioService(HttpClient httpClient)
     {
@@ -85,6 +89,110 @@ public partial class AudioService : IAudioService
         {
             System.Diagnostics.Debug.WriteLine($"[AudioService] ERROR PLAY SOUND: {ex}");
             _currentTrackKey = null;
+        }
+    }
+
+    public async Task PreloadAllActiveAudiosAsync(IEnumerable<POI> pois, CancellationToken cancellationToken = default)
+    {
+        if (pois == null)
+        {
+            return;
+        }
+
+        await _preloadLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (_preloadAttempted)
+            {
+                return;
+            }
+
+            _preloadAttempted = true;
+
+            var candidates = pois
+                .SelectMany(p => p.Audios)
+                .Where(a => a.IsActive && !string.IsNullOrWhiteSpace(a.AudioUrl))
+                .Select(a => new AudioPreloadTarget(a.LanguageCode, NormalizeInput(a.AudioUrl)))
+                .Distinct()
+                .ToList();
+
+            WriteDownloadStatusLog($"PRELOAD_START count={candidates.Count}");
+
+            if (candidates.Count == 0)
+            {
+                WriteDownloadStatusLog("PRELOAD_SKIP reason=no_candidates downloaded=false");
+                return;
+            }
+
+            var resolvedTargets = new List<ResolvedAudioPreloadTarget>(candidates.Count);
+            long totalBytes = 0;
+
+            foreach (var candidate in candidates)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var resolved = await ResolveAudioSizeAndUrlAsync(candidate, cancellationToken);
+                if (resolved == null)
+                {
+                    // Skip file này, tiếp tục file khác — không return cả preload
+                    WriteDownloadStatusLog($"PRELOAD_SKIP reason=url_not_resolved target={candidate.AudioInput} downloaded=false");
+                    continue;
+                }
+
+                totalBytes += resolved.SizeBytes;
+                resolvedTargets.Add(resolved);
+            }
+
+            if (resolvedTargets.Count == 0)
+            {
+                WriteDownloadStatusLog($"PRELOAD_SKIP reason=no_urls_resolved downloaded=false");
+                return;
+            }
+
+            var freeSpace = TryGetAvailableSpaceBytes();
+            // Check: free space phải đủ cho totalBytes CỘNG thêm buffer MinDeviceFreeSpaceBytes
+            var minRequiredFree = totalBytes + MinDeviceFreeSpaceBytes;
+            if (!freeSpace.HasValue || freeSpace.Value < minRequiredFree)
+            {
+                WriteDownloadStatusLog(
+                    $"PRELOAD_SKIP reason=insufficient_storage " +
+                    $"free={freeSpace?.ToString() ?? "unknown"} " +
+                    $"total_audio={totalBytes} " +
+                    $"min_required_free={minRequiredFree} " +
+                    $"buffer={MinDeviceFreeSpaceBytes} " +
+                    $"downloaded=false");
+                return;
+            }
+
+            WriteDownloadStatusLog($"PRELOAD_READY total={totalBytes} free={freeSpace.Value} downloaded=true");
+
+            var successCount = 0;
+            var failCount = 0;
+
+            foreach (var target in resolvedTargets)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var cachePath = GetAudioCachePath(target.LanguageCode, target.AudioInput);
+                if (IsValidAudioFile(cachePath))
+                {
+                    TouchCacheFile(cachePath);
+                    WriteDownloadStatusLog($"PRELOAD_FILE status=already_cached target={target.AudioInput} downloaded=true");
+                    successCount++;
+                    continue;
+                }
+
+                var downloaded = await TryDownloadAudioToCacheAsync(target.DownloadUrl, cachePath);
+                WriteDownloadStatusLog($"PRELOAD_FILE status={(downloaded ? "downloaded" : "failed")} target={target.AudioInput} downloaded={downloaded.ToString().ToLowerInvariant()}");
+                if (downloaded) successCount++; else failCount++;
+            }
+
+            NotifyCacheSizeChanged();
+            WriteDownloadStatusLog($"PRELOAD_DONE total_files={resolvedTargets.Count} success={successCount} failed={failCount} cache_size={GetCacheSizeBytes()}");
+        }
+        finally
+        {
+            _preloadLock.Release();
         }
     }
 
@@ -335,6 +443,7 @@ public partial class AudioService : IAudioService
 
             File.Move(tempPath, cachePath);
             TouchCacheFile(cachePath);
+            NotifyCacheSizeChanged();
         }
         catch
         {
@@ -393,12 +502,15 @@ public partial class AudioService : IAudioService
 
             File.Move(tempPath, cachePath);
             TouchCacheFile(cachePath);
+            NotifyCacheSizeChanged();
             // Console.WriteLine($"Audio downloaded and cached: {url}");
+            WriteDownloadStatusLog($"DOWNLOAD status=success url={url} downloaded=true");
             return true;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[AudioService] Download audio failed ({url}): {ex.Message}");
+            WriteDownloadStatusLog($"DOWNLOAD status=failed url={url} downloaded=false");
             return false;
         }
     }
@@ -428,6 +540,66 @@ public partial class AudioService : IAudioService
         }
         catch
         {
+            return null;
+        }
+    }
+
+    private async Task<ResolvedAudioPreloadTarget?> ResolveAudioSizeAndUrlAsync(AudioPreloadTarget target, CancellationToken cancellationToken)
+    {
+        foreach (var candidateUrl in BuildRemoteUrlCandidates(target.LanguageCode, target.AudioInput))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            WriteDownloadStatusLog($"PRELOAD_RESOLVE url={candidateUrl} lang={target.LanguageCode} target={target.AudioInput}");
+            var size = await TryGetRemoteFileSizeAsync(candidateUrl, cancellationToken);
+            if (size.HasValue && size.Value >= MinValidAudioBytes)
+            {
+                WriteDownloadStatusLog($"PRELOAD_RESOLVE_SUCCESS size={size.Value} bytes url={candidateUrl}");
+                return new ResolvedAudioPreloadTarget(target.LanguageCode, target.AudioInput, candidateUrl, size.Value);
+            }
+            WriteDownloadStatusLog($"PRELOAD_RESOLVE_FAILED size={size?.ToString() ?? "null"} url={candidateUrl}");
+        }
+
+        return null;
+    }
+
+    private async Task<long?> TryGetRemoteFileSizeAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var headRequest = new HttpRequestMessage(HttpMethod.Head, url);
+            using var headResponse = await _httpClient.SendAsync(headRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (headResponse.IsSuccessStatusCode)
+            {
+                var contentLength = headResponse.Content.Headers.ContentLength;
+                if (contentLength.HasValue && contentLength.Value > 0)
+                {
+                    return contentLength.Value;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            WriteDownloadStatusLog($"PRELOAD_HEAD_FAILED url={url} error={ex.Message}");
+        }
+
+        try
+        {
+            using var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
+            using var getResponse = await _httpClient.SendAsync(getRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (!getResponse.IsSuccessStatusCode)
+            {
+                WriteDownloadStatusLog($"PRELOAD_GET_FAILED url={url} status={getResponse.StatusCode}");
+                return null;
+            }
+
+            var contentLength = getResponse.Content.Headers.ContentLength;
+            WriteDownloadStatusLog($"PRELOAD_GET_SUCCESS url={url} contentLength={contentLength}");
+            return contentLength;
+        }
+        catch (Exception ex)
+        {
+            WriteDownloadStatusLog($"PRELOAD_GET_EXCEPTION url={url} error={ex.Message}");
             return null;
         }
     }
@@ -463,6 +635,8 @@ public partial class AudioService : IAudioService
         {
             // Console.WriteLine($"Clear audio cache failed: {ex.Message}");
         }
+
+        NotifyCacheSizeChanged();
 
         return Task.CompletedTask;
     }
@@ -642,6 +816,23 @@ public partial class AudioService : IAudioService
         }
     }
 
+    private void NotifyCacheSizeChanged()
+    {
+        try
+        {
+            CacheSizeChanged?.Invoke(this, GetCacheSizeBytes());
+        }
+        catch
+        {
+            // Ignore observer exceptions.
+        }
+    }
+
+    private static void WriteDownloadStatusLog(string message)
+    {
+        Console.WriteLine($"[AudioService] {message}");
+    }
+
     public void Pause()
     {
         if (_player is null || !_player.IsPlaying) return;
@@ -699,5 +890,8 @@ public partial class AudioService : IAudioService
         StopSound();
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
+
+    private sealed record AudioPreloadTarget(string LanguageCode, string AudioInput);
+    private sealed record ResolvedAudioPreloadTarget(string LanguageCode, string AudioInput, string DownloadUrl, long SizeBytes);
 }
 

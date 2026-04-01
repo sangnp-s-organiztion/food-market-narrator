@@ -5,18 +5,23 @@ namespace food_market_narrator.Services;
 
 public class LocationService : ILocationService
 {
+    private const string BackgroundTrackingModeKey = "background_tracking_mode_enabled";
     private bool _isTracking = false;
     private CancellationTokenSource? _trackingCts;
     private Task? _trackingTask;
     private Location? _lastPublishedLocation;
+    private readonly SemaphoreSlim _permissionFlowLock = new(1, 1);
+    private bool _hasPermissionFlowCompleted;
+    private bool _cachedTrackingPermissionGranted;
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
     private const double MinPublishDistanceMeters = 6;
     private static readonly GeolocationRequest TrackingRequest =
         new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
-    private bool _backgroundPermissionExplained;
 
     public event EventHandler<Location>? LocationChanged;
+
+    public bool IsBackgroundTrackingModeEnabled => Preferences.Get(BackgroundTrackingModeKey, false);
 
     // Lay vi tri hien tai cua nguoi dung.
     public async Task<Location?> GetCurrentLocationAsync()
@@ -50,7 +55,10 @@ public class LocationService : ILocationService
 
         try
         {
-            StartForegroundTrackingServiceIfNeeded();
+            if (IsBackgroundTrackingModeEnabled)
+            {
+                StartForegroundTrackingServiceIfNeeded();
+            }
 
             _isTracking = true;
             _trackingCts = new CancellationTokenSource();
@@ -85,6 +93,56 @@ public class LocationService : ILocationService
             _trackingCts = null;
             _trackingTask = null;
         }
+    }
+
+    public async Task<bool> SetBackgroundTrackingModeAsync(bool enabled)
+    {
+#if ANDROID
+        if (!enabled)
+        {
+            Preferences.Set(BackgroundTrackingModeKey, false);
+
+            if (_isTracking)
+            {
+                StopForegroundTrackingServiceIfNeeded();
+            }
+
+            return true;
+        }
+
+        var hasForegroundPermission = await EnsureTrackingPermissionFlowAsync();
+        if (!hasForegroundPermission)
+        {
+            Preferences.Set(BackgroundTrackingModeKey, false);
+            return false;
+        }
+
+        var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+        if (alwaysStatus != PermissionStatus.Granted)
+        {
+            if (Permissions.ShouldShowRationale<Permissions.LocationAlways>())
+            {
+                await ShowInfoAsync(
+                    "Can quyen vi tri nen",
+                    "Bat che do theo doi nen can quyen 'Allow all the time'.");
+            }
+
+            alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
+        }
+
+        var granted = alwaysStatus == PermissionStatus.Granted;
+        Preferences.Set(BackgroundTrackingModeKey, granted);
+
+        if (granted && _isTracking)
+        {
+            StartForegroundTrackingServiceIfNeeded();
+        }
+
+        return granted;
+#else
+        Preferences.Set(BackgroundTrackingModeKey, enabled);
+        return true;
+#endif
     }
 
     private async Task RunTrackingLoopAsync(CancellationToken cancellationToken)
@@ -136,6 +194,47 @@ public class LocationService : ILocationService
 
     private async Task<bool> EnsureTrackingPermissionFlowAsync()
     {
+        if (_hasPermissionFlowCompleted)
+        {
+            if (_cachedTrackingPermissionGranted)
+            {
+                return true;
+            }
+
+            // If user granted permission in Settings after a previous denial,
+            // detect it without showing another system prompt.
+            var grantedNow = await HasTrackingPermissionWithoutPromptAsync();
+            if (grantedNow)
+            {
+                _cachedTrackingPermissionGranted = true;
+            }
+
+            return _cachedTrackingPermissionGranted;
+        }
+
+        await _permissionFlowLock.WaitAsync();
+        try
+        {
+            if (_hasPermissionFlowCompleted)
+            {
+                return _cachedTrackingPermissionGranted;
+            }
+
+            _cachedTrackingPermissionGranted = await RequestTrackingPermissionInteractiveAsync();
+            _hasPermissionFlowCompleted = true;
+            return _cachedTrackingPermissionGranted;
+        }
+        finally
+        {
+            _permissionFlowLock.Release();
+        }
+    }
+
+    private static async Task<bool> RequestTrackingPermissionInteractiveAsync()
+    {
+#if ANDROID
+        // Request foreground permission first to avoid Android 11+ extra
+        // permission-management screen shown during background escalation.
         var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
         if (whileInUseStatus != PermissionStatus.Granted)
         {
@@ -153,45 +252,25 @@ public class LocationService : ILocationService
         {
             return false;
         }
-
-#if ANDROID
-        if (OperatingSystem.IsAndroidVersionAtLeast(29))
+#else
+        // Non-Android: request WhenInUse by default.
+        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        if (whileInUseStatus != PermissionStatus.Granted)
         {
-            var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
-            if (alwaysStatus != PermissionStatus.Granted)
-            {
-                if (!_backgroundPermissionExplained)
-                {
-                    _backgroundPermissionExplained = true;
-                    await ShowInfoAsync(
-                        "Bat tracking nen",
-                        "De theo doi vi tri khi app chay nen, hay chon phep vi tri \"Always allow\".");
-                }
-
-                alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
-            }
-
-            if (alwaysStatus != PermissionStatus.Granted)
-            {
-                var shouldOpenSettings = await ShowConfirmAsync(
-                    "Thieu quyen vi tri nen",
-                    "Android can quyen vi tri nen de tracking on dinh. Ban co muon mo Settings de cap quyen ngay khong?",
-                    "Mo Settings",
-                    "De sau");
-
-                if (shouldOpenSettings)
-                {
-                    AppInfo.Current.ShowSettingsUI();
-                }
-
-                return false;
-            }
+            whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
         }
 
+        if (whileInUseStatus != PermissionStatus.Granted)
+        {
+            return false;
+        }
+#endif
+
+#if ANDROID
+        // Notification permission: optional but requested so foreground
+        // notification is shown reliably on Android 13+.
         if (OperatingSystem.IsAndroidVersionAtLeast(33))
         {
-            // Notification permission is optional for location data, but requested so foreground
-            // notification can be shown reliably on Android 13+.
             var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
             if (notificationStatus != PermissionStatus.Granted)
             {
@@ -203,6 +282,23 @@ public class LocationService : ILocationService
         return true;
     }
 
+    private static async Task<bool> HasTrackingPermissionWithoutPromptAsync()
+    {
+#if ANDROID
+        var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+        if (alwaysStatus == PermissionStatus.Granted)
+        {
+            return true;
+        }
+
+        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        return whileInUseStatus == PermissionStatus.Granted;
+#else
+        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        return whileInUseStatus == PermissionStatus.Granted;
+#endif
+    }
+
     private static Task ShowInfoAsync(string title, string message)
     {
         return MainThread.InvokeOnMainThreadAsync(async () =>
@@ -212,24 +308,6 @@ public class LocationService : ILocationService
             {
                 await page.DisplayAlertAsync(title, message, "OK");
             }
-        });
-    }
-
-    private static Task<bool> ShowConfirmAsync(
-        string title,
-        string message,
-        string accept,
-        string cancel)
-    {
-        return MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            var page = Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (page == null)
-            {
-                return false;
-            }
-
-            return await page.DisplayAlertAsync(title, message, accept, cancel);
         });
     }
 

@@ -10,5 +10,7 @@ namespace food_market_narrator.Services
         Task<Location?> GetCurrentLocationAsync();
         Task StartTrackingAsync();
         void StopTracking();
+        bool IsBackgroundTrackingModeEnabled { get; }
+        Task<bool> SetBackgroundTrackingModeAsync(bool enabled);
     }
 }
