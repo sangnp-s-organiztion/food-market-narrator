@@ -6,6 +6,7 @@ public static class PublicEndpoints
     public static readonly IReadOnlyList<PublicEndpointDefinition> Definitions =
     [
         new("POST", "/Auth/login"),
+        new("POST", "/Auth/admin/login"),
         new("GET", "/Language"),
         new("GET", "/Language/{languageCode}"),
         new("GET", "/Restaurant"),

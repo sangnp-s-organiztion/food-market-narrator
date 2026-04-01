@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
-import { userApi, type UserResponse, type CreateUserRequest } from "@/lib/adminApi";
+import {
+  userApi,
+  type UserResponse,
+  type CreateUserRequest,
+} from "@/lib/adminApi";
 import { Plus, Lock, Unlock, Shield } from "lucide-react";
 import {
   Dialog,
@@ -24,10 +28,11 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 
 // Map API response → page-local shape
 function toPageUser(r: UserResponse) {
+  const normalizedRole = (r.role ?? "").toLowerCase();
   return {
     user_id: r.userId,
     username: r.username,
-    role: r.role === "Admin" ? ("admin" as const) : ("editor" as const),
+    role: normalizedRole === "admin" ? ("admin" as const) : ("saler" as const),
     is_active: r.isActive,
     created_at: r.createdAt ? r.createdAt.split("T")[0] : "",
   };
@@ -40,8 +45,8 @@ const UsersPage = () => {
   const [form, setForm] = useState<{
     username: string;
     password: string;
-    role: "admin" | "editor";
-  }>({ username: "", password: "", role: "editor" });
+    role: "admin" | "saler";
+  }>({ username: "", password: "", role: "saler" });
   const [confirmUser, setConfirmUser] = useState<{
     id: number;
     name: string;
@@ -69,7 +74,7 @@ const UsersPage = () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       toast.success("Tạo người dùng thành công");
       setDialogOpen(false);
-      setForm({ username: "", password: "", role: "editor" });
+      setForm({ username: "", password: "", role: "saler" });
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Tạo người dùng thất bại");
@@ -109,7 +114,7 @@ const UsersPage = () => {
     createMutation.mutate({
       username: form.username.trim(),
       password: form.password,
-      role: form.role === "admin" ? "Admin" : "Saler",
+      role: form.role,
     });
   };
 
@@ -119,7 +124,7 @@ const UsersPage = () => {
         <h1 className="page-title">Quản lý người dùng</h1>
         <Button
           onClick={() => {
-            setForm({ username: "", password: "", role: "editor" });
+            setForm({ username: "", password: "", role: "saler" });
             setDialogOpen(true);
           }}
           size="sm"
@@ -144,7 +149,10 @@ const UsersPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Đang tải…
                   </td>
                 </tr>
@@ -158,7 +166,10 @@ const UsersPage = () => {
               )}
               {!isLoading && !isError && pageUsers.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Chưa có người dùng nào.
                   </td>
                 </tr>
@@ -177,7 +188,7 @@ const UsersPage = () => {
                         }`}
                       >
                         <Shield className="h-3 w-3" />
-                        {u.role === "admin" ? "Quản trị viên" : "Biên tập viên"}
+                        {u.role === "admin" ? "Quản trị viên" : "Người bán"}
                       </span>
                     </td>
                     <td>
@@ -207,7 +218,9 @@ const UsersPage = () => {
                             ? "text-destructive"
                             : "text-muted-foreground"
                         }`}
-                        title={u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"}
+                        title={
+                          u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"
+                        }
                       >
                         {u.is_active ? (
                           <Unlock className="h-4 w-4" />
@@ -222,7 +235,7 @@ const UsersPage = () => {
                         onValueChange={(v) =>
                           roleMutation.mutate({
                             id: u.user_id,
-                            role: v === "admin" ? "Admin" : "Saler",
+                            role: v,
                           })
                         }
                       >
@@ -231,7 +244,7 @@ const UsersPage = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="admin">Quản trị viên</SelectItem>
-                          <SelectItem value="editor">Biên tập viên</SelectItem>
+                          <SelectItem value="saler">Người bán</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>
@@ -253,9 +266,7 @@ const UsersPage = () => {
               <Label className="text-xs">Tên đăng nhập</Label>
               <Input
                 value={form.username}
-                onChange={(e) =>
-                  setForm({ ...form, username: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 className="mt-1"
                 placeholder="username"
                 autoComplete="username"
@@ -266,9 +277,7 @@ const UsersPage = () => {
               <Input
                 type="password"
                 value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="mt-1"
                 placeholder="••••••"
                 autoComplete="new-password"
@@ -279,7 +288,7 @@ const UsersPage = () => {
               <Select
                 value={form.role}
                 onValueChange={(v) =>
-                  setForm({ ...form, role: v as "admin" | "editor" })
+                  setForm({ ...form, role: v as "admin" | "saler" })
                 }
               >
                 <SelectTrigger className="mt-1">
@@ -287,7 +296,7 @@ const UsersPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Quản trị viên</SelectItem>
-                  <SelectItem value="editor">Biên tập viên</SelectItem>
+                  <SelectItem value="saler">Người bán</SelectItem>
                 </SelectContent>
               </Select>
             </div>

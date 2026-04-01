@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using food_market_narrator_api.Models;
+using System.Globalization;
 
 namespace food_market_narrator_api.Repositories;
 
@@ -199,19 +200,19 @@ public class AnalyticsRepository
 
         // Group by session_id
         var grouped = pointDocs
-            .Where(p => p.Contains("session_id") && p.Contains("lng") && p.Contains("lat"))
+            .Where(p => p.Contains("session_id") && p.Contains("lng") && p.Contains("lat") && p.Contains("timestamp"))
             .GroupBy(p => p["session_id"].ToString());
 
         return grouped.Select(g => new SessionPath
         {
             SessionId = g.Key,
             Points = g
-                .OrderBy(p => p["timestamp"].ToUniversalTime())
+                .OrderBy(p => GetDateTimeValue(p, "timestamp", "created_at"))
                 .Select(p => new GeoJsonPointWithTimestamp
                 {
                     Longitude = p["lng"].ToDouble(),
                     Latitude = p["lat"].ToDouble(),
-                    Timestamp = p["timestamp"].ToUniversalTime()
+                    Timestamp = GetDateTimeValue(p, "timestamp", "created_at")
                 })
                 .ToList()
         }).ToList();
@@ -222,11 +223,29 @@ public class AnalyticsRepository
     {
         var pipeline = new[]
         {
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time",
+                    new BsonDocument("$ifNull", new BsonArray
+                    {
+                        "$timestamp",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            "$end_time",
+                            new BsonDocument("$ifNull", new BsonArray
+                            {
+                                "$start_time",
+                                "$created_at"
+                            })
+                        })
+                    }))),
             new BsonDocument("$match",
-                new BsonDocument("duration",
-                    new BsonDocument("$gte", 5))),
+                new BsonDocument
+                {
+                    { "duration", new BsonDocument("$gte", 5) },
+                    { "event_time", new BsonDocument("$ne", BsonNull.Value) }
+                }),
             new BsonDocument("$sort",
-                new BsonDocument("timestamp", -1)),
+                new BsonDocument("event_time", -1)),
             new BsonDocument("$limit", limit),
             new BsonDocument("$project",
                 new BsonDocument
@@ -235,7 +254,7 @@ public class AnalyticsRepository
                     { "audio_id", 1 },
                     { "restaurant_id", 1 },
                     { "duration", 1 },
-                    { "timestamp", 1 }
+                    { "timestamp", "$event_time" }
                 })
         };
 
@@ -245,11 +264,56 @@ public class AnalyticsRepository
 
         return results.Select(r => new ActivityRecord
         {
-            AudioId = r["audio_id"].ToInt32(),
-            RestaurantId = r["restaurant_id"].ToString(),
-            Duration = r["duration"].ToInt32(),
-            Timestamp = r["timestamp"].ToUniversalTime()
+            AudioId = GetIntValue(r, "audio_id"),
+            RestaurantId = GetStringValue(r, "restaurant_id"),
+            Duration = GetIntValue(r, "duration"),
+            Timestamp = GetDateTimeValue(r, "timestamp", "end_time", "start_time", "created_at")
         }).ToList();
+    }
+
+    private static int GetIntValue(BsonDocument doc, string key, int defaultValue = 0)
+    {
+        if (!doc.TryGetValue(key, out var value) || value.IsBsonNull)
+            return defaultValue;
+
+        return value.BsonType switch
+        {
+            BsonType.Int32 => value.AsInt32,
+            BsonType.Int64 => (int)value.AsInt64,
+            BsonType.Double => (int)value.AsDouble,
+            BsonType.Decimal128 => (int)value.AsDecimal,
+            BsonType.String when int.TryParse(value.AsString, out var parsed) => parsed,
+            _ => defaultValue
+        };
+    }
+
+    private static string GetStringValue(BsonDocument doc, string key, string defaultValue = "")
+    {
+        if (!doc.TryGetValue(key, out var value) || value.IsBsonNull)
+            return defaultValue;
+
+        return value.ToString();
+    }
+
+    private static DateTime GetDateTimeValue(BsonDocument doc, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            if (!doc.TryGetValue(key, out var value) || value.IsBsonNull)
+                continue;
+
+            switch (value.BsonType)
+            {
+                case BsonType.DateTime:
+                    return value.ToUniversalTime();
+                case BsonType.String:
+                    if (DateTime.TryParse(value.AsString, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
+                        return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+                    break;
+            }
+        }
+
+        return DateTime.UtcNow;
     }
 
     // ─── Internal models ──────────────────────────────────────────────────────

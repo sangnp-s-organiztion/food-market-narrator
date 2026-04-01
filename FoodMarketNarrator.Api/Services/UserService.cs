@@ -38,11 +38,13 @@ public class UserService
             return null; // username already taken
         }
 
+        var normalizedRole = UserRoleParser.NormalizeOrThrow(request.Role);
+
         var user = new UserModel
         {
             Username = request.Username.Trim(),
             Password = request.Password, // store as-is to match existing DB schema
-            Role = request.Role,
+            Role = normalizedRole,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -53,7 +55,8 @@ public class UserService
 
     public async Task<bool> UpdateUserRoleAsync(int userId, string role)
     {
-        return await _userRepository.UpdateRoleAsync(userId, role);
+        var normalizedRole = UserRoleParser.NormalizeOrThrow(role);
+        return await _userRepository.UpdateRoleAsync(userId, normalizedRole);
     }
 
     public async Task<bool> UpdateUserStatusAsync(int userId, bool isActive)
@@ -63,11 +66,15 @@ public class UserService
 
     private static UserResponse MapUser(UserModel u)
     {
+        var normalizedRole = UserRoleParser.TryParse(u.Role, out var parsedRole)
+            ? parsedRole.ToString()
+            : (u.Role ?? string.Empty).Trim().ToLowerInvariant();
+
         return new UserResponse
         {
             UserId = u.UserId,
             Username = u.Username,
-            Role = u.Role,
+            Role = normalizedRole,
             IsActive = u.IsActive,
             CreatedAt = u.CreatedAt
         };
