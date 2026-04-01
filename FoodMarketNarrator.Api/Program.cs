@@ -27,11 +27,12 @@ public class Program
         builder.Services.AddScoped<LanguageService>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<AnalyticsService>();
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<MongoHealthRepository>();
         builder.Services.AddScoped<MongoHealthService>();
         builder.Services.AddScoped<AnalyticsRepository>();
-        builder.Services.AddScoped<AnalyticsService>();
+
 
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -199,6 +200,7 @@ public class Program
         });
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<food_market_narrator_api.Middleware.AuditLoggingMiddleware>();
         app.MapControllers();
         app.Run();
     }
