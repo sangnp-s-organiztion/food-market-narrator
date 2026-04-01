@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
+import { MapPin } from "lucide-react";
 import type { HeatmapPoint, TopRestaurant } from "@/types/analytics";
 
 interface HeatmapSectionProps {
@@ -72,6 +73,50 @@ export function HeatmapSection({
       }),
     [points],
   );
+
+  const poiCoordinates = useMemo(() => {
+    type PoiWithCoords = TopRestaurant & {
+      latitude?: number;
+      longitude?: number;
+    };
+
+    return (restaurantPois as PoiWithCoords[])
+      .filter(
+        (r) =>
+          typeof r.latitude === "number" && typeof r.longitude === "number",
+      )
+      .map(
+        (r) => [r.latitude as number, r.longitude as number] as L.LatLngTuple,
+      );
+  }, [restaurantPois]);
+
+  const handleRecenterMap = () => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (weightedHeatPoints.length > 0) {
+      const bounds = L.latLngBounds(
+        weightedHeatPoints.map((p) => [p[0], p[1]] as L.LatLngTuple),
+      );
+      map.fitBounds(bounds, {
+        padding: [40, 40],
+        animate: true,
+        duration: 0.8,
+      });
+      return;
+    }
+
+    if (poiCoordinates.length > 0) {
+      map.fitBounds(L.latLngBounds(poiCoordinates), {
+        padding: [40, 40],
+        animate: true,
+        duration: 0.8,
+      });
+      return;
+    }
+
+    map.flyTo(MAP_CENTER, MAP_ZOOM, { animate: true, duration: 0.8 });
+  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -160,16 +205,10 @@ export function HeatmapSection({
 
     // ── POI restaurant markers ───────────────────────────────────────────────
     // Only render POI markers when coordinates are available from API payload.
-    type PoiWithCoords = TopRestaurant & {
-      latitude?: number;
-      longitude?: number;
-    };
-    const poisWithCoords = (restaurantPois as PoiWithCoords[]).filter(
-      (r) => typeof r.latitude === "number" && typeof r.longitude === "number",
-    );
-    poisWithCoords.forEach((r) => {
-      const lat = r.latitude as number;
-      const lng = r.longitude as number;
+    restaurantPois.forEach((r) => {
+      const lat = (r as TopRestaurant & { latitude?: number }).latitude;
+      const lng = (r as TopRestaurant & { longitude?: number }).longitude;
+      if (typeof lat !== "number" || typeof lng !== "number") return;
       const name = r.restaurantName ?? "";
 
       L.circleMarker([lat, lng], {
@@ -249,6 +288,16 @@ export function HeatmapSection({
       )}
       <div className="relative">
         <div ref={mapRef} className="h-[460px] rounded-lg overflow-hidden" />
+
+        <button
+          type="button"
+          onClick={handleRecenterMap}
+          title="Về vị trí hiện tại"
+          aria-label="Về vị trí hiện tại"
+          className="absolute left-3 top-[96px] z-[500] inline-flex h-[30px] w-[30px] items-center justify-center rounded-[4px] border border-border bg-background text-foreground shadow-sm hover:bg-accent"
+        >
+          <MapPin className="h-3.5 w-3.5" />
+        </button>
 
         <div className="absolute right-3 top-3 z-[500] overflow-hidden rounded-lg border border-border bg-background shadow-sm">
           <button
