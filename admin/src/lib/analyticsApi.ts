@@ -1,0 +1,99 @@
+import type {
+  KpiResponse,
+  HeatmapResponse,
+  TopAudiosResponse,
+  TopRestaurantsResponse,
+  MovementPathsResponse,
+  RecentActivityResponse,
+  TopAudio,
+} from "@/types/analytics";
+
+// ─── Base ───────────────────────────────────────────────────────────────────
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5044";
+
+async function analyticsFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    credentials: "include", // send cookie auth
+  });
+
+  if (!res.ok) {
+    throw new Error(`Analytics API error ${res.status}: ${res.statusText}`);
+  }
+
+  return res.json() as Promise<T>;
+}
+
+// ─── KPIs ────────────────────────────────────────────────────────────────────
+
+export const analyticsApi = {
+  /**
+   * GET /api/analytics/kpis
+   * Returns: total sessions, avg listening time, total valid plays
+   */
+  async getKpis(): Promise<KpiResponse> {
+    return analyticsFetch<KpiResponse>("/api/analytics/kpis");
+  },
+
+  /**
+   * GET /api/analytics/heatmap?hours=24
+   * @param hours - lookback window (default 24, max 720)
+   */
+  async getHeatmap(hours = 24): Promise<HeatmapResponse> {
+    return analyticsFetch<HeatmapResponse>(
+      `/api/analytics/heatmap?hours=${hours}`
+    );
+  },
+
+  /**
+   * GET /api/analytics/top-audios?limit=10
+   * Returns top N most-listened audios with play count, avg duration,
+   * restaurant name, and language name (enriched from MSSQL).
+   */
+  async getTopAudios(limit = 10): Promise<TopAudiosResponse> {
+    return analyticsFetch<TopAudiosResponse>(
+      `/api/analytics/top-audios?limit=${limit}`
+    );
+  },
+
+  /**
+   * GET /api/analytics/top-restaurants?limit=10
+   * Returns top N restaurants by play count with avg duration.
+   */
+  async getTopRestaurants(limit = 10): Promise<TopRestaurantsResponse> {
+    return analyticsFetch<TopRestaurantsResponse>(
+      `/api/analytics/top-restaurants?limit=${limit}`
+    );
+  },
+
+  /**
+   * GET /api/analytics/movement-paths?sessionLimit=100
+   * Returns anonymous GPS paths (ordered per session).
+   * @param sessionLimit - max sessions to return (default 100, max 500)
+   */
+  async getMovementPaths(
+    sessionLimit = 100
+  ): Promise<MovementPathsResponse> {
+    return analyticsFetch<MovementPathsResponse>(
+      `/api/analytics/movement-paths?sessionLimit=${sessionLimit}`
+    );
+  },
+
+  /**
+   * GET /api/analytics/recent-activity?limit=20
+   * Returns recent valid audio plays with restaurant names.
+   */
+  async getRecentActivity(limit = 20): Promise<RecentActivityResponse> {
+    return analyticsFetch<RecentActivityResponse>(
+      `/api/analytics/recent-activity?limit=${limit}`
+    );
+  },
+
+  /**
+   * GET /api/analytics/audio-stats
+   * Full audio stats table (all audios with plays, no top-N limit).
+   */
+  async getAudioStats(): Promise<TopAudio[]> {
+    return analyticsFetch<TopAudio[]>("/api/analytics/audio-stats");
+  },
+};

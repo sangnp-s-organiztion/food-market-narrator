@@ -1,0 +1,12 @@
+[
+  { "session_id": {"$oid": "65432101abcdef0123456781"}, "restaurant_id": "oc-loan", "audio_id": 8, "start_time": {"$date": "2026-03-12T08:05:00Z"}, "end_time": {"$date": "2026-03-12T08:07:30Z"}, "duration": 150 },
+  { "session_id": {"$oid": "65432101abcdef0123456782"}, "restaurant_id": "oc-oanh", "audio_id": 9, "start_time": {"$date": "2026-03-12T08:10:00Z"}, "end_time": {"$date": "2026-03-12T08:12:00Z"}, "duration": 120 },
+  { "session_id": {"$oid": "65432101abcdef0123456783"}, "restaurant_id": "oc-phat", "audio_id": 10, "start_time": {"$date": "2026-03-12T08:15:00Z"}, "end_time": {"$date": "2026-03-12T08:19:00Z"}, "duration": 240 },
+  { "session_id": {"$oid": "65432101abcdef0123456784"}, "restaurant_id": "oc-loan", "audio_id": 8, "start_time": {"$date": "2026-03-12T08:20:00Z"}, "end_time": {"$date": "2026-03-12T08:22:30Z"}, "duration": 150 },
+  { "session_id": {"$oid": "65432101abcdef0123456785"}, "restaurant_id": "chilli-bbq-hotpot-restaurant", "audio_id": 1, "start_time": {"$date": "2026-03-12T08:25:00Z"}, "end_time": {"$date": "2026-03-12T08:26:30Z"}, "duration": 90 },
+  { "session_id": {"$oid": "65432101abcdef0123456786"}, "restaurant_id": "quan-oc-vu", "audio_id": 13, "start_time": {"$date": "2026-03-12T09:10:00Z"}, "end_time": {"$date": "2026-03-12T09:14:00Z"}, "duration": 240 },
+  { "session_id": {"$oid": "65432101abcdef0123456787"}, "restaurant_id": "the-gioi-bo", "audio_id": 15, "start_time": {"$date": "2026-03-12T09:20:00Z"}, "end_time": {"$date": "2026-03-12T09:23:00Z"}, "duration": 180 },
+  { "session_id": {"$oid": "65432101abcdef0123456788"}, "restaurant_id": "oc-loan", "audio_id": 8, "start_time": {"$date": "2026-03-12T09:30:00Z"}, "end_time": {"$date": "2026-03-12T09:33:00Z"}, "duration": 180 },
+  { "session_id": {"$oid": "65432101abcdef0123456789"}, "restaurant_id": "lau-met-nuong-79k", "audio_id": 3, "start_time": {"$date": "2026-03-12T10:10:00Z"}, "end_time": {"$date": "2026-03-12T10:12:00Z"}, "duration": 120 },
+  { "session_id": {"$oid": "65432101abcdef0123456790"}, "restaurant_id": "oc-oanh", "audio_id": 9, "start_time": {"$date": "2026-03-12T10:40:00Z"}, "end_time": {"$date": "2026-03-12T10:43:00Z"}, "duration": 180 }
+]

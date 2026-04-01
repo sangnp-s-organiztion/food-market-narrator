@@ -17,6 +17,11 @@ namespace food_market_narrator_api.Repositories
             return await _context.User.ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.User.CountAsync();
+        }
+
         // get user by id
         public async Task<UserModel> GetByIdAsync(int id)
         {
@@ -41,6 +46,31 @@ namespace food_market_narrator_api.Repositories
 
             // Current DB stores password_hash; compare directly until hash verification is implemented.
             return string.Equals(user.Password, passwordHash, StringComparison.Ordinal);
+        }
+
+        public async Task<UserModel> CreateAsync(UserModel user)
+        {
+            _context.User.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<bool> UpdateRoleAsync(int userId, string role)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.Role = role;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusAsync(int userId, bool isActive)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

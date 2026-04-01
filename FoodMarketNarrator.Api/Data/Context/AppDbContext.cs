@@ -21,4 +21,5 @@ public class AppDbContext : DbContext
     public DbSet<DishModel> Dish { get; set; }
     public DbSet<LanguageModel> Language { get; set; }
     public DbSet<UserModel> User { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 }
