@@ -2,6 +2,7 @@ using food_market_narrator.Services;
 using Microsoft.Extensions.DependencyInjection;
 using food_market_narrator.Models;
 using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.ApplicationModel;
 using System.Collections.Generic;
 using food_market_narrator.Helpers;
 
@@ -14,10 +15,12 @@ public partial class SettingsPage : ContentPage
     private readonly IFavoriteService? _favoriteService;
     private readonly IHistoryService? _historyService;
     private readonly NarrationFlowService? _narrationFlowService;
+    private readonly ILocationService? _locationService;
 
     private readonly Dictionary<string, Border> _languageOptions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Label> _languageChecks = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLanguageOptionsLoaded;
+    private bool _isUpdatingBackgroundToggle;
     private VerticalStackLayout? _languageOptionsContainer;
     private Grid? _languagePopupOverlay;
 
@@ -30,6 +33,7 @@ public partial class SettingsPage : ContentPage
         _favoriteService = services?.GetService<IFavoriteService>();
         _historyService = services?.GetService<IHistoryService>();
         _narrationFlowService = services?.GetService<NarrationFlowService>();
+        _locationService = services?.GetService<ILocationService>();
     }
 
     protected override async void OnAppearing()
@@ -52,6 +56,39 @@ public partial class SettingsPage : ContentPage
             var cacheBytes = await _audioService.GetCachedAudioSizeBytesAsync();
             CacheSizeLabel.Text = FormatBytes(cacheBytes);
         }
+
+        await UpdateBackgroundPermissionStatusAsync();
+    }
+
+    private async Task UpdateBackgroundPermissionStatusAsync()
+    {
+#if ANDROID
+        if (_locationService == null)
+        {
+            BackgroundPermissionStatusLabel.Text = "Không thể kiểm tra quyền";
+            _isUpdatingBackgroundToggle = true;
+            BackgroundPermissionSwitch.IsToggled = false;
+            _isUpdatingBackgroundToggle = false;
+            BackgroundPermissionSwitch.IsEnabled = false;
+            return;
+        }
+
+        var granted = await _locationService.HasBackgroundLocationPermissionAsync();
+        BackgroundPermissionStatusLabel.Text = granted
+            ? "Đã cấp quyền vị trí nền"
+            : "Chưa cấp quyền vị trí nền";
+
+        _isUpdatingBackgroundToggle = true;
+        BackgroundPermissionSwitch.IsToggled = granted;
+        _isUpdatingBackgroundToggle = false;
+        BackgroundPermissionSwitch.IsEnabled = true;
+#else
+        BackgroundPermissionStatusLabel.Text = "Thiết bị này không yêu cầu quyền vị trí nền";
+        _isUpdatingBackgroundToggle = true;
+        BackgroundPermissionSwitch.IsToggled = false;
+        _isUpdatingBackgroundToggle = false;
+        BackgroundPermissionSwitch.IsEnabled = false;
+#endif
     }
 
     private string GetLanguageDisplayName(string code)
@@ -402,5 +439,62 @@ public partial class SettingsPage : ContentPage
         }
 
         await DisplayAlert("Hoàn tất", "Đã xóa tất cả yêu thích", "OK");
+    }
+
+    private async void OnBackgroundLocationToggled(object sender, ToggledEventArgs e)
+    {
+        if (_isUpdatingBackgroundToggle)
+            return;
+
+#if !ANDROID
+        return;
+#else
+        if (_locationService == null)
+        {
+            _isUpdatingBackgroundToggle = true;
+            BackgroundPermissionSwitch.IsToggled = false;
+            _isUpdatingBackgroundToggle = false;
+            await DisplayAlert("Thông báo", "Không thể yêu cầu quyền vị trí nền lúc này.", "OK");
+            return;
+        }
+
+        if (e.Value)
+        {
+            var granted = await _locationService.RequestBackgroundLocationPermissionAsync();
+            _isUpdatingBackgroundToggle = true;
+            BackgroundPermissionSwitch.IsToggled = granted;
+            _isUpdatingBackgroundToggle = false;
+            await UpdateBackgroundPermissionStatusAsync();
+
+            if (!granted)
+            {
+                await DisplayAlert("Thông báo", "Bạn chưa cấp quyền vị trí nền.", "OK");
+            }
+
+            return;
+        }
+
+        var hasPermission = await _locationService.HasBackgroundLocationPermissionAsync();
+        if (!hasPermission)
+        {
+            await UpdateBackgroundPermissionStatusAsync();
+            return;
+        }
+
+        _isUpdatingBackgroundToggle = true;
+        BackgroundPermissionSwitch.IsToggled = true;
+        _isUpdatingBackgroundToggle = false;
+
+        var openSettings = await DisplayAlert(
+            "Quyền vị trí nền",
+            "Để tắt quyền vị trí nền, vui lòng vào Cài đặt hệ thống của ứng dụng.",
+            "Mở cài đặt",
+            "Để sau");
+
+        if (openSettings)
+        {
+            AppInfo.ShowSettingsUI();
+        }
+#endif
     }
 }
