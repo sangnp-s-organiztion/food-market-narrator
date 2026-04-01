@@ -199,6 +199,7 @@ public class Program
         });
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<food_market_narrator_api.Middleware.AuditLoggingMiddleware>();
         app.MapControllers();
         app.Run();
     }
