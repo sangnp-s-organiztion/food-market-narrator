@@ -1,5 +1,6 @@
 using food_market_narrator_api.Data.Context;
 using food_market_narrator_api.DTOs.AuditLog;
+using food_market_narrator_api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace food_market_narrator_api.Services;
@@ -57,5 +58,11 @@ public class AuditLogService
             .ToListAsync();
 
         return (items, totalCount);
+    }
+
+    public async Task WriteLogAsync(AuditLog log)
+    {
+        _db.AuditLogs.Add(log);
+        await _db.SaveChangesAsync();
     }
 }
