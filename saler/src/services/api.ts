@@ -118,10 +118,19 @@ type ApiDish = {
   description?: string | null;
   restaurantId: string;
   imageId?: number | null;
+  imageFileName?: string | null;
   createdAt?: string | null;
 };
 
 function mapDish(item: ApiDish): Dish {
+  // Build image_url from ImageFileName — backend returns just the filename (e.g. "dish_1.jpg")
+  // We prepend /maui-images/ so normalizeImageUrl can resolve it to a full URL
+  let image_url: string | undefined;
+  if (item.imageFileName) {
+    const filename = item.imageFileName.replace(/\\/g, "/").trim();
+    image_url = normalizeImageUrl(filename);
+  }
+
   return {
     dish_id: item.dishId,
     name: item.name ?? "",
@@ -129,6 +138,7 @@ function mapDish(item: ApiDish): Dish {
     description: item.description ?? "",
     restaurant_id: item.restaurantId,
     image_id: item.imageId ?? null,
+    image_url,
     created_at: item.createdAt ?? new Date().toISOString(),
   };
 }
@@ -373,6 +383,26 @@ export async function reorderImagesApi(
       }),
     },
   );
+}
+
+/**
+ * Replaces the image file for an existing image.
+ * Keeps the original is_primary and sort_order values.
+ */
+export async function replaceImageApi(
+  imageId: number,
+  file: File,
+): Promise<RestaurantImage> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const data = await request<ApiImage>(`/Images/${imageId}`, {
+    method: "PUT",
+    body: form,
+    skipJsonContentType: true,
+  });
+
+  return mapImage(data);
 }
 
 export async function getLanguagesApi(): Promise<Language[]> {

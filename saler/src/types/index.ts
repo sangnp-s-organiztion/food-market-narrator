@@ -40,6 +40,7 @@ export interface Dish {
   description: string;
   restaurant_id: string;
   image_id: number | null;
+  image_url?: string;
   created_at: string;
 }
 
