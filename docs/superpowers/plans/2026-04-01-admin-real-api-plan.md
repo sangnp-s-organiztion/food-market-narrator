@@ -498,7 +498,7 @@ public class ListenCountItem
 
 - [ ] **Step 3: Thêm method vào AnalyticsRepository.cs**
 
-Thêm vào cuối class (trước `}` đóng):
+Thêm vào cuối class (trước `}` đóng của class):
 
 ```csharp
 // ─── Daily listen counts for timeseries (group by date, valid plays only) ─
@@ -511,8 +511,8 @@ public async Task<List<DailyListenCount>> GetDailyListenCountsAsync(int days = 1
         new BsonDocument("$match",
             new BsonDocument
             {
-                { "timestamp", new BsonDocument("$gte", since)),
-                { "duration", new BsonDocument("$gte", 5))
+                { "timestamp", new BsonDocument("$gte", since) },
+                { "duration", new BsonDocument("$gte", 5) }
             }),
         new BsonDocument("$group",
             new BsonDocument
@@ -631,20 +631,30 @@ git commit -m "feat(api): add entity-counts and listens-timeseries analytics end
 
 **Files:**
 - Modify: `FoodMarketNarrator.Api/Controllers/AuthController.cs`
+- Modify: `FoodMarketNarrator.Api/Program.cs` (inject AuditLogService — already registered in Task 3)
 
-- [ ] **Step 1: Đọc AuthController.cs hiện tại**
+**AuthController thực tế:** Sử dụng `ClaimTypes.NameIdentifier` cho userId, `ClaimTypes.Name` cho username. Không có claim "user_id".
 
-Xem nội dung AuthController để biết cách login/logout được xử lý.
+- [ ] **Step 1: Inject AuditLogService vào AuthController**
 
-- [ ] **Step 2: Thêm audit log cho LOGIN và LOGOUT**
-
-Trong AuthController, inject `AuditLogService` và gọi `WriteLogAsync`:
-- Sau khi login thành công: ghi action="LOGIN", targetType="User"
-- Khi logout: ghi action="LOGOUT", targetType="User"
-
-Example pattern (điều chỉnh theo code thực tế):
+Thêm field và constructor param:
 ```csharp
-// Trong Login action, sau khi SetAuthenticated:
+private readonly AuthService _authService;
+private readonly AuditLogService _auditLogService; // THÊM
+
+public AuthController(AuthService authService, AuditLogService auditLogService) // THÊM
+{
+    _authService = authService;
+    _auditLogService = auditLogService; // THÊM
+}
+```
+
+- [ ] **Step 2: Thêm audit log sau login thành công**
+
+Sau `await HttpContext.SignInAsync(...)` và trước `return Ok(...)`:
+```csharp
+await HttpContext.SignInAsync(...);
+
 await _auditLogService.WriteLogAsync(new AuditLog
 {
     UserId = user.UserId,
@@ -656,27 +666,48 @@ await _auditLogService.WriteLogAsync(new AuditLog
     CreatedAt = DateTime.UtcNow
 });
 
-// Trong Logout action:
-var userIdClaim = User.FindFirst("user_id")?.Value;
-var username = User.Identity?.Name;
-if (int.TryParse(userIdClaim, out var uid))
+return Ok(new LoginResponse { ... });
+```
+
+- [ ] **Step 3: Thêm audit log trong Logout action**
+
+```csharp
+[HttpPost("logout")]
+[Authorize]
+public async Task<IActionResult> Logout()
 {
-    await _auditLogService.WriteLogAsync(new AuditLog
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var username = User.Identity?.Name ?? "unknown";
+
+    if (int.TryParse(userIdClaim, out var uid))
     {
-        UserId = uid,
-        Username = username ?? "unknown",
-        Action = "LOGOUT",
-        TargetType = "User",
-        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-        CreatedAt = DateTime.UtcNow
-    });
+        await _auditLogService.WriteLogAsync(new AuditLog
+        {
+            UserId = uid,
+            Username = username,
+            Action = "LOGOUT",
+            TargetType = "User",
+            TargetId = uid.ToString(),
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Ok(new { message = "Logged out successfully." });
 }
 ```
 
-- [ ] **Step 3: Build + commit**
+- [ ] **Step 4: Build + commit**
 
 Run: `cd FoodMarketNarrator.Api && dotnet build`
-Commit: `git add ... && git commit -m "feat(api): log LOGIN/LOGOUT actions in AuthController"`
+Expected: Build thành công
+
+Commit:
+```bash
+git add FoodMarketNarrator.Api/Controllers/AuthController.cs
+git commit -m "feat(api): log LOGIN/LOGOUT audit events in AuthController"
+```
 
 ---
 
@@ -911,13 +942,13 @@ import { auditApi } from "@/lib/auditApi";
 import type { AuditLogItem } from "@/types/analytics";
 
 const ACTION_LABELS: Record<string, { label: string; cls: string }> = {
-  LOGIN:        { label: "Đăng nhập",    cls: "bg-emerald-100 text-emerald-700" },
-  LOGOUT:       { label: "Đăng xuất",   cls: "bg-slate-100 text-slate-700" },
-  CREATE:       { label: "Tạo mới",     cls: "bg-blue-100 text-blue-700" },
-  UPDATE:       { label: "Cập nhật",    cls: "bg-amber-100 text-amber-700" },
-  UPDATE_STATUS:{ label: "Đổi trạng thái", cls: "bg-amber-100 text-amber-700" },
-  UPDATE_ROLE: { label: "Đổi quyền",   cls: "bg-purple-100 text-purple-700" },
-  DELETE:      { label: "Xóa",          cls: "bg-red-100 text-red-700" },
+  LOGIN:         { label: "Đăng nhập",       cls: "bg-emerald-100 text-emerald-700" },
+  LOGOUT:        { label: "Đăng xuất",        cls: "bg-slate-100 text-slate-700" },
+  CREATE:        { label: "Tạo mới",          cls: "bg-blue-100 text-blue-700" },
+  UPDATE:        { label: "Cập nhật",         cls: "bg-amber-100 text-amber-700" },
+  UPDATE_STATUS: { label: "Đổi trạng thái",  cls: "bg-amber-100 text-amber-700" },
+  UPDATE_ROLE:   { label: "Đổi quyền",        cls: "bg-purple-100 text-purple-700" },
+  DELETE:        { label: "Xóa",              cls: "bg-red-100 text-red-700" },
 };
 
 function formatTimestamp(iso: string): string {
