@@ -10,6 +10,7 @@ export interface KpiResponse {
 export interface HeatmapPoint {
   longitude: number;
   latitude: number;
+  intensity?: number;
 }
 
 export interface HeatmapResponse {

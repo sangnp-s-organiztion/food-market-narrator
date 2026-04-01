@@ -1,5 +1,6 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
+import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import type { HeatmapPoint, TopRestaurant } from "@/types/analytics";
 
@@ -8,102 +9,71 @@ interface HeatmapSectionProps {
   points?: HeatmapPoint[];
   /** Restaurant list for POI markers on map */
   restaurantPois?: TopRestaurant[];
+  /** Current lookback window (hours) */
+  lookbackHours: 1 | 6 | 24 | 168;
+  /** Change lookback window */
+  onLookbackHoursChange: (hours: 1 | 6 | 24 | 168) => void;
 }
 
 // Vinh Khanh Food Street — center of data (Ho Chi Minh City, District 4)
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
-const GRID_DECIMALS = 4; // ~11m grid at equator, enough for hotspot grouping
-
-const HEAT_RAMP = [
-  { t: 0.0, color: "#0000ff" }, // blue
-  { t: 0.2, color: "#00ffff" }, // cyan
-  { t: 0.4, color: "#00ff00" }, // green
-  { t: 0.7, color: "#ffff00" }, // yellow
-  { t: 0.9, color: "#ff0000" }, // red
-  { t: 1.0, color: "#ffffff" }, // white (hottest)
+const HEAT_PALETTE_5 = ["#0000ff", "#00ffff", "#00ff00", "#ffff00", "#ff0000"];
+const HEAT_PALETTE_7 = [
+  "#000000",
+  "#0000ff",
+  "#00ffff",
+  "#00ff00",
+  "#ffff00",
+  "#ff0000",
+  "#ffffff",
 ];
 
-function clamp01(value: number): number {
-  return Math.max(0, Math.min(1, value));
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const normalized = hex.replace("#", "");
-  const value = parseInt(normalized, 16);
-  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
-}
-
-function rgbToHex(r: number, g: number, b: number): string {
-  const toHex = (v: number) => Math.round(v).toString(16).padStart(2, "0");
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-function interpolateColor(t: number): string {
-  const normalized = clamp01(t);
-  for (let i = 0; i < HEAT_RAMP.length - 1; i += 1) {
-    const a = HEAT_RAMP[i];
-    const b = HEAT_RAMP[i + 1];
-    if (normalized >= a.t && normalized <= b.t) {
-      const localT = (normalized - a.t) / Math.max(0.0001, b.t - a.t);
-      const [ar, ag, ab] = hexToRgb(a.color);
-      const [br, bg, bb] = hexToRgb(b.color);
-      return rgbToHex(
-        ar + (br - ar) * localT,
-        ag + (bg - ag) * localT,
-        ab + (bb - ab) * localT,
-      );
-    }
+function paletteToGradient(palette: string[]): Record<number, string> {
+  if (palette.length === 1) {
+    return { 0: palette[0], 1: palette[0] };
   }
-  return HEAT_RAMP[HEAT_RAMP.length - 1].color;
-}
 
-function makeGridKey(lat: number, lng: number): string {
-  return `${lat.toFixed(GRID_DECIMALS)}:${lng.toFixed(GRID_DECIMALS)}`;
+  const step = 1 / (palette.length - 1);
+  const gradient: Record<number, string> = {};
+  palette.forEach((color, idx) => {
+    const key = Number((idx * step).toFixed(2));
+    gradient[key] = color;
+  });
+
+  return gradient;
 }
 
 export function HeatmapSection({
   points = [],
   restaurantPois = [],
+  lookbackHours,
+  onLookbackHoursChange,
 }: HeatmapSectionProps) {
+  const [paletteMode, setPaletteMode] = useState<5 | 7>(7);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const heatLayerRef = useRef<L.LayerGroup | null>(null);
+  const heatLayerRef = useRef<L.HeatLayer | null>(null);
   const poiLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Bin GPS points by small grid to render density hotspots with a color ramp.
-  const normalizedPoints = useMemo(() => {
-    if (points.length === 0) return [];
+  const activePalette = paletteMode === 7 ? HEAT_PALETTE_7 : HEAT_PALETTE_5;
+  const activeGradient = useMemo(
+    () => paletteToGradient(activePalette),
+    [activePalette],
+  );
 
-    const buckets = new Map<
-      string,
-      { latitude: number; longitude: number; count: number }
-    >();
-    points.forEach((p) => {
-      const key = makeGridKey(p.latitude, p.longitude);
-      const current = buckets.get(key);
-      if (current) {
-        current.count += 1;
-        return;
-      }
-      buckets.set(key, {
-        latitude: p.latitude,
-        longitude: p.longitude,
-        count: 1,
-      });
-    });
-
-    const clustered = Array.from(buckets.values());
-    const maxCount = Math.max(...clustered.map((p) => p.count), 1);
-
-    return clustered.map((p) => ({
-      latitude: p.latitude,
-      longitude: p.longitude,
-      count: p.count,
-      intensity: clamp01(p.count / maxCount),
-      color: interpolateColor(p.count / maxCount),
-    }));
-  }, [points]);
+  const weightedHeatPoints = useMemo(
+    () =>
+      points.map(
+        (p) =>
+          [p.latitude, p.longitude, p.intensity ?? 0.6] as [
+            number,
+            number,
+            number,
+          ],
+      ),
+    [points],
+  );
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -118,7 +88,6 @@ export function HeatmapSection({
       },
     ).addTo(map);
 
-    heatLayerRef.current = L.layerGroup().addTo(map);
     poiLayerRef.current = L.layerGroup().addTo(map);
 
     mapInstanceRef.current = map;
@@ -133,31 +102,26 @@ export function HeatmapSection({
 
   useEffect(() => {
     const map = mapInstanceRef.current;
-    const heatLayer = heatLayerRef.current;
     const poiLayer = poiLayerRef.current;
-    if (!map || !heatLayer || !poiLayer) return;
+    if (!map || !poiLayer) return;
 
-    heatLayer.clearLayers();
     poiLayer.clearLayers();
 
-    // ── Heatmap circle markers ────────────────────────────────────────────────
-    normalizedPoints.forEach(
-      ({ latitude, longitude, intensity, color, count }) => {
-        L.circleMarker([latitude, longitude], {
-          radius: 7 + intensity * 20,
-          fillColor: color,
-          color,
-          weight: 1,
-          opacity: 0.6,
-          fillOpacity: 0.18 + intensity * 0.52,
-        })
-          .bindTooltip(`Mật độ: ${count} điểm`, {
-            direction: "top",
-            opacity: 0.9,
-          })
-          .addTo(heatLayer);
-      },
-    );
+    if (heatLayerRef.current) {
+      map.removeLayer(heatLayerRef.current);
+      heatLayerRef.current = null;
+    }
+
+    if (weightedHeatPoints.length > 0) {
+      const layer = L.heatLayer(weightedHeatPoints, {
+        radius: 30,
+        blur: 26,
+        maxZoom: 18,
+        minOpacity: 0.22,
+        gradient: activeGradient,
+      }).addTo(map);
+      heatLayerRef.current = layer;
+    }
 
     // ── POI restaurant markers ───────────────────────────────────────────────
     // Only render POI markers when coordinates are available from API payload.
@@ -187,19 +151,67 @@ export function HeatmapSection({
     });
 
     // Auto-fit bounds if we have real points
-    if (normalizedPoints.length > 0) {
+    if (weightedHeatPoints.length > 0) {
       const bounds = L.latLngBounds(
-        normalizedPoints.map((p) => [p.latitude, p.longitude] as L.LatLngTuple),
+        weightedHeatPoints.map((p) => [p[0], p[1]] as L.LatLngTuple),
       );
       map.fitBounds(bounds, { padding: [40, 40] });
     }
-  }, [normalizedPoints, restaurantPois]);
+  }, [weightedHeatPoints, activeGradient, restaurantPois]);
 
   return (
     <div className="stat-card">
-      <h3 className="text-sm font-semibold text-foreground mb-4">
-        Bản đồ nhiệt vị trí người dùng nghe âm thanh
-      </h3>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Bản đồ nhiệt vị trí người dùng nghe âm thanh
+        </h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            Khoảng thời gian
+          </span>
+          {[1, 6, 24, 168].map((h) => {
+            const value = h as 1 | 6 | 24 | 168;
+            const isActive = lookbackHours === value;
+            const label = value === 168 ? "7d" : `${value}h`;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => onLookbackHoursChange(value)}
+                className={`rounded-md border px-2 py-1 text-xs ${
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">Ramp màu</span>
+        {[5, 7].map((mode) => {
+          const isActive = paletteMode === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setPaletteMode(mode as 5 | 7)}
+              className={`rounded-md border px-2 py-1 text-xs ${
+                isActive
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {mode} mức
+            </button>
+          );
+        })}
+      </div>
+
       {points.length === 0 && (
         <p className="text-xs text-muted-foreground mb-2">
           Chưa có dữ liệu GPS — hiển thị vị trí nhà hàng tham chiếu
@@ -209,12 +221,15 @@ export function HeatmapSection({
         <div className="mb-2 flex items-center gap-2 text-[11px] text-muted-foreground">
           <span>Lạnh</span>
           <div
-            className="h-2 w-44 rounded-sm"
+            className="h-2 w-52 overflow-hidden rounded-sm border border-border"
             style={{
-              background:
-                "linear-gradient(to right, #0000ff 0%, #00ffff 20%, #00ff00 40%, #ffff00 70%, #ff0000 90%, #ffffff 100%)",
+              background: `linear-gradient(90deg, ${activePalette.join(", ")})`,
             }}
           />
+          <div className="flex items-center gap-1 text-[10px]">
+            <span>{paletteMode} mức</span>
+            <span className="text-muted-foreground/70">(loang mượt)</span>
+          </div>
           <span>Nóng</span>
         </div>
       )}
