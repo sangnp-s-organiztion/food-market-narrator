@@ -12,7 +12,17 @@
       "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\saler\")",
       "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\admin\")",
       "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\\\\Data\")",
-      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\\\\Models\")"
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\\\\Models\")",
+      "Bash(dir /s /b D:Programfood-market-narratorsaler)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(dotnet ef:*)",
+      "Bash(dotnet tool:*)",
+      "Bash(taskkill //F //PID 22628)",
+      "Bash(xargs grep:*)",
+      "Bash(cd:*)",
+      "Bash(git -C /d/Program/food-market-narrator/.worktrees/admin-real-api show 95669226:FoodMarketNarrator.Api/DTOs/Analytics/EntityCountsResponse.cs)",
+      "Bash(git -C /d/Program/food-market-narrator/.worktrees/admin-real-api show 4a588c7e:FoodMarketNarrator.Api/DTOs/Analytics/EntityCountsResponse.cs)"
     ]
   }
 }

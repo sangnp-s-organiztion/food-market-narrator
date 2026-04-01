@@ -1,26 +1,81 @@
+using food_market_narrator_api.DTOs.User;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace food_market_narrator_api.Controllers
+namespace food_market_narrator_api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class UsersController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    [Authorize]
-    public class UsersController : ControllerBase
+    private readonly UserService _userService;
+
+    public UsersController(UserService userService)
     {
-        private readonly RestaurantService _restaurantService;
+        _userService = userService;
+    }
 
-        public UsersController(RestaurantService restaurantService)
+    // GET api/users
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var users = await _userService.GetAllUsersAsync();
+        return Ok(users);
+    }
+
+    // GET api/users/{id}
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var user = await _userService.GetUserByIdAsync(id);
+        if (user == null)
         {
-            _restaurantService = restaurantService;
+            return NotFound(new { message = "User not found." });
+        }
+        return Ok(user);
+    }
+
+    // POST api/users
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return BadRequest(new { message = "Username and password are required." });
         }
 
-        [HttpGet("{userId:int}/restaurants")]
-        public async Task<IActionResult> GetRestaurantsByUserId(int userId)
+        var created = await _userService.CreateUserAsync(request);
+        if (created == null)
         {
-            var data = await _restaurantService.GetRestaurantsByUserIdAsync(userId);
-            return Ok(data);
+            return Conflict(new { message = "Username already exists." });
         }
+
+        return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+    }
+
+    // PATCH api/users/{id}/role
+    [HttpPatch("{id:int}/role")]
+    public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateUserRoleRequest request)
+    {
+        bool updated = await _userService.UpdateUserRoleAsync(id, request.Role);
+        if (!updated)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+        return Ok(new { message = "User role updated." });
+    }
+
+    // PATCH api/users/{id}/status
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateUserStatusRequest request)
+    {
+        bool updated = await _userService.UpdateUserStatusAsync(id, request.IsActive);
+        if (!updated)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+        return Ok(new { message = "User status updated." });
     }
 }

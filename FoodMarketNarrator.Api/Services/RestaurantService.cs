@@ -17,6 +17,11 @@ namespace food_market_narrator_api.Services
 
             return restaurants.Select(MapRestaurant).ToList();
         }
+
+        public async Task<int> CountRestaurantsAsync()
+        {
+            return await _restaurantRepository.CountAsync();
+        }
     
         public async Task<RestaurantResponse> GetRestaurantByIdAsync(string id)
         {
