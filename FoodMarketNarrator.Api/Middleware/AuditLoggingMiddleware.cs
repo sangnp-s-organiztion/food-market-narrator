@@ -37,18 +37,6 @@ public class AuditLoggingMiddleware
             return;
         }
 
-        // Read body BEFORE _next so the stream hasn't been consumed yet
-        string? details = null;
-        if (context.Request.ContentLength > 0 && context.Request.ContentType == "application/json")
-        {
-            context.Request.EnableBuffering();
-            using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
-            var body = await reader.ReadToEndAsync();
-            context.Request.Body.Position = 0;
-            if (!string.IsNullOrWhiteSpace(body))
-                details = body.Length > 500 ? body[..500] : body;
-        }
-
         await _next(context);
 
         // Only log on successful responses (2xx)
@@ -71,6 +59,18 @@ public class AuditLoggingMiddleware
                 context.Request.Path.Value ?? "",
                 context.Request.QueryString.Value ?? ""
             );
+
+            // Try read body for details
+            string? details = null;
+            if (context.Request.ContentLength > 0 && context.Request.ContentType == "application/json")
+            {
+                context.Request.EnableBuffering();
+                using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                context.Request.Body.Position = 0;
+                if (!string.IsNullOrWhiteSpace(body))
+                    details = body.Length > 500 ? body[..500] : body;
+            }
 
             var auditLog = new AuditLog
             {

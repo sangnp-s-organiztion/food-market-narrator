@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace food_market_narrator_api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class AnalyticsController : ControllerBase
 {

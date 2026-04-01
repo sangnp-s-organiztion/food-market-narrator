@@ -20,6 +20,11 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.Restaurant.CountAsync();
+        }
+
         public async Task<RestaurantModel> GetByIdAsync(string id)
         {
             return await _context.Restaurant
