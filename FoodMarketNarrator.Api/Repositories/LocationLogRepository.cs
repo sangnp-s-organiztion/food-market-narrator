@@ -44,6 +44,7 @@ public class LocationLogRepository
         }).ToList();
 
         await _locationLogs.InsertManyAsync(docs);
+        Console.WriteLine($"Sync log to server: inserted {docs.Count} location points to MongoDB");
     }
 }
 

@@ -117,6 +117,8 @@ public class LocationLogSyncService : ILocationLogSyncService
             Items = batch
         };
 
+        Console.WriteLine($"Sync log to server: sending {batch.Count} location points");
+
         try
         {
             using var response = await _httpClient.PostAsJsonAsync(
@@ -126,12 +128,16 @@ public class LocationLogSyncService : ILocationLogSyncService
 
             if (response.IsSuccessStatusCode)
             {
+                Console.WriteLine($"Sync log to server: sent {batch.Count} location points successfully");
                 return;
             }
+
+            Console.WriteLine($"Sync log to server: failed with status {(int)response.StatusCode}");
         }
         catch (Exception)
         {
             // Restore for retry on next flush tick.
+            Console.WriteLine($"Sync log to server: exception while sending {batch.Count} location points");
         }
 
         lock (_bufferLock)
