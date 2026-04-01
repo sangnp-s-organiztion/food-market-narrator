@@ -5,9 +5,11 @@
 
 // ===================================================================
 db.createCollection("UserSessions");
-db.UserSessions.createIndex({ device_id: 1 });
+db.UserSessions.createIndex(
+  { device_id: 1 },
+  { name: "ux_user_sessions_device_id", unique: true },
+);
 db.UserSessions.createIndex({ created_at: -1 });
-
 // ===================================================================
 db.createCollection("LocationLogs");
 

@@ -54,8 +54,13 @@ mongosh "mongodb://admin:root%401133@localhost:27017/admin" \
 ### 5.1 UserSessions
 
 - Collection: `UserSessions`
+- Purpose: lưu phiên ẩn danh theo thiết bị
+- Required fields:
+  - `device_id` (string, required, unique)
+  - `device_info` (string, optional)
+  - `created_at` (ISODate)
 - Indexes:
-  - `{ device_id: 1 }`
+  - `{ device_id: 1 }` with `unique: true`
   - `{ created_at: -1 }`
 
 ### 5.2 LocationLogs
@@ -74,6 +79,23 @@ mongosh "mongodb://admin:root%401133@localhost:27017/admin" \
   - `{ restaurant_id: 1 }`
   - `{ timestamp: -1 }`
   - `{ restaurant_id: 1, timestamp: -1 }` (compound index)
+
+### 5.4 Lưu ý quan trọng về index `device_id`
+
+Nếu trước đây đã tạo index thường `{ device_id: 1 }` rồi mới chuyển sang unique, hãy drop index cũ trước khi tạo lại unique index để tránh xung đột.
+
+```js
+db.UserSessions.dropIndex("device_id_1");
+db.UserSessions.createIndex(
+  { device_id: 1 },
+  { name: "ux_user_sessions_device_id", unique: true },
+);
+```
+
+Khuyến nghị:
+
+- `device_id` nên luôn lưu dưới dạng string (không lưu object).
+- Có thể chuẩn hóa `device_id` bằng UUID hoặc fingerprint hash để tránh lộ định danh thô.
 
 ## 6. API test kết nối Mongo
 

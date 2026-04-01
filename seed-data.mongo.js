@@ -11,16 +11,16 @@
 }
 
 [
-  { "_id": {"$oid": "65432101abcdef0123456781"}, "device_info": "iPhone 14, iOS 17", "created_at": {"$date": "2026-03-12T08:00:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456782"}, "device_info": "Samsung S23, Android 14", "created_at": {"$date": "2026-03-12T08:05:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456783"}, "device_info": "Xiaomi 13, Android 13", "created_at": {"$date": "2026-03-12T08:10:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456784"}, "device_info": "iPhone 15 Pro", "created_at": {"$date": "2026-03-12T08:15:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456785"}, "device_info": "Oppo Reno 10", "created_at": {"$date": "2026-03-12T08:20:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456786"}, "device_info": "iPhone 13", "created_at": {"$date": "2026-03-12T09:00:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456787"}, "device_info": "Google Pixel 7", "created_at": {"$date": "2026-03-12T09:10:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456788"}, "device_info": "iPad Air 5", "created_at": {"$date": "2026-03-12T09:15:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456789"}, "device_info": "iPhone 12", "created_at": {"$date": "2026-03-12T10:00:00Z"} },
-  { "_id": {"$oid": "65432101abcdef0123456790"}, "device_info": "Samsung Fold 5", "created_at": {"$date": "2026-03-12T10:30:00Z"} }
+  { "_id": {"$oid": "65432101abcdef0123456781"}, "device_id": "dev_001", "device_info": "iPhone 14, iOS 17", "created_at": {"$date": "2026-03-12T08:00:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456782"}, "device_id": "dev_002", "device_info": "Samsung S23, Android 14", "created_at": {"$date": "2026-03-12T08:05:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456783"}, "device_id": "dev_003", "device_info": "Xiaomi 13, Android 13", "created_at": {"$date": "2026-03-12T08:10:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456784"}, "device_id": "dev_004", "device_info": "iPhone 15 Pro", "created_at": {"$date": "2026-03-12T08:15:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456785"}, "device_id": "dev_005", "device_info": "Oppo Reno 10", "created_at": {"$date": "2026-03-12T08:20:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456786"}, "device_id": "dev_006", "device_info": "iPhone 13", "created_at": {"$date": "2026-03-12T09:00:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456787"}, "device_id": "dev_007", "device_info": "Google Pixel 7", "created_at": {"$date": "2026-03-12T09:10:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456788"}, "device_id": "dev_008", "device_info": "iPad Air 5", "created_at": {"$date": "2026-03-12T09:15:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456789"}, "device_id": "dev_009", "device_info": "iPhone 12", "created_at": {"$date": "2026-03-12T10:00:00Z"} },
+  { "_id": {"$oid": "65432101abcdef0123456790"}, "device_id": "dev_010", "device_info": "Samsung Fold 5", "created_at": {"$date": "2026-03-12T10:30:00Z"} }
 ]
 
 2. Collection LocationLogs (Lưu tuyến di chuyển & Heatmap)

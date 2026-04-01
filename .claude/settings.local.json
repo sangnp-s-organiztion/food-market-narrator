@@ -5,7 +5,14 @@
       "Bash(dotnet restore:*)",
       "Bash(dotnet test:*)",
       "Bash(mv Integration maui-testing/)",
-      "Bash(mv unit-test:*)"
+      "Bash(mv unit-test:*)",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Maui\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\docs\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\saler\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\admin\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\\\\Data\")",
+      "Bash(dir \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Api\\\\Models\")"
     ]
   }
 }
