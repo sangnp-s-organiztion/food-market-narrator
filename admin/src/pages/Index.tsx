@@ -21,7 +21,6 @@ import {
   Bar,
 } from "recharts";
 import { HeatmapSection } from "@/components/HeatmapSection";
-import { UserRouteSection } from "@/components/UserRouteSection";
 import { analyticsApi } from "@/lib/analyticsApi";
 import { adminStatsApi } from "@/lib/adminApi";
 
@@ -322,11 +321,11 @@ const Dashboard = () => {
         {/* ── Maps ───────────────────────────────────────────────────────────── */}
         <HeatmapSection
           points={heatmapData?.points}
+          movementPaths={movementPaths?.sessions}
           restaurantPois={topRestaurantsData?.items}
           lookbackHours={heatmapHours}
           onLookbackHoursChange={setHeatmapHours}
         />
-        <UserRouteSection paths={movementPaths?.sessions} />
       </div>
     </AdminLayout>
   );
