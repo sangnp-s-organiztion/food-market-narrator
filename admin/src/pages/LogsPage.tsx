@@ -40,7 +40,7 @@ function formatTimestamp(iso: string): string {
 
 const LogsPage = () => {
   const {
-    data: activity = [],
+    data: activityResponse,
     isLoading,
     isError,
   } = useQuery({
@@ -49,6 +49,8 @@ const LogsPage = () => {
     staleTime: 30_000,
     refetchInterval: 30_000, // auto-refresh every 30s for live-ish feed
   });
+
+  const activity = activityResponse?.items ?? [];
 
   return (
     <AdminLayout>
