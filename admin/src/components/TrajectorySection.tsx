@@ -256,7 +256,7 @@ export function TrajectorySection({
       )}
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-        <div className="rounded-lg border border-border bg-background p-3">
+        <div className="flex h-[620px] flex-col rounded-lg border border-border bg-background p-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
               Session ID
@@ -266,37 +266,39 @@ export function TrajectorySection({
             </span>
           </div>
 
-          <div className="space-y-1">
-            <button
-              type="button"
-              onClick={() => setSelectedSessionId(null)}
-              className={`w-full rounded-md border px-2 py-2 text-left text-xs transition-colors ${
-                selectedSessionId === null
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Tất cả session
-            </button>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex-1 space-y-1 overflow-y-auto pr-1">
+              <button
+                type="button"
+                onClick={() => setSelectedSessionId(null)}
+                className={`w-full rounded-md border px-2 py-2 text-left text-xs transition-colors ${
+                  selectedSessionId === null
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Tất cả session
+              </button>
 
-            {paginatedSessionIds.map((sessionId) => {
-              const isActive = selectedSessionId === sessionId;
-              return (
-                <button
-                  key={sessionId}
-                  type="button"
-                  onClick={() => setSelectedSessionId(sessionId)}
-                  className={`w-full rounded-md border px-2 py-2 text-left text-xs transition-colors ${
-                    isActive
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-background text-muted-foreground hover:text-foreground"
-                  }`}
-                  title={sessionId}
-                >
-                  <span className="mono block truncate">{sessionId}</span>
-                </button>
-              );
-            })}
+              {paginatedSessionIds.map((sessionId) => {
+                const isActive = selectedSessionId === sessionId;
+                return (
+                  <button
+                    key={sessionId}
+                    type="button"
+                    onClick={() => setSelectedSessionId(sessionId)}
+                    className={`w-full rounded-md border px-2 py-2 text-left text-xs transition-colors ${
+                      isActive
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                    title={sessionId}
+                  >
+                    <span className="mono block truncate">{sessionId}</span>
+                  </button>
+                );
+              })}
+            </div>
 
             {sessionIds.length > 0 && (
               <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
