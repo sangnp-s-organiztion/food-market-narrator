@@ -2,146 +2,88 @@
 
 ## Project Overview
 
-Food Market Narrator is a location-based mobile application that automatically narrates information about restaurants in Vinh Khanh Food Street.
+Location-based audio narration app for Vinh Khanh Food Street. Visitors walk near restaurants and hear audio narration automatically. Sellers and admins manage content via dashboards.
 
-When users walk near a restaurant, the app detects the location and automatically plays an audio narration describing the restaurant.
-
-The system includes:
-
-- Mobile App (Android)
-- Backend API
-- Seller/Admin Dashboard
+**Components:**
+- `FoodMarketNarrator.Maui/` — Android visitor app (.NET MAUI)
+- `FoodMarketNarrator.Api/` — ASP.NET Core Web API + EF Core + SQL Server
+- `saler/` — Seller dashboard (React + TypeScript + Vite)
+- `admin/` — Admin dashboard (React + TypeScript + Vite)
 
 ---
 
-# Tech Stack (.NET 10)
-- Mobile UI: .NET Maui
-- Backend: ASP.NET Core Web API (.NET 6+)
-- Database: SQL Server
-- ORM: Entity Framework Core
+## System Flow
 
-### Mobile
-
-.NET MAUI (Android)
-
-Responsibilities:
-
-- GPS location tracking
-- Geofence detection
-- Trigger narration
-- Play audio narration
-
-Location:
-FoodMarketNarrator.Maui
+```
+Visitor (MAUI) ──public API──► FoodMarketNarrator.Api ──► SQL Server
+                                                  ▲
+Seller (saler/) ──cookie auth──┘
+Admin  (admin/)  ──cookie auth──┘
+```
 
 ---
 
-### Backend API
+## Roles
 
-ASP.NET Web API
-
-Responsibilities:
-
-- Restaurant management
-- Narration content
-- Location data
-- User authentication
-- Order and restaurant management
-
-Location:
-FoodMarketNarrator.Api
----
-
-### Web Dashboard
-
-React + TypeScript + Vite
-
-Used by:
-
-- Sellers
-- Admins
-
-Responsibilities:
-
-- Manage restaurants
-- Upload narration content
-- Manage menu
-- Manage orders
-
-Location:
-saler/ for saler UI
-admin/ for admin UI
+| Role    | Access |
+|---------|--------|
+| Visitor | Public endpoints only (no login) |
+| Seller  | Own restaurants only (user_id filter on every query) |
+| Admin   | All resources |
 
 ---
 
-## System Architecture
+## Tech Stack
 
-Client → API → Database
+- **Mobile**: .NET MAUI (Android), GPS + geofencing + audio playback
+- **Backend**: ASP.NET Core Web API, EF Core, SQL Server, Cookie Auth
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS
+- **Languages**: vi-VN, en-US, zh-CN, ko-KR, ja-JP
 
-Mobile App
-↓
-ASP.NET Web API
-↓
-SQL Server
+---
 
-Web Dashboard
-↓
-ASP.NET Web API
+## Behavior Rules
 
-## Architecture
+1. **Do not start coding immediately** — always present a plan first.
+2. **Read existing code before editing** — match existing patterns.
+3. **Keep changes small and targeted** — avoid rewriting files unless required.
+4. **Verify before claiming done** — build/lint/test where possible; report what couldn't be verified.
+5. **Cross-layer changes** — check API contract impact before declaring complete.
 
-Layered Architecture:
-- Controller: def api for UI call
-- Service: write logic of feature, it is seperate with controller to help pj is cleaner
-- Repository: interact with Database
-- Model: def table in Database
+---
 
-# Database Rules
-- Use existing schema (do not invent new tables unless asked)
-- Use parameterized queries (avoid SQL injection)
-- Keep queries efficient
+## Standard Response Format
 
-# Coding Rules
-- Keep code simple and readable (YAGNI)
-- Avoid duplication (DRY)
-- Use meaningful naming
-- Do not over-engineer
+All API responses use this envelope:
 
-# Important Notes
-- The goal is a smooth user experience for discovering food via audio narration
-- Prioritize clarity, performance, and maintainability
+```json
+{ "success": true, "data": ..., "message": "" }
+```
 
-# Behavior Rules
-- Do not start coding immediately
-- Always present a plan first
-- Only modify necessary parts of the code
-- Do not rewrite entire files unless required
-- Ask before making major architectural changes
+Use HTTP status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error.
 
-# Mobile Considerations
-- Optimize performance for mobile devices
-- Minimize API latency
+---
 
-# Data Transfer Rules
-- Do NOT return Entity models directly
-- Use DTOs for all API responses
-- Use mapping (manual or AutoMapper)
+## Key Conventions
 
-# API Rules
-- Use RESTful conventions
-- All responses must be JSON
-- Standard response format:
+- **No `any`** in TypeScript unless unavoidable.
+- **No entity models returned from API** — always use DTOs.
+- **No magic strings** — use constants, enums, `nameof()`.
+- **No hardcoded API URLs in components** — use central config.
+- **No default credentials or secrets in code** — use env vars.
+- **Cache audio** (MAUI) with SHA256 filename hash; limit 200MB, min 50MB free, LRU eviction.
 
-{
-  "success": true,
-  "data": ...,
-  "message": ""
-}
+---
 
-- Use proper HTTP status codes (200, 400, 401, 404, 500)
+## Detailed Rules (path-scoped)
 
-# Authentication & Authorization
-- Use Cookie authentication
-- Protect endpoints based on roles (Admin, Seller)
-- Public endpoint is used for visitor.
-- Do not expose sensitive data
+| File | Scope |
+|------|-------|
+| `.claude/rules/backend-rules.md` | FoodMarketNarrator.Api/**/*.cs |
+| `.claude/rules/frontend-rules.md` | admin/**, saler/** |
+| `.claude/rules/mobile-rules.md` | FoodMarketNarrator.Maui/**/*.cs |
+| `.claude/rules/security-rules.md` | All layers |
+| `.claude/rules/dependencies-rules.md` | All .csproj, package.json |
+| `.claude/architecture/backend-architecture.md` | FoodMarketNarrator.Api/**/*.cs |
+| `.claude/architecture/api-architecture.md` | All layers |
+| `.claude/domain/business-domain.md` | All layers |

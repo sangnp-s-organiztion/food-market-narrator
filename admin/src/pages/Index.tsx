@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { Store, Headphones, Users, UtensilsCrossed, TrendingUp, ArrowUp } from "lucide-react";
-import { restaurants, audios, users, dishes, dailyListens, topRestaurants } from "@/lib/mockData";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { restaurants, audios, users, dishes, topRestaurants } from "@/lib/mockData";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import HeatmapSection from "@/components/HeatmapSection";
 import UserRouteSection from "@/components/UserRouteSection";
 
@@ -19,9 +19,6 @@ const Dashboard = () => {
         <div>
           <h1 className="page-title">Tổng quan hệ thống</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Hệ thống quản lý âm thanh thuyết minh & nhà hàng</p>
-        </div>
-        <div className="text-xs text-muted-foreground mono">
-          Cập nhật lần cuối: {new Date().toLocaleString("vi-VN")}
         </div>
       </div>
 
@@ -47,25 +44,7 @@ const Dashboard = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="stat-card">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Lượt nghe theo ngày</h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={dailyListens}>
-                <defs>
-                  <linearGradient id="colorListens" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="hsl(215, 16%, 47%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(215, 16%, 47%)" />
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 13, border: '1px solid hsl(214, 32%, 91%)' }} />
-                <Area type="monotone" dataKey="listens" stroke="hsl(221, 83%, 53%)" strokeWidth={2} fill="url(#colorListens)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="grid grid-cols-1 gap-4">
           <div className="stat-card">
             <h3 className="text-sm font-semibold text-foreground mb-4">Nhà hàng được nghe nhiều nhất</h3>
             <ResponsiveContainer width="100%" height={240}>

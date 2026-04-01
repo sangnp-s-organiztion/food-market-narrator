@@ -1,103 +1,71 @@
+---
+paths:
+  - "FoodMarketNarrator.Api/**/*.cs"
+  - "FoodMarketNarrator.Maui/**/*.cs"
+  - "admin/**"
+  - "saler/**"
+  - ".claude/**"
+---
+
+# Business Domain
+
+## Core Concept: POI (Point of Interest)
+
+Every **Restaurant** is a POI. The mobile app tracks the visitor's GPS location, computes distance to each POI, and triggers audio narration when the visitor enters the geofence.
+
+```
+Visitor GPS ──► Distance calc ──► Geofence check ──► Narration trigger
+                 (lat/lng)        (30m enter/40m exit)
+```
+
 ## Domain Entities
 
-## 0) Bối cảnh nghiệp vụ
-
-Hệ thống Food Market Narrator giúp du khách khám phá quán ăn tại phố ẩm thực Vĩnh Khánh bằng thuyết minh tự động theo vị trí.
-
-Vai trò chính:
-
-- Visitor: nghe thuyết minh khi đi gần POI.
-- Seller: quản lý nội dung quán (ảnh, món, audio).
-- Admin: quản lý và kiểm duyệt dữ liệu hệ thống.
-
-## 1) Domain Entities
-
-Language
-
-- language_id
-- language_code
-- language_name
-
-User
-
-- user_id
-- username
-- password_hash
-- role
-- is_active
-- created_at
-
-Restaurant
-
-- restaurant_id
-- name
-- description
-- latitude
-- longitude
-- phone
-- address
-- open_time
-- close_time
-- user_id
-- created_at
-- is_active
-
-RestaurantImage
-
-- image_id
-- restaurant_id
-- image_url
-- is_primary
-- sort_order
-
-Dish
-
-- dish_id
-- name
-- price
-- description
-- restaurant_id
-- image_id
-- created_at
-- is_active
-
-Audio
-
-- audio_id
-- restaurant_id
-- language_id
-- audio_url
-- version
-- is_active
-- date_generation
+| Entity | Key Fields | Notes |
+|--------|------------|-------|
+| **Language** | language_id, language_code, language_name | Codes: vi-VN, en-US, zh-CN, ko-KR, ja-JP |
+| **User** | user_id, username, password_hash, role, is_active | Roles: Admin, Seller |
+| **Restaurant** | restaurant_id, name, lat/lng, open/close_time, user_id, is_active | **POI**: lat/lng drives geofencing |
+| **RestaurantImage** | image_id, restaurant_id, image_url, is_primary, sort_order | Multiple per restaurant; one primary |
+| **Dish** | dish_id, restaurant_id, name, price, description, image_id, is_active | |
+| **Audio** | audio_id, restaurant_id, language_id, audio_url, version, is_active | One audio per (restaurant, language) pair |
 
 ## Entity Relationships
 
-User
+```
+User (1) ──owns──► (N) Restaurant
+Restaurant (1) ──has──► (N) RestaurantImage
+Restaurant (1) ──has──► (N) Dish
+Restaurant (1) ──has──► (N) Audio
+Audio (N) ──belongs to──► (1) Language
+```
 
-- A user can manage multiple restaurants.
+## Role & Access Rules
 
-Restaurant
+| Role    | Access |
+|---------|--------|
+| **Visitor** | Reads public endpoints only. No authentication needed. |
+| **Seller**  | Can only manage restaurants where `restaurant.user_id == current_user.id`. All queries and mutations must filter by ownership. |
+| **Admin**   | Full access to all resources. |
 
-- A restaurant belongs to one user.
-- A restaurant can have multiple images.
-- A restaurant can have multiple dishes.
-- A restaurant can have multiple narration audios.
+> **CRITICAL**: Every Seller-scoped query and mutation MUST include `user_id` filter. Backend enforces ownership at the repository/service layer — not just the UI.
 
-Audio
+## Multi-language Audio
 
-- Each audio belongs to a restaurant.
-- Each audio belongs to a language.
+- Audio is scoped to (restaurant_id, language_id).
+- The MAUI app selects audio based on the visitor's current language setting.
+- If no audio exists for the selected language, no narration plays.
 
-## 3) Nghiệp vụ cốt lõi
+## Ownership Enforcement Pattern
 
-- Mỗi Restaurant là một POI có tọa độ để mobile tính khoảng cách và trigger narration.
-- Audio narration được gắn theo cặp Restaurant + Language.
-- Restaurant có nhiều ảnh, có thể đánh dấu ảnh chính và sắp xếp thứ tự hiển thị.
-- Seller chỉ nên thao tác trên nhà hàng thuộc quyền quản lý của mình (theo user_id).
+```csharp
+// In Seller service/repository — every method enforces ownership
+var restaurant = await _repo.GetByIdAsync(id);
+if (restaurant.UserId != _currentUserId) throw new ForbiddenException();
+```
 
-## 4) Quy tắc dữ liệu quan trọng
+## Data Integrity Rules
 
-- restaurant_id là khóa nhận diện dùng xuyên suốt mobile/frontend/API.
-- language_code (vi-VN, en-US, zh-CN, ko-KR, ja-JP) quyết định file audio phát ra.
-- is_active trên Restaurant và Audio kiểm soát dữ liệu hiển thị/phát thực tế.
+- `restaurant_id` is the primary identifier used across all layers (mobile, API, dashboards).
+- `is_active` on Restaurant and Audio controls visibility/playability — inactive = hidden.
+- `is_primary` + `sort_order` on RestaurantImage control display order.
+- `language_code` (not id) is used in API responses for mobile compatibility.

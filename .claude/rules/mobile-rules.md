@@ -1,144 +1,115 @@
-## Mobile App Rules
-
-Platform: Android (.NET MAUI)
-
-### Responsibilities
-
-Mobile app chịu trách nhiệm xử lý logic phía client để mang lại trải nghiệm thuyết minh tự động cho visitor.
-
-Các trách nhiệm chính:
-
-- Lấy vị trí GPS của người dùng theo chu kỳ.
-- Tính khoảng cách từ vị trí người dùng tới các restaurant (POI).
-- Phát hiện khi người dùng đi vào vùng geofence của restaurant.
-- Tự động phát audio narration tương ứng với ngôn ngữ đang chọn.
-- Gọi backend API để lấy dữ liệu restaurant, images, dishes và audio.
-- Cache dữ liệu để hỗ trợ trải nghiệm offline cơ bản.
-
+---
+paths:
+  - "FoodMarketNarrator.Maui/**/*.cs"
 ---
 
-### Location Tracking
+# Mobile App Rules (.NET MAUI / Android)
 
-Ứng dụng theo dõi vị trí người dùng khi chế độ narration được bật.
+## Core Responsibilities
 
-Cấu hình hiện tại:
+1. Track visitor GPS location (foreground service on Android).
+2. Compute distance to all POIs (restaurants) using lat/lng.
+3. Detect geofence entry/exit.
+4. Auto-play audio narration when geofence conditions are met.
+5. Cache POI data and audio for offline use.
 
-- PollInterval: 2 giây
-- MinPublishDistanceMeters: 6 mét
-- GeolocationRequest: Best accuracy, timeout 10 giây
-- Chỉ publish event khi di chuyển >= 6m
+## Location Tracking Config
 
-Trên Android:
-- Xin quyền theo tầng: WhenInUse -> Always (Android 10+) -> PostNotifications (Android 13+)
-- Có foreground service TrackingForegroundService để theo dõi nền
+| Setting | Value |
+|---------|-------|
+| PollInterval | 2 seconds |
+| MinPublishDistanceMeters | 6 m |
+| Accuracy | Best available |
+| Timeout | 10 seconds |
 
----
+Android permission flow: `WhenInUse` → `Always` (Android 10+) → `PostNotifications` (Android 13+).
+Use a foreground service (`TrackingForegroundService`) to maintain tracking in background.
 
-### Distance Calculation
+## Distance Calculation
 
-Mobile app tính khoảng cách giữa vị trí hiện tại và các restaurant dựa trên tọa độ:
+Use Haversine formula (or equivalent) to compute distance from visitor position to each restaurant POI. Only update POI state when distance changes by ≥ `MinPublishDistanceMeters`.
 
-- latitude
-- longitude
+## Geofence State Machine
 
-Restaurant gần nhất sẽ được xác định để kiểm tra điều kiện trigger narration.
+Each restaurant is a POI with enter/exit radii:
 
----
+| State | Condition |
+|-------|-----------|
+| **Enter** | Not in any POI → visitor within 30m of a POI |
+| **Switch** | In POI A → visitor within 30m of POI B |
+| **Exit** | In POI → visitor beyond 40m of current POI |
 
-### Geofence Trigger
+Radii: `PoiEnterRadiusMeters = 30`, `PoiExitRadiusMeters = 40` (hysteresis prevents edge-case flapping).
 
-Mỗi restaurant được coi là một **Point of Interest (POI)** với bán kính enter/exit.
+## Narration Trigger Rules
 
-Cấu hình hiện tại (trong AppSettings):
+**Two anti-repeat mechanisms:**
 
-- PoiEnterRadiusMeters: 30m (kích hoạt khi vào vùng)
-- PoiExitRadiusMeters: 40m (thoát vùng - hysteresis chống rung biên)
-- TriggerDistanceMeters: 30m (ngưỡng phát audio)
+1. **Session**: `HashSet<string> _playedPOIs` tracks restaurants played in current narration session. Reset on `StopNarration()`.
+2. **Cooldown**: 60-second minimum between auto-plays for the same POI.
 
-State machine trong POIService.UpdateNearestPOI():
-- Enter: chưa trong POI nào -> vào vùng 30m
-- Switch: đang trong POI này -> chuyển sang POI khác trong vùng 30m
-- Exit: ra khỏi vùng 40m của POI hiện tại
+**Trigger logic:**
+- Visitor enters 30m geofence → narration eligible.
+- If already played in this session → skip (unless cooldown expired).
+- If cooldown not expired → skip.
+- Force/manual trigger bypasses all checks.
+- Manual replay always available from POI detail screen.
 
----
+**Audio selection:**
+1. Get visitor's selected language.
+2. Fetch audio for (restaurant_id, language_id).
+3. If found → play. If not found → show soft notification, skip.
 
-### Narration Trigger Rules
+## API Calls (Mobile)
 
-Có hai cơ chế chống lặp:
+Use **public endpoints only** — no authentication required:
 
-1. **Theo phiên narration**: HashSet \_playedPOIs lưu các restaurant đã phát trong phiên. Reset khi StopNarration().
+```
+GET /Restaurant
+GET /Restaurant/{id}
+GET /Language
+GET /Language/{languageCode}
+GET /public/Restaurant/{restaurantId}/images
+GET /public/Restaurant/{restaurantId}/dishes
+GET /public/Restaurant/{restaurantId}/audios
+```
 
-2. **Theo thời gian**: Cooldown 60 giây giữa các lần phát cho cùng một POI.
+> **Warning**: Do NOT use `/Restaurant/{id}/images|dishes|audios` — these require authentication.
 
-Session narration được định nghĩa là khoảng thời gian từ khi người dùng bật narration cho đến khi tắt narration.
+## Offline Cache
 
-Luật hoạt động:
+| Data | Location | Format |
+|------|----------|--------|
+| POI list | `FileSystem.AppDataDirectory/offline_cache/pois.json` | JSON |
+| Audio files | `audio_cache/` | SHA256 hash of `{language_code}\|{audio_url}` |
 
-- Khi user **enter geofence** (vào vùng 30m) → narration có thể được phát.
-- Nếu restaurant đã được phát trong phiên → không auto-play lại (trừ khi hết cooldown).
-- Nếu chưa hết 60 giây kể từ lần phát cuối → không phát.
-- **Force/manual trigger** cho phép phát ngay và bỏ qua mọi kiểm tra khoảng cách/cooldown.
-- Người dùng vẫn có thể **phát lại audio thủ công** từ màn hình chi tiết POI.
+Cache policy:
+- Max total: 200MB.
+- Min free space: 50MB before downloading.
+- LRU eviction when approaching limit.
+- Priority: local cache → bundled package → network.
 
----
+Offline behavior:
+- POIs served from cache.
+- Audio plays if cached; otherwise silent.
+- No network + no cache = no narration (graceful degradation).
 
-### Audio Selection
+## Performance
 
-Khi narration được kích hoạt:
+- GPS updates throttled by `PollInterval` + `MinPublishDistanceMeters`.
+- Distance calculations only when location is valid and moved enough.
+- Narration triggered only when geofence conditions are met.
+- No UI-blocking on the main thread.
 
-1. Lấy ngôn ngữ hiện tại của user.
-2. Tìm audio tương ứng với restaurant và language.
-3. Nếu audio tồn tại → phát audio.
-4. Nếu không có audio → hiển thị thông báo nhẹ và bỏ qua narration.
+## Error Handling
 
----
+- Location permission denied → show explanation and deep-link to settings.
+- Audio play failure → log, show soft toast, continue tracking.
+- Network unavailable → switch to offline cache silently.
+- Invalid POI data from API → skip POI, log error.
 
-### API Interaction
+## Code Quality
 
-Các API được đánh dấu (public) là endpoint không yêu cầu đăng nhập, phù hợp cho mobile app visitor.
-
-Mobile app hiện nên ưu tiên gọi:
-
-- GET /Restaurant (public)
-- GET /Restaurant/{id} (public)
-- GET /Language (public)
-- GET /Language/{languageCode} (public)
-- GET /public/Restaurant/{restaurantId}/images (public)
-- GET /public/Restaurant/{restaurantId}/dishes (public)
-- GET /public/Restaurant/{restaurantId}/audios (public)
-
-Lưu ý:
-
-- Không dùng nhầm các endpoint /Restaurant/{restaurantId}/images|dishes|audios vì các endpoint này yêu cầu đăng nhập.
-- Mobile app không chứa business logic quản trị dữ liệu; backend chịu trách nhiệm validate và điều phối dữ liệu.
-
----
-
-### Offline Support
-
-Mobile app cache các dữ liệu sau:
-
-- **POI**: Lưu vào file offline_cache/pois.json trong FileSystem.AppDataDirectory.
-- **Audio**: Lưu vào thư mục audio_cache với tên file là hash SHA256 (language|path).
-
-Chính sách cache audio:
-- Giới hạn tổng: 200MB
-- Dung lượng trống tối thiểu: 50MB
-- Cơ chế dọn LRU khi gần đầy
-- Cache ưu tiên: local -> package -> network
-
-Khi mất kết nối mạng:
-- App đọc POI từ cache offline
-- Narration vẫn hoạt động nếu audio đã được cache trước đó
-- Nếu chưa cache và không có mạng -> không phát audio
-
----
-
-### Performance Constraints
-
-Để đảm bảo hiệu năng và tiết kiệm pin:
-
-- không cập nhật GPS quá thường xuyên
-- áp dụng debounce cho location updates
-- chỉ tính khoảng cách khi có location update hợp lệ
-- chỉ trigger narration khi điều kiện geofence được thỏa mãn
+- All location/geofence logic isolated in `Services/` (e.g., `LocationService`, `POIService`, `NarrationService`).
+- App settings (radii, intervals, cache limits) in `AppSettings` — never hardcoded.
+- Dispose of location listeners and audio players properly.
