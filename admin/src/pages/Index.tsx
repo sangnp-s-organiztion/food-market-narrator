@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ComponentType } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import {
@@ -41,6 +41,14 @@ function toBarChartData(
   return items.map((r) => ({ name: r.restaurantName, listens: r.playCount }));
 }
 
+type EntityStat = {
+  label: string;
+  value: number;
+  delta: string;
+  deltaType: "neutral" | "positive";
+  icon: ComponentType<{ className?: string }>;
+};
+
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
 const Dashboard = () => {
@@ -70,33 +78,33 @@ const Dashboard = () => {
     staleTime: 60_000,
   });
 
-  const entityStats = [
+  const entityStats: EntityStat[] = [
     {
       label: "Tổng nhà hàng",
       value: restaurantCount?.count ?? 0,
       delta: "",
-      deltaType: "neutral" as const,
+      deltaType: "neutral",
       icon: Store,
     },
     {
       label: "Tổng âm thanh",
       value: audioCount?.count ?? 0,
       delta: "",
-      deltaType: "neutral" as const,
+      deltaType: "neutral",
       icon: Headphones,
     },
     {
       label: "Người dùng",
       value: userCount?.count ?? 0,
       delta: "",
-      deltaType: "neutral" as const,
+      deltaType: "neutral",
       icon: Users,
     },
     {
       label: "Tổng món ăn",
       value: dishCount?.count ?? 0,
       delta: "",
-      deltaType: "neutral" as const,
+      deltaType: "neutral",
       icon: UtensilsCrossed,
     },
   ];

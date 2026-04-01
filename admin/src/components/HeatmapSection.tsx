@@ -391,10 +391,10 @@ export function HeatmapSection({
             }}
           />
           <div className="flex items-center gap-1 text-[10px]">
-            <span>7 mức</span>
-            <span className="text-muted-foreground/70">(loang mượt)</span>
+            <span>Nóng</span>
+            {/* <span className="text-muted-foreground/70">(loang mượt)</span> */}
           </div>
-          <span>Nóng</span>
+          {/* <span>(7 mức)</span> */}
         </div>
       )}
       <div className="relative">
