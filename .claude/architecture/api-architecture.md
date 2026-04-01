@@ -56,6 +56,10 @@ Luu y:
 - GET /public/Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
 
+## Mongo
+
+- GET /Mongo/test-connect (public)
+
 ## Static Media URLs
 
 - /maui-images/{fileName}

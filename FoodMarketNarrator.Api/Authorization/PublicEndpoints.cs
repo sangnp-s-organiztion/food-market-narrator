@@ -11,6 +11,7 @@ public static class PublicEndpoints
         new("GET", "/Restaurant"),
         new("GET", "/Restaurant/{id}"),
         new("GET", "/audio"),
+        new("GET", "/Mongo/test-connect"),
         new("GET", "/Restaurant/{restaurantId}/dishes"),
         new("GET", "/Restaurant/{restaurantId}/images"),
         new("GET", "/Restaurant/{restaurantId}/audios")
