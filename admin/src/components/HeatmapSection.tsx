@@ -2,7 +2,6 @@ import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { HeatmapPoint, TopRestaurant } from "@/types/analytics";
-import { restaurants as mockRestaurants } from "@/lib/mockData";
 
 interface HeatmapSectionProps {
   /** Geo points from GET /api/analytics/heatmap */
@@ -15,7 +14,10 @@ interface HeatmapSectionProps {
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
 
-export function HeatmapSection({ points = [], restaurantPois = [] }: HeatmapSectionProps) {
+export function HeatmapSection({
+  points = [],
+  restaurantPois = [],
+}: HeatmapSectionProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -35,7 +37,7 @@ export function HeatmapSection({ points = [], restaurantPois = [] }: HeatmapSect
       {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      }
+      },
     ).addTo(map);
 
     // ── Heatmap circle markers ────────────────────────────────────────────────
@@ -51,13 +53,18 @@ export function HeatmapSection({ points = [], restaurantPois = [] }: HeatmapSect
     });
 
     // ── POI restaurant markers ───────────────────────────────────────────────
-    // Fall back to mock restaurants if no real POI data passed
-    const pois = restaurantPois.length > 0 ? restaurantPois : mockRestaurants;
-    pois.forEach((r) => {
-      // Use lat/lng from mock, or from TopRestaurant if available
-      const lat = (r as typeof mockRestaurants[0]).latitude ?? MAP_CENTER[0];
-      const lng = (r as typeof mockRestaurants[0]).longitude ?? MAP_CENTER[1];
-      const name = r.restaurantName ?? (r as typeof mockRestaurants[0]).name ?? "";
+    // Only render POI markers when coordinates are available from API payload.
+    type PoiWithCoords = TopRestaurant & {
+      latitude?: number;
+      longitude?: number;
+    };
+    const poisWithCoords = (restaurantPois as PoiWithCoords[]).filter(
+      (r) => typeof r.latitude === "number" && typeof r.longitude === "number",
+    );
+    poisWithCoords.forEach((r) => {
+      const lat = r.latitude as number;
+      const lng = r.longitude as number;
+      const name = r.restaurantName ?? "";
 
       L.circleMarker([lat, lng], {
         radius: 5,
@@ -66,14 +73,16 @@ export function HeatmapSection({ points = [], restaurantPois = [] }: HeatmapSect
         weight: 2,
         fillOpacity: 0.8,
       })
-        .bindPopup(`<strong>${name}</strong><br/><span style="color:#666">${(r as { playCount?: number }).playCount ? `${(r as { playCount: number }).playCount} lượt nghe` : ""}</span>`)
+        .bindPopup(
+          `<strong>${name}</strong><br/><span style="color:#666">${r.playCount ? `${r.playCount} lượt nghe` : ""}</span>`,
+        )
         .addTo(map);
     });
 
     // Auto-fit bounds if we have real points
     if (normalizedPoints.length > 0) {
       const bounds = L.latLngBounds(
-        normalizedPoints.map((p) => [p.latitude, p.longitude] as L.LatLngTuple)
+        normalizedPoints.map((p) => [p.latitude, p.longitude] as L.LatLngTuple),
       );
       map.fitBounds(bounds, { padding: [40, 40] });
     }

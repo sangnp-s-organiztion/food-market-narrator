@@ -27,6 +27,7 @@ public class Program
         builder.Services.AddScoped<LanguageService>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<AuditLogService>();
         builder.Services.AddScoped<AnalyticsService>();
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<MongoHealthRepository>();

@@ -7,9 +7,12 @@ const LIMIT = 50;
 
 // Map action type from duration-based heuristics
 function inferAction(duration: number): { label: string; cls: string } {
-  if (duration >= 120) return { label: "NGHE ĐẦY ĐỦ", cls: "bg-emerald-100 text-emerald-700" };
-  if (duration >= 60) return { label: "NGHE TỪNG PHẦN", cls: "bg-blue-100 text-blue-700" };
-  if (duration >= 20) return { label: "NGHE NHANH", cls: "bg-amber-100 text-amber-700" };
+  if (duration >= 120)
+    return { label: "NGHE ĐẦY ĐỦ", cls: "bg-emerald-100 text-emerald-700" };
+  if (duration >= 60)
+    return { label: "NGHE TỪNG PHẦN", cls: "bg-blue-100 text-blue-700" };
+  if (duration >= 20)
+    return { label: "NGHE NHANH", cls: "bg-amber-100 text-amber-700" };
   return { label: "NGẮT SỚM", cls: "bg-red-100 text-red-700" };
 }
 
@@ -36,7 +39,11 @@ function formatTimestamp(iso: string): string {
 }
 
 const LogsPage = () => {
-  const { data: activity = [], isLoading, isError } = useQuery({
+  const {
+    data: activity = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["analytics", "recent-activity", LIMIT],
     queryFn: () => analyticsApi.getRecentActivity(LIMIT),
     staleTime: 30_000,
@@ -57,14 +64,26 @@ const LogsPage = () => {
           {/* Subtle hint for action types */}
           <div className="flex flex-wrap gap-3 mb-4">
             {[
-              { label: "Nghe đầy đủ (≥2p)", cls: "bg-emerald-100 text-emerald-700" },
-              { label: "Nghe từng phần (1–2p)", cls: "bg-blue-100 text-blue-700" },
-              { label: "Nghe nhanh (20s–1p)", cls: "bg-amber-100 text-amber-700" },
+              {
+                label: "Nghe đầy đủ (≥2p)",
+                cls: "bg-emerald-100 text-emerald-700",
+              },
+              {
+                label: "Nghe từng phần (1–2p)",
+                cls: "bg-blue-100 text-blue-700",
+              },
+              {
+                label: "Nghe nhanh (20s–1p)",
+                cls: "bg-amber-100 text-amber-700",
+              },
               { label: "Ngắt sớm (<20s)", cls: "bg-red-100 text-red-700" },
             ].map(({ label, cls }) => (
               <span
                 key={label}
-                className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium", cls)}
+                className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                  cls,
+                )}
               >
                 {label}
               </span>
@@ -84,7 +103,10 @@ const LogsPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Đang tải…
                   </td>
                 </tr>
@@ -98,7 +120,10 @@ const LogsPage = () => {
               )}
               {!isLoading && !isError && activity.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Chưa có nhật ký nào.
                   </td>
                 </tr>
@@ -115,12 +140,14 @@ const LogsPage = () => {
                       <td className="mono text-xs text-muted-foreground">
                         #{item.audioId}
                       </td>
-                      <td className="mono text-xs">{formatDuration(item.duration)}</td>
+                      <td className="mono text-xs">
+                        {formatDuration(item.duration)}
+                      </td>
                       <td>
                         <span
                           className={cn(
                             "inline-block px-2 py-0.5 rounded-full text-xs font-medium",
-                            action.cls
+                            action.cls,
                           )}
                         >
                           {action.label}
@@ -145,4 +172,6 @@ const LogsPage = () => {
       </div>
     </AdminLayout>
   );
-}
+};
+
+export default LogsPage;

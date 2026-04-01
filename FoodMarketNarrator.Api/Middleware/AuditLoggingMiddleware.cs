@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using food_market_narrator_api.Data.Context;
 using food_market_narrator_api.Models;
+using food_market_narrator_api.Services;
 
 namespace food_market_narrator_api.Middleware;
 
@@ -15,7 +15,7 @@ public class AuditLoggingMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, AppDbContext db)
+    public async Task InvokeAsync(HttpContext context, AuditLogService auditLogService)
     {
         // Skip non-authenticated, GET, static files, swagger
         if (context.User.Identity?.IsAuthenticated != true
@@ -84,8 +84,7 @@ public class AuditLoggingMiddleware
                 CreatedAt = DateTime.UtcNow
             };
 
-            db.AuditLogs.Add(auditLog);
-            await db.SaveChangesAsync();
+            await auditLogService.WriteLogAsync(auditLog);
         }
         catch (Exception ex)
         {

@@ -1,17 +1,19 @@
-using food_market_narrator_api.Data.Context;
 using food_market_narrator_api.DTOs.AuditLog;
 using food_market_narrator_api.Models;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace food_market_narrator_api.Services;
 
 public class AuditLogService
 {
-    private readonly AppDbContext _db;
+    private readonly IMongoCollection<BsonDocument> _auditLogs;
+    private readonly ILogger<AuditLogService> _logger;
 
-    public AuditLogService(AppDbContext db)
+    public AuditLogService(IMongoDatabase mongoDatabase, ILogger<AuditLogService> logger)
     {
-        _db = db;
+        _auditLogs = mongoDatabase.GetCollection<BsonDocument>("AuditLogs");
+        _logger = logger;
     }
 
     public async Task<(List<AuditLogResponse> Items, int TotalCount)> GetLogsAsync(
@@ -23,45 +25,69 @@ public class AuditLogService
         DateTime? from = null,
         DateTime? to = null)
     {
-        var query = _db.AuditLogs.AsQueryable();
+        var filters = new List<FilterDefinition<BsonDocument>>();
 
         if (userId.HasValue)
-            query = query.Where(l => l.UserId == userId.Value);
+            filters.Add(Builders<BsonDocument>.Filter.Eq("user_id", userId.Value));
         if (!string.IsNullOrWhiteSpace(action))
-            query = query.Where(l => l.Action == action);
+            filters.Add(Builders<BsonDocument>.Filter.Eq("action", action));
         if (!string.IsNullOrWhiteSpace(targetType))
-            query = query.Where(l => l.TargetType == targetType);
+            filters.Add(Builders<BsonDocument>.Filter.Eq("target_type", targetType));
         if (from.HasValue)
-            query = query.Where(l => l.CreatedAt >= from.Value);
+            filters.Add(Builders<BsonDocument>.Filter.Gte("created_at", from.Value));
         if (to.HasValue)
-            query = query.Where(l => l.CreatedAt <= to.Value);
+            filters.Add(Builders<BsonDocument>.Filter.Lte("created_at", to.Value));
 
-        var totalCount = await query.CountAsync();
+        var finalFilter = filters.Count > 0
+            ? Builders<BsonDocument>.Filter.And(filters)
+            : FilterDefinition<BsonDocument>.Empty;
 
-        var items = await query
-            .OrderByDescending(l => l.CreatedAt)
+        var totalCountLong = await _auditLogs.CountDocumentsAsync(finalFilter);
+        var totalCount = totalCountLong > int.MaxValue ? int.MaxValue : (int)totalCountLong;
+
+        var docs = await _auditLogs.Find(finalFilter)
+            .Sort(Builders<BsonDocument>.Sort.Descending("created_at"))
             .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(l => new AuditLogResponse
-            {
-                Id = l.Id,
-                UserId = l.UserId,
-                Username = l.Username,
-                Action = l.Action,
-                TargetType = l.TargetType,
-                TargetId = l.TargetId,
-                Details = l.Details,
-                IpAddress = l.IpAddress,
-                CreatedAt = l.CreatedAt
-            })
+            .Limit(pageSize)
             .ToListAsync();
+
+        var items = docs.Select(d => new AuditLogResponse
+        {
+            Id = 0,
+            UserId = d.GetValue("user_id", BsonValue.Create(0)).ToInt32(),
+            Username = d.GetValue("username", string.Empty).AsString,
+            Action = d.GetValue("action", string.Empty).AsString,
+            TargetType = d.GetValue("target_type", string.Empty).AsString,
+            TargetId = d.GetValue("target_id", BsonNull.Value).IsBsonNull ? null : d["target_id"].AsString,
+            Details = d.GetValue("details", BsonNull.Value).IsBsonNull ? null : d["details"].AsString,
+            IpAddress = d.GetValue("ip_address", BsonNull.Value).IsBsonNull ? null : d["ip_address"].AsString,
+            CreatedAt = d.GetValue("created_at", BsonDateTime.Create(DateTime.UtcNow)).ToUniversalTime()
+        }).ToList();
 
         return (items, totalCount);
     }
 
     public async Task WriteLogAsync(AuditLog log)
     {
-        _db.AuditLogs.Add(log);
-        await _db.SaveChangesAsync();
+        var doc = new BsonDocument
+        {
+            { "user_id", log.UserId },
+            { "username", log.Username ?? string.Empty },
+            { "action", log.Action ?? string.Empty },
+            { "target_type", log.TargetType ?? string.Empty },
+            { "target_id", log.TargetId != null ? (BsonValue)log.TargetId : BsonNull.Value },
+            { "details", log.Details != null ? (BsonValue)log.Details : BsonNull.Value },
+            { "ip_address", log.IpAddress != null ? (BsonValue)log.IpAddress : BsonNull.Value },
+            { "created_at", log.CreatedAt == default ? DateTime.UtcNow : log.CreatedAt }
+        };
+
+        try
+        {
+            await _auditLogs.InsertOneAsync(doc);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to write audit log to MongoDB");
+        }
     }
 }
