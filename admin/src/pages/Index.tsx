@@ -134,12 +134,6 @@ const Dashboard = () => {
     staleTime: 60_000,
   });
 
-  const { data: movementPaths } = useQuery({
-    queryKey: ["analytics", "movement-paths"],
-    queryFn: () => analyticsApi.getMovementPaths(50),
-    staleTime: 60_000,
-  });
-
   const avgTime = kpis?.averageListeningTimeSeconds ?? 0;
   const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
 
@@ -329,7 +323,6 @@ const Dashboard = () => {
         {/* ── Maps ───────────────────────────────────────────────────────────── */}
         <HeatmapSection
           points={heatmapData?.points}
-          movementPaths={movementPaths?.sessions}
           restaurantPois={topRestaurantsData?.items}
           lookbackHours={heatmapHours}
           onLookbackHoursChange={setHeatmapHours}

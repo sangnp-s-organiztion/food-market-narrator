@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound.tsx";
 import RestaurantsPage from "./pages/Restaurants.tsx";
 import UsersPage from "./pages/UsersPage.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
+import TrajectoryPage from "./pages/TrajectoryPage.tsx";
 
 import { ReactNode } from "react";
 
@@ -75,6 +76,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <LogsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trajectory"
+        element={
+          <ProtectedRoute>
+            <TrajectoryPage />
           </ProtectedRoute>
         }
       />
