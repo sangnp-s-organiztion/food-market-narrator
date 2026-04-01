@@ -8,7 +8,6 @@ public class AuditLogResponse
     public string Action { get; set; } = string.Empty;
     public string TargetType { get; set; } = string.Empty;
     public string? TargetId { get; set; }
-    public string? TargetName { get; set; }
     public string? Details { get; set; }
     public string? IpAddress { get; set; }
     public DateTime CreatedAt { get; set; }

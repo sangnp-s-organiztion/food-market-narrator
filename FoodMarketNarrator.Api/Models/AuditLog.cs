@@ -33,10 +33,6 @@ public class AuditLog
     [MaxLength(100)]
     public string? TargetId { get; set; }
 
-    [Column("target_name")]
-    [MaxLength(255)]
-    public string? TargetName { get; set; }
-
     [Column("details")]
     public string? Details { get; set; }
 

@@ -50,7 +50,6 @@ public class AuditLogService
                 Action = l.Action,
                 TargetType = l.TargetType,
                 TargetId = l.TargetId,
-                TargetName = l.TargetName,
                 Details = l.Details,
                 IpAddress = l.IpAddress,
                 CreatedAt = l.CreatedAt

@@ -22,7 +22,6 @@ namespace food_market_narrator_api.Migrations
                     action = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     target_type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     target_id = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    target_name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ip_address = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: false)

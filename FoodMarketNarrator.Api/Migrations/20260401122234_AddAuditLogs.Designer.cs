@@ -104,11 +104,6 @@ namespace food_market_narrator_api.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("target_id");
 
-                    b.Property<string>("TargetName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("target_name");
-
                     b.Property<string>("TargetType")
                         .IsRequired()
                         .HasMaxLength(50)
