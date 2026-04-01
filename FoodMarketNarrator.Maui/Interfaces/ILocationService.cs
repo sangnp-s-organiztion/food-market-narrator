@@ -7,6 +7,7 @@ namespace food_market_narrator.Services
     public interface ILocationService
     {
         event EventHandler<Location> LocationChanged;
+        event EventHandler<Location?> LocationSampled;
         Task<Location?> GetCurrentLocationAsync();
         Task StartTrackingAsync();
         Task<bool> RequestBackgroundLocationPermissionAsync();

@@ -33,6 +33,8 @@ public class Program
         builder.Services.AddScoped<MongoHealthRepository>();
         builder.Services.AddScoped<MongoHealthService>();
         builder.Services.AddScoped<AnalyticsRepository>();
+        builder.Services.AddScoped<LocationLogRepository>();
+        builder.Services.AddScoped<LocationLogService>();
 
 
         builder.Services

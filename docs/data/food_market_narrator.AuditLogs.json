@@ -1,0 +1,170 @@
+[{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b77d"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456781"
+  },
+  "restaurant_id": "oc-loan",
+  "audio_id": 8,
+  "start_time": {
+    "$date": "2026-03-12T08:05:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T08:07:30.000Z"
+  },
+  "duration": 150
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b77e"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456782"
+  },
+  "restaurant_id": "oc-oanh",
+  "audio_id": 9,
+  "start_time": {
+    "$date": "2026-03-12T08:10:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T08:12:00.000Z"
+  },
+  "duration": 120
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b77f"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456783"
+  },
+  "restaurant_id": "oc-phat",
+  "audio_id": 10,
+  "start_time": {
+    "$date": "2026-03-12T08:15:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T08:19:00.000Z"
+  },
+  "duration": 240
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b780"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456784"
+  },
+  "restaurant_id": "oc-loan",
+  "audio_id": 8,
+  "start_time": {
+    "$date": "2026-03-12T08:20:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T08:22:30.000Z"
+  },
+  "duration": 150
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b781"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456785"
+  },
+  "restaurant_id": "chilli-bbq-hotpot-restaurant",
+  "audio_id": 1,
+  "start_time": {
+    "$date": "2026-03-12T08:25:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T08:26:30.000Z"
+  },
+  "duration": 90
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b782"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456786"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 13,
+  "start_time": {
+    "$date": "2026-03-12T09:10:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T09:14:00.000Z"
+  },
+  "duration": 240
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b783"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456787"
+  },
+  "restaurant_id": "the-gioi-bo",
+  "audio_id": 15,
+  "start_time": {
+    "$date": "2026-03-12T09:20:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T09:23:00.000Z"
+  },
+  "duration": 180
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b784"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456788"
+  },
+  "restaurant_id": "oc-loan",
+  "audio_id": 8,
+  "start_time": {
+    "$date": "2026-03-12T09:30:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T09:33:00.000Z"
+  },
+  "duration": 180
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b785"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456789"
+  },
+  "restaurant_id": "lau-met-nuong-79k",
+  "audio_id": 3,
+  "start_time": {
+    "$date": "2026-03-12T10:10:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T10:12:00.000Z"
+  },
+  "duration": 120
+},
+{
+  "_id": {
+    "$oid": "69cccd44de842faf0b15b786"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456790"
+  },
+  "restaurant_id": "oc-oanh",
+  "audio_id": 9,
+  "start_time": {
+    "$date": "2026-03-12T10:40:00.000Z"
+  },
+  "end_time": {
+    "$date": "2026-03-12T10:43:00.000Z"
+  },
+  "duration": 180
+}]
