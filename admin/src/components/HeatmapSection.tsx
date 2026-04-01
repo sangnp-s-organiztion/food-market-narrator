@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { heatmapData, restaurants } from "@/lib/mockData";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -13,29 +12,6 @@ const HeatmapSection = () => {
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
     }).addTo(map);
-
-    heatmapData.forEach(([lat, lng, intensity]) => {
-      L.circleMarker([lat, lng], {
-        radius: intensity * 20,
-        fillColor: "hsl(221, 83%, 53%)",
-        color: "hsl(221, 83%, 53%)",
-        weight: 1,
-        opacity: 0.7,
-        fillOpacity: intensity * 0.5,
-      }).addTo(map);
-    });
-
-    restaurants.forEach((r) => {
-      L.circleMarker([r.latitude, r.longitude], {
-        radius: 5,
-        fillColor: "hsl(199, 89%, 48%)",
-        color: "hsl(199, 89%, 48%)",
-        weight: 2,
-        fillOpacity: 0.8,
-      })
-        .bindPopup(`<strong>${r.name}</strong><br/>${r.address}`)
-        .addTo(map);
-    });
 
     mapInstanceRef.current = map;
     return () => { map.remove(); mapInstanceRef.current = null; };

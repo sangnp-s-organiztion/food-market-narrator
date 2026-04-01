@@ -1,15 +1,26 @@
 import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { restaurants as initialRestaurants, Restaurant, EntityStatus } from "@/lib/mockData";
 import { Search, Lock, Unlock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import StatusBadge from "@/components/StatusBadge";
-import { addLog } from "@/lib/adminLogs";
+
+type EntityStatus = "active" | "inactive";
+
+interface Restaurant {
+  restaurant_id: number;
+  name: string;
+  address: string;
+  phone: string;
+  open_time: string;
+  close_time: string;
+  status: EntityStatus;
+  created_at: string;
+}
 
 const RestaurantsPage = () => {
-  const [data, setData] = useState<Restaurant[]>(initialRestaurants);
+  const [data, setData] = useState<Restaurant[]>([]);
   const [search, setSearch] = useState("");
   const [confirmAction, setConfirmAction] = useState<{ id: number; action: "lock" | "unlock"; name: string } | null>(null);
 
@@ -21,10 +32,9 @@ const RestaurantsPage = () => {
 
   const handleConfirmAction = () => {
     if (!confirmAction) return;
-    const { id, action, name } = confirmAction;
+    const { id, action } = confirmAction;
     const newStatus: EntityStatus = action === "lock" ? "inactive" : "active";
     setData((d) => d.map((r) => (r.restaurant_id === id ? { ...r, status: newStatus } : r)));
-    addLog(action.toUpperCase(), "Restaurant", name);
     toast.success("Thao tác thành công");
     setConfirmAction(null);
   };

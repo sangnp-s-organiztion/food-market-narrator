@@ -1,6 +1,5 @@
 import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { users as initialUsers, User } from "@/lib/mockData";
 import { Plus, Lock, Unlock, Shield } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { addLog } from "@/lib/adminLogs";
+
+interface User {
+  user_id: number;
+  username: string;
+  role: "admin" | "editor";
+  is_active: boolean;
+  created_at: string;
+}
 
 const UsersPage = () => {
-  const [data, setData] = useState<User[]>(initialUsers);
+  const [data, setData] = useState<User[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<{ username: string; role: "admin" | "editor" }>({ username: "", role: "editor" });
   const [confirmUser, setConfirmUser] = useState<{ id: number; name: string; lock: boolean } | null>(null);
@@ -20,7 +26,6 @@ const UsersPage = () => {
   const handleConfirmToggle = () => {
     if (!confirmUser) return;
     setData((arr) => arr.map((u) => (u.user_id === confirmUser.id ? { ...u, is_active: !u.is_active } : u)));
-    addLog(confirmUser.lock ? "LOCK" : "UNLOCK", "User", confirmUser.name);
     toast.success("Thao tác thành công");
     setConfirmUser(null);
   };
@@ -35,7 +40,6 @@ const UsersPage = () => {
     const newU: User = {
       user_id: Date.now(),
       username: form.username,
-      password_hash: "***",
       role: form.role,
       is_active: true,
       created_at: new Date().toISOString().split("T")[0],
