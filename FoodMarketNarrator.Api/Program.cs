@@ -35,6 +35,8 @@ public class Program
         builder.Services.AddScoped<AnalyticsRepository>();
         builder.Services.AddScoped<LocationLogRepository>();
         builder.Services.AddScoped<LocationLogService>();
+        builder.Services.AddScoped<UserSessionRepository>();
+        builder.Services.AddScoped<UserSessionService>();
 
 
         builder.Services

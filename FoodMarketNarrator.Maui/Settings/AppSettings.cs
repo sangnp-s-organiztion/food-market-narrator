@@ -36,6 +36,7 @@ public static class AppSettings
 
     public const string RestaurantEndpoint = "restaurant";
     public const string LanguageEndpoint = "language";
+    public const string UserSessionsStartEndpoint = "api/user-sessions/start";
     public const string LocationLogsBatchEndpoint = "api/location-logs/batch";
 
     public const double MapHighlightDistanceMeters = 20;

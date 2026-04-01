@@ -59,6 +59,8 @@ Luu y:
 ## Mongo
 
 - GET /Mongo/test-connect (public)
+- POST /api/user-sessions/start (public)
+- POST /api/location-logs/batch (public)
 
 ## Static Media URLs
 

@@ -16,3 +16,5 @@ File này đóng vai trò index trong `docs/` để gom cấu trúc theo nhóm t
 - `GET /public/Restaurant/{restaurantId}/dishes`
 - `GET /public/Restaurant/{restaurantId}/audios`
 - `GET /Mongo/test-connect`
+- `POST /api/user-sessions/start`
+- `POST /api/location-logs/batch`
