@@ -23,6 +23,11 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.Dish.CountAsync();
+        }
+
         public async Task<DishModel?> GetByIdAsync(int dishId)
         {
             return await _context.Dish.FirstOrDefaultAsync(d => d.DishId == dishId);

@@ -27,6 +27,11 @@ namespace food_market_narrator_api.Services
             }).ToList();
         }
 
+        public async Task<int> CountAudiosAsync()
+        {
+            return await _audioRepository.CountAsync();
+        }
+
         public async Task<List<AudioResponse>> GetByRestaurantIdAsync(string restaurantId)
         {
             var audios = await _audioRepository.GetByRestaurantIdAsync(restaurantId);

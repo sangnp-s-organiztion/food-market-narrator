@@ -1,4 +1,4 @@
-import { EntityStatus } from "@/lib/mockData";
+type EntityStatus = "active" | "inactive";
 
 const statusLabels: Record<string, string> = {
   active: "Hoạt động",
