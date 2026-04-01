@@ -90,3 +90,24 @@ export interface TopRestaurantChartData {
   name: string;
   listens: number;
 }
+
+// ─── Audit Log Types ─────────────────────────────────────────────────────────
+
+export interface AuditLogItem {
+  id: number;
+  userId: number;
+  username: string;
+  action: string;
+  targetType: string;
+  targetId?: string | null;
+  details?: string | null;
+  ipAddress?: string | null;
+  createdAt: string; // ISO 8601
+}
+
+export interface AuditLogsResponse {
+  items: AuditLogItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

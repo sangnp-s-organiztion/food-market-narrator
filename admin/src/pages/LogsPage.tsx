@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { analyticsApi } from "@/lib/analyticsApi";
+import { auditApi } from "@/lib/auditApi";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
@@ -40,42 +41,85 @@ function formatTimestamp(iso: string): string {
 }
 
 const LogsPage = () => {
-  const [page, setPage] = useState(1);
+  const [audioPage, setAudioPage] = useState(1);
+  const [auditPage, setAuditPage] = useState(1);
+
+  const {
+    data: auditResponse,
+    isLoading: isAuditLoading,
+    isError: isAuditError,
+    isSuccess: isAuditSuccess,
+  } = useQuery({
+    queryKey: ["audit-logs", auditPage, PAGE_SIZE],
+    queryFn: () =>
+      auditApi.getLogs({
+        page: auditPage,
+        pageSize: PAGE_SIZE,
+      }),
+    placeholderData: (previousData) => previousData,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
 
   const {
     data: activityResponse,
-    isLoading,
-    isError,
+    isLoading: isAudioLoading,
+    isError: isAudioError,
+    isSuccess: isAudioSuccess,
   } = useQuery({
-    queryKey: ["analytics", "recent-activity", page, PAGE_SIZE],
-    queryFn: () => analyticsApi.getRecentActivity(page, PAGE_SIZE),
+    queryKey: ["analytics", "recent-activity", audioPage, PAGE_SIZE],
+    queryFn: () => analyticsApi.getRecentActivity(audioPage, PAGE_SIZE),
+    placeholderData: (previousData) => previousData,
     staleTime: 30_000,
     refetchInterval: 30_000, // auto-refresh every 30s for live-ish feed
   });
 
+  const auditItems = auditResponse?.items ?? [];
+  const auditTotalCount = auditResponse?.totalCount ?? 0;
+  const auditTotalPages = Math.max(1, Math.ceil(auditTotalCount / PAGE_SIZE));
+
   const activity = activityResponse?.items ?? [];
-  const totalPages = activityResponse?.totalPages ?? 0;
-  const totalCount = activityResponse?.totalCount ?? 0;
+  const audioTotalPages = activityResponse?.totalPages ?? 0;
+  const audioTotalCount = activityResponse?.totalCount ?? 0;
 
   useEffect(() => {
-    if (totalPages > 0 && page > totalPages) {
-      setPage(totalPages);
+    if (isAudioSuccess && audioTotalPages > 0 && audioPage > audioTotalPages) {
+      setAudioPage(audioTotalPages);
     }
-  }, [page, totalPages]);
+  }, [audioPage, audioTotalPages, isAudioSuccess]);
 
-  const pageWindow = useMemo(() => {
-    if (totalPages <= 0) return [] as number[];
-    const start = Math.max(1, page - 2);
-    const end = Math.min(totalPages, start + 4);
+  useEffect(() => {
+    if (isAuditSuccess && auditPage > auditTotalPages) {
+      setAuditPage(auditTotalPages);
+    }
+  }, [auditPage, auditTotalPages, isAuditSuccess]);
+
+  const audioPageWindow = useMemo(() => {
+    if (audioTotalPages <= 0) return [] as number[];
+    const start = Math.max(1, audioPage - 2);
+    const end = Math.min(audioTotalPages, start + 4);
     const adjustedStart = Math.max(1, end - 4);
     return Array.from(
       { length: end - adjustedStart + 1 },
       (_, i) => adjustedStart + i,
     );
-  }, [page, totalPages]);
+  }, [audioPage, audioTotalPages]);
 
-  const hasPrev = page > 1;
-  const hasNext = totalPages > 0 && page < totalPages;
+  const auditPageWindow = useMemo(() => {
+    if (auditTotalPages <= 0) return [] as number[];
+    const start = Math.max(1, auditPage - 2);
+    const end = Math.min(auditTotalPages, start + 4);
+    const adjustedStart = Math.max(1, end - 4);
+    return Array.from(
+      { length: end - adjustedStart + 1 },
+      (_, i) => adjustedStart + i,
+    );
+  }, [auditPage, auditTotalPages]);
+
+  const hasAudioPrev = audioPage > 1;
+  const hasAudioNext = audioTotalPages > 0 && audioPage < audioTotalPages;
+  const hasAuditPrev = auditPage > 1;
+  const hasAuditNext = auditPage < auditTotalPages;
 
   return (
     <AdminLayout>
@@ -88,6 +132,141 @@ const LogsPage = () => {
 
       <div className="max-w-7xl mx-auto px-8 py-6">
         <div className="stat-card">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold">Nhật ký hệ thống</h2>
+              <span className="text-xs text-muted-foreground mono">
+                Nguồn: MongoDB AuditLogs
+              </span>
+            </div>
+
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Người dùng</th>
+                  <th>Hành động</th>
+                  <th>Đối tượng</th>
+                  <th>Chi tiết</th>
+                  <th>IP</th>
+                  <th>Thời gian</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isAuditLoading && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="text-center py-8 text-muted-foreground"
+                    >
+                      Đang tải nhật ký hệ thống...
+                    </td>
+                  </tr>
+                )}
+                {isAuditError && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="text-center py-8 text-destructive"
+                    >
+                      Không thể tải nhật ký hệ thống.
+                    </td>
+                  </tr>
+                )}
+                {!isAuditLoading &&
+                  !isAuditError &&
+                  auditItems.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        Chưa có nhật ký hệ thống nào.
+                      </td>
+                    </tr>
+                  )}
+                {!isAuditLoading &&
+                  !isAuditError &&
+                  auditItems.map((item, idx) => (
+                    <tr key={`${item.username}-${item.action}-${idx}`}>
+                      <td className="font-medium text-xs">{item.username}</td>
+                      <td className="mono text-xs">{item.action}</td>
+                      <td className="text-xs">
+                        {item.targetType}
+                        {item.targetId ? ` #${item.targetId}` : ""}
+                      </td>
+                      <td className="text-xs text-muted-foreground max-w-xs truncate">
+                        {item.details ?? "-"}
+                      </td>
+                      <td className="mono text-xs text-muted-foreground">
+                        {item.ipAddress ?? "-"}
+                      </td>
+                      <td className="mono text-xs text-muted-foreground whitespace-nowrap">
+                        {formatTimestamp(item.createdAt)}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+
+            {!isAuditLoading && !isAuditError && auditItems.length > 0 && (
+              <div className="mt-3 px-1 flex flex-col gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Hiển thị {auditItems.length} / {auditTotalCount} bản ghi nhật
+                  ký hệ thống.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                    disabled={!hasAuditPrev}
+                    onClick={() => setAuditPage((p) => Math.max(1, p - 1))}
+                  >
+                    Trang trước
+                  </button>
+
+                  {auditPageWindow.map((p) => (
+                    <button
+                      key={`audit-${p}`}
+                      type="button"
+                      className={cn(
+                        "px-3 py-1.5 rounded-md border text-xs font-medium",
+                        p === auditPage
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "hover:bg-muted",
+                      )}
+                      onClick={() => setAuditPage(p)}
+                    >
+                      {p}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                    disabled={!hasAuditNext}
+                    onClick={() => setAuditPage((p) => p + 1)}
+                  >
+                    Trang sau
+                  </button>
+
+                  <span className="text-xs text-muted-foreground ml-1">
+                    Trang {auditPage} / {Math.max(auditTotalPages, 1)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="h-px bg-border mb-6" />
+
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Nhật ký nghe audio</h2>
+            <span className="text-xs text-muted-foreground mono">
+              Nguồn: MongoDB AudioLogs
+            </span>
+          </div>
+
           {/* Subtle hint for action types */}
           <div className="flex flex-wrap gap-3 mb-4">
             {[
@@ -128,7 +307,7 @@ const LogsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {isLoading && (
+              {isAudioLoading && (
                 <tr>
                   <td
                     colSpan={5}
@@ -138,14 +317,14 @@ const LogsPage = () => {
                   </td>
                 </tr>
               )}
-              {isError && (
+              {isAudioError && (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-destructive">
                     Không thể tải nhật ký. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError && activity.length === 0 && (
+              {!isAudioLoading && !isAudioError && activity.length === 0 && (
                 <tr>
                   <td
                     colSpan={5}
@@ -155,8 +334,8 @@ const LogsPage = () => {
                   </td>
                 </tr>
               )}
-              {!isLoading &&
-                !isError &&
+              {!isAudioLoading &&
+                !isAudioError &&
                 activity.map((item, idx) => {
                   const action = inferAction(item.duration);
                   return (
@@ -189,34 +368,34 @@ const LogsPage = () => {
             </tbody>
           </table>
 
-          {!isLoading && !isError && activity.length > 0 && (
+          {!isAudioLoading && !isAudioError && activity.length > 0 && (
             <div className="mt-3 px-1 flex flex-col gap-3">
               <p className="text-xs text-muted-foreground">
-                Hiển thị {activity.length} / {totalCount} bản ghi. Nhật ký tự
-                động cập nhật mỗi 30 giây.
+                Hiển thị {activity.length} / {audioTotalCount} bản ghi nghe
+                audio. Nhật ký tự động cập nhật mỗi 30 giây.
               </p>
 
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-                  disabled={!hasPrev}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={!hasAudioPrev}
+                  onClick={() => setAudioPage((p) => Math.max(1, p - 1))}
                 >
                   Trang trước
                 </button>
 
-                {pageWindow.map((p) => (
+                {audioPageWindow.map((p) => (
                   <button
                     key={p}
                     type="button"
                     className={cn(
                       "px-3 py-1.5 rounded-md border text-xs font-medium",
-                      p === page
+                      p === audioPage
                         ? "bg-primary text-primary-foreground border-primary"
                         : "hover:bg-muted",
                     )}
-                    onClick={() => setPage(p)}
+                    onClick={() => setAudioPage(p)}
                   >
                     {p}
                   </button>
@@ -225,14 +404,14 @@ const LogsPage = () => {
                 <button
                   type="button"
                   className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-                  disabled={!hasNext}
-                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!hasAudioNext}
+                  onClick={() => setAudioPage((p) => p + 1)}
                 >
                   Trang sau
                 </button>
 
                 <span className="text-xs text-muted-foreground ml-1">
-                  Trang {page} / {Math.max(totalPages, 1)}
+                  Trang {audioPage} / {Math.max(audioTotalPages, 1)}
                 </span>
               </div>
             </div>
