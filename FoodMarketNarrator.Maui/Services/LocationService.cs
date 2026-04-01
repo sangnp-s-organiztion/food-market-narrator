@@ -17,6 +17,7 @@ public class LocationService : ILocationService
     private bool _backgroundPermissionExplained;
 
     public event EventHandler<Location>? LocationChanged;
+    public event EventHandler<Location?>? LocationSampled;
 
     // Lay vi tri hien tai cua nguoi dung.
     public async Task<Location?> GetCurrentLocationAsync()
@@ -42,15 +43,13 @@ public class LocationService : ILocationService
         if (_isTracking) return;
 
         var granted = await EnsureForegroundTrackingPermissionAsync();
-        if (!granted)
-        {
-            // Console.WriteLine("Location permission not granted");
-            return;
-        }
 
         try
         {
-            StartForegroundTrackingServiceIfNeeded();
+            if (granted)
+            {
+                StartForegroundTrackingServiceIfNeeded();
+            }
 
             _isTracking = true;
             _trackingCts = new CancellationTokenSource();
@@ -159,10 +158,17 @@ public class LocationService : ILocationService
         {
             try
             {
-                var location = await Geolocation.Default.GetLocationAsync(TrackingRequest);
-                if (location != null)
+                var permissionStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+                if (permissionStatus != PermissionStatus.Granted)
                 {
-                    if (ShouldPublish(location))
+                    LocationSampled?.Invoke(this, null);
+                }
+                else
+                {
+                    var location = await Geolocation.Default.GetLocationAsync(TrackingRequest);
+                    LocationSampled?.Invoke(this, location);
+
+                    if (location != null && ShouldPublish(location))
                     {
                         _lastPublishedLocation = location;
                         LocationChanged?.Invoke(this, location);
@@ -171,6 +177,7 @@ public class LocationService : ILocationService
             }
             catch (Exception)
             {
+                LocationSampled?.Invoke(this, null);
                 // Console.WriteLine($"Tracking loop error: {ex.Message}");
             }
 

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import {
@@ -21,7 +21,6 @@ import {
   Bar,
 } from "recharts";
 import { HeatmapSection } from "@/components/HeatmapSection";
-import { UserRouteSection } from "@/components/UserRouteSection";
 import { analyticsApi } from "@/lib/analyticsApi";
 import { adminStatsApi } from "@/lib/adminApi";
 
@@ -45,6 +44,8 @@ function toBarChartData(
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
 const Dashboard = () => {
+  const [heatmapHours, setHeatmapHours] = useState<1 | 6 | 24 | 168>(24);
+
   const { data: restaurantCount } = useQuery({
     queryKey: ["admin-stats", "restaurants", "count"],
     queryFn: () => adminStatsApi.getRestaurantCount(),
@@ -120,8 +121,8 @@ const Dashboard = () => {
   );
 
   const { data: heatmapData } = useQuery({
-    queryKey: ["analytics", "heatmap"],
-    queryFn: () => analyticsApi.getHeatmap(24),
+    queryKey: ["analytics", "heatmap", heatmapHours],
+    queryFn: () => analyticsApi.getHeatmap(heatmapHours),
     staleTime: 60_000,
   });
 
@@ -320,9 +321,11 @@ const Dashboard = () => {
         {/* ── Maps ───────────────────────────────────────────────────────────── */}
         <HeatmapSection
           points={heatmapData?.points}
+          movementPaths={movementPaths?.sessions}
           restaurantPois={topRestaurantsData?.items}
+          lookbackHours={heatmapHours}
+          onLookbackHoursChange={setHeatmapHours}
         />
-        <UserRouteSection paths={movementPaths?.sessions} />
       </div>
     </AdminLayout>
   );

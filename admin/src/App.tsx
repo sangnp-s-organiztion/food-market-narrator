@@ -26,9 +26,12 @@ const LoadingScreen = () => (
 );
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user || user.role.toLowerCase() !== "admin") {
+    return <Navigate to="/login" replace />;
+  }
   return <>{children}</>;
 };
 
@@ -41,14 +44,40 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/login"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/"
         element={
-          isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
         }
       />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-      <Route path="/restaurants" element={<ProtectedRoute><RestaurantsPage /></ProtectedRoute>} />
-      <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-      <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+      <Route
+        path="/restaurants"
+        element={
+          <ProtectedRoute>
+            <RestaurantsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/logs"
+        element={
+          <ProtectedRoute>
+            <LogsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

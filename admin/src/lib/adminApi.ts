@@ -65,6 +65,19 @@ export interface UpdateRestaurantRequest {
   closeTime?: string | null;
 }
 
+export interface CreateRestaurantRequest {
+  name: string;
+  userId: number;
+  description?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  openTime?: string | null;
+  closeTime?: string | null;
+  isActive?: boolean;
+}
+
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
@@ -102,21 +115,24 @@ export interface CountResponse {
 export const restaurantApi = {
   getAll: () => adminFetch<RestaurantResponse[]>("/restaurant"),
 
+  create: (data: CreateRestaurantRequest) =>
+    adminFetch<RestaurantResponse>("/restaurant", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   getById: (id: string) =>
-    adminFetch<RestaurantResponse>(`/api/restaurant/${encodeURIComponent(id)}`),
+    adminFetch<RestaurantResponse>(`/restaurant/${encodeURIComponent(id)}`),
 
   update: (id: string, data: UpdateRestaurantRequest) =>
-    adminFetch<RestaurantResponse>(
-      `/api/restaurant/${encodeURIComponent(id)}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      },
-    ),
+    adminFetch<RestaurantResponse>(`/restaurant/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 
   updateStatus: (id: string, data: UpdateStatusRequest) =>
     adminFetch<{ message: string }>(
-      `/api/restaurant/${encodeURIComponent(id)}/status`,
+      `/restaurant/${encodeURIComponent(id)}/status`,
       {
         method: "PATCH",
         body: JSON.stringify(data),

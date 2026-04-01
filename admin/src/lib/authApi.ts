@@ -20,7 +20,7 @@ export interface MeResponse {
 
 export const authApi = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const res = await fetch(`${API_BASE}/Auth/login`, {
+    const res = await fetch(`${API_BASE}/Auth/admin/login`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -28,6 +28,11 @@ export const authApi = {
     });
 
     if (!res.ok) {
+      if (res.status === 403) {
+        throw new Error(
+          "Chỉ tài khoản Admin mới được đăng nhập trang quản trị.",
+        );
+      }
       const err = await res.json().catch(() => ({ message: "Login failed" }));
       throw new Error(err.message ?? "Login failed");
     }
@@ -36,7 +41,7 @@ export const authApi = {
   },
 
   async getMe(): Promise<MeResponse> {
-    const res = await fetch(`${API_BASE}/Auth/me`, {
+    const res = await fetch(`${API_BASE}/Auth/admin/me`, {
       credentials: "include",
     });
 

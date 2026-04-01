@@ -42,7 +42,7 @@ CREATE TABLE food_market_narrator.dbo.Restaurant (
 	restaurant_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	name nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	description nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-	latitude decimal(9,6) NULL,
+	latitude decimal(10,6) NULL,
 	longitude decimal(9,6) NULL,
 	phone varchar(10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 	address nvarchar(500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -107,6 +107,7 @@ CREATE TABLE food_market_narrator.dbo.Dish (
 	created_at datetime DEFAULT getdate() NULL,
 	restaurant_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	image_id int NULL,
+	is_active bit NULL,
 	CONSTRAINT PK__Dish__9F2B4CF92E013256 PRIMARY KEY (dish_id),
 	CONSTRAINT FK__Dish__image_id__5070F446 FOREIGN KEY (image_id) REFERENCES food_market_narrator.dbo.Restaurant_Image(image_id),
 	CONSTRAINT FK__Dish__restaurant__4F7CD00D FOREIGN KEY (restaurant_id) REFERENCES food_market_narrator.dbo.Restaurant(restaurant_id)

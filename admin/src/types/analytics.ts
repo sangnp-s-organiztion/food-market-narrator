@@ -10,6 +10,7 @@ export interface KpiResponse {
 export interface HeatmapPoint {
   longitude: number;
   latitude: number;
+  intensity?: number;
 }
 
 export interface HeatmapResponse {
@@ -73,16 +74,41 @@ export interface RecentActivity {
 export interface RecentActivityResponse {
   items: RecentActivity[];
   count: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 }
 
 // ─── Dashboard Chart Types ───────────────────────────────────────────────────
 
 export interface DailyListenData {
-  date: string;      // "dd/MM" e.g. "12/04"
+  date: string; // "dd/MM" e.g. "12/04"
   listens: number;
 }
 
 export interface TopRestaurantChartData {
   name: string;
   listens: number;
+}
+
+// ─── Audit Log Types ─────────────────────────────────────────────────────────
+
+export interface AuditLogItem {
+  id: number;
+  userId: number;
+  username: string;
+  action: string;
+  targetType: string;
+  targetId?: string | null;
+  details?: string | null;
+  ipAddress?: string | null;
+  createdAt: string; // ISO 8601
+}
+
+export interface AuditLogsResponse {
+  items: AuditLogItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }

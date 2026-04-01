@@ -46,7 +46,16 @@ public class UsersController : ControllerBase
             return BadRequest(new { message = "Username and password are required." });
         }
 
-        var created = await _userService.CreateUserAsync(request);
+        UserResponse? created;
+        try
+        {
+            created = await _userService.CreateUserAsync(request);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
         if (created == null)
         {
             return Conflict(new { message = "Username already exists." });
@@ -59,7 +68,16 @@ public class UsersController : ControllerBase
     [HttpPatch("{id:int}/role")]
     public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateUserRoleRequest request)
     {
-        bool updated = await _userService.UpdateUserRoleAsync(id, request.Role);
+        bool updated;
+        try
+        {
+            updated = await _userService.UpdateUserRoleAsync(id, request.Role);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
         if (!updated)
         {
             return NotFound(new { message = "User not found." });

@@ -44,6 +44,14 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+            public async Task<RestaurantModel> AddAsync(RestaurantModel restaurant)
+            {
+                _context.Restaurant.Add(restaurant);
+                await _context.SaveChangesAsync();
+
+                return await GetByIdAsync(restaurant.RestaurantId) ?? restaurant;
+            }
+
         public async Task<bool> UpdateAsync(RestaurantModel restaurant)
         {
             var existing = await _context.Restaurant.FirstOrDefaultAsync(r => r.RestaurantId == restaurant.RestaurantId);

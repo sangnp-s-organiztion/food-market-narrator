@@ -93,13 +93,14 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Recent activity feed from AudioLogs (valid plays only, duration >= 5s).
     /// Sorted by timestamp DESC. Returns restaurant names via MSSQL join.
-    /// Query param: limit (int, default 20, max 100).
+    /// Query params: page (int, default 1), pageSize (int, default 10, max 100).
     /// </summary>
     [HttpGet("recent-activity")]
-    public async Task<IActionResult> GetRecentActivity([FromQuery] int limit = 20)
+    public async Task<IActionResult> GetRecentActivity([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var clamped = Math.Clamp(limit, 1, 100);
-        var result = await _analyticsService.GetRecentActivityAsync(clamped);
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+        var result = await _analyticsService.GetRecentActivityAsync(clampedPage, clampedPageSize);
         return Ok(result);
     }
 

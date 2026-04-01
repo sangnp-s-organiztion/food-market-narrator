@@ -27,6 +27,33 @@ namespace food_market_narrator_api.DTOs.Restaurant
         public List<AudioRequest> Audios { get; set; } = new();
     }
 
+    public class CreateRestaurantRequest
+    {
+        [Required]
+        [MaxLength(255)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public int UserId { get; set; }
+
+        [MaxLength(1000)]
+        public string? Description { get; set; }
+
+        [MaxLength(10)]
+        public string? Phone { get; set; }
+
+        [MaxLength(500)]
+        public string? Address { get; set; }
+
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+
+        public TimeSpan? OpenTime { get; set; }
+        public TimeSpan? CloseTime { get; set; }
+
+        public bool IsActive { get; set; } = true;
+    }
+
     public class RestaurantImageRequest
     {
         [Required]
