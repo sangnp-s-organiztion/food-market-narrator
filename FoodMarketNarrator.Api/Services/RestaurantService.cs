@@ -39,6 +39,29 @@ namespace food_market_narrator_api.Services
             return restaurants.Select(MapRestaurant).ToList();
         }
 
+        public async Task<RestaurantResponse> CreateRestaurantAsync(CreateRestaurantRequest request)
+        {
+            var now = DateTime.UtcNow;
+            var model = new RestaurantModel
+            {
+                RestaurantId = $"rst_{Guid.NewGuid():N}",
+                Name = request.Name.Trim(),
+                Description = request.Description,
+                Phone = request.Phone,
+                Address = request.Address,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                OpenTime = request.OpenTime,
+                CloseTime = request.CloseTime,
+                IsActive = request.IsActive,
+                UserId = request.UserId,
+                CreatedAt = now
+            };
+
+            var created = await _restaurantRepository.AddAsync(model);
+            return MapRestaurant(created);
+        }
+
         public async Task<RestaurantResponse?> UpdateRestaurantAsync(string restaurantId, UpdateRestaurantRequest request)
         {
             var existing = await _restaurantRepository.GetByIdAsync(restaurantId);
