@@ -202,6 +202,16 @@ namespace food_market_narrator_api.Migrations
                 name: "IX_Restaurant_Image_restaurant_id",
                 table: "Restaurant_Image",
                 column: "restaurant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_created_at",
+                table: "AuditLogs",
+                column: "created_at");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_user_id",
+                table: "AuditLogs",
+                column: "user_id");
         }
 
         /// <inheritdoc />
@@ -227,6 +237,14 @@ namespace food_market_narrator_api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AuditLogs_created_at",
+                table: "AuditLogs");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AuditLogs_user_id",
+                table: "AuditLogs");
         }
     }
 }
