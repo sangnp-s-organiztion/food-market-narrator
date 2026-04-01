@@ -1,4 +1,4 @@
-# Luồng Narration Trigger và Geofence (trạng thái hiện tại)
+﻿# Luồng Narration Trigger và Geofence (trạng thái hiện tại)
 
 Tài liệu này mô tả đúng theo code hiện tại.
 

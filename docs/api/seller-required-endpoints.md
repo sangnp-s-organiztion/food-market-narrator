@@ -1,9 +1,9 @@
-# API cho saler (cap nhat implementation)
+﻿# API cho seller (cập nhật implementation)
 
-Tai lieu nay tong hop cac API can co de chay day du cac man trong module saler, doi chieu voi backend hien tai.
-Cap nhat moi nhat: da implement day du nhom API P0 va P1 ben duoi.
+Tài liệu này tổng hợp các API cần có để chạy đầy đủ các màn trong module seller, đối chiếu với backend hiện tại.
+Cập nhật mới nhất: đã implement đầy đủ nhóm API P0 và P1 bên dưới.
 
-## 1) API hien co (FoodMarketNarrator.Api)
+## 1) API hiện có (FoodMarketNarrator.Api)
 
 - `POST /Auth/login`
 - `POST /Auth/logout`
@@ -30,82 +30,82 @@ Cap nhat moi nhat: da implement day du nhom API P0 va P1 ben duoi.
 - `GET /Language`
 - `GET /Language/{languageCode}`
 
-Nhan xet:
+Nhận xét:
 
-- Nhom API phuc vu saler da co du theo danh sach yeu cau P0/P1.
-- Auth hien tai dang dung cookie session (khong tra JWT access token).
+- Nhóm API phục vụ seller đã có đủ theo danh sách yêu cầu P0/P1.
+- Auth hiện tại đang dùng cookie session (không trả JWT access token).
 
-## 2) Feature saler va API da implement
+## 2) Feature seller và API đã implement
 
-### 2.1 Dang nhap + xac thuc
+### 2.1 Đăng nhập + xác thực
 
-UI lien quan: LoginPage, DashboardSidebar (logout)
+UI liên quan: LoginPage, DashboardSidebar (logout)
 
-Da implement:
+Đã implement:
 
 - `POST /Auth/login`
-- `POST /Auth/logout` (neu dung cookie/session)
+- `POST /Auth/logout` (nếu dùng cookie/session)
 - `GET /Auth/me`
 
-Request goi y:
+Request gợi ý:
 
 - `POST /Auth/login`
   - body: `{ "username": "...", "password": "..." }`
 
-Response hien tai:
+Response hiện tại:
 
-- `POST /Auth/login` tra thong tin user va set cookie session (`fmn_saler_auth`).
-- `GET /Auth/me` doc username tu claim trong cookie (khong truyen username qua query/body).
+- `POST /Auth/login` trả thông tin user và set cookie session (`fmn_saler_auth`).
+- `GET /Auth/me` đọc username từ claim trong cookie (không truyền username qua query/body).
 
-### 2.2 Chon nha hang theo user
+### 2.2 Chọn nhà hàng theo user
 
-UI lien quan: SelectRestaurantPage, DashboardLayout
+UI liên quan: SelectRestaurantPage, DashboardLayout
 
-Da implement:
+Đã implement:
 
 - `GET /Users/{userId}/restaurants`
-  - Tra danh sach nha hang ma user duoc quan ly.
+  - Trả danh sách nhà hàng mà user được quản lý.
 
-Luu y DB:
+Lưu ý DB:
 
-- Neu khong co bang `UserRestaurant`, co the map truc tiep bang `Restaurant.user_id`.
+- Nếu không có bảng `UserRestaurant`, có thể map trực tiếp bằng `Restaurant.user_id`.
 
-### 2.3 Trang Nha hang (RestaurantPage)
+### 2.3 Trang nhà hàng (RestaurantPage)
 
-UI lien quan: cap nhat profile nha hang, gio mo cua, trang thai is_active
+UI liên quan: cập nhật profile nhà hàng, giờ mở cửa, trạng thái is_active
 
-Da implement:
+Đã implement:
 
 - `PATCH /Restaurant/{id}`
 - `PATCH /Restaurant/{id}/status`
 
-Request goi y:
+Request gợi ý:
 
 - `PATCH /Restaurant/{id}` body:
   - `name, description, phone, address, latitude, longitude, open_time, close_time`
 - `PATCH /Restaurant/{id}/status` body:
   - `{ "is_active": true }`
 
-### 2.4 Trang Thuc don (DishesPage)
+### 2.4 Trang Thực đơn (DishesPage)
 
-UI lien quan: danh sach mon, them/sua/xoa
+UI liên quan: danh sách món, Thêm/sửa/xóa
 
-Da implement:
+Đã implement:
 
 - `GET /Restaurant/{restaurantId}/dishes`
 - `POST /Restaurant/{restaurantId}/dishes`
 - `PUT /Dishes/{dishId}`
 - `DELETE /Dishes/{dishId}`
 
-Goi y toi uu:
+Gợi ý tối ưu:
 
-- Ho tro phan trang cho list: `?page=1&pageSize=20`
+- Hỗ trợ phân trang cho list: `?page=1&pageSize=20`
 
-### 2.5 Trang Hinh anh (ImagesPage)
+### 2.5 Trang Hình ảnh (ImagesPage)
 
-UI lien quan: them anh, xoa anh, set anh chinh, doi thu tu
+UI liên quan: Thêm ảnh, xóa ảnh, set ảnh chính, đổi thứ tự
 
-Da implement:
+Đã implement:
 
 - `GET /Restaurant/{restaurantId}/images`
 - `POST /Restaurant/{restaurantId}/images` (multipart/form-data)
@@ -113,7 +113,7 @@ Da implement:
 - `PATCH /Images/{imageId}/primary`
 - `PATCH /Restaurant/{restaurantId}/images/reorder`
 
-Request goi y:
+Request gợi ý:
 
 - `PATCH /Images/{imageId}/primary` body: `{ "is_primary": true }`
 - `PATCH /Restaurant/{restaurantId}/images/reorder` body:
@@ -121,29 +121,29 @@ Request goi y:
 
 ### 2.6 Trang Audio (AudioPage)
 
-UI lien quan: list theo nha hang, them audio theo ngon ngu, bat/tat, xoa
+UI liên quan: list theo nhà hàng, Thêm audio theo ngôn ngữ, bật/tắt, xóa
 
-Da implement:
+Đã implement:
 
 - `GET /Restaurant/{restaurantId}/audios`
 - `POST /Restaurant/{restaurantId}/audios` (multipart/form-data)
 - `PATCH /Audios/{audioId}/active`
 - `DELETE /Audios/{audioId}`
 
-Request goi y:
+Request gợi ý:
 
 - `POST /Restaurant/{restaurantId}/audios`
   - fields: `language_id`, `file`
 - `PATCH /Audios/{audioId}/active`
   - body: `{ "is_active": true }`
 
-## 3) Uu tien implement de chay duoc saler nhanh
+## 3) Ưu tiên implement để chạy được seller nhanh
 
-Muc toi thieu de thay mock bang API that:
+Mức tối thiểu để thay mock bằng API thật:
 
-Trang thai: da xong toan bo P0 va P1.
+Trạng thái: đã xong toàn bộ P0 và P1.
 
-P0 (bat buoc):
+P0 (bắt buộc):
 
 - `POST /Auth/login`
 - `GET /Auth/me`
@@ -155,7 +155,7 @@ P0 (bat buoc):
 - `PUT /Dishes/{dishId}`
 - `DELETE /Dishes/{dishId}`
 
-P1 (nen co som):
+P1 (nên có sớm):
 
 - `GET /Restaurant/{restaurantId}/images`
 - `POST /Restaurant/{restaurantId}/images`
@@ -167,32 +167,32 @@ P1 (nen co som):
 - `PATCH /Audios/{audioId}/active`
 - `DELETE /Audios/{audioId}`
 
-## 4) Luu y quan trong ve model du lieu
+## 4) Lưu ý quan trọng về model dữ liệu
 
-Can thong nhat kieu `restaurant_id` giua frontend va backend:
+Cần thống nhất kiểu `restaurant_id` giữa frontend và backend:
 
-- Frontend saler hien dang dung `number`.
-- DB/backend hien co nhieu cho dang `string/varchar`.
+- Frontend seller hiện đang dùng `number`.
+- DB/backend hiện có nhiều chỗ dạng `string/varchar`.
 
-Khuyen nghi:
+Khuyến nghị:
 
-- Chon mot chuan duy nhat (nen theo DB la `string`) va dong bo TypeScript types + DTO API.
+- Chọn một chuẩn duy nhất (nên theo DB là `string`) và đồng bộ TypeScript types + DTO API.
 
-Neu khong dong bo som, ban se gap loi parse ID, route sai kieu, va update/xoa khong trung ban ghi.
+Nếu không đồng bộ sớm, bạn sẽ gặp lỗi parse ID, route sai kiểu, và update/xóa không trúng bản ghi.
 
-## 5) API contract chi tiet (request/response)
+## 5) API contract chi tiết (request/response)
 
-Luu y chung:
+Lưu ý chung:
 
-- JSON key dang camelCase.
-- Tat ca API ben duoi (tru `POST /Auth/login`) can cookie auth hop le.
-- Doi voi frontend web, can gui kem cookie (`credentials: include`).
+- JSON key dạng camelCase.
+- Tất cả API bên dưới (trừ `POST /Auth/login`) cần cookie auth hợp lệ.
+- Đối với frontend web, cần gửi kèm cookie (`credentials: include`).
 
 ### 5.1 Auth
 
 #### `POST /Auth/login`
 
-- Auth: khong can.
+- Auth: không cần.
 - Body (JSON):
 
 ```json
@@ -213,14 +213,14 @@ Luu y chung:
 }
 ```
 
-- Response 400: thieu username/password.
-- Response 401: sai tai khoan/mat khau hoac tai khoan bi khoa.
-- Ghi chu: response set cookie `fmn_saler_auth`.
+- Response 400: thiếu username/password.
+- Response 401: sai tài khoản/mật khẩu hoặc tài khoản bị khóa.
+- Ghi chú: response set cookie `fmn_saler_auth`.
 
 #### `POST /Auth/logout`
 
-- Auth: can.
-- Body: khong co.
+- Auth: cần.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -231,8 +231,8 @@ Luu y chung:
 
 #### `GET /Auth/me`
 
-- Auth: can.
-- Body: khong co.
+- Auth: cần.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -243,17 +243,17 @@ Luu y chung:
 }
 ```
 
-- Response 401: chua login hoac cookie het han.
+- Response 401: chưa login hoặc cookie hết hạn.
 
 ### 5.2 User restaurants
 
 #### `GET /Users/{userId}/restaurants`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `userId` (int)
-- Body: khong co.
-- Response 200 (mang nha hang):
+- Body: không có.
+- Response 200 (mảng nhà hàng):
 
 ```json
 [
@@ -280,7 +280,7 @@ Luu y chung:
 
 #### `PATCH /Restaurant/{id}`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `id` (string, restaurant_id)
 - Body (JSON):
@@ -288,7 +288,7 @@ Luu y chung:
 ```json
 {
   "name": "La Trattoria Bella",
-  "description": "Nha hang Y",
+  "description": "nhà hàng Y",
   "phone": "0123456789",
   "address": "123 Pho Hue",
   "latitude": 21.0285,
@@ -298,13 +298,13 @@ Luu y chung:
 }
 ```
 
-- Response 200: tra lai object restaurant da cap nhat (cung schema voi `GET /Users/{userId}/restaurants`).
-- Response 400: body khong hop le.
-- Response 404: khong tim thay restaurant.
+- Response 200: trả lại object restaurant đã cập nhật (cùng schema với `GET /Users/{userId}/restaurants`).
+- Response 400: body không hợp lệ.
+- Response 404: không tìm thấy restaurant.
 
 #### `PATCH /Restaurant/{id}/status`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `id` (string, restaurant_id)
 - Body (JSON):
@@ -323,19 +323,19 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay restaurant.
+- Response 404: không tìm thấy restaurant.
 
 ### 5.4 Dishes
 
 #### `GET /Restaurant/{restaurantId}/dishes?page=1&pageSize=20`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
 - Query params:
-  - `page` (int, mac dinh 1)
-  - `pageSize` (int, mac dinh 20)
-- Body: khong co.
+  - `page` (int, mặc định 1)
+  - `pageSize` (int, mặc định 20)
+- Body: không có.
 - Response 200:
 
 ```json
@@ -344,7 +344,7 @@ Luu y chung:
     "dishId": 10,
     "name": "Margherita Pizza",
     "price": 14.99,
-    "description": "Pizza co dien",
+    "description": "Pizza có điền",
     "restaurantId": "res_001",
     "imageId": 100,
     "createdAt": "2026-03-15T10:00:00Z"
@@ -354,7 +354,7 @@ Luu y chung:
 
 #### `POST /Restaurant/{restaurantId}/dishes`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
 - Body (JSON):
@@ -363,17 +363,17 @@ Luu y chung:
 {
   "name": "Tiramisu",
   "price": 9.99,
-  "description": "Mon trang mieng Y",
+  "description": "Món tráng miệng Y",
   "imageId": null
 }
 ```
 
-- Response 200: tra ve dish vua tao (schema nhu GET dishes item).
-- Response 400: body khong hop le.
+- Response 200: trả về dish vừa tạo (schema như GET dishes item).
+- Response 400: body không hợp lệ.
 
 #### `PUT /Dishes/{dishId}`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `dishId` (int)
 - Body (JSON):
@@ -382,21 +382,21 @@ Luu y chung:
 {
   "name": "Tiramisu size M",
   "price": 10.99,
-  "description": "Cap nhat mo ta",
+  "description": "cập nhật mô tả",
   "imageId": 101
 }
 ```
 
-- Response 200: tra ve dish da cap nhat.
-- Response 400: body khong hop le.
-- Response 404: khong tim thay dish.
+- Response 200: trả về dish đã cập nhật.
+- Response 400: body không hợp lệ.
+- Response 404: không tìm thấy dish.
 
 #### `DELETE /Dishes/{dishId}`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `dishId` (int)
-- Body: khong co.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -405,16 +405,16 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay dish.
+- Response 404: không tìm thấy dish.
 
 ### 5.5 Images
 
 #### `GET /Restaurant/{restaurantId}/images`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
-- Body: khong co.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -430,7 +430,7 @@ Luu y chung:
 
 #### `POST /Restaurant/{restaurantId}/images` (multipart/form-data)
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
 - Form-data fields:
@@ -448,14 +448,14 @@ Luu y chung:
 }
 ```
 
-- Response 400: thieu file.
+- Response 400: thiếu file.
 
 #### `DELETE /Images/{imageId}`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `imageId` (int)
-- Body: khong co.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -464,11 +464,11 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay image.
+- Response 404: không tìm thấy image.
 
 #### `PATCH /Images/{imageId}/primary`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `imageId` (int)
 - Body (JSON):
@@ -487,11 +487,11 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay image.
+- Response 404: không tìm thấy image.
 
 #### `PATCH /Restaurant/{restaurantId}/images/reorder`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
 - Body (JSON):
@@ -519,16 +519,16 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay restaurant hoac khong co image.
+- Response 404: không tìm thấy restaurant hoặc không có image.
 
 ### 5.6 Audios
 
 #### `GET /Restaurant/{restaurantId}/audios`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
-- Body: khong co.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -547,7 +547,7 @@ Luu y chung:
 
 #### `POST /Restaurant/{restaurantId}/audios` (multipart/form-data)
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `restaurantId` (string)
 - Form-data fields:
@@ -567,11 +567,11 @@ Luu y chung:
 }
 ```
 
-- Response 400: thieu file.
+- Response 400: thiếu file.
 
 #### `PATCH /Audios/{audioId}/active`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `audioId` (int)
 - Body (JSON):
@@ -590,14 +590,14 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay audio.
+- Response 404: không tìm thấy audio.
 
 #### `DELETE /Audios/{audioId}`
 
-- Auth: can.
+- Auth: cần.
 - Path param:
   - `audioId` (int)
-- Body: khong co.
+- Body: không có.
 - Response 200:
 
 ```json
@@ -606,11 +606,11 @@ Luu y chung:
 }
 ```
 
-- Response 404: khong tim thay audio.
+- Response 404: không tìm thấy audio.
 
 ---
 
-Ket luan:
+Kết luận:
 
-- Them `analytics_tables` khong giup cho saler module.
-- Nhom API Auth + UserRestaurants + Restaurant update + Dishes CRUD + Images CRUD + Audio CRUD da duoc implement.
+- Thêm `analytics_tables` không giúp cho seller module.
+- Nhóm API Auth + UserRestaurants + Restaurant update + Dishes CRUD + Images CRUD + Audio CRUD đã được implement.

@@ -1,4 +1,4 @@
-# MongoDB Setup (Food Market Narrator)
+﻿# MongoDB Setup (Food Market Narrator)
 
 Tài liệu này mô tả cách chạy MongoDB local và khởi tạo collection/index theo đúng script hiện có của dự án.
 

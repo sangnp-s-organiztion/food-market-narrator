@@ -1,4 +1,4 @@
-# Khắc phục cập nhật POI gần nhau theo thời gian thực
+﻿# Khắc phục cập nhật POI gần nhau theo thời gian thực
 
 Tài liệu này mô tả các thay đổi đã triển khai để giảm hiện tượng map hiển thị chậm khi người dùng di chuyển giữa các POI nằm sát nhau.
 

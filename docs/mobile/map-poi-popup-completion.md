@@ -1,4 +1,4 @@
-# Hoàn thiện tính năng POI popup trên MapPage
+﻿# Hoàn thiện tính năng POI popup trên MapPage
 
 Tài liệu này tổng hợp trạng thái hiện tại của tính năng chọn POI trên bản đồ và hiển thị popup chi tiết.
 

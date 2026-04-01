@@ -1,4 +1,4 @@
-# Audio cache lưu ở đâu
+﻿# Audio cache lưu ở đâu
 
 Tài liệu này mô tả chính xác vị trí lưu audio đã tải và cơ chế cache/offline theo code hiện tại của MAUI app.
 

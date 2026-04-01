@@ -255,12 +255,14 @@ Các endpoint đọc dữ liệu công khai chính:
 
 ## 10. Tài liệu liên quan
 
-- `docs/prd.md`
-- `docs/architecture.md`
-- `docs/feature/visitor-feature.md`
+- `docs/README.md`
+- `docs/features/prd.md`
+- `docs/features/visitor-features.md`
+- `docs/architecture/overview.md`
+- `docs/architecture/api-architecture.md`
 - `docs/api/mongodb-setup.md`
-- `docs/maui/`
-- `docs/saler/`
+- `docs/mobile/`
+- `docs/testing/`
 
 ## 11. Lưu ý bảo mật
 

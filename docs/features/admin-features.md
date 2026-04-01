@@ -1,4 +1,4 @@
-# Yêu cầu tính năng dành cho Quản trị viên
+﻿# Yêu cầu tính năng dành cho Quản trị viên
 
 ## 1. Quản lý POI hệ thống
 
