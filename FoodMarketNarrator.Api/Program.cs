@@ -30,6 +30,8 @@ public class Program
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<MongoHealthRepository>();
         builder.Services.AddScoped<MongoHealthService>();
+        builder.Services.AddScoped<AnalyticsRepository>();
+        builder.Services.AddScoped<AnalyticsService>();
 
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
