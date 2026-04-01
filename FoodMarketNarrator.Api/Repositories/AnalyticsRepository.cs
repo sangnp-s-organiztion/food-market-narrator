@@ -291,4 +291,45 @@ public class AnalyticsRepository
         public int Duration { get; set; }
         public DateTime Timestamp { get; set; }
     }
+
+    // ─── Daily Listen Counts (timeseries) ─────────────────────────────────────
+    public async Task<List<DailyListenCount>> GetDailyListenCountsAsync(int days = 14)
+    {
+        var since = DateTime.UtcNow.AddDays(-days);
+
+        var pipeline = new[]
+        {
+            new BsonDocument("$match",
+                new BsonDocument
+                {
+                    { "timestamp", new BsonDocument("$gte", since) },
+                    { "duration", new BsonDocument("$gte", 5) }
+                }),
+            new BsonDocument("$group",
+                new BsonDocument
+                {
+                    { "_id", new BsonDocument("$dateToString",
+                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$timestamp" } }) },
+                    { "count", new BsonDocument("$sum", 1) }
+                }),
+            new BsonDocument("$sort",
+                new BsonDocument("_id", 1))
+        };
+
+        var results = await _db.GetCollection<BsonDocument>("AudioLogs")
+            .Aggregate<BsonDocument>(pipeline)
+            .ToListAsync();
+
+        return results.Select(r => new DailyListenCount
+        {
+            Date = r["_id"].ToString(),
+            Count = r["count"].ToInt32()
+        }).ToList();
+    }
+
+    public class DailyListenCount
+    {
+        public string Date { get; set; } = string.Empty;
+        public int Count { get; set; }
+    }
 }

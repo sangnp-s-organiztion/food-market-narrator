@@ -212,6 +212,46 @@ public class AnalyticsService
         }).ToList();
     }
 
+    // ─── Entity Counts ─────────────────────────────────────────────────────────
+    public async Task<EntityCountsResponse> GetEntityCountsAsync()
+    {
+        var totalRestaurants = await _dbContext.Restaurant.CountAsync();
+        var totalAudios = await _dbContext.Audio.CountAsync();
+        var totalUsers = await _dbContext.User.CountAsync();
+        var totalDishes = await _dbContext.Dish.CountAsync();
+
+        return new EntityCountsResponse
+        {
+            TotalRestaurants = totalRestaurants,
+            TotalAudios = totalAudios,
+            TotalUsers = totalUsers,
+            TotalDishes = totalDishes
+        };
+    }
+
+    // ─── Listens Timeseries ────────────────────────────────────────────────────
+    public async Task<ListensTimeseriesResponse> GetListensTimeseriesAsync(int days = 14)
+    {
+        var clampedDays = Math.Clamp(days, 1, 90);
+        var dailyCounts = await _analyticsRepository.GetDailyListenCountsAsync(clampedDays);
+
+        var result = new List<ListenCountItem>();
+        var today = DateTime.UtcNow.Date;
+        for (int i = clampedDays - 1; i >= 0; i--)
+        {
+            var date = today.AddDays(-i);
+            var dateStr = date.ToString("yyyy-MM-dd");
+            var found = dailyCounts.FirstOrDefault(d => d.Date == dateStr);
+            result.Add(new ListenCountItem
+            {
+                Date = dateStr,
+                Listens = found?.Count ?? 0
+            });
+        }
+
+        return new ListensTimeseriesResponse { Items = result };
+    }
+
     // ─── Helper ───────────────────────────────────────────────────────────────
     private static string FormatDuration(double seconds)
     {
