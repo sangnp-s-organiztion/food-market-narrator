@@ -9,6 +9,8 @@ namespace food_market_narrator.Services
         event EventHandler<Location> LocationChanged;
         Task<Location?> GetCurrentLocationAsync();
         Task StartTrackingAsync();
+        Task<bool> RequestBackgroundLocationPermissionAsync();
+        Task<bool> HasBackgroundLocationPermissionAsync();
         void StopTracking();
     }
 }

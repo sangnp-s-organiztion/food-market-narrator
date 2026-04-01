@@ -23,7 +23,7 @@ public class LocationService : ILocationService
     {
         try
         {
-            var granted = await EnsureTrackingPermissionFlowAsync();
+            var granted = await EnsureForegroundTrackingPermissionAsync();
             if (!granted)
                 return null;
 
@@ -41,7 +41,7 @@ public class LocationService : ILocationService
     {
         if (_isTracking) return;
 
-        var granted = await EnsureTrackingPermissionFlowAsync();
+        var granted = await EnsureForegroundTrackingPermissionAsync();
         if (!granted)
         {
             // Console.WriteLine("Location permission not granted");
@@ -62,6 +62,72 @@ public class LocationService : ILocationService
             _isTracking = false;
             // Console.WriteLine($"Error starting tracking: {ex.Message}");
         }
+    }
+
+    public async Task<bool> RequestBackgroundLocationPermissionAsync()
+    {
+#if ANDROID
+        if (!OperatingSystem.IsAndroidVersionAtLeast(29))
+        {
+            return true;
+        }
+
+        var foregroundGranted = await EnsureForegroundTrackingPermissionAsync();
+        if (!foregroundGranted)
+        {
+            return false;
+        }
+
+        var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+        if (alwaysStatus == PermissionStatus.Granted)
+        {
+            return true;
+        }
+
+        if (!_backgroundPermissionExplained)
+        {
+            _backgroundPermissionExplained = true;
+            await ShowInfoAsync(
+                "Bat tracking nen",
+                "De theo doi vi tri khi app chay nen, hay chon phep vi tri \"Always allow\".");
+        }
+
+        alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
+        if (alwaysStatus == PermissionStatus.Granted)
+        {
+            return true;
+        }
+
+        var shouldOpenSettings = await ShowConfirmAsync(
+            "Thieu quyen vi tri nen",
+            "Android can quyen vi tri nen de tracking on dinh. Ban co muon mo Settings de cap quyen ngay khong?",
+            "Mo Settings",
+            "De sau");
+
+        if (shouldOpenSettings)
+        {
+            AppInfo.Current.ShowSettingsUI();
+        }
+
+        return false;
+#else
+        return true;
+#endif
+    }
+
+    public async Task<bool> HasBackgroundLocationPermissionAsync()
+    {
+#if ANDROID
+        if (!OperatingSystem.IsAndroidVersionAtLeast(29))
+        {
+            return true;
+        }
+
+        var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
+        return alwaysStatus == PermissionStatus.Granted;
+#else
+        return true;
+#endif
     }
 
     public void StopTracking()
@@ -134,7 +200,7 @@ public class LocationService : ILocationService
         return distanceMeters >= MinPublishDistanceMeters;
     }
 
-    private async Task<bool> EnsureTrackingPermissionFlowAsync()
+    private async Task<bool> EnsureForegroundTrackingPermissionAsync()
     {
         var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
         if (whileInUseStatus != PermissionStatus.Granted)
@@ -155,39 +221,6 @@ public class LocationService : ILocationService
         }
 
 #if ANDROID
-        if (OperatingSystem.IsAndroidVersionAtLeast(29))
-        {
-            var alwaysStatus = await Permissions.CheckStatusAsync<Permissions.LocationAlways>();
-            if (alwaysStatus != PermissionStatus.Granted)
-            {
-                if (!_backgroundPermissionExplained)
-                {
-                    _backgroundPermissionExplained = true;
-                    await ShowInfoAsync(
-                        "Bat tracking nen",
-                        "De theo doi vi tri khi app chay nen, hay chon phep vi tri \"Always allow\".");
-                }
-
-                alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
-            }
-
-            if (alwaysStatus != PermissionStatus.Granted)
-            {
-                var shouldOpenSettings = await ShowConfirmAsync(
-                    "Thieu quyen vi tri nen",
-                    "Android can quyen vi tri nen de tracking on dinh. Ban co muon mo Settings de cap quyen ngay khong?",
-                    "Mo Settings",
-                    "De sau");
-
-                if (shouldOpenSettings)
-                {
-                    AppInfo.Current.ShowSettingsUI();
-                }
-
-                return false;
-            }
-        }
-
         if (OperatingSystem.IsAndroidVersionAtLeast(33))
         {
             // Notification permission is optional for location data, but requested so foreground
