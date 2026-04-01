@@ -18,15 +18,14 @@ interface HeatmapSectionProps {
 // Vinh Khanh Food Street — center of data (Ho Chi Minh City, District 4)
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
-const HEAT_PALETTE_5 = ["#0000ff", "#00ffff", "#00ff00", "#ffff00", "#ff0000"];
 const HEAT_PALETTE_7 = [
-  "#000000",
-  "#0000ff",
-  "#00ffff",
-  "#00ff00",
-  "#ffff00",
-  "#ff0000",
-  "#ffffff",
+  "#0d1b8f",
+  "#1f5fff",
+  "#00b5ff",
+  "#29d66f",
+  "#e6f34b",
+  "#ff9f1a",
+  "#ff3b30",
 ];
 
 function paletteToGradient(palette: string[]): Record<number, string> {
@@ -50,28 +49,27 @@ export function HeatmapSection({
   lookbackHours,
   onLookbackHoursChange,
 }: HeatmapSectionProps) {
-  const [paletteMode, setPaletteMode] = useState<5 | 7>(7);
+  const [baseLayer, setBaseLayer] = useState<"map" | "satellite">("map");
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const heatLayerRef = useRef<L.HeatLayer | null>(null);
   const poiLayerRef = useRef<L.LayerGroup | null>(null);
+  const tileLayersRef = useRef<{
+    map: L.TileLayer;
+    satellite: L.TileLayer;
+  } | null>(null);
 
-  const activePalette = paletteMode === 7 ? HEAT_PALETTE_7 : HEAT_PALETTE_5;
-  const activeGradient = useMemo(
-    () => paletteToGradient(activePalette),
-    [activePalette],
-  );
+  const activePalette = HEAT_PALETTE_7;
+  const activeGradient = paletteToGradient(activePalette);
 
   const weightedHeatPoints = useMemo(
     () =>
-      points.map(
-        (p) =>
-          [p.latitude, p.longitude, p.intensity ?? 0.6] as [
-            number,
-            number,
-            number,
-          ],
-      ),
+      points.map((p) => {
+        const rawIntensity =
+          typeof p.intensity === "number" ? p.intensity : 0.22;
+        const intensity = Math.max(0.05, Math.min(rawIntensity, 1));
+        return [p.latitude, p.longitude, intensity] as [number, number, number];
+      }),
     [points],
   );
 
@@ -80,13 +78,26 @@ export function HeatmapSection({
     if (mapInstanceRef.current) return;
 
     const map = L.map(mapRef.current).setView(MAP_CENTER, MAP_ZOOM);
-    L.tileLayer(
+    const mapLayer = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
       },
     ).addTo(map);
+
+    const satelliteLayer = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics",
+      },
+    );
+
+    tileLayersRef.current = {
+      map: mapLayer,
+      satellite: satelliteLayer,
+    };
 
     poiLayerRef.current = L.layerGroup().addTo(map);
 
@@ -99,6 +110,29 @@ export function HeatmapSection({
       poiLayerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const tileLayers = tileLayersRef.current;
+    if (!map || !tileLayers) return;
+
+    if (baseLayer === "satellite") {
+      if (map.hasLayer(tileLayers.map)) {
+        map.removeLayer(tileLayers.map);
+      }
+      if (!map.hasLayer(tileLayers.satellite)) {
+        tileLayers.satellite.addTo(map);
+      }
+      return;
+    }
+
+    if (map.hasLayer(tileLayers.satellite)) {
+      map.removeLayer(tileLayers.satellite);
+    }
+    if (!map.hasLayer(tileLayers.map)) {
+      tileLayers.map.addTo(map);
+    }
+  }, [baseLayer]);
 
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -115,9 +149,10 @@ export function HeatmapSection({
     if (weightedHeatPoints.length > 0) {
       const layer = L.heatLayer(weightedHeatPoints, {
         radius: 30,
-        blur: 26,
-        maxZoom: 18,
-        minOpacity: 0.22,
+        blur: 24,
+        maxZoom: 19,
+        minOpacity: 0.08,
+        max: 0.95,
         gradient: activeGradient,
       }).addTo(map);
       heatLayerRef.current = layer;
@@ -191,27 +226,6 @@ export function HeatmapSection({
         </div>
       </div>
 
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">Ramp màu</span>
-        {[5, 7].map((mode) => {
-          const isActive = paletteMode === mode;
-          return (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setPaletteMode(mode as 5 | 7)}
-              className={`rounded-md border px-2 py-1 text-xs ${
-                isActive
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {mode} mức
-            </button>
-          );
-        })}
-      </div>
-
       {points.length === 0 && (
         <p className="text-xs text-muted-foreground mb-2">
           Chưa có dữ liệu GPS — hiển thị vị trí nhà hàng tham chiếu
@@ -227,13 +241,40 @@ export function HeatmapSection({
             }}
           />
           <div className="flex items-center gap-1 text-[10px]">
-            <span>{paletteMode} mức</span>
+            <span>7 mức</span>
             <span className="text-muted-foreground/70">(loang mượt)</span>
           </div>
           <span>Nóng</span>
         </div>
       )}
-      <div ref={mapRef} className="h-[400px] rounded-lg overflow-hidden" />
+      <div className="relative">
+        <div ref={mapRef} className="h-[460px] rounded-lg overflow-hidden" />
+
+        <div className="absolute right-3 top-3 z-[500] overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+          <button
+            type="button"
+            onClick={() => setBaseLayer("map")}
+            className={`px-3 py-1.5 text-sm ${
+              baseLayer === "map"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground"
+            }`}
+          >
+            Bản đồ
+          </button>
+          <button
+            type="button"
+            onClick={() => setBaseLayer("satellite")}
+            className={`px-3 py-1.5 text-sm ${
+              baseLayer === "satellite"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground"
+            }`}
+          >
+            Vệ tinh
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

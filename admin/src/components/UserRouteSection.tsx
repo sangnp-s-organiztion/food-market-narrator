@@ -30,6 +30,7 @@ function formatDuration(seconds: number): string {
 export function UserRouteSection({ paths = [] }: UserRouteSectionProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const pathLayerRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -39,22 +40,36 @@ export function UserRouteSection({ paths = [] }: UserRouteSectionProps) {
       "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
         attribution: "&copy; OSM &copy; CARTO",
-      }
+      },
     ).addTo(map);
 
+    mapInstanceRef.current = map;
+    pathLayerRef.current = L.layerGroup().addTo(map);
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      pathLayerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const pathLayer = pathLayerRef.current;
+    if (!map || !pathLayer) return;
+
+    pathLayer.clearLayers();
+
     if (paths.length === 0) {
-      // No paths yet — just show empty map centered on the food street
-      mapInstanceRef.current = map;
+      map.setView(MAP_CENTER, MAP_ZOOM);
       return;
     }
 
-    // Collect all bounds to auto-fit
     const allPoints: L.LatLngTuple[] = [];
 
     paths.forEach((path, idx) => {
       const color = PATH_COLORS[idx % PATH_COLORS.length];
 
-      // Draw polyline connecting all points in order
       const latlngs = path.points.map((p) => {
         const tuple: L.LatLngTuple = [p.latitude, p.longitude];
         allPoints.push(tuple);
@@ -62,7 +77,6 @@ export function UserRouteSection({ paths = [] }: UserRouteSectionProps) {
       });
 
       if (latlngs.length < 2) {
-        // Single point — add marker only
         if (latlngs.length === 1) {
           L.circleMarker(latlngs[0], {
             radius: 6,
@@ -72,23 +86,21 @@ export function UserRouteSection({ paths = [] }: UserRouteSectionProps) {
             fillOpacity: 0.7,
           })
             .bindPopup(
-              `<strong>${path.sessionId.slice(0, 8)}…</strong><br/>1 điểm dừng`
+              `<strong>${path.sessionId.slice(0, 8)}…</strong><br/>1 điểm dừng`,
             )
-            .addTo(map);
+            .addTo(pathLayer);
         }
         return;
       }
 
-      // Polyline
       L.polyline(latlngs, {
         color,
         weight: 2,
         opacity: 0.6,
-      }).addTo(map);
+      }).addTo(pathLayer);
 
-      // Numbered circle markers at each stop
       path.points.forEach((pt, ptIdx) => {
-        const isPulse = pt.longitude !== latlngs[0][1]; // first point in path
+        const isPulse = pt.longitude !== latlngs[0][1];
         L.circleMarker([pt.latitude, pt.longitude], {
           radius: isPulse ? 7 : 5,
           fillColor: color,
@@ -99,24 +111,16 @@ export function UserRouteSection({ paths = [] }: UserRouteSectionProps) {
           .bindPopup(
             `<strong>${path.sessionId.slice(0, 8)}…</strong><br/>` +
               `Điểm ${ptIdx + 1} / ${path.points.length}<br/>` +
-              `${new Date(pt.timestamp).toLocaleString("vi-VN")}`
+              `${new Date(pt.timestamp).toLocaleString("vi-VN")}`,
           )
-          .addTo(map);
+          .addTo(pathLayer);
       });
     });
 
-    // Fit map to show all paths
     if (allPoints.length > 0) {
       const bounds = L.latLngBounds(allPoints);
       map.fitBounds(bounds, { padding: [40, 40] });
     }
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-    };
   }, [paths]);
 
   return (
