@@ -95,11 +95,16 @@ public partial class SettingsPage : ContentPage
     {
         return code.ToLowerInvariant() switch
         {
-            "vi-vn" or "vi-vn" => "Tiếng Việt",
-            "en-us" or "en-US" => "English",
-            "zh-cn" or "zh-CN" => "中文",
-            "ko-kr" or "ko-KR" => "한국어",
-            "ja-jp" or "ja-JP" => "日本語",
+            "vi-vn" => "Tiếng Việt",
+            // Redundant alternatives were removed because input is already normalized by ToLowerInvariant().
+            // "en-us" or "en-US" => "English",
+            "en-us" => "English",
+            // "zh-cn" or "zh-CN" => "中文",
+            "zh-cn" => "中文",
+            // "ko-kr" or "ko-KR" => "한국어",
+            "ko-kr" => "한국어",
+            // "ja-jp" or "ja-JP" => "日本語",
+            "ja-jp" => "日本語",
             _ => code
         };
     }

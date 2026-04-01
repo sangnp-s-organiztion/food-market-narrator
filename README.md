@@ -94,8 +94,8 @@ dotnet run -f net10.0-android
 | Backend API (HTTP)    | http://localhost:5044  |
 | Backend API (HTTPS)   | https://localhost:7041 |
 | Seller Web (Vite dev) | http://localhost:8080  |
-| Admin Portal (HTTP)   | http://localhost:5104 |
-| Admin Portal (HTTPS) | https://localhost:7168 |
+| Admin Portal (HTTP)   | http://localhost:5104  |
+| Admin Portal (HTTPS)  | https://localhost:7168 |
 
 ### Commands
 
@@ -258,6 +258,7 @@ Các endpoint đọc dữ liệu công khai chính:
 - `docs/prd.md`
 - `docs/architecture.md`
 - `docs/feature/visitor-feature.md`
+- `docs/api/mongodb-setup.md`
 - `docs/maui/`
 - `docs/saler/`
 
