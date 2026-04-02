@@ -13,9 +13,13 @@ public partial class POIDetailPage : ContentPage
 	private readonly ILanguageService? _languageService;
 	private readonly IFavoriteService? _favoriteService;
 	private readonly IHistoryService? _historyService;
+	private readonly IAudioLogSyncService? _audioLogSyncService;
 	private IDispatcherTimer? _progressTimer;
 	private string _restaurantId = string.Empty;
 	private POI? _currentPoi;
+	private DateTime? _playbackStartUtc;
+	private int _playbackAudioId;
+	private string _playbackRestaurantId = string.Empty;
 	private const string PlayGlyph = "\uf04b";
 	private const string StopGlyph = "\uf04c";
 	private const string HeartSolid = "\uf004"; // filled heart
@@ -40,6 +44,7 @@ public partial class POIDetailPage : ContentPage
 		_languageService = services?.GetService<ILanguageService>();
 		_favoriteService = services?.GetService<IFavoriteService>();
 		_historyService = services?.GetService<IHistoryService>();
+		_audioLogSyncService = services?.GetService<IAudioLogSyncService>();
 
 		if (_audioService != null)
 		{
@@ -104,7 +109,7 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl))
+		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl, out var audioId))
 		{
 			return;
 		}
@@ -132,7 +137,15 @@ public partial class POIDetailPage : ContentPage
 
 		// Track khác đang phát hoặc chưa phát gì -> phát track của POI hiện tại
 		ResetAudioProgressUi();
+		_playbackStartUtc = null;
+		_playbackAudioId = audioId;
+		_playbackRestaurantId = _currentPoi?.restaurantId ?? string.Empty;
 		await _audioService.PlaySound(language, audioUrl);
+
+		if (await WaitForPlaybackStartAsync())
+		{
+			_playbackStartUtc = DateTime.UtcNow;
+		}
 		SetPlayButtonState(_audioService.IsPlaying);
 
 		if (_audioService.IsPlaying)
@@ -140,6 +153,34 @@ public partial class POIDetailPage : ContentPage
 			StartProgressTimer();
 			AddCurrentPoiToHistoryIfPlaying();
 		}
+		else
+		{
+			ClearPlaybackContext();
+		}
+	}
+
+	private async Task<bool> WaitForPlaybackStartAsync(int timeoutMs = 2000)
+	{
+		if (_audioService == null)
+		{
+			return false;
+		}
+
+		const int pollDelayMs = 100;
+		var waitedMs = 0;
+
+		while (waitedMs < timeoutMs)
+		{
+			if (_audioService.IsPlaying)
+			{
+				return true;
+			}
+
+			await Task.Delay(pollDelayMs);
+			waitedMs += pollDelayMs;
+		}
+
+		return _audioService.IsPlaying;
 	}
 
 	private void AddCurrentPoiToHistoryIfPlaying()
@@ -219,7 +260,7 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl))
+		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl, out _))
 		{
 			ResetAudioProgressUi();
 			return;
@@ -253,23 +294,25 @@ public partial class POIDetailPage : ContentPage
 		ResetAudioProgressUi();
 	}
 
-	private bool TryGetCurrentPoiAudio(out string language, out string audioUrl)
+	private bool TryGetCurrentPoiAudio(out string language, out string audioUrl, out int audioId)
 	{
 		language = _languageService?.CurrentLanguage ?? "vi-VN";
 		audioUrl = string.Empty;
+		audioId = 0;
 
 		if (BindingContext is not POI poi)
 		{
 			return false;
 		}
 
-		var resolvedAudio = poi.GetAudioUrl(language);
-		if (string.IsNullOrWhiteSpace(resolvedAudio))
+		var selectedAudio = ResolveSelectedAudio(poi, language);
+		if (selectedAudio == null || string.IsNullOrWhiteSpace(selectedAudio.AudioUrl))
 		{
 			return false;
 		}
 
-		audioUrl = resolvedAudio;
+		audioUrl = selectedAudio.AudioUrl;
+		audioId = selectedAudio.AudioId;
 		return true;
 	}
 
@@ -296,6 +339,10 @@ public partial class POIDetailPage : ContentPage
 
 	private void OnPlaybackEnded(object? sender, EventArgs e)
 	{
+		LogPlaybackIfPossible(DateTime.UtcNow);
+
+		ClearPlaybackContext();
+
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			UpdateAudioProgressUi();
@@ -306,7 +353,64 @@ public partial class POIDetailPage : ContentPage
 	protected override void OnDisappearing()
 	{
 		StopProgressTimer();
+		LogPlaybackIfPossible(DateTime.UtcNow);
+		ClearPlaybackContext();
 		base.OnDisappearing();
+	}
+
+	private void LogPlaybackIfPossible(DateTime endedAtUtc)
+	{
+		if (_audioLogSyncService == null
+			|| !_playbackStartUtc.HasValue
+			|| _playbackAudioId <= 0
+			|| string.IsNullOrWhiteSpace(_playbackRestaurantId))
+		{
+			return;
+		}
+
+		var startedAtUtc = _playbackStartUtc.Value;
+		if (endedAtUtc < startedAtUtc)
+		{
+			endedAtUtc = startedAtUtc;
+		}
+
+		var restaurantId = _playbackRestaurantId;
+		var audioId = _playbackAudioId;
+		_ = Task.Run(() => _audioLogSyncService.LogPlaybackAsync(
+			restaurantId,
+			audioId,
+			startedAtUtc,
+			endedAtUtc));
+	}
+
+	private void ClearPlaybackContext()
+	{
+		_playbackStartUtc = null;
+		_playbackAudioId = 0;
+		_playbackRestaurantId = string.Empty;
+	}
+
+	private static AudioModel? ResolveSelectedAudio(POI poi, string languageCode)
+	{
+		var activeAudios = poi.Audios
+			.Where(a => a.IsActive)
+			.ToList();
+
+		var byLanguage = activeAudios
+			.Where(a => string.Equals(a.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase))
+			.OrderByDescending(a => a.Version)
+			.ThenByDescending(a => a.DateGeneration)
+			.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.AudioUrl));
+
+		if (byLanguage != null)
+		{
+			return byLanguage;
+		}
+
+		return activeAudios
+			.OrderByDescending(a => a.Version)
+			.ThenByDescending(a => a.DateGeneration)
+			.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.AudioUrl));
 	}
 
 	protected override void OnHandlerChanging(HandlerChangingEventArgs args)

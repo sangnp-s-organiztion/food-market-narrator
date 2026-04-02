@@ -17,6 +17,7 @@ public class LocationLogSyncService : ILocationLogSyncService
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
     private readonly string _sessionId = Guid.NewGuid().ToString("N");
+    public string CurrentSessionId => _sessionId;
 
     private CancellationTokenSource? _flushCts;
     private Task? _flushTask;

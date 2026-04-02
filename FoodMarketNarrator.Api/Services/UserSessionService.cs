@@ -1,5 +1,6 @@
 using food_market_narrator_api.DTOs.Mongo;
 using food_market_narrator_api.Repositories;
+using MongoDB.Bson;
 
 namespace food_market_narrator_api.Services;
 
@@ -41,5 +42,10 @@ public class UserSessionService
 
         var normalizedLastSeen = DateTime.SpecifyKind(lastSeenAtUtc, DateTimeKind.Utc);
         await _userSessionRepository.TouchSessionsAsync(normalizedSessionIds, normalizedLastSeen);
+    }
+
+    public Task<ObjectId?> FindObjectIdBySessionIdAsync(string sessionId)
+    {
+        return _userSessionRepository.FindObjectIdBySessionIdAsync(sessionId);
     }
 }

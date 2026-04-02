@@ -43,6 +43,30 @@ public class UserSessionRepository
 
         await _userSessions.UpdateManyAsync(filter, update);
     }
+
+    public async Task<ObjectId?> FindObjectIdBySessionIdAsync(string sessionId)
+    {
+        var normalizedSessionId = (sessionId ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedSessionId))
+        {
+            return null;
+        }
+
+        var filter = Builders<BsonDocument>.Filter.Eq("session_id", normalizedSessionId);
+        var projection = Builders<BsonDocument>.Projection.Include("_id");
+
+        var doc = await _userSessions
+            .Find(filter)
+            .Project(projection)
+            .FirstOrDefaultAsync();
+
+        if (doc == null || !doc.Contains("_id") || !doc["_id"].IsObjectId)
+        {
+            return null;
+        }
+
+        return doc["_id"].AsObjectId;
+    }
 }
 
 public class UserSessionStartRecord

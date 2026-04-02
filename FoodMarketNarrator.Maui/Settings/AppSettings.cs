@@ -38,6 +38,7 @@ public static class AppSettings
     public const string LanguageEndpoint = "language";
     public const string UserSessionsStartEndpoint = "api/user-sessions/start";
     public const string LocationLogsBatchEndpoint = "api/location-logs/batch";
+    public const string AudioLogsEndpoint = "api/audio-logs";
 
     public const double MapHighlightDistanceMeters = 20;
     public const double TriggerDistanceMeters = 30;

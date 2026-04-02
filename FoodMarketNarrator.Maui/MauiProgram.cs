@@ -56,6 +56,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddSingleton<ILocationService, LocationService>(); // Updated class name to singular
         builder.Services.AddSingleton<ILocationLogSyncService, LocationLogSyncService>();
+        builder.Services.AddSingleton<IAudioLogSyncService, AudioLogSyncService>();
         builder.Services.AddSingleton<StatusToColorConverter>();
 
 #if DEBUG

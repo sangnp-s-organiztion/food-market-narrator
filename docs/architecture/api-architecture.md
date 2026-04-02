@@ -18,3 +18,4 @@ File này đóng vai trò index trong `docs/` để gom cấu trúc theo nhóm t
 - `GET /Mongo/test-connect`
 - `POST /api/user-sessions/start`
 - `POST /api/location-logs/batch`
+- `POST /api/audio-logs`

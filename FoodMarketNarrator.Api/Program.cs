@@ -37,6 +37,8 @@ public class Program
         builder.Services.AddScoped<LocationLogService>();
         builder.Services.AddScoped<UserSessionRepository>();
         builder.Services.AddScoped<UserSessionService>();
+        builder.Services.AddScoped<AudioLogRepository>();
+        builder.Services.AddScoped<AudioLogService>();
 
 
         builder.Services
