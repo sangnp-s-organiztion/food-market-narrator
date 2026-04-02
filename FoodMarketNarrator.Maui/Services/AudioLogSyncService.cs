@@ -69,8 +69,8 @@ public class AudioLogSyncService : IAudioLogSyncService
                 return;
             }
 
-            // Session could be missing on backend when audio log arrives before session start sync.
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            // Only retry for the expected race condition: session missing on backend.
+            if (await ShouldRetryForMissingSessionAsync(response, cancellationToken))
             {
                 await EnsureSessionStartedAsync(sessionId, cancellationToken);
                 await _locationLogSyncService.FlushNowAsync();
@@ -108,6 +108,25 @@ public class AudioLogSyncService : IAudioLogSyncService
             AppSettings.AudioLogsEndpoint,
             request,
             cancellationToken);
+    }
+
+    private static async Task<bool> ShouldRetryForMissingSessionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        if (response.StatusCode != HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+
+        try
+        {
+            var payload = await response.Content.ReadFromJsonAsync<AudioLogErrorResponse>(cancellationToken: cancellationToken);
+            var message = (payload?.Message ?? string.Empty).Trim();
+            return string.Equals(message, "Session not found", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task EnsureSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
@@ -166,4 +185,9 @@ public class AudioUserSessionStartRequest
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
+}
+
+public class AudioLogErrorResponse
+{
+    public string Message { get; set; } = string.Empty;
 }
