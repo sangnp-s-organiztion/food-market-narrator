@@ -13,7 +13,9 @@ public static class PublicEndpoints
         new("GET", "/Restaurant/{id}"),
         new("GET", "/audio"),
         new("GET", "/Mongo/test-connect"),
+        new("POST", "/api/user-sessions/start"),
         new("POST", "/api/location-logs/batch"),
+        new("POST", "/api/audio-logs"),
         new("GET", "/Restaurant/{restaurantId}/dishes"),
         new("GET", "/Restaurant/{restaurantId}/images"),
         new("GET", "/Restaurant/{restaurantId}/audios")

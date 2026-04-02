@@ -35,6 +35,10 @@ public class Program
         builder.Services.AddScoped<AnalyticsRepository>();
         builder.Services.AddScoped<LocationLogRepository>();
         builder.Services.AddScoped<LocationLogService>();
+        builder.Services.AddScoped<UserSessionRepository>();
+        builder.Services.AddScoped<UserSessionService>();
+        builder.Services.AddScoped<AudioLogRepository>();
+        builder.Services.AddScoped<AudioLogService>();
 
 
         builder.Services
@@ -115,14 +119,15 @@ public class Program
         using (var scope = builder.Services.BuildServiceProvider().CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             try
             {
                 dbContext.Database.CanConnect();
-                Console.WriteLine("Kết nối đến cơ sở dữ liệu thành công.");
+                logger.LogInformation("Kết nối đến cơ sở dữ liệu thành công.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi kết nối đến cơ sở dữ liệu: {ex.Message}");
+                logger.LogError(ex, "Lỗi kết nối đến cơ sở dữ liệu.");
             }
         }
 
