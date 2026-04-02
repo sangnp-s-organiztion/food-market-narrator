@@ -125,7 +125,11 @@ public class LocationLogSyncService : ILocationLogSyncService
             Items = batch
         };
 
-        Console.WriteLine($"Sync log to server: sending {batch.Count} location points");
+        var firstPoiCapturedAtUtc = batch.Min(item => item.Timestamp);
+        var sendLatLngAtUtc = DateTime.UtcNow;
+
+        Console.WriteLine(
+            $"Sync log to server: sending {batch.Count} location points | firstPoiCapturedAtUtc={firstPoiCapturedAtUtc:O} | sendLatLngAtUtc={sendLatLngAtUtc:O}");
 
         try
         {
@@ -136,16 +140,19 @@ public class LocationLogSyncService : ILocationLogSyncService
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Sync log to server: sent {batch.Count} location points successfully");
+                Console.WriteLine(
+                    $"Sync log to server: sent {batch.Count} location points successfully | firstPoiCapturedAtUtc={firstPoiCapturedAtUtc:O} | sendLatLngAtUtc={sendLatLngAtUtc:O}");
                 return;
             }
 
-            Console.WriteLine($"Sync log to server: failed with status {(int)response.StatusCode}");
+            Console.WriteLine(
+                $"Sync log to server: failed with status {(int)response.StatusCode} | firstPoiCapturedAtUtc={firstPoiCapturedAtUtc:O} | sendLatLngAtUtc={sendLatLngAtUtc:O}");
         }
         catch (Exception)
         {
             // Restore for retry on next flush tick.
-            Console.WriteLine($"Sync log to server: exception while sending {batch.Count} location points");
+            Console.WriteLine(
+                $"Sync log to server: exception while sending {batch.Count} location points | firstPoiCapturedAtUtc={firstPoiCapturedAtUtc:O} | sendLatLngAtUtc={sendLatLngAtUtc:O}");
         }
 
         lock (_bufferLock)
