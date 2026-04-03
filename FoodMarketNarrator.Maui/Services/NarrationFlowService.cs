@@ -221,10 +221,7 @@ public class NarrationFlowService : INarrationFlowService
             var queueItem = _playQueue.Dequeue();
             var poi = queueItem.Poi;
             DateTime? startedAtUtc = null;
-            await _audioService.PlaySound(
-                _languageService.CurrentLanguage,
-                queueItem.AudioUrl
-            );
+            await _audioService.PlaySound(queueItem.AudioId);
 
             if (await WaitForPlaybackStartAsync())
             {

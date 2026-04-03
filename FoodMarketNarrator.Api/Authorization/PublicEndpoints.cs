@@ -18,6 +18,7 @@ public static class PublicEndpoints
         new("POST", "/api/audio-logs"),
         new("GET", "/Restaurant/{restaurantId}/dishes"),
         new("GET", "/Restaurant/{restaurantId}/images"),
-        new("GET", "/Restaurant/{restaurantId}/audios")
+        new("GET", "/Restaurant/{restaurantId}/audios"),
+        new("GET", "/public/audios/{audioId:int}/file")
     ];
 }

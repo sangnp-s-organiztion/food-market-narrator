@@ -114,7 +114,7 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		var isThisTrack = _audioService.IsCurrentTrack(language, audioUrl);
+		var isThisTrack = _audioService.IsCurrentTrack(audioId);
 
 		// Đang phát đúng track hiện tại của trang -> tạm dừng
 		if (isThisTrack && _audioService.IsPlaying)
@@ -140,7 +140,7 @@ public partial class POIDetailPage : ContentPage
 		_playbackStartUtc = null;
 		_playbackAudioId = audioId;
 		_playbackRestaurantId = _currentPoi?.restaurantId ?? string.Empty;
-		await _audioService.PlaySound(language, audioUrl);
+		await _audioService.PlaySound(audioId);
 
 		if (await WaitForPlaybackStartAsync())
 		{
@@ -260,13 +260,13 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl, out _))
+		if (!TryGetCurrentPoiAudio(out var language, out var audioUrl, out var audioId))
 		{
 			ResetAudioProgressUi();
 			return;
 		}
 
-		var isThisTrack = _audioService.IsCurrentTrack(language, audioUrl);
+		var isThisTrack = _audioService.IsCurrentTrack(audioId);
 		if (!isThisTrack)
 		{
 			StopProgressTimer();

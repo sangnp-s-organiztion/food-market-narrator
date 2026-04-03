@@ -9,19 +9,22 @@ public partial class App : Application
     private readonly ILocationLogSyncService _locationLogSyncService;
     private readonly IPOIService _poiService;
     private readonly ILanguageService _languageService;
+    private readonly IAudioLibraryService _audioLibraryService;
     private bool _warmupStarted;
 
     public App(
         ILocationService locationService,
         ILocationLogSyncService locationLogSyncService,
         IPOIService poiService,
-        ILanguageService languageService)
+        ILanguageService languageService,
+        IAudioLibraryService audioLibraryService)
 	{
 		InitializeComponent();
         _locationService = locationService;
 		_locationLogSyncService = locationLogSyncService;
 		_poiService = poiService;
 		_languageService = languageService;
+        _audioLibraryService = audioLibraryService;
 
         // Xử lý deep link khi app được mở từ QR code hoặc URL scheme
         HandleAppStart(Environment.GetCommandLineArgs());
@@ -53,6 +56,7 @@ public partial class App : Application
 
         // Không chặn luồng startup: warm-up data chạy nền để lần mở trang đầu mượt hơn.
         StartWarmupInBackground();
+        _ = Task.Run(() => _audioLibraryService.InitializeOnStartupAsync());
         _locationLogSyncService.Start();
         _ = _locationService.StartTrackingAsync();
     }

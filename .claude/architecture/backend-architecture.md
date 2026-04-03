@@ -32,6 +32,7 @@ Backend đang publish các đường dẫn static chính:
 - /maui-images (ảnh từ MAUI Resources/Images)
 - /maui-audios (audio từ MAUI Resources/Narration/audio)
 - /uploads/audios (audio upload runtime)
+- /public/audios/{audioId:int}/file (public controller endpoint cho mobile download/playback)
 
 ## 5) Nguyên tắc mở rộng
 
