@@ -29,6 +29,7 @@ Cấu hình hiện tại:
 - Chỉ publish event khi di chuyển >= 6m
 
 Trên Android:
+
 - Xin quyền theo tầng: WhenInUse -> Always (Android 10+) -> PostNotifications (Android 13+)
 - Có foreground service TrackingForegroundService để theo dõi nền
 
@@ -56,6 +57,7 @@ Cấu hình hiện tại (trong AppSettings):
 - TriggerDistanceMeters: 30m (ngưỡng phát audio)
 
 State machine trong POIService.UpdateNearestPOI():
+
 - Enter: chưa trong POI nào -> vào vùng 30m
 - Switch: đang trong POI này -> chuyển sang POI khác trong vùng 30m
 - Exit: ra khỏi vùng 40m của POI hiện tại
@@ -103,7 +105,7 @@ Mobile app hiện nên ưu tiên gọi:
 - GET /Restaurant/{id} (public)
 - GET /Language (public)
 - GET /Language/{languageCode} (public)
-- GET /public/Restaurant/{restaurantId}/images (public)
+- GET /Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/dishes (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
 
@@ -122,12 +124,14 @@ Mobile app cache các dữ liệu sau:
 - **Audio**: Lưu vào thư mục audio_cache với tên file là hash SHA256 (language|path).
 
 Chính sách cache audio:
+
 - Giới hạn tổng: 200MB
 - Dung lượng trống tối thiểu: 50MB
 - Cơ chế dọn LRU khi gần đầy
 - Cache ưu tiên: local -> package -> network
 
 Khi mất kết nối mạng:
+
 - App đọc POI từ cache offline
 - Narration vẫn hoạt động nếu audio đã được cache trước đó
 - Nếu chưa cache và không có mạng -> không phát audio

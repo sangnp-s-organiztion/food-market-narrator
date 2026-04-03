@@ -233,7 +233,7 @@ Các endpoint đọc dữ liệu công khai chính:
 - `GET /Restaurant/{id}`
 - `GET /Language`
 - `GET /Language/{languageCode}`
-- `GET /public/Restaurant/{restaurantId}/images`
+- `GET /Restaurant/{restaurantId}/images`
 - `GET /public/Restaurant/{restaurantId}/dishes`
 - `GET /public/Restaurant/{restaurantId}/audios`
 

@@ -2,6 +2,8 @@ using food_market_narrator_api.DTOs.Restaurant;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Text;
 
 namespace food_market_narrator_api.Controllers
 {
@@ -68,18 +70,40 @@ namespace food_market_narrator_api.Controllers
                 extension = ".jpg";
             }
 
-            var invalidChars = Path.GetInvalidFileNameChars();
+            extension = extension.ToLowerInvariant();
             string baseName = Path.GetFileNameWithoutExtension(originalFileName).Trim();
             if (string.IsNullOrWhiteSpace(baseName))
             {
                 baseName = "upload";
             }
 
-            var sanitizedChars = baseName
-                .Select(ch => invalidChars.Contains(ch) || char.IsWhiteSpace(ch) ? '_' : ch)
-                .ToArray();
+            // Keep file names compatible with MAUI image resource loading:
+            // lowercase ASCII and underscores only.
+            var normalized = baseName.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(normalized.Length);
+            foreach (var ch in normalized)
+            {
+                var category = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (category == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
 
-            string sanitizedName = new string(sanitizedChars).Trim('_');
+                if (char.IsLetterOrDigit(ch))
+                {
+                    builder.Append(char.ToLowerInvariant(ch));
+                }
+                else
+                {
+                    builder.Append('_');
+                }
+            }
+
+            string sanitizedName = builder
+                .ToString()
+                .Normalize(NormalizationForm.FormC)
+                .Trim('_');
+
             while (sanitizedName.Contains("__"))
             {
                 sanitizedName = sanitizedName.Replace("__", "_");
@@ -90,7 +114,8 @@ namespace food_market_narrator_api.Controllers
                 sanitizedName = "upload";
             }
 
-            return $"img_{sanitizedName}{extension.ToLowerInvariant()}";
+            var uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
+            return $"img_{sanitizedName}_{uniqueSuffix}{extension}";
         }
 
         [HttpDelete("/Images/{imageId:int}")]
