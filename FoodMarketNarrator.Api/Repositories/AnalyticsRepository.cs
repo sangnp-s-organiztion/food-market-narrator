@@ -152,31 +152,35 @@ public class AnalyticsRepository
     }
 
     // ─── Movement Paths: ordered coordinates per session (last N sessions) ───
-    public async Task<List<SessionPath>> GetMovementPathsAsync(int limit = 100)
+    public async Task<List<SessionPath>> GetMovementPathsAsync(int? limit = 100)
     {
         // Distinct session_ids ordered by most recent activity.
         // IMPORTANT: group first, then limit by sessions (not by raw log rows).
-        var sessionPipeline = new[]
+        var sessionPipeline = new List<BsonDocument>
         {
-            new BsonDocument("$addFields",
+            new("$addFields",
                 new BsonDocument("event_time",
                     new BsonDocument("$ifNull", new BsonArray { "$timestamp", "$created_at" }))),
-            new BsonDocument("$match",
+            new("$match",
                 new BsonDocument
                 {
                     { "session_id", new BsonDocument("$ne", BsonNull.Value) },
                     { "event_time", new BsonDocument("$ne", BsonNull.Value) }
                 }),
-            new BsonDocument("$group",
+            new("$group",
                 new BsonDocument
                 {
                     { "_id", "$session_id" },
                     { "last_time", new BsonDocument("$max", "$event_time") }
                 }),
-            new BsonDocument("$sort",
-                new BsonDocument("last_time", -1)),
-            new BsonDocument("$limit", limit)
+            new("$sort",
+                new BsonDocument("last_time", -1))
         };
+
+        if (limit.HasValue && limit.Value > 0)
+        {
+            sessionPipeline.Add(new BsonDocument("$limit", limit.Value));
+        }
 
         var sessionDocs = await _db.GetCollection<BsonDocument>("LocationLogs")
             .Aggregate<BsonDocument>(sessionPipeline)
