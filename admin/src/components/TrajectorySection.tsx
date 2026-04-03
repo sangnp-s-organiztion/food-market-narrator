@@ -6,8 +6,8 @@ import type { MovementPath } from "@/types/analytics";
 
 interface TrajectorySectionProps {
   movementPaths?: MovementPath[];
-  sessionLimit: 20 | 50 | 100 | 200;
-  onSessionLimitChange: (limit: 20 | 50 | 100 | 200) => void;
+  sessionLimit: 20 | 50 | 100 | 200 | "all";
+  onSessionLimitChange: (limit: 20 | 50 | 100 | 200 | "all") => void;
 }
 
 const MAP_CENTER: [number, number] = [10.761, 106.703];
@@ -76,10 +76,11 @@ export function TrajectorySection({
     if (selectedIndex === -1) return;
 
     const selectedPage = Math.floor(selectedIndex / SESSION_IDS_PER_PAGE) + 1;
-    if (selectedPage !== currentPage) {
-      setCurrentPage(selectedPage);
-    }
-  }, [currentPage, selectedSessionId, sessionIds]);
+
+    // Only sync page when selected session or session list changes.
+    // Do not force page while user is manually paginating.
+    setCurrentPage((prev) => (prev === selectedPage ? prev : selectedPage));
+  }, [selectedSessionId, sessionIds]);
 
   const filteredPaths = useMemo(() => {
     if (!selectedSessionId) {
@@ -228,8 +229,8 @@ export function TrajectorySection({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Số phiên</span>
-          {[20, 50, 100, 200].map((limit) => {
-            const value = limit as 20 | 50 | 100 | 200;
+          {[20, 50, 100, 200, "all"].map((limit) => {
+            const value = limit as 20 | 50 | 100 | 200 | "all";
             const isActive = sessionLimit === value;
             return (
               <button
@@ -242,7 +243,7 @@ export function TrajectorySection({
                     : "border-border bg-background text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {value}
+                {value === "all" ? "Tất cả" : value}
               </button>
             );
           })}

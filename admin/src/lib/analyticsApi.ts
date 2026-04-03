@@ -69,11 +69,14 @@ export const analyticsApi = {
   /**
    * GET /api/analytics/movement-paths?sessionLimit=100
    * Returns anonymous GPS paths (ordered per session).
-   * @param sessionLimit - max sessions to return (default 100, max 500)
+   * @param sessionLimit - max sessions to return (default 100, max 500, "all" = no limit)
    */
-  async getMovementPaths(sessionLimit = 100): Promise<MovementPathsResponse> {
+  async getMovementPaths(
+    sessionLimit: number | "all" = 100,
+  ): Promise<MovementPathsResponse> {
+    const normalizedLimit = sessionLimit === "all" ? 0 : sessionLimit;
     return analyticsFetch<MovementPathsResponse>(
-      `/api/analytics/movement-paths?sessionLimit=${sessionLimit}`,
+      `/api/analytics/movement-paths?sessionLimit=${normalizedLimit}`,
     );
   },
 

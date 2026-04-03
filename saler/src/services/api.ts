@@ -202,6 +202,7 @@ function mapLanguage(item: ApiLanguage): Language {
 type LoginResponse = {
   userId: number;
   username: string;
+  role: string;
 };
 
 export async function loginApi(
@@ -216,6 +217,7 @@ export async function loginApi(
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
@@ -224,6 +226,7 @@ export async function getMeApi(): Promise<User> {
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
