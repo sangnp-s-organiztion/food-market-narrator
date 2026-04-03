@@ -6,6 +6,7 @@ namespace food_market_narrator_api.Services;
 
 public class UserService
 {
+    private const string DefaultPassword = "123456";
     private readonly UserRepository _userRepository;
 
     public UserService(UserRepository userRepository)
@@ -40,10 +41,14 @@ public class UserService
 
         var normalizedRole = UserRoleParser.NormalizeOrThrow(request.Role);
 
+        var password = string.IsNullOrWhiteSpace(request.Password)
+            ? DefaultPassword
+            : request.Password;
+
         var user = new UserModel
         {
             Username = request.Username.Trim(),
-            Password = request.Password, // store as-is to match existing DB schema
+            Password = password, // store as-is to match existing DB schema
             Role = normalizedRole,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
