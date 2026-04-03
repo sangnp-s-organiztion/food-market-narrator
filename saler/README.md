@@ -1,74 +1,63 @@
-# React + TypeScript + Vite
+# Saler Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dashboard cho seller/chu quan trong he thong Food Market Narrator.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 18 + TypeScript
+- Vite 5
+- TanStack Query
+- Vitest + Testing Library
 
-## React Compiler
+## Run local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd saler
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Dev server mac dinh: <http://localhost:8080>
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Environment
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Bien moi truong chinh:
+
+- `VITE_API_BASE_URL` (mac dinh `http://localhost:5044`)
+
+Vi du `.env.local`:
+
+```env
+VITE_API_BASE_URL=http://localhost:5044
 ```
-S
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run test
+npm run test:watch
+```
+
+## API su dung chinh
+
+- Auth: `/Auth/login`, `/Auth/me`, `/Auth/logout`
+- Restaurant: `/Restaurant`, `/Restaurant/{id}`, `/Restaurant/{id}/status`
+- Dishes: `/public/Restaurant/{id}/dishes`, `/Restaurant/{id}/dishes`, `/Dishes/{dishId}`
+- Images: `/Restaurant/{id}/images`, `/Images/{imageId}`, `/Images/{imageId}/primary`
+- Audios: `/public/Restaurant/{id}/audios`, `/Restaurant/{id}/audios`, `/Audios/{audioId}`
+- Languages: `/Language`
+
+## Testing
+
+```bash
+cd saler
+npm test
+```
+
+## Ghi chu
+
+- Frontend gui cookie auth qua `credentials: include`.
+- App chi chap nhan user role `saler` trong luong dang nhap.

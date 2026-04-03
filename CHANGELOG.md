@@ -1,114 +1,121 @@
 # Changelog
 
-Tài liệu này ghi lại thay đổi theo từng đợt release dựa trên lịch sử commit thực tế của dự án.
+Tài liệu ghi lại thay đổi quan trọng của dự án theo từng đợt phát hành.
 
-## 2026-04-03
+Format áp dụng:
 
-### Added
+- Added: tính năng mới.
+- Changed: thay đổi hành vi, refactor có tác động.
+- Fixed: sửa lỗi.
+- Removed: loại bỏ tính năng/điểm cũ.
 
-- Thêm test và CI cho admin và saler.
-- Thêm hỗ trợ session limit "Tất cả" cho trang tuyến di chuyển.
+## [Unreleased]
 
-### Changed
+### Added - Unreleased
 
-- Cải thiện truy vấn movement paths: gom theo session trước, xử lý tọa độ null và hỗ trợ dữ liệu cũ.
-- Chuẩn hóa luồng đăng nhập và quản lý người dùng: mặc định mật khẩu `123456`, hash mật khẩu, và giới hạn role cho saler.
-- Loại bỏ route ảnh trùng `/public` và giữ endpoint canonical cho MAUI/saler.
-- Refactor cấu trúc code và cập nhật tài liệu liên quan.
+- Mở rộng CI để chạy test cho đủ 4 mảng: API, MAUI, admin, saler.
+- Bổ sung tài liệu hướng dẫn chạy test tổng hợp tại test-guide.md.
 
-### Fixed
+### Changed - Unreleased
 
-- Sửa lỗi hiển thị thông báo đăng nhập không nhất quán.
-- Sửa lỗi tải ảnh và tên file ảnh chưa tương thích với MAUI.
-- Sửa lỗi phân trang tuyến di chuyển và logic session all.
+- Chuẩn hóa lại bộ test theo trạng thái code mới của auth, analytics và image endpoints.
+- Cải thiện độ ổn định test MAUI bằng cách loại bỏ phụ thuộc vào giờ chạy thực tế.
 
-## 2026-04-02
+## [v1.2.0] - 2026-04-03
 
-### Added
+### Added - v1.2.0
 
-- Thêm logging cho kết nối database, đồng bộ vị trí, và audio logging.
-- Thêm heatmap, trajectory view, và session tracking cho visitor/admin.
-- Thêm schema và seed data ban đầu cho database.
+- Hỗ trợ session limit "Tất cả" cho phân tích tuyến di chuyển.
+- Mở rộng kiểm thử cho admin/saler API clients và bổ sung test API, MAUI.
 
-### Changed
+### Changed - v1.2.0
 
-- Cải thiện cơ chế xử lý session bị thiếu bằng retry logic.
-- Điều chỉnh layout SettingsPage và ẩn nút logout trong ngữ cảnh visitor.
+- Nâng cấp movement-paths aggregation: gom theo session trước khi limit, xử lý dữ liệu tọa độ thiếu/null.
+- Cập nhật chuẩn endpoint ảnh, bỏ route trùng và đồng bộ tài liệu liên quan.
+- Chuẩn hóa luồng quản lý user: role gating, default password, kiểm soát trạng thái tài khoản.
 
-### Fixed
+### Fixed - v1.2.0
 
-- Cải thiện layout, scrolling và labels trong các thành phần heatmap/trajectory.
+- Sửa lỗi phân trang tuyến di chuyển bị snap về trang chứa session đã chọn.
+- Sửa lỗi thông báo đăng nhập admin không nhất quán.
+- Sửa lỗi tải audio và tương thích tên file ảnh với MAUI.
 
-## 2026-04-01
+## [v1.1.0] - 2026-04-02
 
-### Added
+### Added - v1.1.0
 
-- Thêm admin login và role-based access control.
+- Thêm logging cho location sync, audio logs, database connection.
+- Thêm heatmap, trajectory view và các thành phần phân tích hành vi nghe audio.
+- Bổ sung schema và seed data cho dữ liệu tracking/session.
+
+### Changed - v1.1.0
+
+- Cải thiện xử lý session thiếu dữ liệu bằng retry logic.
+- Tinh chỉnh giao diện Settings/Heatmap/Trajectory cho khả năng sử dụng tốt hơn.
+
+### Fixed - v1.1.0
+
+- Sửa layout và scrolling issues trong các màn analytics.
+
+## [v1.0.0] - 2026-04-01
+
+### Added - v1.0.0
+
+- Bổ sung admin authentication và role-based access.
 - Thêm admin stats API và analytics endpoints cho dashboard.
-- Thêm audit log entity, middleware, controller và service.
-- Thêm MongoDB connection, health check, setup guide và seed data.
-- Thêm pagination cho recent activity.
+- Thêm audit log đầy đủ: entity, middleware, service, controller.
+- Bổ sung MongoDB health check, setup docs và seed data.
 
-### Changed
+### Changed - v1.0.0
 
-- Chuyển admin dashboard từ mock data sang real API.
-- Migrate audit logging sang MongoDB.
-- Cập nhật AuthController để ghi LOGIN/LOGOUT audit events.
+- Chuyển admin dashboard từ mock sang real API.
+- Migrate audit logging từ SQL sang MongoDB.
 
-### Fixed
+### Fixed - v1.0.0
 
-- Sửa xử lý dữ liệu activity trong LogsPage.
-- Loại bỏ field thừa `TargetName` khỏi AuditLog.
+- Sửa xử lý dữ liệu activity ở admin logs.
+- Loại bỏ trường thừa trong audit schema/migration.
 
-## 2026-03-21
+## [v0.2.0] - 2026-03-21
 
-### Added
+### Added - v0.2.0
 
-- Thêm integration tests và unit tests cho POIService, HistoryService và API.
-- Thêm StatusToColorConverter và cải thiện trạng thái POI.
-- Thêm hỗ trợ background location permission cho visitor.
-- Thêm thay đổi CI workflow và README test cho admin/saler.
+- Thêm integration tests và unit tests cho API/MAUI.
+- Bổ sung hỗ trợ background location permission ở mobile.
+- Mở rộng CI cho các luồng build/test chính.
 
-### Changed
+### Changed - v0.2.0
 
-- Cải tiến logic dish/image visibility và các endpoint liên quan.
-- Điều chỉnh MAUI build/restore để phù hợp Android target.
-- Refactor test API để khớp DTO response mới.
+- Refactor endpoint và DTO để đồng nhất contract.
+- Cập nhật MAUI build/restore flow theo Android target thực tế.
 
-### Fixed
+### Fixed - v0.2.0
 
-- Sửa workflow CI, quyền workflow, và các vấn đề restore/build trên MAUI.
+- Sửa lỗi CI workflow (restore/build permissions và command).
 
-## 2026-03-20
+## [v0.1.0] - 2026-03-20
 
-### Added
+### Added - v0.1.0
 
-- Thiết lập CI workflow đầu tiên cho MAUI và API testing.
-- Thêm tài liệu và README cho các luồng test.
+- Thiết lập CI workflow ban đầu cho dự án.
+- Bổ sung tài liệu test và hướng dẫn local run.
 
-### Changed
+### Changed - v0.1.0
 
-- Chuẩn hóa DTO và controller naming conventions.
-- Điều chỉnh LocalApiHost IP và layout FavoritePage.
+- Chuẩn hóa naming conventions ở một số DTO/controller.
 
-### Fixed
+## [v0.0.1] - 2026-03-17
 
-- Sửa formatting inconsistencies trong CI workflow.
+### Added - v0.0.1
 
-## 2026-03-17
+- Bản nền cho test automation: API integration tests, MAUI unit tests.
 
-### Added
+### Changed - v0.0.1
 
-- Thêm integration tests cho Food Market Narrator API.
-- Thêm unit tests cho POIService và setup testing project.
-- Thêm integration/unit tests cho POI và history services.
+- Điều chỉnh SettingsPage language flow và cấu trúc test project ban đầu.
 
-### Changed
+## Maintenance Guide
 
-- Refactor SettingsPage language loading logic.
-- Chuẩn hóa project file và tooling phục vụ testing.
-
-## Notes
-
-- Đây là changelog theo hướng release notes, ưu tiên thay đổi có ý nghĩa với người dùng và maintainer.
-- Các commit kỹ thuật nhỏ, commit merge hoặc commit sinh ảnh được gộp lại theo chủ đề để dễ đọc.
+- Mỗi PR có thay đổi hành vi người dùng hoặc API contract cần cập nhật changelog.
+- Không ghi commit kỹ thuật nhỏ lẻ không ảnh hưởng hành vi.
+- Ghi vào `[Unreleased]` trước, chuyển vào version khi cắt release.
