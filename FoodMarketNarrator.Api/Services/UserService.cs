@@ -1,4 +1,5 @@
 using food_market_narrator_api.DTOs.User;
+using food_market_narrator_api.Helpers;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Repositories;
 
@@ -48,7 +49,7 @@ public class UserService
         var user = new UserModel
         {
             Username = request.Username.Trim(),
-            Password = password, // store as-is to match existing DB schema
+            Password = PasswordHasher.Hash(password),
             Role = normalizedRole,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
