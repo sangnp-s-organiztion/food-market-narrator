@@ -28,13 +28,7 @@ export const authApi = {
     });
 
     if (!res.ok) {
-      if (res.status === 403) {
-        throw new Error(
-          "Chỉ tài khoản Admin mới được đăng nhập trang quản trị.",
-        );
-      }
-      const err = await res.json().catch(() => ({ message: "Login failed" }));
-      throw new Error(err.message ?? "Login failed");
+      throw new Error("Thông tin đăng nhập không hợp lệ");
     }
 
     return res.json() as Promise<LoginResponse>;
