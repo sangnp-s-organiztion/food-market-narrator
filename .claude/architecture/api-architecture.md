@@ -53,7 +53,7 @@ Luu y:
 ## Public Data
 
 - GET /public/Restaurant/{restaurantId}/dishes (public)
-- GET /public/Restaurant/{restaurantId}/images (public)
+- GET /Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
 - GET /public/audios/{audioId:int}/file (public)
 

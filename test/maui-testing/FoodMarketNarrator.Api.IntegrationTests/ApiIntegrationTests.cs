@@ -424,7 +424,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var cookie = await LoginAndGetCookie("seller1", "seller123");
 
         // Act
-        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/public/Restaurant/rest-001/images", cookie: cookie);
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Restaurant/rest-001/images", cookie: cookie);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
