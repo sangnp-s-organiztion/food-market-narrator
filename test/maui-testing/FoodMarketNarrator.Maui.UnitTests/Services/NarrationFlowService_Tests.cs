@@ -14,6 +14,7 @@ public class NarrationFlowService_Tests
     private readonly Mock<IPOIService> _mockPoiService;
     private readonly Mock<ILocationService> _mockLocationService;
     private readonly Mock<IAudioService> _mockAudioService;
+    private readonly Mock<IAudioLogSyncService> _mockAudioLogSyncService;
     private readonly Mock<ILanguageService> _mockLanguageService;
     private readonly Mock<IHistoryService> _mockHistoryService;
     private readonly NarrationFlowService _narrationService;
@@ -23,6 +24,7 @@ public class NarrationFlowService_Tests
         _mockPoiService = new Mock<IPOIService>();
         _mockLocationService = new Mock<ILocationService>();
         _mockAudioService = new Mock<IAudioService>();
+        _mockAudioLogSyncService = new Mock<IAudioLogSyncService>();
         _mockLanguageService = new Mock<ILanguageService>();
         _mockHistoryService = new Mock<IHistoryService>();
 
@@ -34,6 +36,7 @@ public class NarrationFlowService_Tests
             _mockPoiService.Object,
             _mockLocationService.Object,
             _mockAudioService.Object,
+            _mockAudioLogSyncService.Object,
             _mockLanguageService.Object,
             _mockHistoryService.Object
         );
@@ -193,7 +196,7 @@ public class NarrationFlowService_Tests
         task.Wait(TimeSpan.FromSeconds(2));
 
         // Assert
-        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<int>()), Times.Never);
     }
 
     [Fact]
@@ -210,7 +213,7 @@ public class NarrationFlowService_Tests
         task.Wait(TimeSpan.FromSeconds(2));
 
         // Assert
-        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<int>()), Times.Never);
     }
 
     #endregion
@@ -241,7 +244,7 @@ public class NarrationFlowService_Tests
             Latitude = 10.776889,
             Longitude = 106.6890608
         };
-        poi.Audios.Add(new AudioModel { LanguageCode = "en-US", AudioUrl = "/audio/english.mp3", IsActive = true });
+        poi.Audios.Add(new AudioModel { AudioId = 101, LanguageCode = "en-US", AudioUrl = "/audio/english.mp3", IsActive = true });
 
         _mockAudioService.Setup(x => x.IsPlaying).Returns(false);
         _mockLocationService
@@ -266,15 +269,15 @@ public class NarrationFlowService_Tests
 
         // Setup audio service to complete immediately
         _mockAudioService
-            .Setup(x => x.PlaySound(It.IsAny<string>(), It.IsAny<string>()))
+            .Setup(x => x.PlaySound(It.IsAny<int>()))
             .Returns(Task.CompletedTask);
 
         // Act
         var task = _narrationService.CheckAndNarrateAsync(force: true);
         task.Wait(TimeSpan.FromSeconds(2));
 
-        // Assert - should use language from service
-        _mockAudioService.Verify(x => x.PlaySound("en-US", It.IsAny<string>()), Times.Once);
+        // Assert - selected language should resolve to the matching audio and play by audio id
+        _mockAudioService.Verify(x => x.PlaySound(101), Times.Once);
     }
 
     #endregion
@@ -315,7 +318,7 @@ public class NarrationFlowService_Tests
         task.Wait(TimeSpan.FromSeconds(2));
 
         // Assert
-        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<int>()), Times.Never);
     }
 
     #endregion
@@ -360,7 +363,7 @@ public class NarrationFlowService_Tests
         task.Wait(TimeSpan.FromSeconds(2));
 
         // Assert - audio should not be played due to distance
-        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _mockAudioService.Verify(x => x.PlaySound(It.IsAny<int>()), Times.Never);
     }
 
     #endregion
