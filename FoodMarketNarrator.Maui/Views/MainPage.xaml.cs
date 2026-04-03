@@ -15,6 +15,7 @@ public partial class MainPage : ContentPage
     private readonly IPOIService _poiService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly ILocationService _locationService;
+    private readonly IAudioLibraryService _audioLibraryService;
 
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
     private bool _isMapLoaded;
@@ -29,12 +30,14 @@ public partial class MainPage : ContentPage
     public MainPage(
         IPOIService poiService,
         NarrationFlowService narrationFlowService,
-        ILocationService locationService)
+        ILocationService locationService,
+        IAudioLibraryService audioLibraryService)
 	{
 		InitializeComponent();
         _poiService = poiService;
         _narrationFlowService = narrationFlowService;
         _locationService = locationService;
+        _audioLibraryService = audioLibraryService;
     }
 
     protected override void OnAppearing()
@@ -60,6 +63,11 @@ public partial class MainPage : ContentPage
         {
             _narrationFlowService.StartNarration();
             _hasAutoStartedNarrationThisSession = true;
+        }
+
+        if (_audioLibraryService.ConsumeStartupOfflineNoticeFlag())
+        {
+            _ = DisplayAlert("Thông báo", "Vui lòng kết nối Internet để tải dữ liệu audio.", "OK");
         }
 
         // Cập nhật trạng thái UI dựa trên vị trí hiện tại

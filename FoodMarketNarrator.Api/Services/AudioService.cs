@@ -47,6 +47,28 @@ namespace food_market_narrator_api.Services
             }).ToList();
         }
 
+    public async Task<AudioResponse?> GetByIdAsync(int audioId)
+    {
+        var audio = await _audioRepository.GetByIdAsync(audioId);
+        if (audio == null)
+        {
+            return null;
+        }
+
+        return new AudioResponse
+        {
+            AudioId = audio.AudioId,
+            RestaurantId = audio.RestaurantId,
+            LanguageId = audio.LanguageId,
+            LanguageCode = audio.Language?.LanguageCode ?? string.Empty,
+            LanguageName = audio.Language?.LanguageName ?? string.Empty,
+            AudioUrl = audio.AudioUrl,
+            Version = audio.Version,
+            IsActive = audio.IsActive,
+            DateGeneration = audio.DateGeneration
+        };
+    }
+
         public async Task<AudioResponse> CreateAsync(string restaurantId, int languageId, string audioUrl)
         {
             var created = await _audioRepository.CreateAsync(new AudioModel

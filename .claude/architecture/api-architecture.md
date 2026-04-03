@@ -55,6 +55,7 @@ Luu y:
 - GET /public/Restaurant/{restaurantId}/dishes (public)
 - GET /public/Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
+- GET /public/audios/{audioId:int}/file (public)
 
 ## Mongo
 

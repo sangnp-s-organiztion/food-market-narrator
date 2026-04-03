@@ -44,6 +44,7 @@ public static class MauiProgram
         // Register pages for dependency injection
         builder.Services.AddSingleton<IPOIService, POIService>(); // POI data cache should be singleton
         builder.Services.AddSingleton<IAudioService, AudioService>();
+        builder.Services.AddSingleton<IAudioLibraryService, AudioLibraryService>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
         builder.Services.AddSingleton<IFavoriteService, FavoriteService>();

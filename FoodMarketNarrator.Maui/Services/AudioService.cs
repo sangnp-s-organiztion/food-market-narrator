@@ -1,6 +1,7 @@
 ﻿using Plugin.Maui.Audio;
 using food_market_narrator.Settings;
 using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace food_market_narrator.Services;
 
@@ -78,6 +79,42 @@ public partial class AudioService : IAudioService
         }
     }
 
+    public async Task PlaySound(int audioId)
+    {
+        if (audioId <= 0)
+        {
+            return;
+        }
+
+        StopSound();
+        _isPaused = false;
+
+        try
+        {
+            _currentTrackKey = GetAudioTrackKey(audioId);
+
+            await using var stream = await ResolvePlayableStreamAsync(audioId);
+            if (stream == null)
+            {
+                _currentTrackKey = null;
+                return;
+            }
+
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            _player = _audioManager.CreatePlayer(memoryStream);
+            _player.PlaybackEnded += OnPlaybackEnded;
+            RequestPlatformAudioFocus();
+            _player.Play();
+        }
+        catch (Exception)
+        {
+            _currentTrackKey = null;
+        }
+    }
+
     private async Task<Stream?> ResolvePlayableStreamAsync(string language, string fileName)
     {
         var normalizedInput = NormalizeInput(fileName);
@@ -108,17 +145,31 @@ public partial class AudioService : IAudioService
             }
         }
 
-        foreach (var remoteUrl in BuildRemoteUrlCandidates(language, normalizedInput))
+        return IsValidAudioFile(cachePath)
+            ? File.OpenRead(cachePath)
+            : null;
+    }
+
+    private async Task<Stream?> ResolvePlayableStreamAsync(int audioId)
+    {
+        if (audioId <= 0)
+        {
+            return null;
+        }
+
+        var cachePath = GetAudioCachePath(audioId);
+
+        if (IsValidAudioFile(cachePath))
+        {
+            TouchCacheFile(cachePath);
+            return File.OpenRead(cachePath);
+        }
+
+        foreach (var remoteUrl in BuildRemoteAudioUrlCandidates(audioId))
         {
             if (!await TryDownloadAudioToCacheAsync(remoteUrl, cachePath))
             {
-                var onlineOnly = await TryDownloadAudioToMemoryAsync(remoteUrl);
-                if (onlineOnly != null)
-                {
-                    // Console.WriteLine($"Playing online-only audio (not cached): {remoteUrl}");
-                    return onlineOnly;
-                }
-
+                Debug.WriteLine($"[AudioService] Prefetch remote failed: {remoteUrl}");
                 continue;
             }
 
@@ -132,6 +183,125 @@ public partial class AudioService : IAudioService
         return IsValidAudioFile(cachePath)
             ? File.OpenRead(cachePath)
             : null;
+    }
+
+    public bool HasLocalAudio(string language, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var normalizedInput = NormalizeInput(fileName);
+        var cachePath = GetAudioCachePath(language, normalizedInput);
+        return IsValidAudioFile(cachePath);
+    }
+
+    public bool HasLocalAudio(int audioId)
+    {
+        if (audioId <= 0)
+        {
+            return false;
+        }
+
+        var cachePath = GetAudioCachePath(audioId);
+        return IsValidAudioFile(cachePath);
+    }
+
+    public async Task<bool> PrefetchAudioAsync(string language, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var normalizedInput = NormalizeInput(fileName);
+        var cachePath = GetAudioCachePath(language, normalizedInput);
+
+        if (IsValidAudioFile(cachePath))
+        {
+            TouchCacheFile(cachePath);
+            Debug.WriteLine($"[AudioService] Prefetch hit local cache: {language} | {fileName}");
+            return true;
+        }
+
+        foreach (var packagePath in BuildPackagePathCandidates(language, normalizedInput))
+        {
+            try
+            {
+                await using var packageStream = await FileSystem.OpenAppPackageFileAsync(packagePath);
+                var memory = new MemoryStream();
+                await packageStream.CopyToAsync(memory);
+                memory.Position = 0;
+
+                await SaveAudioCacheAsync(cachePath, memory);
+                if (IsValidAudioFile(cachePath))
+                {
+                    TouchCacheFile(cachePath);
+                    Debug.WriteLine($"[AudioService] Prefetch from package success: {language} | {packagePath}");
+                    return true;
+                }
+            }
+            catch
+            {
+                // Continue with next candidate.
+            }
+        }
+
+        foreach (var remoteUrl in BuildRemoteUrlCandidates(language, normalizedInput))
+        {
+            if (!await TryDownloadAudioToCacheAsync(remoteUrl, cachePath))
+            {
+                Debug.WriteLine($"[AudioService] Prefetch remote failed: {remoteUrl}");
+                continue;
+            }
+
+            if (IsValidAudioFile(cachePath))
+            {
+                TouchCacheFile(cachePath);
+                Debug.WriteLine($"[AudioService] Prefetch remote success: {remoteUrl}");
+                return true;
+            }
+        }
+
+        Debug.WriteLine($"[AudioService] Prefetch failed for all sources: {language} | {fileName}");
+        return false;
+    }
+
+    public async Task<bool> PrefetchAudioAsync(int audioId)
+    {
+        if (audioId <= 0)
+        {
+            return false;
+        }
+
+        var cachePath = GetAudioCachePath(audioId);
+
+        if (IsValidAudioFile(cachePath))
+        {
+            TouchCacheFile(cachePath);
+            Debug.WriteLine($"[AudioService] Prefetch hit local cache: audioId={audioId}");
+            return true;
+        }
+
+        foreach (var remoteUrl in BuildRemoteAudioUrlCandidates(audioId))
+        {
+            if (!await TryDownloadAudioToCacheAsync(remoteUrl, cachePath))
+            {
+                Debug.WriteLine($"[AudioService] Prefetch remote failed: {remoteUrl}");
+                continue;
+            }
+
+            if (IsValidAudioFile(cachePath))
+            {
+                TouchCacheFile(cachePath);
+                Debug.WriteLine($"[AudioService] Prefetch remote success: {remoteUrl}");
+                return true;
+            }
+        }
+
+        Debug.WriteLine($"[AudioService] Prefetch failed for audioId={audioId}");
+        return false;
     }
 
     private static string ResolveAudioPath(string language, string fileName)
@@ -160,6 +330,20 @@ public partial class AudioService : IAudioService
         return fileName
             .Replace("\\", "/", StringComparison.Ordinal)
             .Trim();
+    }
+
+    private static string GetAudioTrackKey(int audioId)
+    {
+        return $"audio:{audioId}";
+    }
+
+    private static string GetAudioCachePath(int audioId)
+    {
+        var cacheRoot = GetAudioCacheRootPath();
+        Directory.CreateDirectory(cacheRoot);
+
+        var hash = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"audio:{audioId}")));
+        return Path.Combine(cacheRoot, $"{hash}.mp3");
     }
 
     private static IEnumerable<string> BuildPackagePathCandidates(string language, string normalizedInput)
@@ -308,18 +492,31 @@ public partial class AudioService : IAudioService
 
     private async Task<bool> TryDownloadAudioToCacheAsync(string url, string cachePath)
     {
+        if (MainThread.IsMainThread)
+        {
+            return await Task.Run(() => TryDownloadAudioToCacheCoreAsync(url, cachePath));
+        }
+
+        return await TryDownloadAudioToCacheCoreAsync(url, cachePath);
+    }
+
+    private async Task<bool> TryDownloadAudioToCacheCoreAsync(string url, string cachePath)
+    {
         try
         {
+            Debug.WriteLine($"[AudioService] Download start: {url}");
             using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
+                Debug.WriteLine($"[AudioService] Download HTTP fail ({(int)response.StatusCode}): {url}");
                 return false;
             }
 
             var declaredLength = response.Content.Headers.ContentLength ?? 0;
+            Debug.WriteLine($"[AudioService] Download response OK: {url} | contentLength={declaredLength}");
             if (declaredLength > 0 && !await EnsureStorageForIncomingFileAsync(declaredLength, cachePath))
             {
-                // Console.WriteLine($"Skip download cache (not enough storage/quota): {url}");
+                Debug.WriteLine($"[AudioService] Skip download (quota/storage pre-check): {url}");
                 return false;
             }
 
@@ -335,13 +532,14 @@ public partial class AudioService : IAudioService
             if (size < MinValidAudioBytes)
             {
                 File.Delete(tempPath);
+                Debug.WriteLine($"[AudioService] Download too small ({size} bytes): {url}");
                 return false;
             }
 
             if (!await EnsureStorageForIncomingFileAsync(size, cachePath))
             {
                 File.Delete(tempPath);
-                // Console.WriteLine($"Skip download cache after write (not enough storage/quota): {url}");
+                Debug.WriteLine($"[AudioService] Skip download after write (quota/storage): {url}");
                 return false;
             }
 
@@ -352,42 +550,13 @@ public partial class AudioService : IAudioService
 
             File.Move(tempPath, cachePath);
             TouchCacheFile(cachePath);
-            // Console.WriteLine($"Audio downloaded and cached: {url}");
+            Debug.WriteLine($"[AudioService] Download success and cached: {url}");
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Console.WriteLine($"Download audio failed ({url}): {ex.Message}");
+            Debug.WriteLine($"[AudioService] Download exception: {url} -> {ex.Message}");
             return false;
-        }
-    }
-
-    private async Task<Stream?> TryDownloadAudioToMemoryAsync(string url)
-    {
-        try
-        {
-            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
-
-            await using var source = await response.Content.ReadAsStreamAsync();
-            var memory = new MemoryStream();
-            await source.CopyToAsync(memory);
-
-            if (memory.Length < MinValidAudioBytes)
-            {
-                memory.Dispose();
-                return null;
-            }
-
-            memory.Position = 0;
-            return memory;
-        }
-        catch
-        {
-            return null;
         }
     }
 
@@ -435,27 +604,38 @@ public partial class AudioService : IAudioService
 
         if (incomingBytes > MaxAudioCacheBytes)
         {
-            // Console.WriteLine($"Incoming audio ({incomingBytes} bytes) exceeds cache quota ({MaxAudioCacheBytes} bytes).");
+            Debug.WriteLine($"[AudioService] Storage check fail: incoming={incomingBytes} exceeds quota={MaxAudioCacheBytes}");
             return false;
         }
 
         var hasQuotaCapacity = EnsureQuotaCapacity(incomingBytes, protectedPath);
         if (!hasQuotaCapacity)
         {
+            Debug.WriteLine($"[AudioService] Storage check fail: quota capacity unavailable for incoming={incomingBytes}");
             return false;
         }
 
         var availableSpace = TryGetAvailableSpaceBytes();
+        if (availableSpace.HasValue && availableSpace.Value <= 0)
+        {
+            // Some Android environments can report 0 even when storage is usable.
+            availableSpace = null;
+        }
+
         if (availableSpace.HasValue && availableSpace.Value < incomingBytes + MinDeviceFreeSpaceBytes)
         {
             var needToFree = incomingBytes + MinDeviceFreeSpaceBytes - availableSpace.Value;
             CleanupLruBytes(needToFree, protectedPath);
             availableSpace = TryGetAvailableSpaceBytes();
+            if (availableSpace.HasValue && availableSpace.Value <= 0)
+            {
+                availableSpace = null;
+            }
         }
 
         if (availableSpace.HasValue && availableSpace.Value < incomingBytes + MinDeviceFreeSpaceBytes)
         {
-            // Console.WriteLine("Not enough free storage for audio cache write.");
+            Debug.WriteLine($"[AudioService] Storage check fail: free={availableSpace.Value}, needAtLeast={incomingBytes + MinDeviceFreeSpaceBytes}");
             return false;
         }
 
@@ -493,7 +673,7 @@ public partial class AudioService : IAudioService
 
         if (projectedSize > MaxAudioCacheBytes)
         {
-            // Console.WriteLine("Audio cache quota reached and could not free enough files.");
+            Debug.WriteLine($"[AudioService] Quota check fail: projected={projectedSize}, quota={MaxAudioCacheBytes}");
             return false;
         }
 
@@ -567,6 +747,35 @@ public partial class AudioService : IAudioService
         });
     }
 
+    private IEnumerable<string> BuildRemoteAudioUrlCandidates(int audioId)
+    {
+        var relativePath = $"public/audios/{audioId}/file";
+        var baseCandidates = new List<string>();
+
+        if (_httpClient.BaseAddress != null)
+        {
+            baseCandidates.Add(_httpClient.BaseAddress.ToString());
+        }
+
+        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+
+        return baseCandidates
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(baseUrl =>
+            {
+                try
+                {
+                    return new Uri(new Uri(baseUrl), relativePath).ToString();
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x));
+    }
+
     private static long? TryGetAvailableSpaceBytes()
     {
         try
@@ -624,6 +833,16 @@ public partial class AudioService : IAudioService
 
         var resolved = ResolveAudioPath(language, fileName);
         return string.Equals(_currentTrackKey, resolved, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public bool IsCurrentTrack(int audioId)
+    {
+        if (audioId <= 0 || string.IsNullOrWhiteSpace(_currentTrackKey))
+        {
+            return false;
+        }
+
+        return string.Equals(_currentTrackKey, GetAudioTrackKey(audioId), StringComparison.OrdinalIgnoreCase);
     }
 
     private void OnPlaybackEnded(object? sender, EventArgs e)
