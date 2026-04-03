@@ -324,10 +324,9 @@ export async function deleteDishApi(dishId: number): Promise<void> {
 export async function getRestaurantImagesApi(
   restaurantId: string,
 ): Promise<RestaurantImage[]> {
-  const data = await request<ApiImage[]>(
-    `/public/Restaurant/${restaurantId}/images`,
-    { method: "GET" },
-  );
+  const data = await request<ApiImage[]>(`/Restaurant/${restaurantId}/images`, {
+    method: "GET",
+  });
   return data.map(mapImage);
 }
 

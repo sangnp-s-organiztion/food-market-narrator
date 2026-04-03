@@ -646,7 +646,7 @@ Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển
   - GET /Restaurant
   - GET /Restaurant/{id}
   - GET /Language
-  - GET /public/Restaurant/{restaurantId}/images
+  - GET /Restaurant/{restaurantId}/images
   - GET /public/Restaurant/{restaurantId}/dishes
   - GET /public/Restaurant/{restaurantId}/audios
 - Protected APIs cho Seller/Admin:
@@ -707,7 +707,7 @@ Visitor App Open
   -> render bản đồ + lưu offline_cache
 
 Visitor Tap POI
-  -> GET /public/Restaurant/{restaurantId}/images
+  -> GET /Restaurant/{restaurantId}/images
   -> GET /public/Restaurant/{restaurantId}/dishes
   -> GET /public/Restaurant/{restaurantId}/audios
   -> hiển thị ảnh + menu + audio

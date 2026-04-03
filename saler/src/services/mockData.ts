@@ -178,7 +178,9 @@ async function fetchJson<T>(path: string): Promise<T> {
   return await res.json();
 }
 
-export async function getUserRestaurants(userId: number): Promise<Restaurant[]> {
+export async function getUserRestaurants(
+  userId: number,
+): Promise<Restaurant[]> {
   try {
     const all = await fetchJson<Restaurant[]>("/Restaurant");
     return all.filter((r) => r.user_id === userId);
@@ -187,7 +189,9 @@ export async function getUserRestaurants(userId: number): Promise<Restaurant[]> 
   }
 }
 
-export async function getRestaurantDishes(restaurantId: string): Promise<Dish[]> {
+export async function getRestaurantDishes(
+  restaurantId: string,
+): Promise<Dish[]> {
   try {
     return await fetchJson<Dish[]>(`/public/Restaurant/${restaurantId}/dishes`);
   } catch (err) {
@@ -195,17 +199,25 @@ export async function getRestaurantDishes(restaurantId: string): Promise<Dish[]>
   }
 }
 
-export async function getRestaurantImages(restaurantId: string): Promise<RestaurantImage[]> {
+export async function getRestaurantImages(
+  restaurantId: string,
+): Promise<RestaurantImage[]> {
   try {
-    return await fetchJson<RestaurantImage[]>(`/public/Restaurant/${restaurantId}/images`);
+    return await fetchJson<RestaurantImage[]>(
+      `/Restaurant/${restaurantId}/images`,
+    );
   } catch (err) {
     return mockImages.filter((i) => i.restaurant_id === restaurantId);
   }
 }
 
-export async function getRestaurantAudios(restaurantId: string): Promise<Audio[]> {
+export async function getRestaurantAudios(
+  restaurantId: string,
+): Promise<Audio[]> {
   try {
-    return await fetchJson<Audio[]>(`/public/Restaurant/${restaurantId}/audios`);
+    return await fetchJson<Audio[]>(
+      `/public/Restaurant/${restaurantId}/audios`,
+    );
   } catch (err) {
     return mockAudios.filter((a) => a.restaurant_id === restaurantId);
   }
