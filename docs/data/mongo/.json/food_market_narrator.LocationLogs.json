@@ -1,0 +1,180 @@
+[{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b772"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456781"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.701279,
+      10.764057
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:01:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b773"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456781"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.702051,
+      10.763402
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:03:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b774"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456781"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.702372,
+      10.761733
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:05:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b775"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456781"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.7027,
+      10.761408
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:07:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b776"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456782"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.703631,
+      10.760703
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:06:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b777"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456782"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.704322,
+      10.760798
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:08:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b778"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456783"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.705417,
+      10.761126
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:12:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b779"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456784"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.705702,
+      10.761183
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:16:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b77a"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456785"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.703051,
+      10.761168
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T08:22:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cccd31de842faf0b15b77b"
+  },
+  "session_id": {
+    "$oid": "65432101abcdef0123456786"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      106.70262,
+      10.761242
+    ]
+  },
+  "timestamp": {
+    "$date": "2026-03-12T09:05:00.000Z"
+  }
+}]

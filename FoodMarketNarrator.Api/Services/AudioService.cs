@@ -27,6 +27,11 @@ namespace food_market_narrator_api.Services
             }).ToList();
         }
 
+        public async Task<int> CountAudiosAsync()
+        {
+            return await _audioRepository.CountAsync();
+        }
+
         public async Task<List<AudioResponse>> GetByRestaurantIdAsync(string restaurantId)
         {
             var audios = await _audioRepository.GetByRestaurantIdAsync(restaurantId);
@@ -41,6 +46,28 @@ namespace food_market_narrator_api.Services
                 DateGeneration = a.DateGeneration
             }).ToList();
         }
+
+    public async Task<AudioResponse?> GetByIdAsync(int audioId)
+    {
+        var audio = await _audioRepository.GetByIdAsync(audioId);
+        if (audio == null)
+        {
+            return null;
+        }
+
+        return new AudioResponse
+        {
+            AudioId = audio.AudioId,
+            RestaurantId = audio.RestaurantId,
+            LanguageId = audio.LanguageId,
+            LanguageCode = audio.Language?.LanguageCode ?? string.Empty,
+            LanguageName = audio.Language?.LanguageName ?? string.Empty,
+            AudioUrl = audio.AudioUrl,
+            Version = audio.Version,
+            IsActive = audio.IsActive,
+            DateGeneration = audio.DateGeneration
+        };
+    }
 
         public async Task<AudioResponse> CreateAsync(string restaurantId, int languageId, string audioUrl)
         {

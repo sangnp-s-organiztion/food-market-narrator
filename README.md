@@ -94,8 +94,8 @@ dotnet run -f net10.0-android
 | Backend API (HTTP)    | http://localhost:5044  |
 | Backend API (HTTPS)   | https://localhost:7041 |
 | Seller Web (Vite dev) | http://localhost:8080  |
-| Admin Portal (HTTP)   | http://localhost:5104 |
-| Admin Portal (HTTPS) | https://localhost:7168 |
+| Admin Portal (HTTP)   | http://localhost:5104  |
+| Admin Portal (HTTPS)  | https://localhost:7168 |
 
 ### Commands
 
@@ -233,7 +233,7 @@ Các endpoint đọc dữ liệu công khai chính:
 - `GET /Restaurant/{id}`
 - `GET /Language`
 - `GET /Language/{languageCode}`
-- `GET /public/Restaurant/{restaurantId}/images`
+- `GET /Restaurant/{restaurantId}/images`
 - `GET /public/Restaurant/{restaurantId}/dishes`
 - `GET /public/Restaurant/{restaurantId}/audios`
 
@@ -255,11 +255,14 @@ Các endpoint đọc dữ liệu công khai chính:
 
 ## 10. Tài liệu liên quan
 
-- `docs/prd.md`
-- `docs/architecture.md`
-- `docs/feature/visitor-feature.md`
-- `docs/maui/`
-- `docs/saler/`
+- `docs/README.md`
+- `docs/features/prd.md`
+- `docs/features/visitor-features.md`
+- `docs/architecture/overview.md`
+- `docs/architecture/api-architecture.md`
+- `docs/api/mongodb-setup.md`
+- `docs/mobile/`
+- `docs/testing/`
 
 ## 11. Lưu ý bảo mật
 

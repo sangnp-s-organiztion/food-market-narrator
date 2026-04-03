@@ -118,10 +118,19 @@ type ApiDish = {
   description?: string | null;
   restaurantId: string;
   imageId?: number | null;
+  imageFileName?: string | null;
   createdAt?: string | null;
 };
 
 function mapDish(item: ApiDish): Dish {
+  // Build image_url from ImageFileName — backend returns just the filename (e.g. "dish_1.jpg")
+  // We prepend /maui-images/ so normalizeImageUrl can resolve it to a full URL
+  let image_url: string | undefined;
+  if (item.imageFileName) {
+    const filename = item.imageFileName.replace(/\\/g, "/").trim();
+    image_url = normalizeImageUrl(filename);
+  }
+
   return {
     dish_id: item.dishId,
     name: item.name ?? "",
@@ -129,6 +138,7 @@ function mapDish(item: ApiDish): Dish {
     description: item.description ?? "",
     restaurant_id: item.restaurantId,
     image_id: item.imageId ?? null,
+    image_url,
     created_at: item.createdAt ?? new Date().toISOString(),
   };
 }
@@ -192,6 +202,7 @@ function mapLanguage(item: ApiLanguage): Language {
 type LoginResponse = {
   userId: number;
   username: string;
+  role: string;
 };
 
 export async function loginApi(
@@ -206,6 +217,7 @@ export async function loginApi(
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
@@ -214,6 +226,7 @@ export async function getMeApi(): Promise<User> {
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
@@ -314,10 +327,9 @@ export async function deleteDishApi(dishId: number): Promise<void> {
 export async function getRestaurantImagesApi(
   restaurantId: string,
 ): Promise<RestaurantImage[]> {
-  const data = await request<ApiImage[]>(
-    `/public/Restaurant/${restaurantId}/images`,
-    { method: "GET" },
-  );
+  const data = await request<ApiImage[]>(`/Restaurant/${restaurantId}/images`, {
+    method: "GET",
+  });
   return data.map(mapImage);
 }
 
@@ -373,6 +385,26 @@ export async function reorderImagesApi(
       }),
     },
   );
+}
+
+/**
+ * Replaces the image file for an existing image.
+ * Keeps the original is_primary and sort_order values.
+ */
+export async function replaceImageApi(
+  imageId: number,
+  file: File,
+): Promise<RestaurantImage> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const data = await request<ApiImage>(`/Images/${imageId}`, {
+    method: "PUT",
+    body: form,
+    skipJsonContentType: true,
+  });
+
+  return mapImage(data);
 }
 
 export async function getLanguagesApi(): Promise<Language[]> {

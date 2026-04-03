@@ -53,8 +53,16 @@ Luu y:
 ## Public Data
 
 - GET /public/Restaurant/{restaurantId}/dishes (public)
-- GET /public/Restaurant/{restaurantId}/images (public)
+- GET /Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
+- GET /public/audios/{audioId:int}/file (public)
+
+## Mongo
+
+- GET /Mongo/test-connect (public)
+- POST /api/user-sessions/start (public)
+- POST /api/location-logs/batch (public)
+- POST /api/audio-logs (public)
 
 ## Static Media URLs
 

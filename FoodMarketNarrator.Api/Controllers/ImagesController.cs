@@ -2,6 +2,8 @@ using food_market_narrator_api.DTOs.Restaurant;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Text;
 
 namespace food_market_narrator_api.Controllers
 {
@@ -47,8 +49,7 @@ namespace food_market_narrator_api.Controllers
                     "Images"));
             Directory.CreateDirectory(uploadDir);
 
-            string extension = Path.GetExtension(file.FileName);
-            string fileName = $"{Guid.NewGuid():N}{extension}";
+            string fileName = BuildImageFileName(file.FileName);
             string fullPath = Path.Combine(uploadDir, fileName);
 
             await using (var stream = System.IO.File.Create(fullPath))
@@ -61,16 +62,108 @@ namespace food_market_narrator_api.Controllers
             return Ok(created);
         }
 
+        private static string BuildImageFileName(string originalFileName)
+        {
+            string extension = Path.GetExtension(originalFileName);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".jpg";
+            }
+
+            extension = extension.ToLowerInvariant();
+            string baseName = Path.GetFileNameWithoutExtension(originalFileName).Trim();
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                baseName = "upload";
+            }
+
+            // Keep file names compatible with MAUI image resource loading:
+            // lowercase ASCII and underscores only.
+            var normalized = baseName.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(normalized.Length);
+            foreach (var ch in normalized)
+            {
+                var category = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (category == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
+
+                if (char.IsLetterOrDigit(ch))
+                {
+                    builder.Append(char.ToLowerInvariant(ch));
+                }
+                else
+                {
+                    builder.Append('_');
+                }
+            }
+
+            string sanitizedName = builder
+                .ToString()
+                .Normalize(NormalizationForm.FormC)
+                .Trim('_');
+
+            while (sanitizedName.Contains("__"))
+            {
+                sanitizedName = sanitizedName.Replace("__", "_");
+            }
+
+            if (string.IsNullOrWhiteSpace(sanitizedName))
+            {
+                sanitizedName = "upload";
+            }
+
+            var uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
+            return $"img_{sanitizedName}_{uniqueSuffix}{extension}";
+        }
+
         [HttpDelete("/Images/{imageId:int}")]
         public async Task<IActionResult> Delete(int imageId)
         {
+            var existing = await _restaurantService.GetImageByIdAsync(imageId);
+            if (existing == null)
+            {
+                return NotFound(new { message = "Image not found." });
+            }
+
             bool deleted = await _restaurantService.DeleteImageAsync(imageId);
             if (!deleted)
             {
                 return NotFound(new { message = "Image not found." });
             }
 
+            DeletePhysicalImage(existing.ImageUrl);
+
             return Ok(new { message = "Image deleted successfully." });
+        }
+
+        private void DeletePhysicalImage(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return;
+            }
+
+            string fileName = Path.GetFileName(imageUrl.Replace('\\', '/'));
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            string uploadDir = Path.GetFullPath(
+                Path.Combine(
+                    _environment.ContentRootPath,
+                    "..",
+                    "FoodMarketNarrator.Maui",
+                    "Resources",
+                    "Images"));
+
+            string fullPath = Path.Combine(uploadDir, fileName);
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
 
         [HttpPatch("/Images/{imageId:int}/primary")]

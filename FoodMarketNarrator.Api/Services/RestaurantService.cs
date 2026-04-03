@@ -17,6 +17,11 @@ namespace food_market_narrator_api.Services
 
             return restaurants.Select(MapRestaurant).ToList();
         }
+
+        public async Task<int> CountRestaurantsAsync()
+        {
+            return await _restaurantRepository.CountAsync();
+        }
     
         public async Task<RestaurantResponse> GetRestaurantByIdAsync(string id)
         {
@@ -32,6 +37,29 @@ namespace food_market_narrator_api.Services
         {
             var restaurants = await _restaurantRepository.GetByUserIdAsync(userId);
             return restaurants.Select(MapRestaurant).ToList();
+        }
+
+        public async Task<RestaurantResponse> CreateRestaurantAsync(CreateRestaurantRequest request)
+        {
+            var now = DateTime.UtcNow;
+            var model = new RestaurantModel
+            {
+                RestaurantId = $"rst_{Guid.NewGuid():N}",
+                Name = request.Name.Trim(),
+                Description = request.Description,
+                Phone = request.Phone,
+                Address = request.Address,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                OpenTime = request.OpenTime,
+                CloseTime = request.CloseTime,
+                IsActive = request.IsActive,
+                UserId = request.UserId,
+                CreatedAt = now
+            };
+
+            var created = await _restaurantRepository.AddAsync(model);
+            return MapRestaurant(created);
         }
 
         public async Task<RestaurantResponse?> UpdateRestaurantAsync(string restaurantId, UpdateRestaurantRequest request)
@@ -100,6 +128,23 @@ namespace food_market_narrator_api.Services
         public async Task<bool> DeleteImageAsync(int imageId)
         {
             return await _restaurantRepository.DeleteImageAsync(imageId);
+        }
+
+        public async Task<RestaurantImageResponse?> GetImageByIdAsync(int imageId)
+        {
+            var image = await _restaurantRepository.GetImageByIdAsync(imageId);
+            if (image == null)
+            {
+                return null;
+            }
+
+            return new RestaurantImageResponse
+            {
+                ImageId = image.ImageId,
+                ImageUrl = image.ImageUrl,
+                IsPrimary = image.IsPrimary,
+                SortOrder = image.SortOrder,
+            };
         }
 
         public async Task<bool> SetPrimaryImageAsync(int imageId, bool isPrimary)

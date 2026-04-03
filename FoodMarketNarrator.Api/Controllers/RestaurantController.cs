@@ -37,6 +37,18 @@ namespace food_market_narrator_api.Controllers
             return Ok(data);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateRestaurantRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var created = await _restaurantService.CreateRestaurantAsync(request);
+            return Ok(created);
+        }
+
         [HttpPatch("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateRestaurantRequest request)
         {

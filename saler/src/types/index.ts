@@ -1,6 +1,7 @@
 export interface User {
   user_id: number;
   username: string;
+  role: string;
 }
 
 export interface UserRestaurant {
@@ -40,6 +41,7 @@ export interface Dish {
   description: string;
   restaurant_id: string;
   image_id: number | null;
+  image_url?: string;
   created_at: string;
 }
 

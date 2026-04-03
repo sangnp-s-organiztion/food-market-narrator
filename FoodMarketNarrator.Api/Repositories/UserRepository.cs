@@ -1,4 +1,5 @@
 using food_market_narrator_api.Models;
+using food_market_narrator_api.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace food_market_narrator_api.Repositories
@@ -17,6 +18,11 @@ namespace food_market_narrator_api.Repositories
             return await _context.User.ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.User.CountAsync();
+        }
+
         // get user by id
         public async Task<UserModel> GetByIdAsync(int id)
         {
@@ -31,7 +37,7 @@ namespace food_market_narrator_api.Repositories
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<bool> ValidateCredentialsAsync(string username, string passwordHash)
+        public async Task<bool> ValidateCredentialsAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);
             if (user == null || !user.IsActive)
@@ -39,8 +45,45 @@ namespace food_market_narrator_api.Repositories
                 return false;
             }
 
-            // Current DB stores password_hash; compare directly until hash verification is implemented.
-            return string.Equals(user.Password, passwordHash, StringComparison.Ordinal);
+            if (PasswordHasher.IsHashed(user.Password))
+            {
+                return PasswordHasher.Verify(password, user.Password);
+            }
+
+            // Legacy fallback: support existing plaintext rows and migrate immediately on successful login.
+            if (!string.Equals(user.Password, password, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            user.Password = PasswordHasher.Hash(password);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<UserModel> CreateAsync(UserModel user)
+        {
+            _context.User.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<bool> UpdateRoleAsync(int userId, string role)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.Role = role;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusAsync(int userId, bool isActive)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

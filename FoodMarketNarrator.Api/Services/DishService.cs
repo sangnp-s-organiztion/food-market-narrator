@@ -19,6 +19,11 @@ namespace food_market_narrator_api.Services
             return dishes.Select(Map).ToList();
         }
 
+        public async Task<int> CountDishesAsync()
+        {
+            return await _dishRepository.CountAsync();
+        }
+
         public async Task<DishResponse?> CreateAsync(string restaurantId, CreateDishRequest request)
         {
             var dish = new DishModel

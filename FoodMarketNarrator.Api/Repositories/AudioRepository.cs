@@ -18,6 +18,11 @@ namespace food_market_narrator_api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await _context.Audio.CountAsync();
+        }
+
         public async Task<List<AudioModel>> GetByRestaurantIdAsync(string restaurantId)
         {
             return await _context.Audio
@@ -29,7 +34,9 @@ namespace food_market_narrator_api.Repositories
 
         public async Task<AudioModel?> GetByIdAsync(int audioId)
         {
-            return await _context.Audio.FirstOrDefaultAsync(a => a.AudioId == audioId);
+            return await _context.Audio
+                .Include(a => a.Language)
+                .FirstOrDefaultAsync(a => a.AudioId == audioId);
         }
 
         public async Task<AudioModel> CreateAsync(AudioModel audio)

@@ -488,3 +488,6 @@ obj/
 *.bin/
 *.obj/
 .vs/
+
+# Git worktrees
+.worktrees/
