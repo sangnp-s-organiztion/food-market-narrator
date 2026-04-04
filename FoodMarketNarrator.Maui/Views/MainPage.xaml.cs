@@ -152,9 +152,7 @@ public partial class MainPage : ContentPage
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
     private async void OnNarratorTapped(object sender, EventArgs e)
     {
-        // Hiệu ứng nhấn xuống
-        await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
-        await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
+        var animateTapTask = AnimateNarratorButtonTapAsync();
 
         if (!_narrationFlowService.IsNarrating)
         {
@@ -169,6 +167,14 @@ public partial class MainPage : ContentPage
         }
         // cập nhật lại UI của nút thuyết minh
         UpdateFloatingButtonUI();
+
+        await animateTapTask;
+    }
+
+    private async Task AnimateNarratorButtonTapAsync()
+    {
+        await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
+        await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
     }
 
     // Hàm xử lý khi nhấn vào icon user (chuyển đến Settings)

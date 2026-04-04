@@ -250,6 +250,12 @@ public class POIService : IPOIService
         return null; // KhÃ´ng cÃ³ thay Ä‘á»•i
     }
 
+    public void ResetGeofenceState()
+    {
+        _isInsidePOI = false;
+        _lastNearest = null;
+    }
+
     // Láº¥y danh sÃ¡ch mÃ³n Äƒn theo restaurant
     public async Task<List<DishModel>> GetDishesByRestaurantIdAsync(string restaurantId)
     {
