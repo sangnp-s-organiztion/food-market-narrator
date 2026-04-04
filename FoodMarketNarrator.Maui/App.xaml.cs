@@ -11,6 +11,7 @@ public partial class App : Application
     private readonly ILanguageService _languageService;
     private readonly IAudioLibraryService _audioLibraryService;
     private readonly IQrAccessService _qrAccessService;
+    private readonly NarrationFlowService _narrationFlowService;
     private bool _warmupStarted;
     private CancellationTokenSource? _qrAccessGuardCts;
 
@@ -20,7 +21,8 @@ public partial class App : Application
         IPOIService poiService,
         ILanguageService languageService,
         IAudioLibraryService audioLibraryService,
-        IQrAccessService qrAccessService)
+        IQrAccessService qrAccessService,
+        NarrationFlowService narrationFlowService)
 	{
 		InitializeComponent();
         _locationService = locationService;
@@ -29,6 +31,7 @@ public partial class App : Application
 		_languageService = languageService;
         _audioLibraryService = audioLibraryService;
         _qrAccessService = qrAccessService;
+        _narrationFlowService = narrationFlowService;
 
         AppLinkDispatcher.DeepLinkReceived += OnDeepLinkReceived;
 
@@ -129,7 +132,7 @@ public partial class App : Application
 
     private async Task HandleQrAccessExpiredAsync()
     {
-        Debug.WriteLine($"[App] QR access expired. Closing app. reason={_qrAccessService.LastBlockReason}");
+        Debug.WriteLine($"[App] QR access expired. Stop narration. reason={_qrAccessService.LastBlockReason}");
 
         try
         {
@@ -137,18 +140,26 @@ public partial class App : Application
         }
         catch
         {
-            // Ignore flush failure when force-closing app.
+            // Ignore flush failure when handling QR expiry.
         }
 
-        await MainThread.InvokeOnMainThreadAsync(() =>
+        await MainThread.InvokeOnMainThreadAsync(async () =>
         {
-#if ANDROID
-            var activity = Microsoft.Maui.ApplicationModel.Platform.CurrentActivity;
-            activity?.FinishAffinity();
-            Java.Lang.JavaSystem.Exit(0);
-#else
-            Process.GetCurrentProcess().Kill();
-#endif
+            _narrationFlowService.StopNarration();
+
+            var activePage = Shell.Current?.CurrentPage;
+            if (activePage == null && Current?.Windows.Count > 0)
+            {
+                activePage = Current.Windows[0].Page;
+            }
+
+            if (activePage != null)
+            {
+                await activePage.DisplayAlertAsync(
+                    "QR hết hạn",
+                    "Mã QR đã hết thời gian. Hệ thống đã dừng thuyết minh, vui lòng quét lại QR để tiếp tục.",
+                    "OK");
+            }
         });
     }
 
