@@ -4,6 +4,8 @@ using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Mapsui;
+using Mapsui.Projections;
 
 namespace food_market_narrator.Views;
 
@@ -180,6 +182,64 @@ public partial class MainPage : ContentPage
     {
         await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
         await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
+    }
+
+    private void OnZoomInTapped(object sender, TappedEventArgs e)
+    {
+        AdjustMapZoom(0.7);
+    }
+
+    private void OnZoomOutTapped(object sender, TappedEventArgs e)
+    {
+        AdjustMapZoom(1.3);
+    }
+
+    private async void OnMyLocationTapped(object sender, TappedEventArgs e)
+    {
+        var currentLocation = await _locationService.GetCurrentLocationAsync();
+        if (currentLocation == null)
+        {
+            return;
+        }
+
+        _lastKnownLocation = currentLocation;
+        MapHelper.UpdateUserLocation(mapControl, currentLocation.Latitude, currentLocation.Longitude);
+        CenterMapOn(currentLocation.Latitude, currentLocation.Longitude, 18);
+    }
+
+    private void AdjustMapZoom(double factor)
+    {
+        if (mapControl?.Map?.Navigator == null)
+        {
+            return;
+        }
+
+        var viewport = mapControl.Map.Navigator.Viewport;
+        var minResolution = ToResolution(20);
+        var maxResolution = ToResolution(3);
+        var targetResolution = Math.Clamp(viewport.Resolution * factor, minResolution, maxResolution);
+        var currentCenter = new MPoint(viewport.CenterX, viewport.CenterY);
+
+        mapControl.Map.Navigator.CenterOnAndZoomTo(currentCenter, targetResolution);
+        mapControl.Map.RefreshGraphics();
+    }
+
+    private void CenterMapOn(double latitude, double longitude, int zoomLevel)
+    {
+        if (mapControl?.Map?.Navigator == null)
+        {
+            return;
+        }
+
+        var spherical = SphericalMercator.FromLonLat(longitude, latitude);
+        var center = new MPoint(spherical.x, spherical.y);
+        mapControl.Map.Navigator.CenterOnAndZoomTo(center, ToResolution(zoomLevel));
+        mapControl.Map.RefreshGraphics();
+    }
+
+    private static double ToResolution(int zoomLevel)
+    {
+        return 156543.03392 / Math.Pow(2, zoomLevel);
     }
 
     // Hàm xử lý khi nhấn vào icon user (chuyển đến Settings)

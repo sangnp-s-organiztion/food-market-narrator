@@ -58,22 +58,45 @@
                 </Grid>
 
                 <!-- 3. Map Section -->
-                <Border HeightRequest="220" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="White">
-                    <Grid>
-                        <!-- Map Control -->
-                        <mapsui:MapControl x:Name="mapControl" />
+                <Grid Margin="-20,0" Padding="0,0,0,2">
+                    <Border HeightRequest="250" StrokeShape="RoundRectangle 24" StrokeThickness="0" BackgroundColor="White" Margin="12,0">
+                        <Grid>
+                            <mapsui:MapControl x:Name="mapControl" />
 
-                        <!-- Map Overlays -->
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End" Margin="10" Spacing="10">
-                             <!-- <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
-                                <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
-                             <Border BackgroundColor="White" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0">
-                                <Label Text="&#xf5a0;" FontFamily="FASolid" TextColor="#333" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border> -->
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
+                            <VerticalStackLayout HorizontalOptions="End" VerticalOptions="Center" Spacing="10" Margin="0,0,14,0">
+                                <Border HeightRequest="38" WidthRequest="38" StrokeShape="RoundRectangle 19" BackgroundColor="White" StrokeThickness="0">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#000" Opacity="0.14" Radius="5"/>
+                                    </Border.Shadow>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnZoomInTapped"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="&#x2b;" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="18" FontAttributes="Bold"/>
+                                </Border>
+
+                                <Border HeightRequest="38" WidthRequest="38" StrokeShape="RoundRectangle 19" BackgroundColor="White" StrokeThickness="0">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#000" Opacity="0.14" Radius="5"/>
+                                    </Border.Shadow>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnZoomOutTapped"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="&#x2212;" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="22" FontAttributes="Bold"/>
+                                </Border>
+
+                                <Border HeightRequest="38" WidthRequest="38" StrokeShape="RoundRectangle 19" BackgroundColor="White" StrokeThickness="0">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#000" Opacity="0.14" Radius="5"/>
+                                    </Border.Shadow>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnMyLocationTapped"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="&#xf3c5;" FontFamily="FASolid" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#3C4043" FontSize="15"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </Grid>
 
                 <!-- 4. Categories -->
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
