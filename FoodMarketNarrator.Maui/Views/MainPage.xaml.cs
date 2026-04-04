@@ -4,12 +4,15 @@ using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Mapsui;
+using Mapsui.Projections;
 
 namespace food_market_narrator.Views;
 
 public partial class MainPage : ContentPage
 {
     private static bool _hasAutoStartedNarrationThisSession;
+    private const int FeaturedPoiPageSize = 10;
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -20,6 +23,8 @@ public partial class MainPage : ContentPage
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
     private bool _isMapLoaded;
     private bool _isPoiListBound;
+    private List<POI> _allPois = new();
+    private int _currentPoiPageIndex;
     private Location? _lastKnownLocation;
     private bool _isInitializingMainPage;
 
@@ -104,7 +109,9 @@ public partial class MainPage : ContentPage
             if (!_isPoiListBound)
             {
                 var poisData = await _poiService.GetAllPOIsAsync();
-                PoiList.ItemsSource = poisData;
+                _allPois = poisData;
+                _currentPoiPageIndex = 0;
+                BindPoiPage();
                 _isPoiListBound = true;
                 LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
             }
@@ -152,9 +159,7 @@ public partial class MainPage : ContentPage
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
     private async void OnNarratorTapped(object sender, EventArgs e)
     {
-        // Hiệu ứng nhấn xuống
-        await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
-        await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
+        var animateTapTask = AnimateNarratorButtonTapAsync();
 
         if (!_narrationFlowService.IsNarrating)
         {
@@ -169,6 +174,72 @@ public partial class MainPage : ContentPage
         }
         // cập nhật lại UI của nút thuyết minh
         UpdateFloatingButtonUI();
+
+        await animateTapTask;
+    }
+
+    private async Task AnimateNarratorButtonTapAsync()
+    {
+        await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
+        await FloatingButton.ScaleToAsync(1, 80, Easing.CubicIn);
+    }
+
+    private void OnZoomInTapped(object sender, TappedEventArgs e)
+    {
+        AdjustMapZoom(0.7);
+    }
+
+    private void OnZoomOutTapped(object sender, TappedEventArgs e)
+    {
+        AdjustMapZoom(1.3);
+    }
+
+    private async void OnMyLocationTapped(object sender, TappedEventArgs e)
+    {
+        var currentLocation = await _locationService.GetCurrentLocationAsync();
+        if (currentLocation == null)
+        {
+            return;
+        }
+
+        _lastKnownLocation = currentLocation;
+        MapHelper.UpdateUserLocation(mapControl, currentLocation.Latitude, currentLocation.Longitude);
+        CenterMapOn(currentLocation.Latitude, currentLocation.Longitude, 18);
+    }
+
+    private void AdjustMapZoom(double factor)
+    {
+        if (mapControl?.Map?.Navigator == null)
+        {
+            return;
+        }
+
+        var viewport = mapControl.Map.Navigator.Viewport;
+        var minResolution = ToResolution(20);
+        var maxResolution = ToResolution(3);
+        var targetResolution = Math.Clamp(viewport.Resolution * factor, minResolution, maxResolution);
+        var currentCenter = new MPoint(viewport.CenterX, viewport.CenterY);
+
+        mapControl.Map.Navigator.CenterOnAndZoomTo(currentCenter, targetResolution);
+        mapControl.Map.RefreshGraphics();
+    }
+
+    private void CenterMapOn(double latitude, double longitude, int zoomLevel)
+    {
+        if (mapControl?.Map?.Navigator == null)
+        {
+            return;
+        }
+
+        var spherical = SphericalMercator.FromLonLat(longitude, latitude);
+        var center = new MPoint(spherical.x, spherical.y);
+        mapControl.Map.Navigator.CenterOnAndZoomTo(center, ToResolution(zoomLevel));
+        mapControl.Map.RefreshGraphics();
+    }
+
+    private static double ToResolution(int zoomLevel)
+    {
+        return 156543.03392 / Math.Pow(2, zoomLevel);
     }
 
     // Hàm xử lý khi nhấn vào icon user (chuyển đến Settings)
@@ -194,6 +265,75 @@ public partial class MainPage : ContentPage
 
         var encodedId = Uri.EscapeDataString(selectedPoi.restaurantId);
         await Shell.Current.GoToAsync($"{nameof(POIDetailPage)}?restaurantId={encodedId}");
+    }
+
+    private void OnPreviousPageClicked(object sender, EventArgs e)
+    {
+        if (_currentPoiPageIndex <= 0)
+        {
+            return;
+        }
+
+        _currentPoiPageIndex--;
+        BindPoiPage();
+    }
+
+    private void OnNextPageClicked(object sender, EventArgs e)
+    {
+        var totalPages = GetTotalPoiPages();
+        if (_currentPoiPageIndex >= totalPages - 1)
+        {
+            return;
+        }
+
+        _currentPoiPageIndex++;
+        BindPoiPage();
+    }
+
+    private void BindPoiPage()
+    {
+        if (_allPois.Count == 0)
+        {
+            PoiList.ItemsSource = null;
+            UpdatePaginationUi();
+            return;
+        }
+
+        var pageItems = _allPois
+            .Skip(_currentPoiPageIndex * FeaturedPoiPageSize)
+            .Take(FeaturedPoiPageSize)
+            .ToList();
+
+        PoiList.ItemsSource = pageItems;
+        UpdatePaginationUi();
+    }
+
+    private int GetTotalPoiPages()
+    {
+        if (_allPois.Count == 0)
+        {
+            return 1;
+        }
+
+        return (int)Math.Ceiling((double)_allPois.Count / FeaturedPoiPageSize);
+    }
+
+    private void UpdatePaginationUi()
+    {
+        var totalPages = GetTotalPoiPages();
+        var currentPageDisplay = totalPages == 0 ? 0 : _currentPoiPageIndex + 1;
+
+        PaginationContainer.IsVisible = _allPois.Count > FeaturedPoiPageSize;
+        PageIndicatorLabel.Text = $"Trang {currentPageDisplay}/{totalPages}";
+
+        var canGoPrevious = _currentPoiPageIndex > 0;
+        var canGoNext = _currentPoiPageIndex < totalPages - 1;
+
+        PreviousPageButton.IsEnabled = canGoPrevious;
+        PreviousPageButton.Opacity = canGoPrevious ? 1 : 0.5;
+
+        NextPageButton.IsEnabled = canGoNext;
+        NextPageButton.Opacity = canGoNext ? 1 : 0.5;
     }
 
     // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất

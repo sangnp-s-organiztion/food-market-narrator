@@ -45,7 +45,7 @@ public class NarrationFlowService : INarrationFlowService
         _historyService = historyService;
     }
 
-    public async void StartNarration()
+    public void StartNarration()
     {
         if (_isNarrationEnabled) return;
 
@@ -55,17 +55,29 @@ public class NarrationFlowService : INarrationFlowService
         _playedPOIs.Clear();
         _poiLastPlayedTime.Clear();
         _lastProcessedLocation = null;
+        _poiService.ResetGeofenceState();
 
         _locationService.LocationChanged += OnLocationChanged;
-        await _locationService.StartTrackingAsync();
+        _ = _locationService.StartTrackingAsync();
 
-        // Kiểm tra ngay lần đầu
-        var currentLocation = await _locationService.GetCurrentLocationAsync();
-        if (currentLocation != null)
+        var cachedLocation = _locationService.LastKnownLocation;
+        if (cachedLocation != null)
         {
-            _lastProcessedLocation = currentLocation;
-            await CheckAndNarrateAsync(currentLocation);
+            _lastProcessedLocation = cachedLocation;
+            _ = CheckAndNarrateAsync(cachedLocation);
+            return;
         }
+
+        // Fallback khi chưa có vị trí cache: lấy vị trí một lần ở nền
+        _ = Task.Run(async () =>
+        {
+            var currentLocation = await _locationService.GetCurrentLocationAsync();
+            if (currentLocation != null && _isNarrationEnabled)
+            {
+                _lastProcessedLocation = currentLocation;
+                await CheckAndNarrateAsync(currentLocation);
+            }
+        });
     }
 
     public void StopNarration()
@@ -88,6 +100,7 @@ public class NarrationFlowService : INarrationFlowService
         _playedPOIs.Clear();
         _poiLastPlayedTime.Clear();
         _lastProcessedLocation = null;
+        _poiService.ResetGeofenceState();
     }
 
     // Khi thay đổi vị trí thì làm gì đó
@@ -113,12 +126,6 @@ public class NarrationFlowService : INarrationFlowService
 
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
-        // Nếu đang phát audio, bỏ qua (trừ force)
-        if (!force && _audioService.IsPlaying)
-        {
-            return;
-        }
-
         if (currentLocation == null)
             currentLocation = await _locationService.GetCurrentLocationAsync();
 
@@ -218,6 +225,12 @@ public class NarrationFlowService : INarrationFlowService
 
         while (_playQueue.Count > 0)
         {
+            // Nếu đang có track phát, chờ phát xong rồi mới lấy item kế tiếp trong queue.
+            while (_audioService.IsPlaying)
+            {
+                await Task.Delay(300);
+            }
+
             var queueItem = _playQueue.Dequeue();
             var poi = queueItem.Poi;
             DateTime? startedAtUtc = null;
