@@ -10,6 +10,7 @@ namespace food_market_narrator.Views;
 public partial class MainPage : ContentPage
 {
     private static bool _hasAutoStartedNarrationThisSession;
+    private const int FeaturedPoiPageSize = 10;
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -20,6 +21,8 @@ public partial class MainPage : ContentPage
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
     private bool _isMapLoaded;
     private bool _isPoiListBound;
+    private List<POI> _allPois = new();
+    private int _currentPoiPageIndex;
     private Location? _lastKnownLocation;
     private bool _isInitializingMainPage;
 
@@ -104,7 +107,9 @@ public partial class MainPage : ContentPage
             if (!_isPoiListBound)
             {
                 var poisData = await _poiService.GetAllPOIsAsync();
-                PoiList.ItemsSource = poisData;
+                _allPois = poisData;
+                _currentPoiPageIndex = 0;
+                BindPoiPage();
                 _isPoiListBound = true;
                 LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
             }
@@ -200,6 +205,75 @@ public partial class MainPage : ContentPage
 
         var encodedId = Uri.EscapeDataString(selectedPoi.restaurantId);
         await Shell.Current.GoToAsync($"{nameof(POIDetailPage)}?restaurantId={encodedId}");
+    }
+
+    private void OnPreviousPageClicked(object sender, EventArgs e)
+    {
+        if (_currentPoiPageIndex <= 0)
+        {
+            return;
+        }
+
+        _currentPoiPageIndex--;
+        BindPoiPage();
+    }
+
+    private void OnNextPageClicked(object sender, EventArgs e)
+    {
+        var totalPages = GetTotalPoiPages();
+        if (_currentPoiPageIndex >= totalPages - 1)
+        {
+            return;
+        }
+
+        _currentPoiPageIndex++;
+        BindPoiPage();
+    }
+
+    private void BindPoiPage()
+    {
+        if (_allPois.Count == 0)
+        {
+            PoiList.ItemsSource = null;
+            UpdatePaginationUi();
+            return;
+        }
+
+        var pageItems = _allPois
+            .Skip(_currentPoiPageIndex * FeaturedPoiPageSize)
+            .Take(FeaturedPoiPageSize)
+            .ToList();
+
+        PoiList.ItemsSource = pageItems;
+        UpdatePaginationUi();
+    }
+
+    private int GetTotalPoiPages()
+    {
+        if (_allPois.Count == 0)
+        {
+            return 1;
+        }
+
+        return (int)Math.Ceiling((double)_allPois.Count / FeaturedPoiPageSize);
+    }
+
+    private void UpdatePaginationUi()
+    {
+        var totalPages = GetTotalPoiPages();
+        var currentPageDisplay = totalPages == 0 ? 0 : _currentPoiPageIndex + 1;
+
+        PaginationContainer.IsVisible = _allPois.Count > FeaturedPoiPageSize;
+        PageIndicatorLabel.Text = $"Trang {currentPageDisplay}/{totalPages}";
+
+        var canGoPrevious = _currentPoiPageIndex > 0;
+        var canGoNext = _currentPoiPageIndex < totalPages - 1;
+
+        PreviousPageButton.IsEnabled = canGoPrevious;
+        PreviousPageButton.Opacity = canGoPrevious ? 1 : 0.5;
+
+        NextPageButton.IsEnabled = canGoNext;
+        NextPageButton.Opacity = canGoNext ? 1 : 0.5;
     }
 
     // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất

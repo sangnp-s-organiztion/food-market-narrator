@@ -219,6 +219,42 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
+                <Grid x:Name="PaginationContainer"
+                      ColumnDefinitions="Auto,*,Auto"
+                      ColumnSpacing="10"
+                      IsVisible="False"
+                      Margin="0,6,0,0">
+                    <Button x:Name="PreviousPageButton"
+                            Text="Trước"
+                            Clicked="OnPreviousPageClicked"
+                            BackgroundColor="#F5F1EE"
+                            TextColor="#8D6E63"
+                            CornerRadius="14"
+                            FontSize="13"
+                            HeightRequest="34"
+                            Padding="14,0" />
+
+                    <Label x:Name="PageIndicatorLabel"
+                           Grid.Column="1"
+                           Text="Trang 1/1"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="#8D6E63"
+                           FontSize="13"
+                           FontAttributes="Bold" />
+
+                    <Button x:Name="NextPageButton"
+                            Grid.Column="2"
+                            Text="Sau"
+                            Clicked="OnNextPageClicked"
+                            BackgroundColor="#F5F1EE"
+                            TextColor="#8D6E63"
+                            CornerRadius="14"
+                            FontSize="13"
+                            HeightRequest="34"
+                            Padding="14,0" />
+                </Grid>
+
 
 
 
