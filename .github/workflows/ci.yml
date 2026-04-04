@@ -147,6 +147,11 @@ jobs:
         working-directory: saler
         run: npm ci
 
+      - name: Verify React 19 versions
+        working-directory: saler
+        run: |
+          node -e "const major=(v)=>Number(v.split('.')[0]); const react=require('react/package.json').version; const reactDom=require('react-dom/package.json').version; if (major(react)!==19 || major(reactDom)!==19) { console.error('Expected React 19 in CI, got react=' + react + ', react-dom=' + reactDom); process.exit(1); } console.log('React versions OK: react=' + react + ', react-dom=' + reactDom);"
+
       - name: Run saler tests
         working-directory: saler
         run: npm test
