@@ -152,20 +152,35 @@ public class AnalyticsRepository
     }
 
     // ─── Movement Paths: ordered coordinates per session (last N sessions) ───
-    public async Task<List<SessionPath>> GetMovementPathsAsync(int limit = 100)
+    public async Task<List<SessionPath>> GetMovementPathsAsync(int? limit = 100)
     {
-        // Distinct session_ids ordered by most recent activity
-        var sessionPipeline = new[]
+        // Distinct session_ids ordered by most recent activity.
+        // IMPORTANT: group first, then limit by sessions (not by raw log rows).
+        var sessionPipeline = new List<BsonDocument>
         {
-            new BsonDocument("$sort",
-                new BsonDocument("timestamp", -1)),
-            new BsonDocument("$limit", limit),
-            new BsonDocument("$group",
+            new("$addFields",
+                new BsonDocument("event_time",
+                    new BsonDocument("$ifNull", new BsonArray { "$timestamp", "$created_at" }))),
+            new("$match",
                 new BsonDocument
                 {
-                    { "_id", "$session_id" }
-                })
+                    { "session_id", new BsonDocument("$ne", BsonNull.Value) },
+                    { "event_time", new BsonDocument("$ne", BsonNull.Value) }
+                }),
+            new("$group",
+                new BsonDocument
+                {
+                    { "_id", "$session_id" },
+                    { "last_time", new BsonDocument("$max", "$event_time") }
+                }),
+            new("$sort",
+                new BsonDocument("last_time", -1))
         };
+
+        if (limit.HasValue && limit.Value > 0)
+        {
+            sessionPipeline.Add(new BsonDocument("$limit", limit.Value));
+        }
 
         var sessionDocs = await _db.GetCollection<BsonDocument>("LocationLogs")
             .Aggregate<BsonDocument>(sessionPipeline)
@@ -188,9 +203,26 @@ public class AnalyticsRepository
                 new BsonDocument
                 {
                     { "session_id", 1 },
-                    { "lng", new BsonDocument("$arrayElemAt", new BsonArray { "$location.coordinates", 0 }) },
-                    { "lat", new BsonDocument("$arrayElemAt", new BsonArray { "$location.coordinates", 1 }) },
-                    { "timestamp", 1 }
+                    {
+                        "lng",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            new BsonDocument("$arrayElemAt", new BsonArray { "$location.coordinates", 0 }),
+                            "$lng"
+                        })
+                    },
+                    {
+                        "lat",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            new BsonDocument("$arrayElemAt", new BsonArray { "$location.coordinates", 1 }),
+                            "$lat"
+                        })
+                    },
+                    {
+                        "timestamp",
+                        new BsonDocument("$ifNull", new BsonArray { "$timestamp", "$created_at" })
+                    }
                 })
         };
 
@@ -200,7 +232,12 @@ public class AnalyticsRepository
 
         // Group by session_id
         var grouped = pointDocs
-            .Where(p => p.Contains("session_id") && p.Contains("lng") && p.Contains("lat") && p.Contains("timestamp"))
+            .Where(p =>
+                !string.IsNullOrWhiteSpace(GetStringValue(p, "session_id"))
+                && TryGetDoubleValue(p, "lng", out _)
+                && TryGetDoubleValue(p, "lat", out _)
+                && p.Contains("timestamp")
+                && !p["timestamp"].IsBsonNull)
             .GroupBy(p => p["session_id"].ToString());
 
         return grouped.Select(g => new SessionPath
@@ -210,8 +247,8 @@ public class AnalyticsRepository
                 .OrderBy(p => GetDateTimeValue(p, "timestamp", "created_at"))
                 .Select(p => new GeoJsonPointWithTimestamp
                 {
-                    Longitude = p["lng"].ToDouble(),
-                    Latitude = p["lat"].ToDouble(),
+                    Longitude = GetDoubleValue(p, "lng"),
+                    Latitude = GetDoubleValue(p, "lat"),
                     Timestamp = GetDateTimeValue(p, "timestamp", "created_at")
                 })
                 .ToList()
@@ -316,6 +353,52 @@ public class AnalyticsRepository
             BsonType.String when int.TryParse(value.AsString, out var parsed) => parsed,
             _ => defaultValue
         };
+    }
+
+    private static double GetDoubleValue(BsonDocument doc, string key, double defaultValue = 0)
+    {
+        if (!doc.TryGetValue(key, out var value) || value.IsBsonNull)
+            return defaultValue;
+
+        return value.BsonType switch
+        {
+            BsonType.Double => value.AsDouble,
+            BsonType.Int32 => value.AsInt32,
+            BsonType.Int64 => value.AsInt64,
+            BsonType.Decimal128 => (double)value.AsDecimal,
+            BsonType.String when double.TryParse(value.AsString, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) => parsed,
+            _ => defaultValue
+        };
+    }
+
+    private static bool TryGetDoubleValue(BsonDocument doc, string key, out double value)
+    {
+        if (!doc.TryGetValue(key, out var bsonValue) || bsonValue.IsBsonNull)
+        {
+            value = default;
+            return false;
+        }
+
+        switch (bsonValue.BsonType)
+        {
+            case BsonType.Double:
+                value = bsonValue.AsDouble;
+                return true;
+            case BsonType.Int32:
+                value = bsonValue.AsInt32;
+                return true;
+            case BsonType.Int64:
+                value = bsonValue.AsInt64;
+                return true;
+            case BsonType.Decimal128:
+                value = (double)bsonValue.AsDecimal;
+                return true;
+            case BsonType.String:
+                return double.TryParse(bsonValue.AsString, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+            default:
+                value = default;
+                return false;
+        }
     }
 
     private static string GetStringValue(BsonDocument doc, string key, string defaultValue = "")

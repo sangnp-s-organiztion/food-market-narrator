@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import type { User, AuthState } from "@/types";
 import { getMeApi, loginApi, logoutApi } from "@/services/api";
 
@@ -21,6 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function bootstrapAuth() {
       try {
         const me = await getMeApi();
+        if (me.role !== "saler") {
+          await logoutApi().catch(() => undefined);
+          if (mounted) {
+            setAuthState({ user: null, isAuthenticated: false });
+          }
+          return;
+        }
+
         if (mounted) {
           setAuthState({ user: me, isAuthenticated: true });
         }
@@ -40,6 +54,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (username: string, password: string) => {
     try {
       const user = await loginApi(username, password);
+      if (user.role !== "saler") {
+        await logoutApi().catch(() => undefined);
+        setAuthState({ user: null, isAuthenticated: false });
+        return false;
+      }
+
       setAuthState({ user, isAuthenticated: true });
       return true;
     } catch {

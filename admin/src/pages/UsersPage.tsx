@@ -107,13 +107,13 @@ const UsersPage = () => {
   });
 
   const handleCreate = () => {
-    if (!form.username.trim() || !form.password.trim()) {
-      toast.error("Vui lòng nhập đầy đủ thông tin");
+    if (!form.username.trim()) {
+      toast.error("Vui lòng nhập tên đăng nhập");
       return;
     }
     createMutation.mutate({
       username: form.username.trim(),
-      password: form.password,
+      password: form.password.trim(),
       role: form.role,
     });
   };
@@ -279,7 +279,7 @@ const UsersPage = () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="mt-1"
-                placeholder="••••••"
+                placeholder="Để trống sẽ dùng 123456"
                 autoComplete="new-password"
               />
             </div>
