@@ -2,6 +2,7 @@
 using food_market_narrator.Settings;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Diagnostics;
 
 
 
@@ -30,7 +31,10 @@ public class POIService : IPOIService
     public async Task<List<POI>> GetPOIsAsync()
     {
         if (_pois != null && _pois.Count > 0)
+           {
+               Debug.WriteLine($"[POIService] Using in-memory POIs: {_pois.Count}");
              return _pois;
+           }
 
         var cachedPois = await ReadPoisCacheAsync();
 
@@ -52,35 +56,37 @@ public class POIService : IPOIService
             try
             {
                 var requestUrl = new Uri(new Uri(baseUrl), AppSettings.RestaurantEndpoint);
-                // Console.WriteLine($"[POIService] Trying URL = {requestUrl}");
+                Debug.WriteLine($"[POIService] Trying URL = {requestUrl}");
 
                 var data = await _httpClient.GetFromJsonAsync<List<POI>>(requestUrl);
 
                 if (data == null)
                 {
-                    // Console.WriteLine($"[POIService] Empty response from {requestUrl}");
+                    Debug.WriteLine($"[POIService] Empty response from {requestUrl}");
                     continue;
                 }
 
                 _pois = data;
                 await SavePoisCacheAsync(_pois);
-                // Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from {requestUrl}");
+                var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
+                Debug.WriteLine($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from {requestUrl}");
                 return _pois;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Console.WriteLine($"[POIService] Request failed: {baseUrl} -> {ex.Message}");
+                Debug.WriteLine($"[POIService] Request failed: {baseUrl} -> {ex.Message}");
             }
         }
 
         if (cachedPois.Count > 0)
         {
             _pois = cachedPois;
-            // Console.WriteLine($"[POIService] Loaded {_pois.Count} POIs from offline cache.");
+            var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
+            Debug.WriteLine($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from offline cache.");
             return _pois;
         }
 
-        // Console.WriteLine("[POIService] Error fetching POIs from all candidates.");
+        Debug.WriteLine("[POIService] Error fetching POIs from all candidates.");
         return new List<POI>();
     }
 

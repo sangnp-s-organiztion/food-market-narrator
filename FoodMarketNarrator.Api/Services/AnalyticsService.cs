@@ -124,7 +124,7 @@ public class AnalyticsService
     }
 
     // ─── Anonymous Movement Paths ──────────────────────────────────────────────
-    public async Task<MovementPathsResponse> GetMovementPathsAsync(int sessionLimit = 100)
+    public async Task<MovementPathsResponse> GetMovementPathsAsync(int? sessionLimit = 100)
     {
         var paths = await _analyticsRepository.GetMovementPathsAsync(sessionLimit);
 

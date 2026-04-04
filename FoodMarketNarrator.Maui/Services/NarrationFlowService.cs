@@ -9,6 +9,7 @@ public class NarrationFlowService : INarrationFlowService
     private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
     private readonly IAudioService _audioService;
+    private readonly IAudioLogSyncService _audioLogSyncService;
     private readonly ILanguageService _languageService;
     private readonly IHistoryService _historyService;
 
@@ -24,7 +25,7 @@ public class NarrationFlowService : INarrationFlowService
 
     private bool _isNarrationEnabled = false;
 
-    private readonly Queue<POI> _playQueue = new();
+    private readonly Queue<NarrationQueueItem> _playQueue = new();
     private bool _isProcessingQueue = false;
     public bool IsNarrating => _isNarrationEnabled;
 
@@ -32,12 +33,14 @@ public class NarrationFlowService : INarrationFlowService
         IPOIService poiService,
         ILocationService locationService,
         IAudioService audioService,
+        IAudioLogSyncService audioLogSyncService,
         ILanguageService languageService,
         IHistoryService historyService)
     {
         _poiService = poiService;
         _locationService = locationService;
         _audioService = audioService;
+        _audioLogSyncService = audioLogSyncService;
         _languageService = languageService;
         _historyService = historyService;
     }
@@ -155,9 +158,8 @@ public class NarrationFlowService : INarrationFlowService
 
     private async Task TryPlayAudioAsync(POI poi, Location currentLocation, bool force = false)
     {
-        var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
-
-        if (string.IsNullOrWhiteSpace(selectedAudio))
+        var selectedAudio = ResolveSelectedAudio(poi, _languageService.CurrentLanguage);
+        if (selectedAudio == null || string.IsNullOrWhiteSpace(selectedAudio.AudioUrl))
         {
             return;
         }
@@ -188,7 +190,12 @@ public class NarrationFlowService : INarrationFlowService
         if (force || !alreadyPlayed)
         {
             // Thêm vào queue để phát
-            _playQueue.Enqueue(poi);
+            _playQueue.Enqueue(new NarrationQueueItem
+            {
+                Poi = poi,
+                AudioId = selectedAudio.AudioId,
+                AudioUrl = selectedAudio.AudioUrl
+            });
 
             if (!alreadyPlayed)
             {
@@ -211,21 +218,18 @@ public class NarrationFlowService : INarrationFlowService
 
         while (_playQueue.Count > 0)
         {
-            var poi = _playQueue.Dequeue();
+            var queueItem = _playQueue.Dequeue();
+            var poi = queueItem.Poi;
+            DateTime? startedAtUtc = null;
+            await _audioService.PlaySound(queueItem.AudioId);
 
-            var selectedAudio = poi.GetAudioUrl(_languageService.CurrentLanguage);
-            if (string.IsNullOrWhiteSpace(selectedAudio))
+            if (await WaitForPlaybackStartAsync())
             {
-                continue;
+                startedAtUtc = DateTime.UtcNow;
             }
 
-            await _audioService.PlaySound(
-                _languageService.CurrentLanguage,
-                selectedAudio
-            );
-
             // Khi audio auto narration đã bắt đầu phát thành công, lưu POI vào lịch sử.
-            if (_audioService.IsPlaying && !string.IsNullOrWhiteSpace(poi.restaurantId))
+            if (startedAtUtc.HasValue && !string.IsNullOrWhiteSpace(poi.restaurantId))
             {
                 _historyService.AddToHistory(poi.restaurantId);
             }
@@ -235,9 +239,38 @@ public class NarrationFlowService : INarrationFlowService
             {
                 await Task.Delay(300);
             }
+
+            if (startedAtUtc.HasValue && queueItem.AudioId > 0 && !string.IsNullOrWhiteSpace(poi.restaurantId))
+            {
+                var endedAtUtc = DateTime.UtcNow;
+                await _audioLogSyncService.LogPlaybackAsync(
+                    poi.restaurantId,
+                    queueItem.AudioId,
+                    startedAtUtc.Value,
+                    endedAtUtc);
+            }
         }
 
         _isProcessingQueue = false;
+    }
+
+    private async Task<bool> WaitForPlaybackStartAsync(int timeoutMs = 2000)
+    {
+        const int pollDelayMs = 100;
+        var waitedMs = 0;
+
+        while (waitedMs < timeoutMs)
+        {
+            if (_audioService.IsPlaying)
+            {
+                return true;
+            }
+
+            await Task.Delay(pollDelayMs);
+            waitedMs += pollDelayMs;
+        }
+
+        return _audioService.IsPlaying;
     }
 
     public void ResetPlayedPOIs()
@@ -245,4 +278,34 @@ public class NarrationFlowService : INarrationFlowService
         _playedPOIs.Clear();
         _poiLastPlayedTime.Clear();
     }
+
+    private static AudioModel? ResolveSelectedAudio(POI poi, string languageCode)
+    {
+        var activeAudios = poi.Audios
+            .Where(a => a.IsActive)
+            .ToList();
+
+        var byLanguage = activeAudios
+            .Where(a => string.Equals(a.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(a => a.Version)
+            .ThenByDescending(a => a.DateGeneration)
+            .FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.AudioUrl));
+
+        if (byLanguage != null)
+        {
+            return byLanguage;
+        }
+
+        return activeAudios
+            .OrderByDescending(a => a.Version)
+            .ThenByDescending(a => a.DateGeneration)
+            .FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.AudioUrl));
+    }
+}
+
+internal class NarrationQueueItem
+{
+    public POI Poi { get; set; } = new();
+    public int AudioId { get; set; }
+    public string AudioUrl { get; set; } = string.Empty;
 }

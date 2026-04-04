@@ -141,7 +141,7 @@ test/
 | STT | Tên test case             | Mô tả                  | Input                                  | Expected Output | Thực tế |
 | --- | ------------------------- | ---------------------- | -------------------------------------- | --------------- | ------- |
 | 1   | GetPublicDishes_ReturnsOk | Lấy danh sách món ăn   | GET /public/Restaurant/rest-001/dishes | HTTP 200        | ✅ Pass |
-| 2   | GetPublicImages_ReturnsOk | Lấy danh sách hình ảnh | GET /public/Restaurant/rest-001/images | HTTP 200        | ✅ Pass |
+| 2   | GetPublicImages_ReturnsOk | Lấy danh sách hình ảnh | GET /Restaurant/rest-001/images        | HTTP 200        | ✅ Pass |
 | 3   | GetPublicAudios_ReturnsOk | Lấy danh sách audio    | GET /public/Restaurant/rest-001/audios | HTTP 200        | ✅ Pass |
 
 **Mục đích**: Các endpoint này phục vụ mobile app khi người dùng đi bộ gần nhà hàng

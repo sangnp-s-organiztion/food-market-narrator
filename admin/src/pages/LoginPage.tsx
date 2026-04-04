@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,7 +16,11 @@ import { Lock, User } from "lucide-react";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ username?: string; password?: string; api?: string }>({});
+  const [errors, setErrors] = useState<{
+    username?: string;
+    password?: string;
+    api?: string;
+  }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -29,9 +39,9 @@ const LoginPage = () => {
     try {
       await login(username.trim(), password);
       navigate("/");
-    } catch (err) {
+    } catch {
       setErrors({
-        api: err instanceof Error ? err.message : "Đăng nhập thất bại. Vui lòng thử lại.",
+        api: "Thông tin đăng nhập không hợp lệ",
       });
     } finally {
       setIsSubmitting(false);
@@ -94,7 +104,12 @@ const LoginPage = () => {
               </div>
             )}
 
-            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Đang đăng nhập…" : "Đăng nhập"}
             </Button>
           </form>

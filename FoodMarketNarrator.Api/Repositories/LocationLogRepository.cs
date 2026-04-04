@@ -1,15 +1,18 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 
 namespace food_market_narrator_api.Repositories;
 
 public class LocationLogRepository
 {
     private readonly IMongoCollection<BsonDocument> _locationLogs;
+    private readonly ILogger<LocationLogRepository> _logger;
 
-    public LocationLogRepository(IMongoDatabase mongoDatabase)
+    public LocationLogRepository(IMongoDatabase mongoDatabase, ILogger<LocationLogRepository> logger)
     {
         _locationLogs = mongoDatabase.GetCollection<BsonDocument>("LocationLogs");
+        _logger = logger;
     }
 
     public async Task InsertBatchAsync(List<LocationLogRecord> records)
@@ -44,7 +47,7 @@ public class LocationLogRepository
         }).ToList();
 
         await _locationLogs.InsertManyAsync(docs);
-        Console.WriteLine($"Sync log to server: inserted {docs.Count} location points to MongoDB");
+        _logger.LogInformation("Sync log to server: inserted {Count} location points to MongoDB", docs.Count);
     }
 }
 

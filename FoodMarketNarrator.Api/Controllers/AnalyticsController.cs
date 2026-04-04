@@ -80,13 +80,13 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Anonymous movement paths: ordered GPS coordinates per session.
     /// Returns last N sessions ordered by most recent activity.
-    /// Query params: sessionLimit (int, default 100, max 500).
+    /// Query params: sessionLimit (int, default 100, max 500, <=0 = all).
     /// </summary>
     [HttpGet("movement-paths")]
     public async Task<IActionResult> GetMovementPaths([FromQuery] int sessionLimit = 100)
     {
-        var clamped = Math.Clamp(sessionLimit, 1, 500);
-        var result = await _analyticsService.GetMovementPathsAsync(clamped);
+        int? normalizedLimit = sessionLimit <= 0 ? null : Math.Clamp(sessionLimit, 1, 500);
+        var result = await _analyticsService.GetMovementPathsAsync(normalizedLimit);
         return Ok(result);
     }
 

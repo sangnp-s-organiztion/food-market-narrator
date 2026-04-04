@@ -2,6 +2,7 @@ using food_market_narrator_api.DTOs.User;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace food_market_narrator_api.Controllers;
 
@@ -41,9 +42,9 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+        if (string.IsNullOrWhiteSpace(request.Username))
         {
-            return BadRequest(new { message = "Username and password are required." });
+            return BadRequest(new { message = "Username is required." });
         }
 
         UserResponse? created;
@@ -89,6 +90,15 @@ public class UsersController : ControllerBase
     [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateUserStatusRequest request)
     {
+        if (!request.IsActive)
+        {
+            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(currentUserIdRaw, out var currentUserId) && currentUserId == id)
+            {
+                return BadRequest(new { message = "Không thể khóa tài khoản admin đang đăng nhập." });
+            }
+        }
+
         bool updated = await _userService.UpdateUserStatusAsync(id, request.IsActive);
         if (!updated)
         {

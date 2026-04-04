@@ -202,6 +202,7 @@ function mapLanguage(item: ApiLanguage): Language {
 type LoginResponse = {
   userId: number;
   username: string;
+  role: string;
 };
 
 export async function loginApi(
@@ -216,6 +217,7 @@ export async function loginApi(
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
@@ -224,6 +226,7 @@ export async function getMeApi(): Promise<User> {
   return {
     user_id: response.userId,
     username: response.username,
+    role: response.role,
   };
 }
 
@@ -324,10 +327,9 @@ export async function deleteDishApi(dishId: number): Promise<void> {
 export async function getRestaurantImagesApi(
   restaurantId: string,
 ): Promise<RestaurantImage[]> {
-  const data = await request<ApiImage[]>(
-    `/public/Restaurant/${restaurantId}/images`,
-    { method: "GET" },
-  );
+  const data = await request<ApiImage[]>(`/Restaurant/${restaurantId}/images`, {
+    method: "GET",
+  });
   return data.map(mapImage);
 }
 
