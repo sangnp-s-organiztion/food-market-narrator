@@ -11,4 +11,6 @@ public class UserSessionStartRequest
     public string DeviceId { get; set; } = string.Empty;
 
     public string? DeviceInfo { get; set; }
+
+    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }

@@ -14,6 +14,7 @@ public partial class POIDetailPage : ContentPage
 	private readonly IFavoriteService? _favoriteService;
 	private readonly IHistoryService? _historyService;
 	private readonly IAudioLogSyncService? _audioLogSyncService;
+	private readonly IQrAccessService? _qrAccessService;
 	private IDispatcherTimer? _progressTimer;
 	private string _restaurantId = string.Empty;
 	private POI? _currentPoi;
@@ -45,6 +46,7 @@ public partial class POIDetailPage : ContentPage
 		_favoriteService = services?.GetService<IFavoriteService>();
 		_historyService = services?.GetService<IHistoryService>();
 		_audioLogSyncService = services?.GetService<IAudioLogSyncService>();
+		_qrAccessService = services?.GetService<IQrAccessService>();
 
 		if (_audioService != null)
 		{
@@ -100,10 +102,21 @@ public partial class POIDetailPage : ContentPage
 	{
 		base.OnAppearing();
 		SyncAudioUiWithService();
+		UpdateNarrationActionAvailability();
 	}
 
 	private async void OnPlayAudioTapped(object sender, EventArgs e)
 	{
+		if (IsNarrationBlockedByQr())
+		{
+			await DisplayAlertAsync(
+				"QR hết hạn",
+				"Mã QR đã hết thời gian. Vui lòng quét lại QR để tiếp tục thuyết minh.",
+				"OK");
+			UpdateNarrationActionAvailability();
+			return;
+		}
+
 		if (_audioService is null)
 		{
 			return;
@@ -254,6 +267,8 @@ public partial class POIDetailPage : ContentPage
 
 	private void SyncAudioUiWithService()
 	{
+		UpdateNarrationActionAvailability();
+
 		if (_audioService is null)
 		{
 			ResetAudioProgressUi();
@@ -335,6 +350,30 @@ public partial class POIDetailPage : ContentPage
 		}
 
 		return $"{time.Minutes:00}:{time.Seconds:00}";
+	}
+
+	private void UpdateNarrationActionAvailability()
+	{
+		if (PlayAudioButton == null)
+		{
+			return;
+		}
+
+		var blocked = IsNarrationBlockedByQr();
+		PlayAudioButton.IsEnabled = !blocked;
+		PlayAudioButton.Opacity = blocked ? 0.55 : 1;
+	}
+
+	private bool IsNarrationBlockedByQr()
+	{
+		if (_qrAccessService == null || !_qrAccessService.IsQrTimeRestricted)
+		{
+			return false;
+		}
+
+		var expiry = _qrAccessService.QrAccessExpiresAtUtc;
+		return (expiry.HasValue && DateTime.UtcNow > expiry.Value)
+			|| string.Equals(_qrAccessService.LastBlockReason, "expired", StringComparison.OrdinalIgnoreCase);
 	}
 
 	private void OnPlaybackEnded(object? sender, EventArgs e)
