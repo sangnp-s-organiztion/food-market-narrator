@@ -1,4 +1,5 @@
 using food_market_narrator_api.Models;
+using food_market_narrator_api.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace food_market_narrator_api.Repositories
@@ -36,7 +37,7 @@ namespace food_market_narrator_api.Repositories
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<bool> ValidateCredentialsAsync(string username, string passwordHash)
+        public async Task<bool> ValidateCredentialsAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);
             if (user == null || !user.IsActive)
@@ -44,8 +45,20 @@ namespace food_market_narrator_api.Repositories
                 return false;
             }
 
-            // Current DB stores password_hash; compare directly until hash verification is implemented.
-            return string.Equals(user.Password, passwordHash, StringComparison.Ordinal);
+            if (PasswordHasher.IsHashed(user.Password))
+            {
+                return PasswordHasher.Verify(password, user.Password);
+            }
+
+            // Legacy fallback: support existing plaintext rows and migrate immediately on successful login.
+            if (!string.Equals(user.Password, password, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            user.Password = PasswordHasher.Hash(password);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<UserModel> CreateAsync(UserModel user)

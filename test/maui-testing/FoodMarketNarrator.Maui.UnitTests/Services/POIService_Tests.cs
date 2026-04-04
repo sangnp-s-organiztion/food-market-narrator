@@ -268,6 +268,39 @@ public class POIService_Tests
     }
 
     [Fact]
+    public void UpdateNearestPOI_EnterThenSwitchToAnotherPOI_ReturnsNewPOI()
+    {
+        // Arrange
+        var poi1 = new POI
+        {
+            restaurantId = "resto1",
+            Latitude = 10.776889,
+            Longitude = 106.6890608
+        };
+
+        var poi2 = new POI
+        {
+            restaurantId = "resto2",
+            Latitude = 10.777050,
+            Longitude = 106.6890608
+        };
+
+        var locationService = CreatePOIServiceWithPois(new List<POI> { poi1, poi2 });
+
+        // First enter POI 1
+        var firstEnter = locationService.UpdateNearestPOI(10.776889, 106.6890608);
+        Assert.NotNull(firstEnter);
+        Assert.Equal("resto1", firstEnter!.restaurantId);
+
+        // Move close enough to POI 2 (within enter radius) -> should trigger switch
+        var switchResult = locationService.UpdateNearestPOI(10.777050, 106.6890608);
+
+        // Assert
+        Assert.NotNull(switchResult);
+        Assert.Equal("resto2", switchResult!.restaurantId);
+    }
+
+    [Fact]
     public void UpdateNearestPOI_EmptyPOIs_ReturnsNull()
     {
         // Arrange

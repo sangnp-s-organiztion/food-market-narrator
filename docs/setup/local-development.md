@@ -36,8 +36,8 @@ npm run dev
 
 ```bash
 cd admin
-dotnet restore
-dotnet run
+npm install
+npm run dev
 ```
 
 ### MAUI Android
@@ -52,3 +52,19 @@ dotnet run -f net10.0-android
 
 - Sửa `LocalApiHost` trong `FoodMarketNarrator.Maui/Settings/AppSettings.cs`.
 - Điện thoại và máy chạy API phải cùng mạng.
+
+## Chạy test local
+
+```bash
+# API integration
+dotnet test test/maui-testing/FoodMarketNarrator.Api.IntegrationTests/IntegrationTests.csproj
+
+# MAUI unit
+dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj
+
+# Admin frontend
+cd admin && npm test
+
+# Saler frontend
+cd ../saler && npm test
+```

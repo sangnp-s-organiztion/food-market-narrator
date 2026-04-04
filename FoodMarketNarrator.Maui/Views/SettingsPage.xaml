@@ -232,16 +232,18 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!--
                 <Button Text="&#xf2f5;  Đăng xuất"
-                        FontFamily="FASolid"
-                        TextColor="#EF4444"
-                        BackgroundColor="#FFF5F5"
-                        BorderColor="#FEE2E2"
-                        BorderWidth="1"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        CornerRadius="20"
-                        HeightRequest="42"/>
+                    FontFamily="FASolid"
+                    TextColor="#EF4444"
+                    BackgroundColor="#FFF5F5"
+                    BorderColor="#FEE2E2"
+                    BorderWidth="1"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    CornerRadius="20"
+                    HeightRequest="42"/>
+                -->
             </VerticalStackLayout>
         </ScrollView>
 

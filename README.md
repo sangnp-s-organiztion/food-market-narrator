@@ -1,188 +1,47 @@
 # Food Market Narrator
 
-Nền tảng thuyết minh tự động cho phố ẩm thực Vĩnh Khánh, giúp khách tham quan khám phá quán ăn qua bản đồ, vị trí thời gian thực và audio theo ngôn ngữ.
+Food Market Narrator là hệ sinh thái gồm mobile app + backend API + 2 web apps (admin/saler) để hỗ trợ trải nghiệm thuyết minh tự động theo vị trí tại phố ẩm thực Vĩnh Khánh.
 
-## 1. Tổng quan
+## 1. Thành phần hệ thống
 
-Workspace này gồm nhiều ứng dụng chạy cùng một hệ sinh thái:
-
-- `FoodMarketNarrator.Api`: Backend ASP.NET Core Web API + EF Core + SQL Server.
-- `FoodMarketNarrator.Maui`: Ứng dụng mobile cho visitor (MAUI).
-- `saler`: Web app cho seller/chủ quán (React + Vite + TypeScript).
-- `admin`: Cổng quản trị nội bộ (ASP.NET Core MVC, có thể chuyển dần sang React theo roadmap tài liệu).
-- `docs`: Tài liệu sản phẩm, kiến trúc, feature, PRD.
+- FoodMarketNarrator.Api: ASP.NET Core Web API, dữ liệu chính trên SQL Server, analytics/logs trên MongoDB.
+- FoodMarketNarrator.Maui: ứng dụng mobile visitor (Android) với GPS tracking, geofence và phát audio tự động.
+- admin: dashboard quản trị (React + Vite + TypeScript).
+- saler: dashboard người bán/chủ quán (React + Vite + TypeScript).
+- test: bộ test cho API và MAUI.
+- docs: tài liệu kỹ thuật, setup, testing, kiến trúc.
 
 ## 2. Kiến trúc nhanh
 
 ```text
-Mobile MAUI / Seller Web / Admin Portal
+MAUI (visitor) / Admin web / Saler web
                 |
                 v
-     FoodMarketNarrator.Api (REST)
+      FoodMarketNarrator.Api (REST + Cookie Auth)
                 |
-                +--> SQL Server (dữ liệu nghiệp vụ)
-                +--> Static media (/images, /audios, /audios)
+        +-------+---------------------+
+        |                             |
+   SQL Server                    MongoDB
+ (nghiep vu)               (session/log/analytics)
 ```
 
-## 3. Công nghệ chính
+## 3. Tech stack
 
-- Backend: .NET 10, ASP.NET Core Web API, EF Core SQL Server.
-- Mobile: .NET MAUI (Android/iOS/Windows), Mapsui, Plugin.Maui.Audio.
-- Seller Web: React 18, Vite 5, TypeScript, React Query.
-- Admin: ASP.NET Core MVC (.NET 10).
-- API format: REST/JSON.
-- Auth: Cookie authentication + role-based authorization.
+- Backend: .NET 10, ASP.NET Core Web API, EF Core SQL Server, MongoDB.Driver.
+- Mobile: .NET MAUI (net10.0-android), Mapsui, Plugin.Maui.Audio.
+- Admin/Saler: React 18, TypeScript, Vite 5, TanStack Query, Vitest.
 
-## 4. Cấu trúc thư mục
-
-```text
-FoodMarketNarrator/
-├─ FoodMarketNarrator.Api/
-├─ FoodMarketNarrator.Maui/
-├─ saler/
-├─ admin/
-├─ test/
-│   └─ maui-testing/
-│       ├─ FoodMarketNarrator.Api.IntegrationTests/
-│       └─ FoodMarketNarrator.Maui.UnitTests/
-├─ docs/
-├─ db.sql
-└─ README.md
-```
-
-## Quick Start
-
-### Prerequisites
-
-- .NET 10 SDK
-- Node.js 20+ và npm
-- SQL Server (local hoặc remote)
-- MAUI workload (nếu chạy mobile): `dotnet workload install maui`
-
-### Setup
-
-```bash
-# Clone source
-git clone <repo-url>
-cd FoodMarketNarrator
-
-# Backend API
-cd FoodMarketNarrator.Api
-dotnet restore
-dotnet run
-
-# Seller frontend (terminal mới)
-cd ../saler
-npm install
-npm run dev
-
-# Admin portal (terminal mới)
-cd ../admin
-dotnet restore
-dotnet run
-
-# MAUI app (terminal mới, optional)
-cd ../FoodMarketNarrator.Maui
-dotnet restore
-dotnet run -f net10.0-android
-```
-
-### Services
-
-| Service               | URL                    |
-| --------------------- | ---------------------- |
-| Backend API (HTTP)    | http://localhost:5044  |
-| Backend API (HTTPS)   | https://localhost:7041 |
-| Seller Web (Vite dev) | http://localhost:8080  |
-| Admin Portal (HTTP)   | http://localhost:5104  |
-| Admin Portal (HTTPS)  | https://localhost:7168 |
-
-### Commands
-
-```bash
-# API
-cd FoodMarketNarrator.Api
-dotnet run                     # Run API
-dotnet build                   # Build API
-
-# Seller frontend
-cd saler
-npm run dev                    # Start dev server (port 8080)
-npm run build                  # Production build
-npm run lint                   # ESLint
-npm run test                   # Unit tests (Vitest)
-
-# Admin portal
-cd admin
-dotnet run                     # Run admin portal
-dotnet build                   # Build admin portal
-
-# MAUI app
-cd FoodMarketNarrator.Maui
-dotnet build                   # Build MAUI app
-dotnet run -f net10.0-android  # Run on Android target
-```
-
-## 5. Yêu cầu môi trường
-
-### 5.1 Bắt buộc
+## 4. Local prerequisites
 
 - .NET SDK 10.x
-- SQL Server (local hoặc remote)
-- Node.js 20+ (khuyến nghị LTS)
-- npm hoặc bun (repo có `bun.lockb`, nhưng npm vẫn dùng được)
+- Node.js 20+ và npm
+- SQL Server
+- MongoDB (khuyến nghị chạy local qua Docker)
+- MAUI workload (nếu build app): `dotnet workload install maui`
 
-### 5.2 Cho MAUI
+## 5. Chạy local
 
-- MAUI workload: `dotnet workload install maui`
-- Android SDK/Emulator (nếu chạy Android)
-- Visual Studio 2022 hoặc toolchain MAUI đầy đủ
-
-## 6. Cấu hình
-
-### 6.1 API connection string
-
-Sửa tại:
-
-- `FoodMarketNarrator.Api/appsettings.json`
-- `FoodMarketNarrator.Api/appsettings.Development.json`
-
-Ví dụ:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=food_market_narrator;User Id=sa;Password=***;TrustServerCertificate=True;"
-  }
-}
-```
-
-### 6.2 Base URL cho MAUI
-
-Sửa tại `FoodMarketNarrator.Maui/Settings/AppSettings.cs`.
-
-App đã gom cấu hình host về 1 chỗ:
-
-- `LocalApiHost`: IP LAN hoặc hostname của máy đang chạy API.
-- Emulator Android sẽ tự dùng `10.0.2.2`.
-- Android máy thật sẽ tự dùng `LocalApiHost`.
-
-Ví dụ đổi host khi chạy Android máy thật:
-
-```csharp
-private const string LocalApiHost = "192.168.1.7";
-```
-
-Lưu ý khi chạy trên Android máy thật:
-
-1. Điện thoại và máy chạy API phải cùng mạng Wi-Fi/LAN.
-2. API phải đang chạy ở cổng `5044` (HTTP) hoặc `7041` (HTTPS).
-3. Mở firewall cho cổng API trên máy chạy backend nếu cần.
-4. Nếu IP hay thay đổi, nên đặt DHCP reservation trên router hoặc dùng hostname nội bộ.
-
-## 7. Chạy local nhanh
-
-### 7.1 Chạy backend API
+### 5.1 Backend API
 
 ```bash
 cd FoodMarketNarrator.Api
@@ -192,10 +51,18 @@ dotnet run
 
 Mặc định:
 
-- `http://localhost:5044`
-- `https://localhost:7041`
+- <http://localhost:5044>
+- <https://localhost:7041>
 
-### 7.2 Chạy Seller web
+### 5.2 Admin web
+
+```bash
+cd admin
+npm install
+npm run dev
+```
+
+### 5.3 Saler web
 
 ```bash
 cd saler
@@ -203,81 +70,50 @@ npm install
 npm run dev
 ```
 
-### 7.3 Chạy Admin portal
-
-```bash
-cd admin
-dotnet restore
-dotnet run
-```
-
-### 7.4 Chạy MAUI app
+### 5.4 MAUI app (Android)
 
 ```bash
 cd FoodMarketNarrator.Maui
 dotnet restore
 dotnet build
-```
-
-Ví dụ chạy Android:
-
-```bash
 dotnet run -f net10.0-android
 ```
 
-## 8. API public cho visitor
+## 6. Test nhanh
 
-Các endpoint đọc dữ liệu công khai chính:
+```bash
+dotnet test test/maui-testing/FoodMarketNarrator.Api.IntegrationTests/IntegrationTests.csproj
+dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj
 
-- `GET /Restaurant`
-- `GET /Restaurant/{id}`
-- `GET /Language`
-- `GET /Language/{languageCode}`
-- `GET /public/Restaurant/{restaurantId}/images`
-- `GET /public/Restaurant/{restaurantId}/dishes`
-- `GET /public/Restaurant/{restaurantId}/audios`
+cd admin && npm test
+cd ../saler && npm test
+```
 
-## 9. Luồng dữ liệu chính
+Xem chi tiết tại `test-guide.md`.
 
-### 9.1 Visitor
+## 7. API public chính cho MAUI
 
-1. App MAUI gọi `GET /Restaurant` để lấy POI.
-2. Người dùng chọn POI, app gọi các endpoint public chi tiết (ảnh/món/audio).
-3. Khi bật narration, app theo dõi GPS, tìm POI gần nhất và phát audio theo ngôn ngữ.
-4. Nếu mạng lỗi, app fallback về cache local (POI/audio).
+- GET /Restaurant
+- GET /Restaurant/{id}
+- GET /Language
+- GET /Language/{languageCode}
+- GET /Restaurant/{restaurantId}/images
+- GET /public/Restaurant/{restaurantId}/dishes
+- GET /public/Restaurant/{restaurantId}/audios
 
-### 9.2 Seller/Admin
+## 8. Tài liệu
 
-1. Đăng nhập qua cookie auth.
-2. Gọi protected APIs để CRUD restaurant, dish, image, audio, user/role.
-3. API ghi SQL + cập nhật media storage.
-4. Dữ liệu mới được visitor nhận ở lần đồng bộ tiếp theo.
+- docs/README.md
+- docs/architecture/overview.md
+- docs/setup/local-development.md
+- docs/testing/test-strategy.md
+- docs/api/README.md
+- docs/mobile/README.md
+- docs/admin/README.md
+- docs/saler/README.md
 
-## 10. Tài liệu liên quan
+## 9. Ghi chú bảo mật
 
-- `docs/README.md`
-- `docs/features/prd.md`
-- `docs/features/visitor-features.md`
-- `docs/architecture/overview.md`
-- `docs/architecture/api-architecture.md`
-- `docs/api/mongodb-setup.md`
-- `docs/mobile/`
-- `docs/testing/`
-
-## 11. Lưu ý bảo mật
-
-- Không commit secrets thật (connection string production, API key, token).
-- Ưu tiên dùng biến môi trường hoặc secret manager.
-- Kiểm tra kỹ quyền truy cập endpoint trước khi deploy.
-
-## 12. Đóng góp
-
-Quy trình khuyến nghị:
-
-1. Tạo branch theo feature/bugfix.
-2. Cập nhật code + tài liệu liên quan trong `docs`.
-3. Chạy test/lint/build tương ứng từng app trước khi tạo PR.
-
-## 13. License
-
-Chưa khai báo. Nếu cần public dự án, thêm file `LICENSE` tại thư mục gốc.
+- Credentials trong repo chỉ dùng cho local/dev.
+- Không dùng trực tiếp cho production.
+- Khi deploy thật phải thay secrets bằng môi trường production.

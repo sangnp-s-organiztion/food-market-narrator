@@ -6,10 +6,14 @@ namespace food_market_narrator_api.Services;
 public class LocationLogService
 {
     private readonly LocationLogRepository _locationLogRepository;
+    private readonly UserSessionService _userSessionService;
 
-    public LocationLogService(LocationLogRepository locationLogRepository)
+    public LocationLogService(
+        LocationLogRepository locationLogRepository,
+        UserSessionService userSessionService)
     {
         _locationLogRepository = locationLogRepository;
+        _userSessionService = userSessionService;
     }
 
     public async Task<int> WriteBatchAsync(LocationLogBatchRequest request)
@@ -42,6 +46,15 @@ public class LocationLogService
         }
 
         await _locationLogRepository.InsertBatchAsync(records);
+
+        var lastSeenAtUtc = records.Max(record => record.Timestamp);
+        var sessionIds = records
+            .Select(record => record.SessionId)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        await _userSessionService.TouchSessionActivityAsync(sessionIds, lastSeenAtUtc);
+
         return records.Count;
     }
 

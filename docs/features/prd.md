@@ -532,6 +532,11 @@ So that invalid or inactive locations do not affect visitors.
 
 ### 10.3 Admin Features (Quản trị hệ thống)
 
+Ghi chú phạm vi:
+
+- Nhóm A-01 đến A-05 là phạm vi đã có trong trạng thái hiện tại.
+- Nhóm A-06 đến A-08 là roadmap, chưa phải module hoàn chỉnh trên admin web.
+
 **Feature A-01: Đăng nhập quản trị**
 
 - Mô tả: Admin đăng nhập để truy cập các chức năng quản trị hệ thống.
@@ -560,35 +565,63 @@ So that invalid or inactive locations do not affect visitors.
   - -> chỉnh role/trạng thái
   - -> lưu thay đổi
 
-**Feature A-03: Quản lý ngôn ngữ hệ thống**
+**Feature A-03: Quản lý toàn cục nhà hàng**
 
-- Mô tả: Admin duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
+- Mô tả: Admin giám sát và cập nhật trạng thái nhà hàng trên toàn hệ thống.
 - Actor: Admin.
 - Functional requirements:
-  - Xem danh sách ngôn ngữ hiện có.
-  - Thêm/sửa thông tin ngôn ngữ.
-  - Ngăn trùng mã ngôn ngữ.
+- Xem toàn bộ nhà hàng không phụ thuộc owner.
+- Cập nhật trạng thái hoạt động của nhà hàng.
+- Kiểm tra tính đầy đủ dữ liệu cơ bản để phục vụ vận hành.
 - Flow:
-  - Mở module Languages
-  - -> thêm/sửa ngôn ngữ
-  - -> validate
+- Mở module Restaurants
+- -> lọc/chọn nhà hàng
+- -> chỉnh trạng thái hoặc dữ liệu
   - -> lưu
 
-**Feature A-04: Quản lý toàn cục nhà hàng và dữ liệu nội dung**
+**Feature A-04: Dashboard analytics vận hành**
 
-- Mô tả: Admin giám sát dữ liệu nhà hàng trên toàn hệ thống.
+- Mô tả: Admin theo dõi chỉ số vận hành và hành vi nghe để ra quyết định.
 - Actor: Admin.
 - Functional requirements:
-  - Xem toàn bộ nhà hàng không phụ thuộc owner.
-  - Cập nhật trạng thái hoạt động của nhà hàng.
-  - Kiểm tra tính đầy đủ của ảnh, món, audio theo từng nhà hàng.
+- Xem KPI tổng quan, heatmap, top restaurants, movement paths.
+- Hỗ trợ session limit cho movement paths (bao gồm chế độ all).
+- Tự refresh dữ liệu analytics theo chu kỳ phù hợp.
 - Flow:
-  - Mở module Restaurants
-  - -> lọc/chọn nhà hàng
-  - -> chỉnh trạng thái hoặc dữ liệu
+- Mở dashboard
+- -> gọi analytics APIs
+- -> render widgets/charts
   - -> lưu
 
-**Feature A-05: Kiểm duyệt media và chất lượng nội dung**
+**Feature A-05: Theo dõi recent activity và audit logs**
+
+- Mô tả: Admin theo dõi hoạt động gần đây để phát hiện bất thường sớm.
+- Actor: Admin.
+- Functional requirements:
+- Xem danh sách recent activity từ analytics.
+- Xem audit logs phục vụ truy vết thao tác hệ thống.
+- Hỗ trợ phân loại nhanh hành vi để điều tra khi cần.
+- Flow:
+- Mở module Logs
+- -> lấy recent activity/audit logs
+- -> lọc theo nhu cầu
+- -> đối chiếu sự kiện
+
+**Feature A-06 (Roadmap): Quản lý ngôn ngữ hệ thống**
+
+- Mô tả: Duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
+- Actor: Admin.
+- Functional requirements:
+- Xem danh sách ngôn ngữ hiện có.
+- Thêm/sửa thông tin ngôn ngữ.
+- Ngăn trùng mã ngôn ngữ.
+- Flow:
+- Mở module Languages
+- -> thêm/sửa ngôn ngữ
+- -> validate
+- -> lưu
+
+**Feature A-07 (Roadmap): Kiểm duyệt media và chất lượng nội dung**
 
 - Mô tả: Admin kiểm duyệt nội dung media để đảm bảo chất lượng trải nghiệm visitor.
 - Actor: Admin.
@@ -602,9 +635,9 @@ So that invalid or inactive locations do not affect visitors.
   - -> duyệt hoặc từ chối
   - -> cập nhật trạng thái
 
-**Feature A-06: Cấu hình chính sách bảo mật endpoint**
+**Feature A-08 (Roadmap): Cấu hình chính sách bảo mật endpoint**
 
-- Mô tả: Admin cấu hình và kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
+- Mô tả: Admin kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
 - Actor: Admin.
 - Functional requirements:
   - Theo dõi danh sách endpoint công khai.
@@ -623,8 +656,9 @@ So that invalid or inactive locations do not affect visitors.
 - FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
 - FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
 - FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu.
-- FR-06: Admin quản lý user, role, ngôn ngữ và dữ liệu hệ thống toàn cục.
+- FR-06: Admin quản lý user/role, restaurants, analytics và logs để vận hành hệ thống.
 - FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
+- FR-08: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
 
 ## 11. Technical Requirements
 
@@ -646,7 +680,7 @@ Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển
   - GET /Restaurant
   - GET /Restaurant/{id}
   - GET /Language
-  - GET /public/Restaurant/{restaurantId}/images
+  - GET /Restaurant/{restaurantId}/images
   - GET /public/Restaurant/{restaurantId}/dishes
   - GET /public/Restaurant/{restaurantId}/audios
 - Protected APIs cho Seller/Admin:
@@ -707,7 +741,7 @@ Visitor App Open
   -> render bản đồ + lưu offline_cache
 
 Visitor Tap POI
-  -> GET /public/Restaurant/{restaurantId}/images
+  -> GET /Restaurant/{restaurantId}/images
   -> GET /public/Restaurant/{restaurantId}/dishes
   -> GET /public/Restaurant/{restaurantId}/audios
   -> hiển thị ảnh + menu + audio
@@ -793,7 +827,7 @@ Phần này dùng để đo mức độ thành công của sản phẩm sau khi 
 ### 13.3 Admin metrics
 
 - 100% tài khoản quản trị được gán role hợp lệ.
-- > = 95% yêu cầu kiểm duyệt nội dung được xử lý trong vòng 24 giờ.
+- > = 95% bản ghi bất thường trong recent activity/audit logs được phát hiện và xử lý trong vòng 24 giờ.
 - Tỷ lệ sự cố phân quyền (truy cập sai quyền) < 1% tổng request protected.
 
 ### 13.4 System/business metrics tổng hợp
