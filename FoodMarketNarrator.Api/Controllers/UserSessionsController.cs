@@ -33,4 +33,33 @@ public class UserSessionsController : ControllerBase
             sessionId = request.SessionId.Trim()
         });
     }
+
+    [HttpGet("{sessionId}/qr-access")]
+    public async Task<IActionResult> GetQrAccessStatus([FromRoute] string sessionId)
+    {
+        var normalizedSessionId = (sessionId ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedSessionId))
+        {
+            return BadRequest(new
+            {
+                message = "SessionId is required"
+            });
+        }
+
+        var status = await _userSessionService.GetQrAccessStatusAsync(normalizedSessionId);
+        if (!status.Exists)
+        {
+            return NotFound(new
+            {
+                message = "Session not found"
+            });
+        }
+
+        return Ok(new
+        {
+            allowed = status.Allowed,
+            expiresAtUtc = status.ExpiresAtUtc,
+            reason = status.Reason
+        });
+    }
 }

@@ -25,6 +25,12 @@ public class UserSessionRepository
             .Set("updated_at", now)
             .SetOnInsert("created_at", now);
 
+        if (record.QrAccessExpiresAtUtc.HasValue)
+        {
+            var normalizedExpiry = DateTime.SpecifyKind(record.QrAccessExpiresAtUtc.Value, DateTimeKind.Utc);
+            update = update.Min("qr_access_expires_at", normalizedExpiry);
+        }
+
         await _userSessions.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
     }
 
@@ -67,6 +73,42 @@ public class UserSessionRepository
 
         return doc["_id"].AsObjectId;
     }
+
+    public async Task<UserSessionQrAccessRecord?> GetQrAccessBySessionIdAsync(string sessionId)
+    {
+        var normalizedSessionId = (sessionId ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedSessionId))
+        {
+            return null;
+        }
+
+        var filter = Builders<BsonDocument>.Filter.Eq("session_id", normalizedSessionId);
+        var projection = Builders<BsonDocument>.Projection
+            .Include("session_id")
+            .Include("qr_access_expires_at");
+
+        var doc = await _userSessions
+            .Find(filter)
+            .Project(projection)
+            .FirstOrDefaultAsync();
+
+        if (doc == null)
+        {
+            return null;
+        }
+
+        DateTime? qrAccessExpiresAtUtc = null;
+        if (doc.TryGetValue("qr_access_expires_at", out var expiryValue) && expiryValue.IsBsonDateTime)
+        {
+            qrAccessExpiresAtUtc = DateTime.SpecifyKind(expiryValue.AsBsonDateTime.ToUniversalTime(), DateTimeKind.Utc);
+        }
+
+        return new UserSessionQrAccessRecord
+        {
+            SessionId = normalizedSessionId,
+            QrAccessExpiresAtUtc = qrAccessExpiresAtUtc
+        };
+    }
 }
 
 public class UserSessionStartRecord
@@ -74,4 +116,11 @@ public class UserSessionStartRecord
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
+    public DateTime? QrAccessExpiresAtUtc { get; set; }
+}
+
+public class UserSessionQrAccessRecord
+{
+    public string SessionId { get; set; } = string.Empty;
+    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }

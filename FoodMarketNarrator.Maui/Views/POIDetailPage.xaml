@@ -185,7 +185,8 @@
 
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                            <Border StrokeThickness="0"
+                            <Border x:Name="PlayAudioButton"
+                                StrokeThickness="0"
                                     BackgroundColor="#F39C12"
                                     HeightRequest="42"
                                     WidthRequest="42"

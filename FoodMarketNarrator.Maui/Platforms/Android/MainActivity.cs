@@ -4,6 +4,7 @@ using Android.Content.PM;
 using Android.Graphics;
 using Android.OS;
 using Android.Views;
+using food_market_narrator.Services;
 
 namespace food_market_narrator;
 
@@ -26,6 +27,7 @@ public class MainActivity : MauiAppCompatActivity
         // ⬇ Switch sang main theme TRƯỚC khi base.OnCreate inflate layout
         SetTheme(Resource.Style.Maui_MainTheme_NoActionBar);
         base.OnCreate(savedInstanceState);
+        HandleDeepLinkIntent(Intent);
 
         // Đồng bộ thanh status bar theo tông sáng của app, tránh dải tím mặc định.
         if (Window != null)
@@ -44,5 +46,17 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnNewIntent(intent);
         Intent = intent;
+        HandleDeepLinkIntent(intent);
+    }
+
+    private static void HandleDeepLinkIntent(Android.Content.Intent? intent)
+    {
+        var dataString = intent?.DataString;
+        if (string.IsNullOrWhiteSpace(dataString))
+        {
+            return;
+        }
+
+        AppLinkDispatcher.Dispatch(dataString);
     }
 }

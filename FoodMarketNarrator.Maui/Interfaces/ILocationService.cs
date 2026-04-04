@@ -8,6 +8,7 @@ namespace food_market_narrator.Services
     {
         event EventHandler<Location> LocationChanged;
         event EventHandler<Location?> LocationSampled;
+        Location? LastKnownLocation { get; }
         Task<Location?> GetCurrentLocationAsync();
         Task StartTrackingAsync();
         Task<bool> RequestBackgroundLocationPermissionAsync();

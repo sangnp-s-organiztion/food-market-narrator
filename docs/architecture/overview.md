@@ -26,5 +26,10 @@ Nguyên tắc:
 ## Tài liệu liên quan
 
 - `architecture/api-architecture.md`
+- `architecture/maui-architecture-overview.md`
+- `architecture/maui-runtime-flows.md`
+- `architecture/maui-caching-and-offline.md`
+- `architecture/maui-api-and-sync-contracts.md`
+- `architecture/maui-feature-inventory-and-gaps.md`
 - `api/mongodb-setup.md`
 - `mobile/overview-current-features.md`

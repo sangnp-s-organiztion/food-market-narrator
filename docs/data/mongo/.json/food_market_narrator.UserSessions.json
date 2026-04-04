@@ -6,7 +6,11 @@
   "created_at": {
     "$date": "2026-03-12T08:00:00.000Z"
   },
-  "device_id": "1"
+  "device_id": "1",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -16,7 +20,11 @@
   "created_at": {
     "$date": "2026-03-12T08:05:00.000Z"
   },
-  "device_id": "2"
+  "device_id": "2",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -26,7 +34,11 @@
   "created_at": {
     "$date": "2026-03-12T08:10:00.000Z"
   },
-  "device_id": "3"
+  "device_id": "3",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -36,7 +48,11 @@
   "created_at": {
     "$date": "2026-03-12T08:15:00.000Z"
   },
-  "device_id": "4"
+  "device_id": "4",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -46,7 +62,11 @@
   "created_at": {
     "$date": "2026-03-12T08:20:00.000Z"
   },
-  "device_id": "5"
+  "device_id": "5",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -56,7 +76,11 @@
   "created_at": {
     "$date": "2026-03-12T09:00:00.000Z"
   },
-  "device_id": "6"
+  "device_id": "6",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -66,7 +90,11 @@
   "created_at": {
     "$date": "2026-03-12T09:10:00.000Z"
   },
-  "device_id": "7"
+  "device_id": "7",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -76,7 +104,11 @@
   "created_at": {
     "$date": "2026-03-12T09:15:00.000Z"
   },
-  "device_id": "8"
+  "device_id": "8",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -86,7 +118,11 @@
   "created_at": {
     "$date": "2026-03-12T10:00:00.000Z"
   },
-  "device_id": "9"
+  "device_id": "9",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
 },
 {
   "_id": {
@@ -96,5 +132,26 @@
   "created_at": {
     "$date": "2026-03-12T10:30:00.000Z"
   },
-  "device_id": "10"
+  "device_id": "10",
+  "last_seen_at": {
+    "$date": "2026-04-01T20:33:12.163Z"
+  },
+  "session_id": "unknown"
+},
+{
+  "_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "device_id": "ab1f34aa95bc4a8ab83a5de42d534935",
+  "created_at": {
+    "$date": "2026-04-01T21:04:21.280Z"
+  },
+  "device_info": "Google sdk_gphone64_x86_64, Android 16",
+  "last_seen_at": {
+    "$date": "2026-04-03T14:16:34.310Z"
+  },
+  "session_id": "5987bad6d5634a44a1f88e0b2ba19bbd",
+  "updated_at": {
+    "$date": "2026-04-03T14:16:37.711Z"
+  }
 }]

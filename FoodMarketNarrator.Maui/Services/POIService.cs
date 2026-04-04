@@ -66,7 +66,9 @@ public class POIService : IPOIService
                     continue;
                 }
 
-                _pois = data;
+                _pois = data
+                    .Where(p => p.IsActive)
+                    .ToList();
                 await SavePoisCacheAsync(_pois);
                 var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
                 Debug.WriteLine($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from {requestUrl}");
@@ -80,7 +82,9 @@ public class POIService : IPOIService
 
         if (cachedPois.Count > 0)
         {
-            _pois = cachedPois;
+            _pois = cachedPois
+                .Where(p => p.IsActive)
+                .ToList();
             var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
             Debug.WriteLine($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from offline cache.");
             return _pois;
@@ -248,6 +252,12 @@ public class POIService : IPOIService
         }
 
         return null; // KhÃ´ng cÃ³ thay Ä‘á»•i
+    }
+
+    public void ResetGeofenceState()
+    {
+        _isInsidePOI = false;
+        _lastNearest = null;
     }
 
     // Láº¥y danh sÃ¡ch mÃ³n Äƒn theo restaurant
