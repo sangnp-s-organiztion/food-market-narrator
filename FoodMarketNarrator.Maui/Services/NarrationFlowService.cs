@@ -126,12 +126,6 @@ public class NarrationFlowService : INarrationFlowService
 
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
-        // Nếu đang phát audio, bỏ qua (trừ force)
-        if (!force && _audioService.IsPlaying)
-        {
-            return;
-        }
-
         if (currentLocation == null)
             currentLocation = await _locationService.GetCurrentLocationAsync();
 
@@ -231,6 +225,12 @@ public class NarrationFlowService : INarrationFlowService
 
         while (_playQueue.Count > 0)
         {
+            // Nếu đang có track phát, chờ phát xong rồi mới lấy item kế tiếp trong queue.
+            while (_audioService.IsPlaying)
+            {
+                await Task.Delay(300);
+            }
+
             var queueItem = _playQueue.Dequeue();
             var poi = queueItem.Poi;
             DateTime? startedAtUtc = null;
