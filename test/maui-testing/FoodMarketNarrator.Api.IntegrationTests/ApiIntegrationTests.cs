@@ -6,6 +6,8 @@ using food_market_narrator_api.DTOs.Auth;
 using food_market_narrator_api.DTOs.Dish;
 using food_market_narrator_api.DTOs.Language;
 using food_market_narrator_api.DTOs.Restaurant;
+using food_market_narrator_api.DTOs.User;
+using food_market_narrator_api.Helpers;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
@@ -82,12 +84,12 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             new LanguageModel { LanguageId = 2, LanguageCode = "en", LanguageName = "English" }
         );
 
-        // Seed Users - password stored as plain text per UserRepository implementation
+        // Seed Users
         context.User.Add(new UserModel
         {
             UserId = 1,
             Username = "admin",
-            Password = "admin123", // Plain text as per UserRepository implementation
+            Password = PasswordHasher.Hash("admin123"),
             Role = "Admin",
             IsActive = true
         });
@@ -96,7 +98,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         {
             UserId = 2,
             Username = "seller1",
-            Password = "seller123", // Plain text as per UserRepository implementation
+            Password = PasswordHasher.Hash("seller123"),
             Role = "Saler",
             IsActive = true
         });
@@ -165,6 +167,37 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         }
 
         return await _client.SendAsync(request);
+    }
+
+    private async Task SeedUserAsync(string username, string password, bool isHashed, string role = "Saler", bool isActive = true)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var existing = await context.User.FirstOrDefaultAsync(u => u.Username == username);
+        if (existing != null)
+        {
+            context.User.Remove(existing);
+            await context.SaveChangesAsync();
+        }
+
+        context.User.Add(new UserModel
+        {
+            Username = username,
+            Password = isHashed ? PasswordHasher.Hash(password) : password,
+            Role = role,
+            IsActive = isActive,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<UserModel?> GetUserFromDbAsync(string username)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await context.User.FirstOrDefaultAsync(u => u.Username == username);
     }
 
     #endregion
@@ -293,6 +326,89 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_WithLegacyPlaintextPassword_MigratesPasswordToHash()
+    {
+        // Arrange
+        var username = $"legacy_{Guid.NewGuid():N}";
+        const string password = "legacy123";
+        await SeedUserAsync(username, password, isHashed: false);
+
+        var loginRequest = new { username, password };
+        var content = new StringContent(
+            JsonSerializer.Serialize(loginRequest),
+            Encoding.UTF8,
+            "application/json");
+
+        // Act
+        var response = await _client.PostAsync("/Auth/login", content);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var updatedUser = await GetUserFromDbAsync(username);
+        Assert.NotNull(updatedUser);
+        Assert.True(PasswordHasher.IsHashed(updatedUser!.Password));
+        Assert.NotEqual(password, updatedUser.Password);
+    }
+
+    #endregion
+
+    #region Users Tests
+
+    [Fact]
+    public async Task CreateUser_WithEmptyPassword_UsesDefaultPassword()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var username = $"new_saler_{Guid.NewGuid():N}";
+
+        var createRequest = new
+        {
+            username,
+            password = string.Empty,
+            role = "saler"
+        };
+
+        // Act - create user without explicit password
+        var createResponse = await AuthorizedRequestAsync(
+            HttpMethod.Post,
+            "/api/users",
+            body: createRequest,
+            cookie: cookie);
+
+        // Assert create
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        // Act - login with default password
+        var loginContent = new StringContent(
+            JsonSerializer.Serialize(new { username, password = "123456" }),
+            Encoding.UTF8,
+            "application/json");
+        var loginResponse = await _client.PostAsync("/Auth/login", loginContent);
+
+        // Assert login succeeds with default password
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_LockingCurrentAdmin_ReturnsBadRequest()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var request = new { isActive = false };
+
+        // Act
+        var response = await AuthorizedRequestAsync(
+            HttpMethod.Patch,
+            "/api/users/1/status",
+            body: request,
+            cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     #endregion
@@ -458,25 +574,26 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetRestaurantsByUserId_ReturnsOk()
+    public async Task GetUserById_WithAuth_ReturnsOk()
     {
         // Arrange
         var cookie = await LoginAndGetCookie("seller1", "seller123");
 
         // Act
-        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Users/2/restaurants", cookie: cookie);
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/api/users/2", cookie: cookie);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var restaurants = JsonSerializer.Deserialize<List<RestaurantResponse>>(responseBody, new JsonSerializerOptions
+        var user = JsonSerializer.Deserialize<UserResponse>(responseBody, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
 
-        Assert.NotNull(restaurants);
-        Assert.True(restaurants.Count >= 2);
+        Assert.NotNull(user);
+        Assert.Equal(2, user!.UserId);
+        Assert.Equal("seller1", user.Username);
     }
 
     [Fact]

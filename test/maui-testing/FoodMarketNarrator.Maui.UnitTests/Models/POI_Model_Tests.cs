@@ -242,8 +242,13 @@ public class POI_Model_Tests
     public void StatusText_WhenActive_ReturnsOpenText()
     {
         // Arrange
-        // Set OpeningHours that includes the current time (1:54 PM)
-        var poi = new POI { restaurantId = "resto1", OpeningHours = "06:00 - 23:00" };
+        // Build a range that always includes current time.
+        var now = DateTime.Now;
+        var open = now.AddHours(-1);
+        var close = now.AddHours(1);
+        var openingHours = $"{open:HH:mm} - {close:HH:mm}";
+
+        var poi = new POI { restaurantId = "resto1", OpeningHours = openingHours };
 
         // Act
         var result = poi.StatusText;
@@ -256,9 +261,14 @@ public class POI_Model_Tests
     public void StatusText_WhenInactive_ReturnsClosedText()
     {
         // Arrange
-        // Use a fixed time range that is guaranteed to exclude the current server time.
-        // Using a narrow window: 02:00-03:00 (UTC+7 morning, unlikely to be test runtime)
-        var poi = new POI { restaurantId = "resto1", OpeningHours = "02:00 - 03:00" };
+        // Build a range that always excludes current time.
+        // Window is from 3h ago to 2h ago.
+        var now = DateTime.Now;
+        var open = now.AddHours(-3);
+        var close = now.AddHours(-2);
+        var openingHours = $"{open:HH:mm} - {close:HH:mm}";
+
+        var poi = new POI { restaurantId = "resto1", OpeningHours = openingHours };
 
         // Act
         var result = poi.StatusText;
