@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import TrajectorySection from "@/components/TrajectorySection";
@@ -15,15 +15,6 @@ const TrajectoryPage = () => {
     staleTime: 60_000,
   });
 
-  const totalPoints = useMemo(
-    () =>
-      (movementPathsData?.sessions ?? []).reduce(
-        (acc, session) => acc + session.points.length,
-        0,
-      ),
-    [movementPathsData],
-  );
-
   return (
     <AdminLayout>
       <div className="page-header">
@@ -33,10 +24,6 @@ const TrajectoryPage = () => {
             Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe
             audio
           </p>
-        </div>
-        <div className="text-xs text-muted-foreground mono">
-          Session: {(movementPathsData?.sessions ?? []).length} | Điểm GPS:{" "}
-          {totalPoints.toLocaleString("vi-VN")}
         </div>
       </div>
 
