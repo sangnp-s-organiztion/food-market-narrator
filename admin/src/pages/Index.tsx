@@ -171,9 +171,6 @@ const Dashboard = () => {
             Hệ thống quản lý âm thanh thuyết minh &amp; nhà hàng
           </p>
         </div>
-        <div className="text-xs text-muted-foreground mono">
-          Cập nhật lần cuối: {new Date().toLocaleString("vi-VN")}
-        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-6 space-y-6">

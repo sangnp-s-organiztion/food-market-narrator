@@ -7,7 +7,7 @@ import {
   type RestaurantResponse,
   type CreateRestaurantRequest,
 } from "@/lib/adminApi";
-import { Search, Lock, Unlock, Plus } from "lucide-react";
+import { Search, Lock, Unlock, Plus, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,24 @@ import {
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import StatusBadge from "@/components/StatusBadge";
+
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "http://localhost:5044";
+
+function normalizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const normalized = url.replace(/\\/g, "/").trim();
+  if (!normalized) return null;
+
+  if (normalized.startsWith("/")) {
+    return new URL(normalized, API_BASE).toString();
+  }
+
+  return new URL(`/maui-images/${normalized}`, API_BASE).toString();
+}
 
 // Map backend RestaurantResponse → page-local shape (keeps existing UI fields intact)
 function toPageRestaurant(r: RestaurantResponse) {
@@ -67,6 +85,10 @@ const RestaurantsPage = () => {
     name: string;
   } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<
+    string | null
+  >(null);
   const [createForm, setCreateForm] = useState<RestaurantForm>({
     name: "",
     userId: "",
@@ -93,6 +115,17 @@ const RestaurantsPage = () => {
   const { data: users = [] } = useQuery({
     queryKey: ["admin", "users"],
     queryFn: userApi.getAll,
+    staleTime: 60_000,
+  });
+
+  const {
+    data: selectedRestaurant,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = useQuery({
+    queryKey: ["admin", "restaurants", "detail", selectedRestaurantId],
+    queryFn: () => restaurantApi.getById(selectedRestaurantId ?? ""),
+    enabled: detailOpen && !!selectedRestaurantId,
     staleTime: 60_000,
   });
 
@@ -178,6 +211,26 @@ const RestaurantsPage = () => {
       isActive: true,
     });
   };
+
+  const handleOpenDetail = (restaurantId: string) => {
+    setSelectedRestaurantId(restaurantId);
+    setDetailOpen(true);
+  };
+
+  const handleDetailDialogChange = (open: boolean) => {
+    setDetailOpen(open);
+    if (!open) {
+      setSelectedRestaurantId(null);
+    }
+  };
+
+  const detailPrimaryImage = selectedRestaurant?.images?.find(
+    (img) => img.isPrimary,
+  );
+  const detailImageFallback = selectedRestaurant?.images?.[0];
+  const detailPreviewImageUrl = normalizeImageUrl(
+    detailPrimaryImage?.imageUrl ?? detailImageFallback?.imageUrl ?? null,
+  );
 
   return (
     <AdminLayout>
@@ -268,6 +321,13 @@ const RestaurantsPage = () => {
                     </td>
                     <td>
                       <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleOpenDetail(r.restaurant_id)}
+                          className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() =>
                             setConfirmAction({
@@ -430,6 +490,150 @@ const RestaurantsPage = () => {
               {createMutation.isPending ? "Đang tạo..." : "Tạo nhà hàng"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={detailOpen} onOpenChange={handleDetailDialogChange}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chi tiết nhà hàng</DialogTitle>
+          </DialogHeader>
+
+          {isDetailLoading && (
+            <p className="text-sm text-muted-foreground">
+              Đang tải chi tiết...
+            </p>
+          )}
+
+          {isDetailError && (
+            <p className="text-sm text-destructive">
+              Không thể tải chi tiết nhà hàng. Vui lòng thử lại.
+            </p>
+          )}
+
+          {!isDetailLoading && !isDetailError && selectedRestaurant && (
+            <div className="space-y-4 py-1">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Tên nhà hàng
+                  </Label>
+                  <p className="mt-1 font-medium">{selectedRestaurant.name}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Mã nhà hàng
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.restaurantId}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Trạng thái
+                  </Label>
+                  <div className="mt-1">
+                    <StatusBadge
+                      status={
+                        selectedRestaurant.isActive ? "active" : "inactive"
+                      }
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Người bán quản lý (User ID)
+                  </Label>
+                  <p className="mt-1">{selectedRestaurant.userId}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Điện thoại
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.phone || "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Ngày tạo
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {new Date(selectedRestaurant.createdAt).toLocaleString(
+                      "vi-VN",
+                    )}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Địa chỉ
+                  </Label>
+                  <p className="mt-1">{selectedRestaurant.address || "—"}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Giờ mở cửa
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.openTime || "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Giờ đóng cửa
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.closeTime || "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Vĩ độ</Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.latitude ?? "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Kinh độ
+                  </Label>
+                  <p className="mt-1 mono text-xs">
+                    {selectedRestaurant.longitude ?? "—"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Số ảnh
+                  </Label>
+                  <p className="mt-1">{selectedRestaurant.images.length}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Số audio
+                  </Label>
+                  <p className="mt-1">{selectedRestaurant.audios.length}</p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs text-muted-foreground">Mô tả</Label>
+                  <p className="mt-1 whitespace-pre-wrap">
+                    {selectedRestaurant.description || "—"}
+                  </p>
+                </div>
+              </div>
+
+              {detailPreviewImageUrl && (
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Ảnh đại diện
+                  </Label>
+                  <img
+                    src={detailPreviewImageUrl}
+                    alt={selectedRestaurant.name}
+                    className="mt-2 h-[22rem] w-full rounded-md object-cover border"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
