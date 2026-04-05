@@ -168,6 +168,56 @@
 
                         <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf1ad;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                <Label Text="Dữ liệu quán offline" FontSize="15" TextColor="#1F2937"/>
+                                <Label x:Name="PoiCacheSizeLabel" Text="0 B" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="Đã tải" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#F3ECE5"/>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf03e;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                <Label Text="Ảnh offline" FontSize="15" TextColor="#1F2937"/>
+                                <Label x:Name="ImageCacheSizeLabel" Text="0 B" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="Đã tải" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#F3ECE5"/>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf2e7;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                <Label Text="Món ăn offline" FontSize="15" TextColor="#1F2937"/>
+                                <Label x:Name="DishesCacheSizeLabel" Text="0 B" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="Đã tải" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#F3ECE5"/>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf1ab;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                <Label Text="Ngôn ngữ offline" FontSize="15" TextColor="#1F2937"/>
+                                <Label x:Name="LanguageCacheSizeLabel" Text="0 B" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="Đã tải" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                             <Label Grid.Column="1" Text="Xóa lịch sử xem" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>

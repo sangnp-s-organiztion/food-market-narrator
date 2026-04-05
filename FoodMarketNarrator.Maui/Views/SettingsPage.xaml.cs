@@ -5,6 +5,7 @@ using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.Generic;
 using food_market_narrator.Helpers;
+using IOPath = System.IO.Path;
 
 namespace food_market_narrator.Views;
 
@@ -57,7 +58,88 @@ public partial class SettingsPage : ContentPage
             CacheSizeLabel.Text = FormatBytes(cacheBytes);
         }
 
+        LoadOfflineDataUsage();
+
         await UpdateBackgroundPermissionStatusAsync();
+    }
+
+    private void LoadOfflineDataUsage()
+    {
+        try
+        {
+            var appData = FileSystem.AppDataDirectory;
+            var offlineCacheRoot = IOPath.Combine(appData, "offline_cache");
+            var imageCacheRoot = IOPath.Combine(appData, "image_cache");
+
+            var poiFilePath = IOPath.Combine(offlineCacheRoot, "pois.json");
+            var languageFilePath = IOPath.Combine(offlineCacheRoot, "languages.json");
+            var dishesDirPath = IOPath.Combine(offlineCacheRoot, "dishes");
+
+            var poiBytes = GetFileSizeSafe(poiFilePath);
+            var languageBytes = GetFileSizeSafe(languageFilePath);
+            var dishesBytes = GetDirectorySizeSafe(dishesDirPath);
+            var imageBytes = GetDirectorySizeSafe(imageCacheRoot);
+
+            var dishesCount = GetFileCountSafe(dishesDirPath);
+            var imageCount = GetFileCountSafe(imageCacheRoot);
+
+            PoiCacheSizeLabel.Text = FormatBytes(poiBytes);
+            LanguageCacheSizeLabel.Text = FormatBytes(languageBytes);
+            DishesCacheSizeLabel.Text = $"{FormatBytes(dishesBytes)} ({dishesCount} file)";
+            ImageCacheSizeLabel.Text = $"{FormatBytes(imageBytes)} ({imageCount} file)";
+        }
+        catch
+        {
+            PoiCacheSizeLabel.Text = "Không đọc được";
+            LanguageCacheSizeLabel.Text = "Không đọc được";
+            DishesCacheSizeLabel.Text = "Không đọc được";
+            ImageCacheSizeLabel.Text = "Không đọc được";
+        }
+    }
+
+    private static long GetFileSizeSafe(string filePath)
+    {
+        try
+        {
+            return File.Exists(filePath) ? new FileInfo(filePath).Length : 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private static long GetDirectorySizeSafe(string directoryPath)
+    {
+        try
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                return 0;
+            }
+
+            return Directory
+                .EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories)
+                .Sum(path => GetFileSizeSafe(path));
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private static int GetFileCountSafe(string directoryPath)
+    {
+        try
+        {
+            return Directory.Exists(directoryPath)
+                ? Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories).Count()
+                : 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     private async Task UpdateBackgroundPermissionStatusAsync()
