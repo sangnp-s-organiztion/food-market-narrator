@@ -305,37 +305,19 @@ Với vai trò là quản trị viên
 Tôi muốn quản lý tài khoản người dùng và vai trò  
 Để quyền truy cập được kiểm soát đúng.
 
-**Story A2 - Quản lý danh mục ngôn ngữ**
-
-Với vai trò là quản trị viên  
-Tôi muốn duy trì danh mục ngôn ngữ khả dụng  
-Để hệ thống hỗ trợ thuyết minh đa ngôn ngữ.
-
-**Story A3 - Quản lý toàn bộ nhà hàng**
+**Story A2 - Quản lý toàn bộ nhà hàng**
 
 Với vai trò là quản trị viên  
 Tôi muốn xem và cập nhật toàn bộ nhà hàng  
 Để chất lượng dữ liệu được đồng nhất trong toàn hệ thống.
 
-**Story A4 - Kiểm duyệt nội dung media**
-
-Với vai trò là quản trị viên  
-Tôi muốn kiểm duyệt hình ảnh và audio đã tải lên  
-Để nội dung không phù hợp hoặc bị lỗi được loại bỏ.
-
-**Story A5 - Cấu hình endpoint public/private**
-
-Với vai trò là quản trị viên  
-Tôi muốn kiểm soát API nào là public hoặc protected  
-Để chính sách bảo mật được áp dụng đúng.
-
-**Story A6 - Theo dõi vận hành hệ thống**
+**Story A3 - Theo dõi vận hành hệ thống**
 
 Với vai trò là quản trị viên  
 Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung  
 Để có thể phát hiện và xử lý vấn đề sớm.
 
-**Story A7 - Khóa/mở trạng thái nhà hàng**
+**Story A4 - Khóa/mở trạng thái nhà hàng**
 
 Với vai trò là quản trị viên  
 Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng  
