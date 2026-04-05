@@ -18,6 +18,8 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - POIService tải dữ liệu từ endpoint restaurant qua HttpClient.
 - Có fallback base URL theo AppSettings.ApiFallbackBaseUrls.
 - Có cache offline POI vào file cục bộ: offline_cache/pois.json.
+- Có TTL 3 phút cho cache in-memory POI list trong GetAllPOIsAsync.
+- Khi hết TTL: app thử refresh lại dữ liệu; \_lastFetchUtc chỉ cập nhật nếu fetch API thành công.
 - Cung cấp các hàm:
   - GetAllPOIsAsync
   - GetPOIByIdAsync

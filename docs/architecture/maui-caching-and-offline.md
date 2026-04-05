@@ -12,20 +12,20 @@ Tài liệu này mô tả chi tiết toàn bộ cache trong MAUI app:
 
 ## 2. Cache Matrix
 
-| Loại dữ liệu                 | Tầng lưu           | Đường dẫn/Key                                                                  | TTL thời gian                            | Chính sách xóa/làm mới                                       |
-| ---------------------------- | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------ |
-| POI list                     | In-memory + file   | \_pois + AppData/offline_cache/pois.json                                       | Không có TTL theo thời gian              | Ghi đè khi fetch API thành công; giữ cache cũ khi API fail   |
-| Languages                    | In-memory + file   | \_cachedLanguages + AppData/offline_cache/languages.json                       | Không có TTL theo thời gian              | Ghi đè khi fetch API thành công; giữ cache cũ khi API fail   |
-| Audio file                   | File cache         | AppData/audio_cache/{SHA256}.ext                                               | Không có TTL theo thời gian              | LRU eviction theo quota/space, hoặc xóa thủ công từ Settings |
-| Audio manifest version       | File JSON          | AppData/audio_manifest.json                                                    | Không có TTL theo thời gian              | Cập nhật khi prefetch/sync audio thành công                  |
-| Map tile OSM                 | File cache library | CacheDirectory/osm_tiles                                                       | Không cấu hình TTL tường minh trong code | Do BruTile FileCache quản lý; app không có lệnh clear riêng  |
-| Favorites                    | Preferences        | favorite_restaurants                                                           | Không TTL, persistent                    | Chỉ xóa khi user remove/clear/app data clear                 |
-| Language preference          | Preferences        | AppLanguage                                                                    | Không TTL, persistent                    | Ghi đè khi user đổi ngôn ngữ                                 |
-| Audio-ready state            | Preferences        | audio_ready                                                                    | Không TTL, persistent                    | Set true khi full sync thành công                            |
-| Startup offline notice flags | Preferences        | audio_first_install_offline_notice_shown, audio_startup_offline_notice_pending | Không TTL                                | Theo flow first install audio                                |
-| Tracking device id           | Preferences        | tracking_device_id                                                             | Không TTL, persistent                    | Tạo một lần, dùng lại lâu dài                                |
-| History list                 | In-memory          | \_history (max 50)                                                             | Theo vòng đời process app                | Mất khi app process kết thúc hoặc clear bằng UI              |
-| Narration anti-repeat state  | In-memory          | \_playedPOIs, \_poiLastPlayedTime                                              | Theo phiên narration                     | Reset khi Start/Stop narration                               |
+| Loại dữ liệu                 | Tầng lưu           | Đường dẫn/Key                                                                  | TTL thời gian                            | Chính sách xóa/làm mới                                                                                      |
+| ---------------------------- | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| POI list                     | In-memory + file   | \_pois + AppData/offline_cache/pois.json + \_lastFetchUtc                      | TTL 3 phút (chỉ cho in-memory)           | Hết TTL sẽ thử refresh; chỉ cập nhật \_lastFetchUtc khi fetch API thành công; giữ cache cũ khi refresh fail |
+| Languages                    | In-memory + file   | \_cachedLanguages + AppData/offline_cache/languages.json                       | Không có TTL theo thời gian              | Ghi đè khi fetch API thành công; giữ cache cũ khi API fail                                                  |
+| Audio file                   | File cache         | AppData/audio_cache/{SHA256}.ext                                               | Không có TTL theo thời gian              | LRU eviction theo quota/space, hoặc xóa thủ công từ Settings                                                |
+| Audio manifest version       | File JSON          | AppData/audio_manifest.json                                                    | Không có TTL theo thời gian              | Cập nhật khi prefetch/sync audio thành công                                                                 |
+| Map tile OSM                 | File cache library | CacheDirectory/osm_tiles                                                       | Không cấu hình TTL tường minh trong code | Do BruTile FileCache quản lý; app không có lệnh clear riêng                                                 |
+| Favorites                    | Preferences        | favorite_restaurants                                                           | Không TTL, persistent                    | Chỉ xóa khi user remove/clear/app data clear                                                                |
+| Language preference          | Preferences        | AppLanguage                                                                    | Không TTL, persistent                    | Ghi đè khi user đổi ngôn ngữ                                                                                |
+| Audio-ready state            | Preferences        | audio_ready                                                                    | Không TTL, persistent                    | Set true khi full sync thành công                                                                           |
+| Startup offline notice flags | Preferences        | audio_first_install_offline_notice_shown, audio_startup_offline_notice_pending | Không TTL                                | Theo flow first install audio                                                                               |
+| Tracking device id           | Preferences        | tracking_device_id                                                             | Không TTL, persistent                    | Tạo một lần, dùng lại lâu dài                                                                               |
+| History list                 | In-memory          | \_history (max 50)                                                             | Theo vòng đời process app                | Mất khi app process kết thúc hoặc clear bằng UI                                                             |
+| Narration anti-repeat state  | In-memory          | \_playedPOIs, \_poiLastPlayedTime                                              | Theo phiên narration                     | Reset khi Start/Stop narration                                                                              |
 
 ## 3. POI cache chi tiết
 
@@ -40,10 +40,22 @@ POIService.GetPOIsAsync:
 5. Nếu API fail toàn bộ:
    - Dùng cachedPois nếu có.
 
+POIService.GetAllPOIsAsync:
+
+1. Nếu \_pois còn hạn TTL 3 phút theo \_lastFetchUtc -> trả ngay.
+2. Nếu hết TTL hoặc chưa có dữ liệu -> vào lock và thử refresh.
+3. Khi refresh:
+
+- Tạm bypass in-memory để ép thử nguồn mới.
+- Nếu nhận dữ liệu và nguồn là network success -> cập nhật \_lastFetchUtc.
+- Nếu nhận dữ liệu từ offline/in-memory fallback -> không cập nhật \_lastFetchUtc.
+- Nếu refresh rỗng nhưng có previous data -> khôi phục previous data để tránh rỗng UI.
+
 TTL:
 
-- Không có expiration theo thời gian.
-- Dữ liệu được coi là hợp lệ vô thời hạn cho tới lần fetch online thành công kế tiếp.
+- Có TTL 3 phút cho in-memory POI list.
+- Timestamp \_lastFetchUtc chỉ được set khi fetch API thành công.
+- Offline cache file pois.json không có TTL cứng; được dùng làm fallback khi không lấy được network.
 
 ## 4. Language cache chi tiết
 
@@ -188,11 +200,10 @@ Khi không có internet:
 
 Trả lời theo code hiện tại:
 
-- POI cache: không có thời hạn theo thời gian.
+- POI cache in-memory: TTL 3 phút, chỉ làm mới mốc thời gian khi fetch API thành công.
+- POI cache file (offline_cache/pois.json): không có TTL cứng, dùng fallback khi offline/network fail.
 - Language cache: không có thời hạn theo thời gian.
 - Audio cache: không có thời hạn theo thời gian; tồn tại đến khi quota/LRU hoặc user xóa.
 - Favorites và deviceId: lưu lâu dài trong Preferences.
 - History: tồn tại trong phiên chạy app (in-memory).
 - Telemetry location buffer: tồn tại trong RAM, flush theo chu kỳ 10 giây.
-
-Nếu cần TTL cụ thể kiểu 24h/7 ngày, hiện tại code chưa áp dụng và cần bổ sung timestamp-based invalidation.
