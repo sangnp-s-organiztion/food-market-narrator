@@ -167,13 +167,6 @@ public class LanguageService : ILanguageService
         Thread.CurrentThread.CurrentCulture = culture;
 
         AppResources.Culture = culture;
-
-        // Reload AppShell (nháº¹ hÆ¡n recreate toÃ n app)
-        if (Application.Current?.Windows?.Count > 0)
-        {
-            Application.Current.Windows[0].Page = new AppShell();
-        }
-
     }
 }
 
