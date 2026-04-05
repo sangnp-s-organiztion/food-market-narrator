@@ -12,11 +12,13 @@ public class AudioLogSyncService : IAudioLogSyncService
 
     private readonly HttpClient _httpClient;
     private readonly ILocationLogSyncService _locationLogSyncService;
+    private readonly IQrAccessService _qrAccessService;
 
-    public AudioLogSyncService(HttpClient httpClient, ILocationLogSyncService locationLogSyncService)
+    public AudioLogSyncService(HttpClient httpClient, ILocationLogSyncService locationLogSyncService, IQrAccessService qrAccessService)
     {
         _httpClient = httpClient;
         _locationLogSyncService = locationLogSyncService;
+        _qrAccessService = qrAccessService;
     }
 
     public async Task LogPlaybackAsync(
@@ -135,7 +137,10 @@ public class AudioLogSyncService : IAudioLogSyncService
         {
             SessionId = sessionId,
             DeviceId = GetOrCreateDeviceId(),
-            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}"
+            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}",
+            QrAccessExpiresAtUtc = _qrAccessService.IsQrTimeRestricted
+                ? _qrAccessService.QrAccessExpiresAtUtc
+                : null
         };
 
         try
@@ -185,6 +190,7 @@ public class AudioUserSessionStartRequest
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
+    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }
 
 public class AudioLogErrorResponse

@@ -15,11 +15,24 @@ Format áp dụng:
 
 - Mở rộng CI để chạy test cho đủ 4 mảng: API, MAUI, admin, saler.
 - Bổ sung tài liệu hướng dẫn chạy test tổng hợp tại test-guide.md.
+- Bổ sung phân trang danh sách "Quán ngon nổi bật" trên trang chủ MAUI (10 quán/trang).
+- Thêm bộ điều khiển bản đồ trên MainPage MAUI: zoom in/out và đưa camera về vị trí hiện tại.
+- Thêm hiển thị tên POI trực tiếp trên bản đồ MAUI, tối ưu theo hướng tương đối và giới hạn bán kính 40m quanh người dùng.
+- Bổ sung tài liệu kiến trúc MAUI chi tiết tại docs/architecture (overview, runtime flow, caching/offline, API contracts, feature gaps).
+- Bổ sung metadata `last_seen_at` và `session_id` cho dữ liệu UserSessions phục vụ theo dõi phiên tốt hơn.
 
 ### Changed - Unreleased
 
 - Chuẩn hóa lại bộ test theo trạng thái code mới của auth, analytics và image endpoints.
 - Cải thiện độ ổn định test MAUI bằng cách loại bỏ phụ thuộc vào giờ chạy thực tế.
+- Cải thiện luồng auto narration MAUI: vẫn ghi nhận geofence transition khi audio hiện tại đang phát và phát nối tiếp POI kế tiếp sau khi track trước kết thúc.
+- Lọc danh sách POI không active ngay từ tầng service MAUI (API + offline cache) để đồng bộ hiển thị và trigger narration.
+- Tăng vùng hiển thị map ở MainPage MAUI (full-bleed hơn, chiều cao lớn hơn) để tối ưu trải nghiệm quan sát POI.
+- Cập nhật luồng CI frontend/admin theo React 19 và đồng bộ dependency liên quan.
+
+### Fixed - Unreleased
+
+- Sửa lỗi pipeline CI cho admin/saler.
 
 ## [v1.2.0] - 2026-04-03
 
@@ -113,6 +126,28 @@ Format áp dụng:
 ### Changed - v0.0.1
 
 - Điều chỉnh SettingsPage language flow và cấu trúc test project ban đầu.
+
+## [v0.0.0] - 2026-01-19
+
+### Added - v0.0.0
+
+- Khởi tạo repository và cấu trúc dự án ban đầu.
+- Khởi tạo ứng dụng MAUI, tích hợp bản đồ và hiển thị danh sách POI đầu tiên.
+- Bổ sung các tài nguyên narration (scripts/audio) đa ngôn ngữ cho visitor flow.
+- Thêm các màn cốt lõi: MainPage, MapPage, POIDetailPage, FavoritePage, HistoryPage và SettingsPage.
+- Thiết lập backend .NET Web API nền tảng để phục vụ dữ liệu POI và media.
+
+### Changed - v0.0.0
+
+- Chuyển hướng bản đồ từ Google Maps sang Mapsui/OpenStreetMap.
+- Chuẩn hóa cấu hình API host cho Android emulator/device thật.
+- Refactor dần service/interface để tách lớp rõ hơn giữa UI, service và data flow.
+
+### Fixed - v0.0.0
+
+- Sửa các lỗi theo dõi vị trí realtime, highlight POI gần nhất và focus vị trí người dùng.
+- Sửa các lỗi UI/UX ban đầu ở MainPage, map interactions và favorite flow.
+- Cải thiện ổn định phát audio (play/pause/resume) ở màn chi tiết POI.
 
 ## Maintenance Guide
 

@@ -36,13 +36,15 @@ export const analyticsApi = {
   },
 
   /**
-   * GET /api/analytics/heatmap?hours=24
-   * @param hours - lookback window (default 24, max 720)
+   * GET /api/analytics/heatmap
+   * @param hoursOrAll - lookback window in hours, or "all" for no time limit
    */
-  async getHeatmap(hours = 24): Promise<HeatmapResponse> {
-    return analyticsFetch<HeatmapResponse>(
-      `/api/analytics/heatmap?hours=${hours}`,
-    );
+  async getHeatmap(hoursOrAll: number | "all" = 24): Promise<HeatmapResponse> {
+    const query =
+      hoursOrAll === "all"
+        ? "/api/analytics/heatmap?all=true"
+        : `/api/analytics/heatmap?hours=${hoursOrAll}`;
+    return analyticsFetch<HeatmapResponse>(query);
   },
 
   /**

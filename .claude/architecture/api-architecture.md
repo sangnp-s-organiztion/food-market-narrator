@@ -61,6 +61,7 @@ Luu y:
 
 - GET /Mongo/test-connect (public)
 - POST /api/user-sessions/start (public)
+- GET /api/user-sessions/{sessionId}/qr-access (public)
 - POST /api/location-logs/batch (public)
 - POST /api/audio-logs (public)
 

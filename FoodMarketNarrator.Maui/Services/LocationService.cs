@@ -8,6 +8,7 @@ public class LocationService : ILocationService
     private bool _isTracking = false;
     private CancellationTokenSource? _trackingCts;
     private Task? _trackingTask;
+    private Location? _lastKnownLocation;
     private Location? _lastPublishedLocation;
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
@@ -18,6 +19,7 @@ public class LocationService : ILocationService
 
     public event EventHandler<Location>? LocationChanged;
     public event EventHandler<Location?>? LocationSampled;
+    public Location? LastKnownLocation => _lastKnownLocation;
 
     // Lay vi tri hien tai cua nguoi dung.
     public async Task<Location?> GetCurrentLocationAsync()
@@ -29,7 +31,13 @@ public class LocationService : ILocationService
                 return null;
 
             var request = new GeolocationRequest(GeolocationAccuracy.High, TimeSpan.FromSeconds(10));
-            return await Geolocation.Default.GetLocationAsync(request);
+            var location = await Geolocation.Default.GetLocationAsync(request);
+            if (location != null)
+            {
+                _lastKnownLocation = location;
+            }
+
+            return location;
         }
         catch (Exception)
         {
@@ -166,6 +174,11 @@ public class LocationService : ILocationService
                 else
                 {
                     var location = await Geolocation.Default.GetLocationAsync(TrackingRequest);
+                    if (location != null)
+                    {
+                        _lastKnownLocation = location;
+                    }
+
                     LocationSampled?.Invoke(this, location);
 
                     if (location != null && ShouldPublish(location))

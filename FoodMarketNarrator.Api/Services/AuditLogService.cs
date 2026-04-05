@@ -90,4 +90,29 @@ public class AuditLogService
             _logger.LogError(ex, "Failed to write audit log to MongoDB");
         }
     }
+
+    public async Task<bool> ExistsAsync(string action, string? targetId = null)
+    {
+        if (string.IsNullOrWhiteSpace(action))
+        {
+            return false;
+        }
+
+        var filters = new List<FilterDefinition<BsonDocument>>
+        {
+            Builders<BsonDocument>.Filter.Eq("action", action)
+        };
+
+        if (!string.IsNullOrWhiteSpace(targetId))
+        {
+            filters.Add(Builders<BsonDocument>.Filter.Eq("target_id", targetId));
+        }
+
+        var filter = filters.Count == 1
+            ? filters[0]
+            : Builders<BsonDocument>.Filter.And(filters);
+
+        var count = await _auditLogs.CountDocumentsAsync(filter, new CountOptions { Limit = 1 });
+        return count > 0;
+    }
 }

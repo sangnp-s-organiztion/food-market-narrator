@@ -9,14 +9,18 @@ using Mapsui.Projections;
 using Mapsui.Styles;
 using Mapsui.Tiling.Layers;
 using Mapsui.UI.Maui;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace food_market_narrator.Helpers
 {
     public static class MapHelper
     {
         private const string PoiLayerName = "POIs";
+        private const string PoiLabelLayerName = "POILabels";
         private const string UserLocationLayerName = "UserLocation";
         private const string OsmLayerName = "OpenStreetMap";
+        private const double PoiLabelOffsetMeters = 8;
+        private const double PoiLabelVisibleRadiusMeters = 40;
 
         public static async Task LoadMapAsync(
             MapControl mapControl,
@@ -58,6 +62,10 @@ namespace food_market_narrator.Helpers
                 if (existingLayer != null)
                     mapControl.Map.Layers.Remove(existingLayer);
 
+                var existingLabelLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLabelLayerName);
+                if (existingLabelLayer != null)
+                    mapControl.Map.Layers.Remove(existingLabelLayer);
+
                 var features = new List<PointFeature>();
                 foreach (var poi in pois)
                 {
@@ -66,6 +74,8 @@ namespace food_market_narrator.Helpers
                     feature["name"] = poi.Name ?? poi.restaurantId;
                     feature["address"] = poi.Address ?? "";
                     feature["id"] = poi.restaurantId;
+                    feature["lat"] = poi.Latitude;
+                    feature["lon"] = poi.Longitude;
                     feature.Styles.Add(CreateMarkerStyle(false));
                     features.Add(feature);
                 }
@@ -76,6 +86,19 @@ namespace food_market_narrator.Helpers
                     Features = features
                 };
                 mapControl.Map.Layers.Add(poiLayer);
+
+                var poiLabelLayer = new MemoryLayer
+                {
+                    Name = PoiLabelLayerName,
+                    Features = new List<IFeature>(),
+                    Style = CreatePoiLabelStyle()
+                };
+                mapControl.Map.Layers.Add(poiLabelLayer);
+
+                if (focusLocation != null)
+                {
+                    RefreshPoiLabelsByUserLocation(mapControl, focusLocation.Latitude, focusLocation.Longitude);
+                }
 
                 if (focusLocation != null)
                 {
@@ -171,9 +194,90 @@ namespace food_market_narrator.Helpers
             };
             mapControl.Map.Layers.Add(layer);
 
+            RefreshPoiLabelsByUserLocation(mapControl, lat, lon);
+
             // Tương tự: force re-render sau khi update user location
             mapControl.Map.RefreshData();
             mapControl.Map.RefreshGraphics();
+        }
+
+        private static void RefreshPoiLabelsByUserLocation(MapControl mapControl, double userLat, double userLon)
+        {
+            var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
+            var poiLabelLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLabelLayerName) as MemoryLayer;
+            if (poiLayer == null || poiLabelLayer == null)
+            {
+                return;
+            }
+
+            var labelFeatures = new List<IFeature>();
+            foreach (var poiFeature in poiLayer.Features.OfType<PointFeature>())
+            {
+                if (!TryGetCoordinate(poiFeature["lat"], out var poiLat)
+                    || !TryGetCoordinate(poiFeature["lon"], out var poiLon))
+                {
+                    continue;
+                }
+
+                var distanceMeters = Location.CalculateDistance(
+                    new Location(userLat, userLon),
+                    new Location(poiLat, poiLon),
+                    DistanceUnits.Kilometers) * 1000;
+
+                if (distanceMeters > PoiLabelVisibleRadiusMeters)
+                {
+                    continue;
+                }
+
+                var poiSpherical = SphericalMercator.FromLonLat(poiLon, poiLat);
+                var userSpherical = SphericalMercator.FromLonLat(userLon, userLat);
+                var deltaX = poiSpherical.x - userSpherical.x;
+                var deltaY = poiSpherical.y - userSpherical.y;
+
+                var labelX = poiSpherical.x;
+                var labelY = poiSpherical.y;
+
+                if (Math.Abs(deltaX) >= Math.Abs(deltaY))
+                {
+                    labelX += deltaX >= 0 ? PoiLabelOffsetMeters : -PoiLabelOffsetMeters;
+                }
+                else
+                {
+                    labelY += deltaY >= 0 ? PoiLabelOffsetMeters : -PoiLabelOffsetMeters;
+                }
+
+                var labelFeature = new PointFeature(labelX, labelY);
+                var rawName = poiFeature["name"]?.ToString() ?? string.Empty;
+                labelFeature["name"] = $"  {rawName}  ";
+                labelFeature["id"] = poiFeature["id"]?.ToString() ?? string.Empty;
+                labelFeatures.Add(labelFeature);
+            }
+
+            poiLabelLayer.Features = labelFeatures;
+            poiLabelLayer.DataHasChanged();
+        }
+
+        private static bool TryGetCoordinate(object? value, out double coordinate)
+        {
+            coordinate = 0;
+
+            switch (value)
+            {
+                case double d:
+                    coordinate = d;
+                    return true;
+                case float f:
+                    coordinate = f;
+                    return true;
+                case decimal m:
+                    coordinate = (double)m;
+                    return true;
+                case string s when double.TryParse(s, out var parsed):
+                    coordinate = parsed;
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static void CenterOnUserLocation(MapControl mapControl, double lat, double lon, int? zoomLevel = null)
@@ -231,6 +335,17 @@ namespace food_market_narrator.Helpers
                     : new Mapsui.Styles.Color(244, 140, 6)),
                 Outline = new Pen(new Mapsui.Styles.Color(255, 255, 255), 2),
                 SymbolType = SymbolType.Ellipse
+            };
+        }
+
+        private static LabelStyle CreatePoiLabelStyle()
+        {
+            return new LabelStyle
+            {
+                LabelColumn = "name",
+                ForeColor = new Mapsui.Styles.Color(47, 54, 64),
+                BackColor = new Mapsui.Styles.Brush(new Mapsui.Styles.Color(255, 255, 255, 232)),
+                CollisionDetection = true
             };
         }
     }

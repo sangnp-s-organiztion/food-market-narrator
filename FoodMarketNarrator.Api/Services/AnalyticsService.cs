@@ -32,8 +32,8 @@ public class AnalyticsService
         };
     }
 
-    // ─── Heatmap Points (last 24h) ─────────────────────────────────────────────
-    public async Task<HeatmapResponse> GetHeatmapAsync(int hours = 24)
+    // ─── Heatmap Points (hours window or all-time when null) ──────────────────
+    public async Task<HeatmapResponse> GetHeatmapAsync(int? hours = 24)
     {
         var points = await _analyticsRepository.GetHeatmapPointsAsync(hours);
 
