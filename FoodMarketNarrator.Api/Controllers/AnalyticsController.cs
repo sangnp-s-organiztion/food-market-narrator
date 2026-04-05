@@ -29,14 +29,22 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
-    /// GeoJSON heatmap points from LocationLogs (last 24h by default).
-    /// Query param: hours (int, default 24, max 720 / 30 days).
+    /// GeoJSON heatmap points from LocationLogs.
+    /// Query params:
+    /// - hours (int, default 24, max 720 / 30 days)
+    /// - all (bool, default false): true = return all available points (ignore hours)
     /// </summary>
     [HttpGet("heatmap")]
-    public async Task<IActionResult> GetHeatmap([FromQuery] int hours = 24)
+    public async Task<IActionResult> GetHeatmap([FromQuery] int? hours = 24, [FromQuery] bool all = false)
     {
-        var clamped = Math.Clamp(hours, 1, 720);
-        var heatmap = await _analyticsService.GetHeatmapAsync(clamped);
+        int? normalizedHours = null;
+        if (!all)
+        {
+            var requested = hours ?? 24;
+            normalizedHours = Math.Clamp(requested, 1, 720);
+        }
+
+        var heatmap = await _analyticsService.GetHeatmapAsync(normalizedHours);
         return Ok(heatmap);
     }
 
