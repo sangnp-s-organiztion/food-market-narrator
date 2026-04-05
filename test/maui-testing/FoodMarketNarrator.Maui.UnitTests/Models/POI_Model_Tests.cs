@@ -295,7 +295,7 @@ public class POI_Model_Tests
     }
 
     [Fact]
-    public void OpeningHoursDisplay_WithoutValue_ReturnsDefault()
+    public void OpeningHoursDisplay_WithoutValue_ReturnsUpdatingText()
     {
         // Arrange
         var poi = new POI { restaurantId = "resto1", OpeningHours = null };
@@ -304,7 +304,25 @@ public class POI_Model_Tests
         var result = poi.OpeningHoursDisplay;
 
         // Assert
-        Assert.Equal("08:00 - 22:00", result);
+        Assert.Equal("Đang cập nhật", result);
+    }
+
+    [Fact]
+    public void OpeningHoursDisplay_WithOpenTimeAndCloseTime_ReturnsFormattedWindow()
+    {
+        // Arrange
+        var poi = new POI
+        {
+            restaurantId = "resto1",
+            OpenTime = new TimeSpan(8, 0, 0),
+            CloseTime = new TimeSpan(22, 30, 0)
+        };
+
+        // Act
+        var result = poi.OpeningHoursDisplay;
+
+        // Assert
+        Assert.Equal("08:00 - 22:30", result);
     }
 
     [Fact]
