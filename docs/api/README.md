@@ -1,12 +1,12 @@
 # API Docs
 
-Tai lieu tong quan cho FoodMarketNarrator.Api.
+Tài liệu tổng quan cho FoodMarketNarrator.Api.
 
-## Cong nghe
+## Công nghệ
 
 - ASP.NET Core Web API (.NET 10)
 - EF Core SQL Server
-- MongoDB cho logging va analytics
+- MongoDB cho logging và analytics
 - Cookie Authentication + Role-based Authorization
 
 ## Base URLs local
@@ -18,13 +18,13 @@ Tai lieu tong quan cho FoodMarketNarrator.Api.
 
 - Controller -> Service -> Repository -> DbContext
 
-Nguyen tac:
+Nguyên tắc:
 
-- Controller mong, tra response va validate co ban.
-- Business logic o Service.
-- Data access o Repository.
+- Controller mỏng, trả response và validate cơ bản.
+- Business logic ở Service.
+- Data access ở Repository.
 
-## Nhom endpoint chinh
+## Nhóm endpoint chính
 
 ### Auth
 
@@ -59,7 +59,7 @@ Nguyen tac:
 - PATCH /Audios/{audioId}/active
 - DELETE /Audios/{audioId}
 
-### Admin analytics va logs
+### Admin analytics và logs
 
 - GET /api/analytics/kpis
 - GET /api/analytics/heatmap
@@ -82,7 +82,7 @@ Nguyen tac:
 - PATCH /api/users/{id}/role
 - PATCH /api/users/{id}/status
 
-## Chay local
+## Chạy local
 
 ```bash
 cd FoodMarketNarrator.Api
@@ -90,16 +90,20 @@ dotnet restore
 dotnet run
 ```
 
-## Chay test
+## Chạy test
 
 ```bash
 dotnet test test/maui-testing/FoodMarketNarrator.Api.IntegrationTests/IntegrationTests.csproj
 ```
 
-## Tai lieu lien quan
+## Tài liệu liên quan
 
 - ../architecture/overview.md
 - ../architecture/api-architecture.md
 - ../setup/local-development.md
 - ../testing/test-strategy.md
 - seller-required-endpoints.md
+
+## Ghi chú nghiệp vụ mới
+
+- Với endpoint `PATCH /Audios/{audioId}/active`: khi bật active cho một audio, backend sẽ tự tắt các audio active khác cùng `restaurantId` và `languageId`.

@@ -181,9 +181,9 @@ Phần này mô tả các hành vi chính của người dùng khi sử dụng �
 
 Format chuẩn:
 
-**As a [user]**  
-**I want [action]**  
-**So that [goal]**
+**Với vai trò là [user]**  
+**Tôi muốn [action]**  
+**Để [goal]**
 
 ---
 
@@ -191,63 +191,63 @@ Format chuẩn:
 
 **Story V1 - Mở ứng dụng nhanh**
 
-As a visitor  
-I want to scan a QR code  
-So that I can quickly open the food market app.
+Với vai trò là du khách  
+Tôi muốn quét mã QR  
+Để có thể mở nhanh ứng dụng chợ ẩm thực.
 
 **Story V2 - Cấp quyền vị trí**
 
-As a visitor  
-I want the app to request location permission clearly  
-So that I understand why location is needed for narration.
+Với vai trò là du khách  
+Tôi muốn ứng dụng xin quyền vị trí một cách rõ ràng  
+Để tôi hiểu vì sao vị trí là cần thiết cho tính năng thuyết minh.
 
 **Story V3 - Xem bản đồ POI**
 
-As a visitor  
-I want to see all nearby food POIs on a map  
-So that I can choose where to go next.
+Với vai trò là du khách  
+Tôi muốn xem tất cả POI ẩm thực lân cận trên bản đồ  
+Để tôi có thể chọn nơi sẽ đi tiếp theo.
 
 **Story V4 - Xem chi tiết quán**
 
-As a visitor  
-I want to view details of a selected food stall  
-So that I can decide whether the place matches my preference.
+Với vai trò là du khách  
+Tôi muốn xem chi tiết một quán ăn đã chọn  
+Để tôi có thể quyết định quán đó có phù hợp với sở thích của mình hay không.
 
 **Story V5 - Nghe thuyết minh tự động**
 
-As a visitor  
-I want narration to auto-play when I enter a POI area  
-So that I can learn without manually searching information.
+Với vai trò là du khách  
+Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI  
+Để tôi có thể tìm hiểu thông tin mà không cần tự tìm thủ công.
 
 **Story V6 - Đổi ngôn ngữ thuyết minh**
 
-As a visitor  
-I want to switch narration language  
-So that I can listen in my preferred language.
+Với vai trò là du khách  
+Tôi muốn đổi ngôn ngữ thuyết minh  
+Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
 
 **Story V7 - Phát lại thủ công**
 
-As a visitor  
-I want to manually replay a POI audio  
-So that I can review information I missed.
+Với vai trò là du khách  
+Tôi muốn phát lại thủ công audio của POI  
+Để tôi có thể nghe lại những thông tin đã bỏ lỡ.
 
 **Story V8 - Hoạt động khi mạng yếu**
 
-As a visitor  
-I want the app to use cached POI/audio when network is unstable  
-So that my experience is not interrupted.
+Với vai trò là du khách  
+Tôi muốn ứng dụng dùng dữ liệu POI/audio đã cache khi mạng không ổn định  
+Để trải nghiệm của tôi không bị gián đoạn.
 
 **Story V9 - Nhận gợi ý quán gần nhất**
 
-As a visitor  
-I want to see the nearest highlighted POI  
-So that I can quickly discover places around me.
+Với vai trò là du khách  
+Tôi muốn thấy POI gần nhất được làm nổi bật  
+Để tôi có thể nhanh chóng khám phá các địa điểm xung quanh.
 
 **Story V10 - Không phát lặp gây phiền**
 
-As a visitor  
-I want the app to avoid auto-repeating the same narration in one session  
-So that I am not annoyed by duplicate audio.
+Với vai trò là du khách  
+Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên  
+Để tôi không bị khó chịu vì âm thanh lặp lại.
 
 ---
 
@@ -255,45 +255,45 @@ So that I am not annoyed by duplicate audio.
 
 **Story S1 - Đăng nhập quản lý quán**
 
-As a seller  
-I want to sign in to my management portal  
-So that I can manage my own restaurant data securely.
+Với vai trò là chủ quán  
+Tôi muốn đăng nhập vào cổng quản lý của mình  
+Để tôi có thể quản lý dữ liệu nhà hàng một cách an toàn.
 
 **Story S2 - Cập nhật thông tin quán**
 
-As a seller  
-I want to edit restaurant profile information  
-So that visitors always see accurate details.
+Với vai trò là chủ quán  
+Tôi muốn chỉnh sửa thông tin hồ sơ nhà hàng  
+Để du khách luôn thấy thông tin chính xác.
 
 **Story S3 - Quản lý menu món ăn**
 
-As a seller  
-I want to create, update, and delete dish items  
-So that my menu reflects current offerings.
+Với vai trò là chủ quán  
+Tôi muốn tạo, cập nhật và xóa món ăn  
+Để menu phản ánh đúng các món đang phục vụ.
 
 **Story S4 - Quản lý hình ảnh quán**
 
-As a seller  
-I want to upload and reorder restaurant images  
-So that my stall appears attractive and informative.
+Với vai trò là chủ quán  
+Tôi muốn tải lên và sắp xếp lại hình ảnh nhà hàng  
+Để quán của tôi trông hấp dẫn và cung cấp thông tin tốt hơn.
 
 **Story S5 - Quản lý audio thuyết minh**
 
-As a seller  
-I want to upload narration audio by language  
-So that visitors can hear introductions for my stall.
+Với vai trò là chủ quán  
+Tôi muốn tải lên audio thuyết minh theo từng ngôn ngữ  
+Để du khách có thể nghe phần giới thiệu của quán.
 
 **Story S6 - Bật/tắt nội dung không còn phù hợp**
 
-As a seller  
-I want to activate or deactivate audio items  
-So that outdated content is not played to visitors.
+Với vai trò là chủ quán  
+Tôi muốn bật hoặc tắt các bản ghi audio  
+Để nội dung đã lỗi thời không bị phát cho du khách.
 
 **Story S7 - Chọn nhà hàng cần thao tác**
 
-As a seller  
-I want to select a restaurant before editing data  
-So that I avoid updating the wrong place.
+Với vai trò là chủ quán  
+Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu  
+Để tránh cập nhật nhầm địa điểm.
 
 ---
 
@@ -301,45 +301,45 @@ So that I avoid updating the wrong place.
 
 **Story A1 - Quản lý tài khoản người dùng**
 
-As an admin  
-I want to manage user accounts and roles  
-So that access is controlled correctly.
+Với vai trò là quản trị viên  
+Tôi muốn quản lý tài khoản người dùng và vai trò  
+Để quyền truy cập được kiểm soát đúng.
 
 **Story A2 - Quản lý danh mục ngôn ngữ**
 
-As an admin  
-I want to maintain available languages  
-So that the system supports multilingual narration.
+Với vai trò là quản trị viên  
+Tôi muốn duy trì danh mục ngôn ngữ khả dụng  
+Để hệ thống hỗ trợ thuyết minh đa ngôn ngữ.
 
 **Story A3 - Quản lý toàn bộ nhà hàng**
 
-As an admin  
-I want to view and update all restaurants  
-So that data quality is consistent across the system.
+Với vai trò là quản trị viên  
+Tôi muốn xem và cập nhật toàn bộ nhà hàng  
+Để chất lượng dữ liệu được đồng nhất trong toàn hệ thống.
 
 **Story A4 - Kiểm duyệt nội dung media**
 
-As an admin  
-I want to review uploaded images and audios  
-So that inappropriate or broken media is removed.
+Với vai trò là quản trị viên  
+Tôi muốn kiểm duyệt hình ảnh và audio đã tải lên  
+Để nội dung không phù hợp hoặc bị lỗi được loại bỏ.
 
 **Story A5 - Cấu hình endpoint public/private**
 
-As an admin  
-I want to control which APIs are public or protected  
-So that security policies are enforced correctly.
+Với vai trò là quản trị viên  
+Tôi muốn kiểm soát API nào là public hoặc protected  
+Để chính sách bảo mật được áp dụng đúng.
 
 **Story A6 - Theo dõi vận hành hệ thống**
 
-As an admin  
-I want to monitor system health and content update activities  
-So that I can detect and resolve issues early.
+Với vai trò là quản trị viên  
+Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung  
+Để có thể phát hiện và xử lý vấn đề sớm.
 
 **Story A7 - Khóa/mở trạng thái nhà hàng**
 
-As an admin  
-I want to enable or disable a restaurant status  
-So that invalid or inactive locations do not affect visitors.
+Với vai trò là quản trị viên  
+Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng  
+Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
 
 ## 10. Features / Functional Requirements
 
