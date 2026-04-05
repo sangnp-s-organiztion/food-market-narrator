@@ -1,16 +1,16 @@
 # Saler Docs
 
-Tai lieu tong quan cho web saler.
+Tài liệu tổng quan cho web saler.
 
-## Muc tieu
+## Mục tiêu
 
-Saler dashboard dung de:
+Saler dashboard dùng để:
 
-- Dang nhap va quan ly phien lam viec
-- Quan ly thong tin nha hang
-- Quan ly menu mon an
-- Quan ly hinh anh nha hang
-- Quan ly audio thuyet minh theo ngon ngu
+- Đăng nhập và quản lý phiên làm việc
+- Quản lý thông tin nhà hàng
+- Quản lý menu món ăn
+- Quản lý hình ảnh nhà hàng
+- Quản lý audio thuyết minh theo ngôn ngữ
 
 ## Stack
 
@@ -18,7 +18,7 @@ Saler dashboard dung de:
 - TanStack Query
 - Vitest
 
-## Chay local
+## Chạy local
 
 ```bash
 cd saler
@@ -26,7 +26,7 @@ npm install
 npm run dev
 ```
 
-## Build va test
+## Build và test
 
 ```bash
 cd saler
@@ -35,7 +35,7 @@ npm run lint
 npm test
 ```
 
-## API chinh
+## API chính
 
 - Auth: /Auth/login, /Auth/me, /Auth/logout
 - Restaurant: /Restaurant, /Restaurant/{id}, /Restaurant/{id}/status
@@ -44,13 +44,15 @@ npm test
 - Audios: /public/Restaurant/{id}/audios, /Restaurant/{id}/audios, /Audios/{audioId}
 - Languages: /Language
 
-## Luu y
+## Lưu ý
 
-- Frontend gui cookie auth qua credentials include.
-- App chi chap nhan tai khoan role saler trong auth flow.
-- Endpoint images da dung route canonical /Restaurant/{id}/images.
+- Frontend gửi cookie auth qua `credentials: include`.
+- App chỉ chấp nhận tài khoản role `saler` trong auth flow.
+- Endpoint images đã dùng route canonical `/Restaurant/{id}/images`.
+- Mỗi ngôn ngữ chỉ nên có 1 audio active cho mỗi nhà hàng; backend đang enforce quy tắc này.
+- Khi upload/toggle/delete audio, UI cần refresh dữ liệu từ server để phản ánh trạng thái active mới nhất.
 
-## Tai lieu lien quan
+## Tài liệu liên quan
 
 - ../api/seller-required-endpoints.md
 - ../testing/test-strategy.md

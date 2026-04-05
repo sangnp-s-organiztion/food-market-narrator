@@ -1,18 +1,18 @@
 # Seller Required Endpoints
 
-Tai lieu endpoint thuc te ma web saler dang su dung o code hien tai.
+Tài liệu endpoint thực tế mà web saler đang sử dụng ở code hiện tại.
 
-## 1. Auth va session
+## 1. Auth và session
 
 - POST /Auth/login
 - GET /Auth/me
 - POST /Auth/logout
 
-Luu y:
+Lưu ý:
 
-- Dung cookie auth.
-- Frontend can gui `credentials: include`.
-- Saler app chi chap nhan user co role `saler`.
+- Dùng cookie auth.
+- Frontend cần gửi `credentials: include`.
+- Saler app chỉ chấp nhận user có role `saler`.
 
 ## 2. Restaurant
 
@@ -49,8 +49,9 @@ Luu y:
 - GET /Language
 - GET /Language/{languageCode}
 
-## 7. Notes quan trong
+## 7. Ghi chú quan trọng
 
-- Route `/Users/{userId}/restaurants` khong con la dependency bat buoc trong saler frontend hien tai.
-- Endpoint images canonical dang dung la `/Restaurant/{restaurantId}/images` (khong dung prefix /public).
-- Du lieu `restaurantId` duoc xu ly theo string o frontend va backend.
+- Route `/Users/{userId}/restaurants` không còn là dependency bắt buộc trong saler frontend hiện tại.
+- Endpoint images canonical đang dùng là `/Restaurant/{restaurantId}/images` (không dùng prefix /public).
+- Dữ liệu `restaurantId` được xử lý theo string ở frontend và backend.
+- Nghiệp vụ audio hiện tại: trong cùng một nhà hàng và một ngôn ngữ, chỉ có 1 bản ghi audio được active tại một thời điểm.

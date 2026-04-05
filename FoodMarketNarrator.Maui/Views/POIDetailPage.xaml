@@ -85,7 +85,7 @@
                         </Grid>
                     </Border>
 
-                    <!-- Card thông tin quán (trạng thái, giờ mở cửa, tên, rating, địa chỉ) -->
+                    <!-- Card thông tin quán (trạng thái, giờ mở cửa, tên, địa chỉ) -->
                     <Border Grid.Row="1"
                             Margin="16,-44,16,0"
                             Padding="14"
@@ -133,13 +133,6 @@
                                    FontFamily="OpenSansSemibold" />
 
                             <VerticalStackLayout Grid.Row="2" Spacing="6">
-                                <HorizontalStackLayout Spacing="6">
-                                    <Label Text="&#xf005;" FontFamily="FASolid" FontSize="12" TextColor="#F39C12" />
-                                    <Label Text="Chưa có" FontSize="13" FontAttributes="Bold" TextColor="#2F3640" />
-                                    <Label Text="(chưa có đánh giá)" FontSize="12" TextColor="#808B96" />
-                                </HorizontalStackLayout>
-                                <!-- HARD_CODE: payload không có rating/review -->
-
                                 <HorizontalStackLayout Spacing="8">
                                     <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#E67E22" VerticalOptions="Start" Margin="0,2,0,0" />
                                     <Label Text="{Binding AddressDisplay}"

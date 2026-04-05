@@ -92,6 +92,15 @@ export interface TopRestaurantChartData {
   listens: number;
 }
 
+export interface ListenTimeseriesItem {
+  date: string; // "yyyy-MM-dd"
+  listens: number;
+}
+
+export interface ListensTimeseriesResponse {
+  items: ListenTimeseriesItem[];
+}
+
 // ─── Audit Log Types ─────────────────────────────────────────────────────────
 
 export interface AuditLogItem {

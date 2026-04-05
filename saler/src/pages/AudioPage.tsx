@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   deleteAudioApi,
   getLanguagesApi,
@@ -36,6 +36,7 @@ export default function AudioPage() {
   const { selectedRestaurant } = useRestaurant();
   const [audios, setAudios] = useState<Audio[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -64,22 +65,83 @@ export default function AudioPage() {
     return versions;
   }, [audios]);
 
-  useEffect(() => {
-    if (selectedRestaurant) {
-      (async () => {
-        try {
-          const [audioData, languageData] = await Promise.all([
-            getRestaurantAudiosApi(selectedRestaurant.restaurant_id),
-            getLanguagesApi(),
-          ]);
-          setAudios(audioData ?? []);
-          setLanguages(languageData ?? []);
-        } catch {
-          toast.error("Không thể tải danh sách âm thanh");
-        }
-      })();
+  const languageGroups = useMemo(() => {
+    const audiosByLanguage = new Map<number, Audio[]>();
+
+    audios.forEach((audio) => {
+      const list = audiosByLanguage.get(audio.language_id) ?? [];
+      list.push(audio);
+      audiosByLanguage.set(audio.language_id, list);
+    });
+
+    audiosByLanguage.forEach((list) => {
+      list.sort((a, b) => {
+        const dateDiff =
+          new Date(b.date_generation).getTime() -
+          new Date(a.date_generation).getTime();
+        if (dateDiff !== 0) return dateDiff;
+        return b.audio_id - a.audio_id;
+      });
+    });
+
+    const languageOrder = new Map<number, number>();
+    languages.forEach((lang, idx) => {
+      languageOrder.set(lang.language_id, idx);
+    });
+
+    const ids = new Set<number>([
+      ...languages.map((l) => l.language_id),
+      ...audios.map((a) => a.language_id),
+    ]);
+
+    return [...ids]
+      .map((languageId) => {
+        const language = languages.find((l) => l.language_id === languageId);
+        const items = audiosByLanguage.get(languageId) ?? [];
+
+        return {
+          languageId,
+          languageName: language?.name ?? `Ngôn ngữ #${languageId}`,
+          items,
+          activeCount: items.filter((a) => a.is_active).length,
+        };
+      })
+      .sort((a, b) => {
+        const orderA = languageOrder.get(a.languageId);
+        const orderB = languageOrder.get(b.languageId);
+
+        if (orderA != null && orderB != null) return orderA - orderB;
+        if (orderA != null) return -1;
+        if (orderB != null) return 1;
+        return a.languageName.localeCompare(b.languageName);
+      });
+  }, [audios, languages]);
+
+  const fetchAudioData = useCallback(async () => {
+    if (!selectedRestaurant) {
+      setAudios([]);
+      setLanguages([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const [audioData, languageData] = await Promise.all([
+        getRestaurantAudiosApi(selectedRestaurant.restaurant_id),
+        getLanguagesApi(),
+      ]);
+      setAudios(audioData ?? []);
+      setLanguages(languageData ?? []);
+    } catch {
+      toast.error("Không thể tải danh sách âm thanh");
+    } finally {
+      setIsLoading(false);
     }
   }, [selectedRestaurant]);
+
+  useEffect(() => {
+    void fetchAudioData();
+  }, [fetchAudioData]);
 
   useEffect(() => {
     return () => {
@@ -96,11 +158,7 @@ export default function AudioPage() {
 
     try {
       await updateAudioActiveApi(id, !current.is_active);
-      setAudios((prev) =>
-        prev.map((a) =>
-          a.audio_id === id ? { ...a, is_active: !a.is_active } : a,
-        ),
-      );
+      await fetchAudioData();
       toast.success("Đã cập nhật trạng thái âm thanh");
     } catch {
       toast.error("Không thể cập nhật trạng thái âm thanh");
@@ -110,11 +168,17 @@ export default function AudioPage() {
   const deleteAudio = async (id: number) => {
     try {
       await deleteAudioApi(id);
-      setAudios((prev) => prev.filter((a) => a.audio_id !== id));
+      await fetchAudioData();
       toast.success("Đã xóa âm thanh");
     } catch {
       toast.error("Không thể xóa âm thanh");
     }
+  };
+
+  const openUploadDialog = (languageId?: number) => {
+    setSelectedLang(languageId ? String(languageId) : "");
+    setSelectedFile(null);
+    setDialogOpen(true);
   };
 
   const handleUpload = async () => {
@@ -133,12 +197,12 @@ export default function AudioPage() {
     const langId = parseInt(selectedLang);
 
     try {
-      const created = await uploadAudioApi(
+      await uploadAudioApi(
         selectedRestaurant.restaurant_id,
         langId,
         selectedFile,
       );
-      setAudios((prev) => [...prev, created]);
+      await fetchAudioData();
       setDialogOpen(false);
       setSelectedLang("");
       setSelectedFile(null);
@@ -147,9 +211,6 @@ export default function AudioPage() {
       toast.error("Không thể tải âm thanh lên");
     }
   };
-
-  const getLangName = (id: number) =>
-    languages.find((l) => l.language_id === id)?.name ?? `Ngôn ngữ #${id}`;
 
   const resolveAudioUrl = (audio: Audio): string => {
     const raw = audio.audio_url?.trim();
@@ -222,74 +283,120 @@ export default function AudioPage() {
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
           <p className="page-description">
-            Quản lý mô tả âm thanh theo các ngôn ngữ khác nhau
+            Quản lý theo từng ngôn ngữ, mỗi ngôn ngữ chỉ nên có 1 âm thanh hoạt
+            động
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => openUploadDialog()}>
           <Plus className="w-4 h-4 mr-2" /> Tải lên âm thanh
         </Button>
       </div>
 
-      {audios.length === 0 ? (
-        <div className="form-section text-center py-12">
-          <p className="text-muted-foreground">
-            Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.
-          </p>
+      {isLoading ? (
+        <div className="form-section text-center py-12 text-muted-foreground">
+          Đang tải dữ liệu âm thanh...
         </div>
       ) : (
         <div className="space-y-3">
-          {audios.map((audio) => (
-            <div
-              key={audio.audio_id}
-              className="dashboard-card flex items-center gap-4"
-            >
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-lg bg-accent shrink-0"
-                onClick={() => togglePlay(audio)}
-                title={
-                  playingAudioId === audio.audio_id
-                    ? "Tạm dừng"
-                    : "Phát âm thanh"
-                }
-              >
-                {playingAudioId === audio.audio_id ? (
-                  <Pause className="w-5 h-5 text-accent-foreground" />
-                ) : (
-                  <Play className="w-5 h-5 text-accent-foreground" />
-                )}
-              </Button>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground">
-                  {getLangName(audio.language_id)}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Phiên bản {versionByAudioId.get(audio.audio_id) ?? 1} ·{" "}
-                  {new Date(audio.date_generation).toLocaleDateString("vi-VN")}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-medium ${audio.is_active ? "text-success" : "text-muted-foreground"}`}
-                  >
-                    {audio.is_active ? "Hoạt động" : "Không hoạt động"}
-                  </span>
-                  <Switch
-                    checked={audio.is_active}
-                    onCheckedChange={() => toggleActive(audio.audio_id)}
-                  />
+          {languageGroups.length === 0 && (
+            <div className="form-section text-center py-12">
+              <p className="text-muted-foreground">
+                Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.
+              </p>
+            </div>
+          )}
+
+          {languageGroups.map((group) => (
+            <div key={group.languageId} className="dashboard-card space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold text-foreground text-base">
+                    {group.languageName}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {group.items.length} phiên bản - {group.activeCount} đang
+                    hoạt động
+                  </p>
+                  {group.activeCount > 1 && (
+                    <p className="text-xs text-destructive mt-1">
+                      Có hơn 1 âm thanh đang hoạt động trong cùng ngôn ngữ.
+                    </p>
+                  )}
                 </div>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteAudio(audio.audio_id)}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openUploadDialog(group.languageId)}
                 >
-                  <Trash2 className="w-4 h-4 text-destructive" />
+                  <Plus className="w-4 h-4 mr-1" /> Thêm bản ghi
                 </Button>
               </div>
+
+              {group.items.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  Chưa có âm thanh cho ngôn ngữ này.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {group.items.map((audio) => (
+                    <div
+                      key={audio.audio_id}
+                      className="flex items-center gap-4 rounded-lg border border-border/60 px-4 py-3"
+                    >
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="w-10 h-10 rounded-lg bg-accent shrink-0"
+                        onClick={() => togglePlay(audio)}
+                        title={
+                          playingAudioId === audio.audio_id
+                            ? "Tạm dừng"
+                            : "Phát âm thanh"
+                        }
+                      >
+                        {playingAudioId === audio.audio_id ? (
+                          <Pause className="w-5 h-5 text-accent-foreground" />
+                        ) : (
+                          <Play className="w-5 h-5 text-accent-foreground" />
+                        )}
+                      </Button>
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-foreground">
+                          Phiên bản {versionByAudioId.get(audio.audio_id) ?? 1}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(audio.date_generation).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-xs font-medium ${audio.is_active ? "text-success" : "text-muted-foreground"}`}
+                          >
+                            {audio.is_active ? "Hoạt động" : "Không hoạt động"}
+                          </span>
+                          <Switch
+                            checked={audio.is_active}
+                            onCheckedChange={() => toggleActive(audio.audio_id)}
+                          />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteAudio(audio.audio_id)}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
