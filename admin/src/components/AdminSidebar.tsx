@@ -23,6 +23,12 @@ const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const roleLabel =
+    user?.role?.toLowerCase() === "admin"
+      ? "Quản trị viên"
+      : user?.role?.toLowerCase() === "saler"
+        ? "Người bán"
+        : (user?.role ?? "");
 
   const handleLogout = async () => {
     await logout();
@@ -44,16 +50,11 @@ const AdminSidebar = () => {
           style={{ color: "hsl(221, 83%, 53%)" }}
         />
         <span
-          className="text-base font-semibold tracking-tight"
+          className="text-base font-semibold tracking-tight truncate"
           style={{ color: "white" }}
+          title="Food Market Narrator"
         >
-          SonicMap
-        </span>
-        <span
-          className="text-xs font-medium px-1.5 py-0.5 rounded"
-          style={{ background: "hsl(221, 83%, 53%)", color: "white" }}
-        >
-          Admin
+          Food Market Narrator
         </span>
       </div>
 
@@ -99,7 +100,7 @@ const AdminSidebar = () => {
               className="text-xs truncate"
               style={{ color: "hsl(215, 20%, 65%)" }}
             >
-              {user?.role ?? ""}
+              {roleLabel}
             </p>
           </div>
           <button

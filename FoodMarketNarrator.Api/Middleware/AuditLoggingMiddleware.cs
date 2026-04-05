@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
 
@@ -95,31 +94,135 @@ public class AuditLoggingMiddleware
     private static (string Action, string TargetType, string? TargetId) MapRequestToAuditAction(
         string method, string path, string query)
     {
-        var routeMatch = Regex.Match(path, @"^/api/(\w+)/([^/]+)(?:/(\w+))?", RegexOptions.IgnoreCase);
-        string targetType = routeMatch.Success ? routeMatch.Groups[1].Value : "Unknown";
-        string? targetId = routeMatch.Success && routeMatch.Groups[2].Success
-            ? routeMatch.Groups[2].Value : null;
-        string subAction = routeMatch.Success && routeMatch.Groups[3].Success
-            ? routeMatch.Groups[3].Value : "";
-
-        return method.ToUpperInvariant() switch
+        var cleanPath = (path ?? string.Empty).Split('?', 2)[0].Trim('/');
+        if (string.IsNullOrWhiteSpace(cleanPath))
         {
-            "POST" => ("CREATE", Capitalize(targetType), null),
-            "PUT" => ("UPDATE", Capitalize(targetType), targetId),
-            "PATCH" => subAction.ToLowerInvariant() switch
+            return ("UNKNOWN", "Unknown", null);
+        }
+
+        var segments = cleanPath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (segments.Length == 0)
+        {
+            return ("UNKNOWN", "Unknown", null);
+        }
+
+        // Support both /api/users/... and /Restaurant/... style routes.
+        var offset = string.Equals(segments[0], "api", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        if (segments.Length <= offset)
+        {
+            return ("UNKNOWN", "Unknown", null);
+        }
+
+        var root = segments[offset].ToLowerInvariant();
+        var id = segments.Length > offset + 1 ? segments[offset + 1] : null;
+        var sub = segments.Length > offset + 2 ? segments[offset + 2].ToLowerInvariant() : null;
+        var nested = segments.Length > offset + 3 ? segments[offset + 3].ToLowerInvariant() : null;
+        var methodUpper = method.ToUpperInvariant();
+
+        // Fine-grained saler/admin actions for better observability in Admin Logs.
+        if (root == "restaurant")
+        {
+            if (methodUpper == "POST" && string.IsNullOrWhiteSpace(id))
+                return ("RESTAURANT_CREATE", "Restaurant", null);
+
+            if (!string.IsNullOrWhiteSpace(id) && sub == "status" && methodUpper == "PATCH")
+                return ("RESTAURANT_UPDATE_STATUS", "Restaurant", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && sub == "dishes" && methodUpper == "POST")
+                return ("DISH_CREATE", "Dish", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && sub == "images" && methodUpper == "POST")
+                return ("IMAGE_UPLOAD", "Image", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && sub == "images" && nested == "reorder" && methodUpper == "PATCH")
+                return ("IMAGE_REORDER", "Image", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && sub == "audios" && methodUpper == "POST")
+                return ("AUDIO_UPLOAD", "Audio", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && methodUpper == "PATCH")
+                return ("RESTAURANT_UPDATE", "Restaurant", id);
+        }
+
+        if (root == "dishes" && !string.IsNullOrWhiteSpace(id))
+        {
+            return methodUpper switch
             {
-                "status" => ("UPDATE_STATUS", Capitalize(targetType), targetId),
-                "role" => ("UPDATE_ROLE", Capitalize(targetType), targetId),
-                _ => ("UPDATE", Capitalize(targetType), targetId)
+                "PUT" => ("DISH_UPDATE", "Dish", id),
+                "DELETE" => ("DISH_DELETE", "Dish", id),
+                _ => ("UPDATE", "Dish", id)
+            };
+        }
+
+        if (root == "images" && !string.IsNullOrWhiteSpace(id))
+        {
+            if (methodUpper == "PATCH" && sub == "primary")
+                return ("IMAGE_SET_PRIMARY", "Image", id);
+
+            return methodUpper switch
+            {
+                "PUT" => ("IMAGE_REPLACE", "Image", id),
+                "DELETE" => ("IMAGE_DELETE", "Image", id),
+                _ => ("UPDATE", "Image", id)
+            };
+        }
+
+        if (root == "audios" && !string.IsNullOrWhiteSpace(id))
+        {
+            if (methodUpper == "PATCH" && sub == "active")
+                return ("AUDIO_SET_ACTIVE", "Audio", id);
+
+            if (methodUpper == "DELETE")
+                return ("AUDIO_DELETE", "Audio", id);
+        }
+
+        if (root == "users")
+        {
+            if (methodUpper == "POST")
+                return ("USER_CREATE", "User", null);
+
+            if (!string.IsNullOrWhiteSpace(id) && methodUpper == "PATCH" && sub == "role")
+                return ("USER_UPDATE_ROLE", "User", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && methodUpper == "PATCH" && sub == "status")
+                return ("USER_UPDATE_STATUS", "User", id);
+
+            if (!string.IsNullOrWhiteSpace(id) && methodUpper == "DELETE")
+                return ("USER_DELETE", "User", id);
+        }
+
+        var targetType = ToTargetType(root);
+
+        return methodUpper switch
+        {
+            "POST" => ("CREATE", targetType, null),
+            "PUT" => ("UPDATE", targetType, id),
+            "PATCH" => sub switch
+            {
+                "status" => ("UPDATE_STATUS", targetType, id),
+                "role" => ("UPDATE_ROLE", targetType, id),
+                _ => ("UPDATE", targetType, id)
             },
-            "DELETE" => ("DELETE", Capitalize(targetType), targetId),
-            _ => ("UNKNOWN", Capitalize(targetType), targetId)
+            "DELETE" => ("DELETE", targetType, id),
+            _ => ("UNKNOWN", targetType, id)
         };
     }
 
-    private static string Capitalize(string s)
+    private static string ToTargetType(string root)
     {
-        if (string.IsNullOrEmpty(s)) return s;
-        return char.ToUpperInvariant(s[0]) + s[1..];
+        return root.ToLowerInvariant() switch
+        {
+            "restaurant" => "Restaurant",
+            "dishes" => "Dish",
+            "images" => "Image",
+            "audios" => "Audio",
+            "users" => "User",
+            "auth" => "Auth",
+            _ => string.IsNullOrWhiteSpace(root)
+                ? "Unknown"
+                : char.ToUpperInvariant(root[0]) + root[1..]
+        };
     }
 }
