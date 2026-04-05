@@ -465,6 +465,7 @@ public class POIService : IPOIService
 
             if (poi.Images == null || poi.Images.Count == 0)
             {
+                Log($"[POIService][Image] skip-poi-no-images: poi={poi.restaurantId}");
                 continue;
             }
 
@@ -479,30 +480,37 @@ public class POIService : IPOIService
                 imageCandidates = imageCandidates.Take(1).ToList();
             }
 
+            Log($"[POIService][Image] warmup-candidates: poi={poi.restaurantId}, count={imageCandidates.Count}, priority={priority}, includeAll={includeAllImages}");
+
             foreach (var image in imageCandidates)
             {
                 if (string.IsNullOrWhiteSpace(image.ImageUrl))
                 {
+                    Log($"[POIService][Image] skip-empty-image-url: poi={poi.restaurantId}");
                     continue;
                 }
 
                 if (File.Exists(image.ImageUrl))
                 {
+                    Log($"[POIService][Image] skip-local-file-exists: poi={poi.restaurantId}, image={image.ImageUrl}");
                     continue;
                 }
 
                 var cachedPath = GetImageCachePath(image.ImageUrl);
                 if (IsValidImageFile(cachedPath))
                 {
+                    Log($"[POIService][Image] skip-already-cached: poi={poi.restaurantId}, source={image.ImageUrl}, cache={cachedPath}");
                     continue;
                 }
 
                 if (!IsRemoteImageCandidate(image.ImageUrl))
                 {
+                    Log($"[POIService][Image] skip-non-remote-candidate: poi={poi.restaurantId}, image={image.ImageUrl}");
                     continue;
                 }
 
                 var normalized = image.ImageUrl.Replace("\\", "/", StringComparison.Ordinal).Trim().ToLowerInvariant();
+                Log($"[POIService][Image] enqueue-download: poi={poi.restaurantId}, source={image.ImageUrl}");
                 EnqueueWarmupJob(new WarmupJob(
                     $"img:{normalized}",
                     WarmupJobKind.Image,
@@ -516,6 +524,10 @@ public class POIService : IPOIService
     {
         if (!_queuedOrRunningWarmupKeys.TryAdd(job.Key, 0))
         {
+            if (job.Kind == WarmupJobKind.Image)
+            {
+                Log($"[POIService][Image] dedupe-queue-hit: key={job.Key}");
+            }
             return;
         }
 
@@ -535,7 +547,17 @@ public class POIService : IPOIService
         }
 
         var normalized = imageUrl.Replace("\\", "/", StringComparison.Ordinal).Trim().ToLowerInvariant();
+        var hadInFlight = _imageDownloadsInFlight.ContainsKey(normalized);
         var task = _imageDownloadsInFlight.GetOrAdd(normalized, _ => DownloadImageToCacheCoreAsync(imageUrl));
+        if (hadInFlight)
+        {
+            Log($"[POIService][Image] dedupe-inflight-hit: source={imageUrl}");
+        }
+        else
+        {
+            Log($"[POIService][Image] start-download-flow: source={imageUrl}");
+        }
+
         try
         {
             var cachedPath = await task;
@@ -543,6 +565,10 @@ public class POIService : IPOIService
             {
                 ApplyCachedImagePaths(_pois);
             }
+
+            Log(string.IsNullOrWhiteSpace(cachedPath)
+                ? $"[POIService][Image] download-flow-failed: source={imageUrl}"
+                : $"[POIService][Image] download-flow-success: source={imageUrl}, cache={cachedPath}");
 
             return cachedPath;
         }
@@ -556,28 +582,38 @@ public class POIService : IPOIService
     {
         if (File.Exists(imageUrl))
         {
+            Log($"[POIService][Image] download-skip-local-exists: source={imageUrl}");
             return imageUrl;
         }
 
         var cachedPath = GetImageCachePath(imageUrl);
         if (IsValidImageFile(cachedPath))
         {
+            Log($"[POIService][Image] download-skip-cache-hit: source={imageUrl}, cache={cachedPath}");
             return cachedPath;
         }
 
         if (!IsRemoteImageCandidate(imageUrl))
         {
+            Log($"[POIService][Image] download-skip-non-remote: source={imageUrl}");
             return null;
         }
 
-        foreach (var url in BuildImageUrlCandidates(imageUrl))
+        var candidates = BuildImageUrlCandidates(imageUrl).ToList();
+        Log($"[POIService][Image] url-candidates: source={imageUrl}, count={candidates.Count}, candidates={string.Join(" | ", candidates)}");
+
+        foreach (var url in candidates)
         {
             if (await TryDownloadImageToCacheAsync(url, cachedPath))
             {
+                Log($"[POIService][Image] download-success: source={imageUrl}, url={url}, cache={cachedPath}");
                 return cachedPath;
             }
+
+            Log($"[POIService][Image] download-attempt-failed: source={imageUrl}, url={url}");
         }
 
+        Log($"[POIService][Image] all-candidates-failed: source={imageUrl}");
         return null;
     }
 
@@ -588,20 +624,49 @@ public class POIService : IPOIService
             return false;
         }
 
-        if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var absoluteUri))
-        {
-            return absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps;
-        }
-
         var normalized = imageUrl.Replace("\\", "/", StringComparison.Ordinal).Trim();
         if (normalized.StartsWith("Resources/Images/", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
-        return normalized.StartsWith("/", StringComparison.Ordinal)
+        // IMPORTANT: check app-relative/static paths before Uri.TryCreate,
+        // because strings like "/maui-images/a.jpg" may be parsed as absolute file URIs.
+        if (normalized.StartsWith("/", StringComparison.Ordinal)
             || normalized.StartsWith("maui-images/", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase);
+            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("uploads/images/", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps;
+        }
+
+        // Accept bare file names like "foo.jpg" from legacy image data.
+        if (!normalized.Contains('/', StringComparison.Ordinal) && HasImageLikeExtension(normalized))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasImageLikeExtension(string path)
+    {
+        var ext = Path.GetExtension(path);
+        if (string.IsNullOrWhiteSpace(ext))
+        {
+            return false;
+        }
+
+        return ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase)
+            || ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)
+            || ext.Equals(".png", StringComparison.OrdinalIgnoreCase)
+            || ext.Equals(".webp", StringComparison.OrdinalIgnoreCase)
+            || ext.Equals(".gif", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ApplyCachedImagePaths(IEnumerable<POI> pois)
@@ -643,7 +708,27 @@ public class POIService : IPOIService
         }
 
         var normalized = imageUrl.Replace("\\", "/", StringComparison.Ordinal).Trim();
-        var relative = normalized.TrimStart('/');
+        var relatives = new List<string>();
+
+        if (normalized.StartsWith("/", StringComparison.Ordinal))
+        {
+            relatives.Add(normalized.TrimStart('/'));
+        }
+        else if (normalized.StartsWith("maui-images/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            relatives.Add(normalized);
+        }
+        else if (!normalized.Contains('/', StringComparison.Ordinal) && HasImageLikeExtension(normalized))
+        {
+            // Legacy DB rows often store just file name; default them to maui-images static path.
+            relatives.Add($"maui-images/{normalized}");
+            relatives.Add(normalized);
+        }
+        else
+        {
+            relatives.Add(normalized.TrimStart('/'));
+        }
 
         var baseCandidates = new List<string>();
         if (_httpClient.BaseAddress != null)
@@ -656,7 +741,7 @@ public class POIService : IPOIService
         return baseCandidates
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Select(baseUrl =>
+            .SelectMany(baseUrl => relatives.Select(relative =>
             {
                 try
                 {
@@ -666,7 +751,8 @@ public class POIService : IPOIService
                 {
                     return string.Empty;
                 }
-            })
+            }))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Where(x => !string.IsNullOrWhiteSpace(x));
     }
 
@@ -684,6 +770,7 @@ public class POIService : IPOIService
             using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
+                Log($"[POIService][Image] http-failed: url={url}, status={(int)response.StatusCode} {response.StatusCode}");
                 return false;
             }
 
@@ -697,6 +784,7 @@ public class POIService : IPOIService
             var size = new FileInfo(tempPath).Length;
             if (size < MinValidImageBytes)
             {
+                Log($"[POIService][Image] file-too-small: url={url}, bytes={size}, min={MinValidImageBytes}");
                 File.Delete(tempPath);
                 return false;
             }
@@ -707,10 +795,12 @@ public class POIService : IPOIService
             }
 
             File.Move(tempPath, cachePath);
+            Log($"[POIService][Image] cache-write-success: url={url}, cache={cachePath}, bytes={size}");
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Log($"[POIService][Image] download-exception: url={url}, error={FormatException(ex)}");
             return false;
         }
         finally
