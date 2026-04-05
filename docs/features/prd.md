@@ -788,11 +788,63 @@ Network Failure Fallback
 - Ghi log cho các sự kiện quan trọng: login, upload media, lỗi API, trigger narration.
 - Có dashboard theo dõi các chỉ số vận hành chính (API latency, error rate, audio success rate).
 
-## 13. Success Metrics
+## 13. Edge Cases (Xử lý lỗi)
+
+Phần này mô tả các tình huống lỗi hoặc trạng thái biên quan trọng mà sản phẩm cần xử lý ổn định để không làm gián đoạn trải nghiệm visitor và không gây sai lệch vận hành.
+
+### 13.1 Quyền vị trí và tracking
+
+- Nếu visitor từ chối quyền vị trí foreground, ứng dụng vẫn phải mở được bản đồ, danh sách POI và trang chi tiết; chỉ các tính năng auto narration và tracking theo vị trí bị vô hiệu cho đến khi người dùng cấp quyền.
+- Trên Android, nếu chưa có quyền background location, hệ thống vẫn cho phép trải nghiệm foreground bình thường nhưng phải hạ cấp rõ ràng với background tracking, đồng thời hướng dẫn người dùng mở `Settings` để cấp quyền khi cần.
+- Nếu GPS chưa bắt được tín hiệu, timeout hoặc trả về location `null`, ứng dụng không được crash và không được tự phát audio sai; hệ thống sẽ chờ lần sample tiếp theo và giữ UI ở trạng thái ổn định.
+- Hệ thống cần giảm false trigger khi người dùng đứng gần ranh giới POI bằng cơ chế debounce/hysteresis: chỉ phát khi đủ gần, không phát lặp khi dao động nhẹ quanh mép geofence, và phải có ngưỡng enter/exit tách biệt.
+
+### 13.2 Mạng yếu, cache và dữ liệu thiếu
+
+- Nếu API public cho POI, ngôn ngữ hoặc dishes lỗi/timeout, mobile phải fallback về cache cục bộ/in-memory nếu có; nếu chưa từng cache thì hiển thị trạng thái degraded hoặc empty state rõ ràng thay vì lỗi chặn toàn bộ màn hình.
+- Nếu audio đúng ngôn ngữ không tồn tại, hệ thống ưu tiên audio active mới nhất theo ngôn ngữ đã chọn; nếu vẫn không có thì có thể fallback sang audio active hợp lệ khác hoặc bỏ qua autoplay một cách an toàn.
+- Nếu audio file bị hỏng, quá nhỏ, không tải được hoặc không còn truy cập được từ remote URL, ứng dụng không được treo luồng narration; chỉ bỏ qua lượt phát đó và tiếp tục hoạt động với các POI khác.
+- Nếu người dùng mở app lần đầu trong trạng thái offline và thư viện audio chưa sẵn sàng, hệ thống vẫn cho phép xem POI/nội dung đã có nhưng phải thông báo rõ rằng audio có thể chưa phát được cho tới khi có mạng để đồng bộ.
+- Nếu bộ nhớ cache audio chạm quota hoặc thiết bị thiếu dung lượng trống, hệ thống cần dọn cache theo LRU trước; nếu vẫn không đủ chỗ thì từ chối cache mới một cách an toàn và không làm hỏng dữ liệu đang có.
+
+### 13.3 QR session, sync log và telemetry
+
+- Nếu phiên truy cập từ QR bị hết hạn theo local expiry hoặc backend trả trạng thái không còn hợp lệ, ứng dụng phải dừng narration, flush log theo best effort và yêu cầu người dùng quét lại QR để tiếp tục.
+- Nếu kiểm tra QR với server lỗi do mất mạng tạm thời, hệ thống không được cắt narration ngay khi local expiry vẫn còn hiệu lực; thay vào đó tiếp tục chạy theo trạng thái local và retry check ở vòng sau.
+- Nếu audio log gặp race condition `Session not found`, mobile phải tự khởi tạo lại session, flush location logs ngay và retry gửi audio log 1 lần trước khi bỏ qua.
+- Nếu đồng bộ location logs thất bại, batch phải được giữ lại trong buffer memory để retry theo chu kỳ; cần có giới hạn buffer để tránh tràn bộ nhớ và chấp nhận chiến lược drop oldest khi quá ngưỡng.
+- Nếu app bị sleep/terminate trước khi flush log thành công, PRD phải chấp nhận rủi ro mất một phần telemetry chưa đồng bộ và không coi đây là lỗi chặn trải nghiệm chính của visitor.
+
+## 14. Privacy (Bảo mật vị trí)
+
+Phần này mô tả cách sản phẩm xử lý dữ liệu vị trí và telemetry visitor theo nguyên tắc tối thiểu hóa dữ liệu, kiểm soát truy cập và minh bạch với người dùng.
+
+### 14.1 Dữ liệu được thu thập trong phiên visitor
+
+- Hệ thống hiện ghi nhận `sessionId` cho từng phiên visitor, `deviceId` dạng định danh nội bộ lưu cục bộ trên thiết bị, `deviceInfo` cơ bản và thời điểm hết hạn QR nếu phiên có giới hạn thời gian.
+- Location telemetry gửi lên backend gồm thời gian ghi nhận và tọa độ `GeoJSON Point` `[longitude, latitude]`; audio telemetry gồm `restaurantId`, `audioId`, thời gian bắt đầu/kết thúc và thời lượng nghe.
+- Trên thiết bị, ứng dụng có thể lưu cache POI, ngôn ngữ, dishes, audio, favorites, history và preference ngôn ngữ để phục vụ trải nghiệm offline/liền mạch.
+
+### 14.2 Nguyên tắc bảo mật và phân quyền
+
+- Ứng dụng phải giải thích rõ lý do cần quyền vị trí trước hoặc trong lúc xin quyền; quyền background location trên Android phải được xin tách biệt với quyền foreground.
+- Dữ liệu movement path dùng cho analytics phải được hiển thị cho Admin dưới dạng đường đi theo session ẩn danh; Seller và người dùng public không được truy cập dữ liệu vị trí thô của visitor.
+- Tất cả analytics, audit logs, quản trị user và quản lý vận hành phải nằm sau lớp xác thực và role-based access control; nguyên tắc mặc định là protected-by-default, chỉ mở public cho các endpoint được khai báo tường minh.
+- API không được trả về dữ liệu nhạy cảm như password/hash hoặc thông tin định danh quản trị không cần thiết trong response.
+- Môi trường production bắt buộc dùng HTTPS và chính sách xác thực chứng chỉ phù hợp; các cấu hình chấp nhận mọi certificate chỉ được chấp nhận trong môi trường dev/test nội bộ.
+
+### 14.3 Quyền kiểm soát của người dùng và vòng đời dữ liệu
+
+- Visitor phải có khả năng dừng narration bất kỳ lúc nào; hệ thống không được ép phát lặp liên tục trong cùng phiên chỉ vì dữ liệu vị trí dao động.
+- Ứng dụng nên cung cấp khả năng quản lý dữ liệu cục bộ như xóa audio cache, xóa history, xóa favorites và kiểm tra/truy cập phần cấp quyền tracking nền trong phần settings.
+- Sản phẩm cần có privacy notice ngắn gọn ở onboarding hoặc luồng QR entry, nêu rõ vì sao vị trí được thu thập, loại telemetry nào được gửi lên server và dữ liệu analytics được xử lý theo session ẩn danh.
+- Cần xác định retention policy riêng cho location logs, audio logs và audit data để tránh lưu dữ liệu hành vi lâu hơn mức cần thiết cho vận hành và phân tích.
+
+## 15. Success Metrics
 
 Phần này dùng để đo mức độ thành công của sản phẩm sau khi triển khai.
 
-### 13.1 Visitor metrics
+### 15.1 Visitor metrics
 
 - > = 80% phiên mở app bắt đầu từ QR/deep link tại điểm tham quan.
 - > = 70% visitor bật narration ít nhất 1 lần trong phiên.
@@ -800,19 +852,19 @@ Phần này dùng để đo mức độ thành công của sản phẩm sau khi 
 - Tỷ lệ lỗi phát audio < 3% tổng số lượt phát.
 - Tỷ lệ dùng cache thành công khi offline >= 90% với dữ liệu đã từng tải.
 
-### 13.2 Seller metrics
+### 15.2 Seller metrics
 
 - > = 70% seller cập nhật nội dung quán (món/ảnh/audio) ít nhất 1 lần mỗi tuần.
 - > = 90% thao tác CRUD từ seller thành công ngay lần đầu.
 - Thời gian trung bình cập nhật một mục nội dung < 2 phút.
 
-### 13.3 Admin metrics
+### 15.3 Admin metrics
 
 - 100% tài khoản quản trị được gán role hợp lệ.
 - > = 95% bản ghi bất thường trong recent activity/audit logs được phát hiện và xử lý trong vòng 24 giờ.
 - Tỷ lệ sự cố phân quyền (truy cập sai quyền) < 1% tổng request protected.
 
-### 13.4 System/business metrics tổng hợp
+### 15.4 System/business metrics tổng hợp
 
 - API error rate (5xx) < 1% theo ngày.
 - P95 API latency cho endpoint public < 800ms.
