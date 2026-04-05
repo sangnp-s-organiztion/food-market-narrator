@@ -45,4 +45,11 @@ public static class AppSettings
     public const double TriggerDistanceMeters = 30;
     public const double PoiEnterRadiusMeters = 30;
     public const double PoiExitRadiusMeters = 40;
+
+    // Performance tuning for startup/warm-up on mobile devices.
+    public const int StartupTrackingDelayMs = 1200;
+    public const int OfflineWarmupInitialDelayMs = 2000;
+    public const int OfflineWarmupPhaseBDelayMs = 10000;
+    public const int OfflineWarmupImageConcurrency = 1;
+    public static readonly bool EnableVerboseImageWarmupLogs = false;
 }

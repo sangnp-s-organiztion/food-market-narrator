@@ -40,16 +40,17 @@ public class POIService : IPOIService
     private readonly ConcurrentDictionary<string, Task<string?>> _imageDownloadsInFlight = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, Task<List<DishModel>>> _dishRequestsInFlight = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileWriteLocks = new(StringComparer.OrdinalIgnoreCase);
-    private readonly SemaphoreSlim _imageWarmupLimiter = new(2, 2);
+    private readonly SemaphoreSlim _imageWarmupLimiter = new(AppSettings.OfflineWarmupImageConcurrency, AppSettings.OfflineWarmupImageConcurrency);
     private readonly SemaphoreSlim _dishWarmupLimiter = new(1, 1);
     private int _warmupWorkersStarted;
     private const string ImageCacheFolderName = "image_cache";
     private const int MinValidImageBytes = 128;
-    private const int WarmupWorkerCount = 3;
+    private const int WarmupWorkerCount = 2;
     private const int WarmupPhaseATopCount = 6;
     private const int WarmupPriorityHigh = 0;
     private const int WarmupPriorityNormal = 1;
-    private static readonly TimeSpan WarmupPhaseBDelay = TimeSpan.FromSeconds(4);
+    private static readonly TimeSpan WarmupInitialDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupInitialDelayMs);
+    private static readonly TimeSpan WarmupPhaseBDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupPhaseBDelayMs);
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -67,8 +68,37 @@ public class POIService : IPOIService
 
     private static void Log(string message)
     {
+        if (ShouldSkipVerboseImageLog(message))
+        {
+            return;
+        }
+
         Debug.WriteLine(message);
         Console.WriteLine(message);
+    }
+
+    private static bool ShouldSkipVerboseImageLog(string message)
+    {
+        if (AppSettings.EnableVerboseImageWarmupLogs)
+        {
+            return false;
+        }
+
+        if (!message.Contains("[POIService][Image]", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // Keep only actionable image logs when verbose mode is disabled.
+        return !message.Contains("http-failed", StringComparison.Ordinal)
+            && !message.Contains("download-exception", StringComparison.Ordinal)
+            && !message.Contains("all-candidates-failed", StringComparison.Ordinal)
+            && !message.Contains("download-flow-failed", StringComparison.Ordinal)
+            && !message.Contains("file-too-small", StringComparison.Ordinal)
+            && !message.Contains("skip-non-remote-candidate", StringComparison.Ordinal)
+            && !message.Contains("401", StringComparison.Ordinal)
+            && !message.Contains("403", StringComparison.Ordinal)
+            && !message.Contains("404", StringComparison.Ordinal);
     }
 
     private static string FormatException(Exception ex)
@@ -336,6 +366,8 @@ public class POIService : IPOIService
             await _offlineWarmupLock.WaitAsync();
             try
             {
+                // Delay warm-up a bit so first render and first interactions stay smooth.
+                await Task.Delay(WarmupInitialDelay);
                 EnsureWarmupWorkersStarted();
                 Log($"[POIService][Offline] Warm-up scheduling start for {pois.Count} POIs");
 

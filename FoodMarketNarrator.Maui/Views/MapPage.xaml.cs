@@ -53,7 +53,7 @@ public partial class MapPage : ContentPage
 
         // Đăng ký lại hàm xử lí sự kiện thay đổi vị trí ng dùng để cập nhật bản đồ khi vị trí thay đổi
         _locationService.LocationChanged += OnLocationChangedForMap;
-        await _locationService.StartTrackingAsync();
+        _ = _locationService.StartTrackingAsync();
 
         if (!_isMapLoaded)
         {
