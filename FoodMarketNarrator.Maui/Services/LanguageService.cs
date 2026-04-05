@@ -31,7 +31,7 @@ public class LanguageService : ILanguageService
         {
             // Console.WriteLine($"CurrentLanguage getter called, returning: {Preferences.Get(LANGUAGE_KEY, "vi-VN")}");
             return Preferences.Get(LANGUAGE_KEY, "vi-VN"); 
-            // máº·c Ä‘á»‹nh tiáº¿ng Viá»‡t (vi-VN) náº¿u chÆ°a cÃ³
+            // mặc định tiếng Việt (vi-VN) nếu chưa có giá trị nào được lưu trước đó
         }
     }
 
@@ -155,7 +155,7 @@ public class LanguageService : ILanguageService
             string.Equals(x.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
     }
 
-	// Thay Ä‘á»•i ngÃ´n ngá»¯ á»©ng dá»¥ng
+	// Thay đổi ngôn ngữ hiện tại của ứng dụng
 	public void ChangeLanguage(string cultureCode)
     {
 		// LÆ°u láº¡i Ä‘á»ƒ láº§n sau app má»Ÿ tá»± load
