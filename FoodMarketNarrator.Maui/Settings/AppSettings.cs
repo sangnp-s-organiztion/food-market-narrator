@@ -47,9 +47,19 @@ public static class AppSettings
     public const double PoiExitRadiusMeters = 40;
 
     // Performance tuning for startup/warm-up on mobile devices.
+
+    // đợi 1.2s rồi mới gọi start tracking gps
     public const int StartupTrackingDelayMs = 1200;
+
+    // trì hoãn 2 giây trước khi bắt đầu warm-up offline (ảnh/dishes).
     public const int OfflineWarmupInitialDelayMs = 2000;
+
+    // phase A chạy trước (nhóm POI ưu tiên), phase B chạy sau 10 giây.
     public const int OfflineWarmupPhaseBDelayMs = 10000;
+
+    // chỉ cho 1 job tải ảnh chạy đồng thời.
     public const int OfflineWarmupImageConcurrency = 1;
+
+    //  tắt log ảnh quá chi tiết mặc định (enqueue/url-candidates/download-flow-success hàng loạt).
     public static readonly bool EnableVerboseImageWarmupLogs = false;
 }

@@ -23,6 +23,11 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Có warm-up nền để prefetch ảnh POI vào cache local (AppData/image_cache) cho offline rendering.
 - Có cache dishes theo từng nhà hàng (AppData/offline_cache/dishes/{restaurantId}.json) và fallback khi offline/API fail.
 - Warm-up offline dùng queue ưu tiên theo 2 phase (A/B), có concurrency limit và dedupe để tránh tải/ghi trùng.
+- Warm-up có tuning để giảm giật lúc startup:
+  - Delay khởi động warm-up phase A: 2 giây.
+  - Delay warm-up phase B: 10 giây.
+  - Concurrency tải ảnh: 1 job đồng thời (ưu tiên mượt UI hơn tốc độ prefetch).
+  - Verbose image warm-up logs: tắt mặc định, chỉ giữ log lỗi quan trọng.
 - Cung cấp các hàm:
   - GetAllPOIsAsync
   - GetPOIByIdAsync
@@ -59,6 +64,7 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Khi mới vào app:
   - Nếu chưa chọn ngôn ngữ: tự mở popup chọn ngôn ngữ.
   - Nếu đã chọn: tự bật narration 1 lần cho mỗi phiên chạy app.
+- Start tracking được trì hoãn ~1.2 giây sau khi vào MainPage để ưu tiên render frame đầu, giảm skipped frames/ANR log lúc cold start.
 - Floating button chỉ hiện khi ở trong phạm vi TriggerDistanceMeters (30m) so với POI gần nhất.
 
 ## 6) MapPage
@@ -166,7 +172,27 @@ Chưa hoàn thiện hoặc mới ở mức khung:
 
 - AppSettings dùng host động trên Android:
   - Emulator: 10.0.2.2
-  - Thiết bị thật: LocalApiHost (hiện tại là 192.168.1.7)
+  - Thiết bị thật: LocalApiHost (hiện tại là 192.168.1.8)
 - Port mặc định:
   - HTTP: 5044
   - HTTPS: 7041
+
+## 17) Startup performance tuning (AppSettings)
+
+Các tham số đang dùng trong AppSettings để cân bằng mượt UI và tốc độ warm-up:
+
+- StartupTrackingDelayMs = 1200
+  - Trì hoãn StartTrackingAsync khoảng 1.2 giây sau khi vào MainPage.
+- OfflineWarmupInitialDelayMs = 2000
+  - Trì hoãn warm-up phase A để nhường tài nguyên cho first render.
+- OfflineWarmupPhaseBDelayMs = 10000
+  - Dời phase B sang sau để tránh spike network/IO lúc đầu phiên.
+- OfflineWarmupImageConcurrency = 1
+  - Giảm RAM/GC pressure do tải ảnh lớn đồng thời.
+- EnableVerboseImageWarmupLogs = false
+  - Giảm overhead log và nhiễu log; vẫn giữ log lỗi quan trọng (401/403/404, exception, all-candidates-failed).
+
+Trade-off hiện tại:
+
+- Ưu điểm: startup mượt hơn, giảm khả năng khựng khi mới mở app/chuyển tab đầu.
+- Nhược điểm: tổng thời gian prefetch đầy đủ ảnh có thể dài hơn trước.

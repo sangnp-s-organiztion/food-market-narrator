@@ -67,6 +67,11 @@ Offline asset warm-up sau khi load POI:
 - Warm-up chia 2 lớp:
   - Phase A (ưu tiên cao): top N POI, ảnh primary + dishes.
   - Phase B (ưu tiên thường): toàn bộ ảnh còn lại + dishes còn lại (delay sau first render).
+- Startup tuning hiện tại (AppSettings):
+  - OfflineWarmupInitialDelayMs = 2000 (phase A bắt đầu sau 2 giây).
+  - OfflineWarmupPhaseBDelayMs = 10000 (phase B dời 10 giây).
+  - OfflineWarmupImageConcurrency = 1 (1 image download đồng thời).
+  - WarmupWorkerCount = 2 (giảm tranh chấp tài nguyên lúc đầu phiên).
 
 Thread safety / race-condition guard:
 
@@ -80,6 +85,22 @@ Thread safety / race-condition guard:
   - \_dishRequestsInFlight cho dishes.
 - Khóa ghi file theo path bằng \_fileWriteLocks để tránh 2 luồng ghi cùng file.
 - Ghi file kiểu atomic temp -> replace để tránh file hỏng nửa chừng.
+
+Startup smoothness optimization:
+
+- MainPage không gọi tracking ngay tức thì khi OnAppearing.
+- App trì hoãn StartTrackingAsync bằng StartupTrackingDelayMs = 1200 để nhường tài nguyên cho first frame.
+- Mục tiêu: giảm skipped frames/ANR log do startup workload chồng chéo (UI render + GPS/tracking service + warm-up IO/network).
+
+Image warm-up logging policy:
+
+- EnableVerboseImageWarmupLogs = false theo mặc định để tránh log quá dày.
+- Khi tắt verbose, hệ thống vẫn giữ các log lỗi quan trọng:
+  - http-failed (bao gồm 401/403/404)
+  - download-exception
+  - all-candidates-failed
+  - file-too-small
+  - download-flow-failed
 
 ## 4. Language cache chi tiết
 
