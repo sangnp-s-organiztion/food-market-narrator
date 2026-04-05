@@ -56,5 +56,6 @@ dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj
 
 - overview-current-features.md
 - narration-geofence-trigger-flow.md
+- qr-access-session-flow.md
 - audio-cache-storage.md
 - ../testing/unit/maui-unit-test-cases.md

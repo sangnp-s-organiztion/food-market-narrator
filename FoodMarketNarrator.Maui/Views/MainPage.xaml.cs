@@ -57,8 +57,8 @@ public partial class MainPage : ContentPage
         _locationService.LocationChanged += OnLocationChangedForMap;
         LogPerf("OnAppearing: subscribed LocationChanged", sw);
 
-        // Không chờ tracking để tránh block frame đầu khi vào trang.
-        _ = _locationService.StartTrackingAsync();
+        // Dời start tracking sau frame đầu để giảm giật lúc cold start.
+        _ = StartTrackingDeferredAsync();
 
         // Trả giao diện ngay, các phần nặng sẽ được tải nền.
         if (!_isInitializingMainPage)
@@ -135,6 +135,19 @@ public partial class MainPage : ContentPage
         finally
         {
             _isInitializingMainPage = false;
+        }
+    }
+
+    private async Task StartTrackingDeferredAsync()
+    {
+        try
+        {
+            await Task.Delay(AppSettings.StartupTrackingDelayMs);
+            await _locationService.StartTrackingAsync();
+        }
+        catch
+        {
+            // Ignore startup tracking failures to keep UI responsive.
         }
     }
 

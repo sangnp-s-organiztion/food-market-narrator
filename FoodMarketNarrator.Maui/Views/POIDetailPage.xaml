@@ -75,7 +75,11 @@
                                            FontSize="14"
                                            TextColor="White"
                                            HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
+                                           VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnShareTapped"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
                                 </Border>
                             </Grid>
                         </Grid>
