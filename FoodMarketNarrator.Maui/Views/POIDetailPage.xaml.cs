@@ -550,4 +550,37 @@ public partial class POIDetailPage : ContentPage
 		// Cập nhật icon
 		UpdateFavoriteIcon();
 	}
+
+	private async void OnShareTapped(object sender, EventArgs e)
+	{
+		if (BindingContext is not POI poi)
+		{
+			return;
+		}
+
+		try
+		{
+			var name = string.IsNullOrWhiteSpace(poi.Name) ? "Quán ăn" : poi.Name;
+			var address = string.IsNullOrWhiteSpace(poi.AddressDisplay)
+				? "Đang cập nhật địa chỉ"
+				: poi.AddressDisplay;
+			var mapsUrl = $"https://www.google.com/maps/search/?api=1&query={poi.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)},{poi.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+
+			var shareText =
+				$"{name}\n" +
+				$"Địa chỉ: {address}\n" +
+				$"Bản đồ: {mapsUrl}";
+
+			await Share.RequestAsync(new ShareTextRequest
+			{
+				Title = $"Chia sẻ {name}",
+				Text = shareText,
+				Uri = mapsUrl
+			});
+		}
+		catch (Exception)
+		{
+			await DisplayAlert("Lỗi", "Không thể chia sẻ thông tin quán lúc này", "OK");
+		}
+	}
 }
