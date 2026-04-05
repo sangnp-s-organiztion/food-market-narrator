@@ -15,6 +15,8 @@ Tài liệu này mô tả chi tiết toàn bộ cache trong MAUI app:
 | Loại dữ liệu                 | Tầng lưu           | Đường dẫn/Key                                                                  | TTL thời gian                            | Chính sách xóa/làm mới                                                                                      |
 | ---------------------------- | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | POI list                     | In-memory + file   | \_pois + AppData/offline_cache/pois.json + \_lastFetchUtc                      | TTL 3 phút (chỉ cho in-memory)           | Hết TTL sẽ thử refresh; chỉ cập nhật \_lastFetchUtc khi fetch API thành công; giữ cache cũ khi refresh fail |
+| POI images                   | File cache         | AppData/image_cache/{SHA256(imageUrl)}.ext                                     | Không có TTL theo thời gian              | Prefetch nền sau khi có POI; nếu cache tồn tại thì ưu tiên path local                                       |
+| Dishes theo nhà hàng         | File JSON          | AppData/offline_cache/dishes/{restaurantId}.json                               | Không có TTL theo thời gian              | Ghi đè khi gọi API thành công; fallback file cache khi offline/API fail                                     |
 | Languages                    | In-memory + file   | \_cachedLanguages + AppData/offline_cache/languages.json                       | Không có TTL theo thời gian              | Ghi đè khi fetch API thành công; giữ cache cũ khi API fail                                                  |
 | Audio file                   | File cache         | AppData/audio_cache/{SHA256}.ext                                               | Không có TTL theo thời gian              | LRU eviction theo quota/space, hoặc xóa thủ công từ Settings                                                |
 | Audio manifest version       | File JSON          | AppData/audio_manifest.json                                                    | Không có TTL theo thời gian              | Cập nhật khi prefetch/sync audio thành công                                                                 |
@@ -57,6 +59,28 @@ TTL:
 - Timestamp \_lastFetchUtc chỉ được set khi fetch API thành công.
 - Offline cache file pois.json không có TTL cứng; được dùng làm fallback khi không lấy được network.
 
+Offline asset warm-up sau khi load POI:
+
+- Chạy nền để prefetch ảnh POI vào AppData/image_cache.
+- Nếu ảnh đã có cache local thì map trực tiếp sang path local để dùng offline.
+- Đồng thời prefetch danh sách dishes theo từng restaurant và lưu vào offline_cache/dishes/{restaurantId}.json.
+- Warm-up chia 2 lớp:
+  - Phase A (ưu tiên cao): top N POI, ảnh primary + dishes.
+  - Phase B (ưu tiên thường): toàn bộ ảnh còn lại + dishes còn lại (delay sau first render).
+
+Thread safety / race-condition guard:
+
+- Dùng PriorityQueue cho warm-up jobs (high -> normal).
+- Dedupe job key bằng ConcurrentDictionary (\_queuedOrRunningWarmupKeys) để không enqueue trùng.
+- Giới hạn đồng thời:
+  - Image warm-up: semaphore giới hạn song song.
+  - Dishes warm-up: semaphore riêng.
+- Dedupe network call đang chạy:
+  - \_imageDownloadsInFlight cho ảnh.
+  - \_dishRequestsInFlight cho dishes.
+- Khóa ghi file theo path bằng \_fileWriteLocks để tránh 2 luồng ghi cùng file.
+- Ghi file kiểu atomic temp -> replace để tránh file hỏng nửa chừng.
+
 ## 4. Language cache chi tiết
 
 LanguageService.GetAllLanguagesAsync chạy tương tự POI:
@@ -69,7 +93,51 @@ TTL:
 
 - Không có expiration theo giờ/ngày.
 
-## 5. Audio cache chi tiết
+## 5. Image cache chi tiết (POI)
+
+POIService warm-up xử lý ảnh theo flow:
+
+1. Duyệt danh sách images trong từng POI.
+2. Nếu image path local đã tồn tại -> dùng ngay.
+3. Nếu chưa có, tạo key cache bằng SHA256(imageUrl) + extension.
+4. Nếu imageUrl là remote/relative hợp lệ:
+
+- Build URL candidates từ BaseAddress + ApiFallbackBaseUrls.
+- Tải file về image_cache.
+- Nếu hợp lệ thì đổi ImageUrl sang path local để render offline.
+- Nếu nhiều luồng cùng yêu cầu 1 ảnh:
+  - Dedupe theo normalized image key, chỉ còn 1 download thật sự.
+  - Các luồng còn lại await cùng task in-flight.
+- Khi ghi cache file ảnh:
+  - Khóa file-path bằng semaphore theo path.
+  - Ghi temp file rồi replace.
+
+TTL:
+
+- Không có TTL theo thời gian.
+- File tồn tại đến khi app data bị xóa hoặc bị ghi đè khi tải lại cùng key.
+
+## 6. Dishes cache chi tiết
+
+POIService.GetDishesByRestaurantIdAsync:
+
+1. Đọc cache file dishes theo restaurantId trước.
+2. Thử gọi API /Restaurant/{restaurantId}/dishes.
+3. Nếu API thành công -> ghi đè cache file và trả dữ liệu mới.
+4. Nếu API fail/offline -> trả dữ liệu cache đã đọc.
+5. Nếu nhiều call đồng thời cùng restaurantId:
+
+- Dedupe bằng \_dishRequestsInFlight.
+- Chỉ còn 1 request mạng + 1 lần ghi cache thực tế.
+
+6. Ghi cache dishes dùng khóa file-path để tránh ghi chồng.
+
+TTL:
+
+- Không có expiration theo thời gian.
+- Làm mới khi API gọi thành công.
+
+## 7. Audio cache chi tiết
 
 ### 5.1 Vị trí và key
 
@@ -122,7 +190,7 @@ Mỗi lần file được dùng, TouchCacheFile cập nhật access/write time �
   - User bấm xóa cache trong Settings.
   - App data bị clear/uninstall.
 
-## 6. Audio library manifest và startup sync
+## 8. Audio library manifest và startup sync
 
 AudioLibraryService lưu manifest tại:
 
@@ -146,7 +214,7 @@ TTL manifest:
 - Không time-based TTL.
 - Version-based invalidation (chỉ tải lại khi server version cao hơn hoặc local thiếu file).
 
-## 7. Telemetry buffer cache
+## 9. Telemetry buffer cache
 
 ### 7.1 Location log buffer
 
@@ -168,7 +236,7 @@ AudioLogSyncService không có local persistent queue riêng.
 - Có retry 1 lần trong tình huống session missing.
 - Các lỗi khác chủ yếu log console, không lưu queue dài hạn.
 
-## 8. Favorites và History
+## 10. Favorites và History
 
 Favorites:
 
@@ -182,12 +250,16 @@ History:
 - Max 50 mục gần nhất.
 - Reset khi app process đóng.
 
-## 9. Offline behavior tổng hợp
+## 11. Offline behavior tổng hợp
 
 Khi không có internet:
 
 - POI/Language:
   - Dùng file cache nếu đã có.
+- POI images:
+  - Dùng file trong image_cache nếu đã prefetch thành công trước đó.
+- Dishes:
+  - Dùng cache file theo restaurantId nếu đã từng tải thành công.
 - Audio:
   - Phát được nếu file đã cache hoặc bundled package có file phù hợp.
   - Nếu chưa có local, prefetch remote sẽ fail.
@@ -196,12 +268,14 @@ Khi không có internet:
 - Telemetry:
   - Location buffer giữ trong RAM đến khi flush thành công hoặc bị drop do vượt giới hạn.
 
-## 10. Câu hỏi thường gặp về "cache bao lâu"
+## 12. Câu hỏi thường gặp về "cache bao lâu"
 
 Trả lời theo code hiện tại:
 
 - POI cache in-memory: TTL 3 phút, chỉ làm mới mốc thời gian khi fetch API thành công.
 - POI cache file (offline_cache/pois.json): không có TTL cứng, dùng fallback khi offline/network fail.
+- POI image cache (image_cache): không có TTL cứng; dùng lại cho tới khi app data bị xóa hoặc file bị ghi đè.
+- Dishes cache (offline_cache/dishes): không có TTL cứng; làm mới khi API dishes thành công.
 - Language cache: không có thời hạn theo thời gian.
 - Audio cache: không có thời hạn theo thời gian; tồn tại đến khi quota/LRU hoặc user xóa.
 - Favorites và deviceId: lưu lâu dài trong Preferences.

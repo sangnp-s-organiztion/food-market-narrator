@@ -20,6 +20,9 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Có cache offline POI vào file cục bộ: offline_cache/pois.json.
 - Có TTL 3 phút cho cache in-memory POI list trong GetAllPOIsAsync.
 - Khi hết TTL: app thử refresh lại dữ liệu; \_lastFetchUtc chỉ cập nhật nếu fetch API thành công.
+- Có warm-up nền để prefetch ảnh POI vào cache local (AppData/image_cache) cho offline rendering.
+- Có cache dishes theo từng nhà hàng (AppData/offline_cache/dishes/{restaurantId}.json) và fallback khi offline/API fail.
+- Warm-up offline dùng queue ưu tiên theo 2 phase (A/B), có concurrency limit và dedupe để tránh tải/ghi trùng.
 - Cung cấp các hàm:
   - GetAllPOIsAsync
   - GetPOIByIdAsync
@@ -111,7 +114,8 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
   - Đồng bộ icon và progress bar.
   - Timer cập nhật tiến trình mỗi 200ms.
 - Có nút back về MainPage.
-- Hai nút Đường đi và Gọi điện ngay hiện là UI, chưa thấy handler code-behind.
+- Có nút Chia sẻ để gửi nhanh thông tin quán + link bản đồ.
+- Có nút Đường đi để mở Google Maps/map app và nút Gọi điện ngay để mở dialer.
 
 ## 11) FavoritePage (Yêu thích)
 
@@ -157,8 +161,6 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 Chưa hoàn thiện hoặc mới ở mức khung:
 
 - Filter chip danh mục trên MapPage chưa có logic lọc dữ liệu.
-- Nút Share trên POIDetailPage chưa nối logic.
-- Nút Đường đi/Gọi điện trên POIDetailPage chưa xử lý sự kiện.
 
 ## 16) Cấu hình API hiện tại
 
