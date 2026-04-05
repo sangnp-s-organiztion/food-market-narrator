@@ -40,6 +40,83 @@ function formatTimestamp(iso: string): string {
   }
 }
 
+function actionBadge(action: string): { cls: string; meaning: string } {
+  const normalized = (action ?? "").toUpperCase();
+
+  if (normalized.startsWith("RESTAURANT_")) {
+    return {
+      cls: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      meaning: "thao tác nhà hàng",
+    };
+  }
+
+  if (normalized.startsWith("DISH_")) {
+    return {
+      cls: "bg-amber-100 text-amber-700 border-amber-200",
+      meaning: "thao tác món ăn",
+    };
+  }
+
+  if (normalized.startsWith("IMAGE_")) {
+    return {
+      cls: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+      meaning: "thao tác hình ảnh",
+    };
+  }
+
+  if (normalized.startsWith("AUDIO_")) {
+    return {
+      cls: "bg-cyan-100 text-cyan-700 border-cyan-200",
+      meaning: "thao tác audio",
+    };
+  }
+
+  if (normalized.startsWith("USER_")) {
+    return {
+      cls: "bg-teal-100 text-teal-700 border-teal-200",
+      meaning: "thao tác người dùng",
+    };
+  }
+
+  switch (normalized) {
+    case "LOGIN":
+      return {
+        cls: "bg-blue-100 text-blue-700 border-blue-200",
+        meaning: "bình thường",
+      };
+    case "LOGOUT":
+      return {
+        cls: "bg-slate-100 text-slate-700 border-slate-200",
+        meaning: "neutral",
+      };
+    case "CREATE":
+      return {
+        cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
+        meaning: "tạo dữ liệu",
+      };
+    case "MOBILE_SYNC":
+      return {
+        cls: "bg-violet-100 text-violet-700 border-violet-200",
+        meaning: "low priority",
+      };
+    case "ERROR":
+      return {
+        cls: "bg-red-100 text-red-700 border-red-200",
+        meaning: "cần chú ý",
+      };
+    case "MOBILE_PLAY":
+      return {
+        cls: "bg-cyan-100 text-cyan-700 border-cyan-200",
+        meaning: "mobile playback",
+      };
+    default:
+      return {
+        cls: "bg-zinc-100 text-zinc-700 border-zinc-200",
+        meaning: "khác",
+      };
+  }
+}
+
 const LogsPage = () => {
   const [audioPage, setAudioPage] = useState(1);
   const [auditPage, setAuditPage] = useState(1);
@@ -140,13 +217,39 @@ const LogsPage = () => {
               </span>
             </div>
 
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {[
+                "LOGIN",
+                "LOGOUT",
+                "RESTAURANT_UPDATE",
+                "DISH_CREATE",
+                "IMAGE_UPLOAD",
+                "AUDIO_DELETE",
+                "USER_UPDATE_STATUS",
+                "MOBILE_SYNC",
+                "ERROR",
+              ].map((action) => {
+                const style = actionBadge(action);
+                return (
+                  <span
+                    key={action}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+                      style.cls,
+                    )}
+                    title={style.meaning}
+                  >
+                    {action}
+                  </span>
+                );
+              })}
+            </div>
+
             <table className="data-table">
               <thead>
                 <tr>
                   <th>Người dùng</th>
                   <th>Hành động</th>
-                  <th>Đối tượng</th>
-                  <th>Chi tiết</th>
                   <th>IP</th>
                   <th>Thời gian</th>
                 </tr>
@@ -155,7 +258,7 @@ const LogsPage = () => {
                 {isAuditLoading && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={4}
                       className="text-center py-8 text-muted-foreground"
                     >
                       Đang tải nhật ký hệ thống...
@@ -165,7 +268,7 @@ const LogsPage = () => {
                 {isAuditError && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={4}
                       className="text-center py-8 text-destructive"
                     >
                       Không thể tải nhật ký hệ thống.
@@ -177,7 +280,7 @@ const LogsPage = () => {
                   auditItems.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={4}
                         className="text-center py-8 text-muted-foreground"
                       >
                         Chưa có nhật ký hệ thống nào.
@@ -188,14 +291,21 @@ const LogsPage = () => {
                   !isAuditError &&
                   auditItems.map((item, idx) => (
                     <tr key={`${item.username}-${item.action}-${idx}`}>
-                      <td className="font-medium text-xs">{item.username}</td>
-                      <td className="mono text-xs">{item.action}</td>
-                      <td className="text-xs">
-                        {item.targetType}
-                        {item.targetId ? ` #${item.targetId}` : ""}
+                      <td className="font-medium text-xs">
+                        {item.username?.toLowerCase() === "mobile"
+                          ? "visitor"
+                          : item.username}
                       </td>
-                      <td className="text-xs text-muted-foreground max-w-xs truncate">
-                        {item.details ?? "-"}
+                      <td className="mono text-xs">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
+                            actionBadge(item.action).cls,
+                          )}
+                          title={actionBadge(item.action).meaning}
+                        >
+                          {item.action}
+                        </span>
                       </td>
                       <td className="mono text-xs text-muted-foreground">
                         {item.ipAddress ?? "-"}

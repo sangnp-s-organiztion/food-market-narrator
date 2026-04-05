@@ -22,7 +22,7 @@ import {
 } from "recharts";
 import { HeatmapSection } from "@/components/HeatmapSection";
 import { analyticsApi } from "@/lib/analyticsApi";
-import { adminStatsApi } from "@/lib/adminApi";
+import { adminStatsApi, restaurantApi } from "@/lib/adminApi";
 
 // ─── Derived chart helpers ────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ type EntityStat = {
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
 const Dashboard = () => {
-  const [heatmapHours, setHeatmapHours] = useState<1 | 6 | 24 | 168>(24);
+  const [heatmapHours, setHeatmapHours] = useState<1 | 6 | 24 | "all">("all");
 
   const { data: restaurantCount } = useQuery({
     queryKey: ["admin-stats", "restaurants", "count"],
@@ -123,6 +123,12 @@ const Dashboard = () => {
     staleTime: 60_000,
   });
 
+  const { data: allRestaurantsData } = useQuery({
+    queryKey: ["admin", "restaurants", "all-for-heatmap"],
+    queryFn: () => restaurantApi.getAll(),
+    staleTime: 120_000,
+  });
+
   const barChartData = useMemo(
     () => toBarChartData(topRestaurantsData?.items ?? []),
     [topRestaurantsData],
@@ -133,6 +139,25 @@ const Dashboard = () => {
     queryFn: () => analyticsApi.getHeatmap(heatmapHours),
     staleTime: 60_000,
   });
+
+  const heatmapPoiList = useMemo(() => {
+    const playCountByRestaurant = new Map(
+      (topRestaurantsData?.items ?? []).map((r) => [
+        r.restaurantId,
+        r.playCount,
+      ]),
+    );
+
+    return (allRestaurantsData ?? [])
+      .filter((r) => r.isActive)
+      .map((r) => ({
+        restaurantId: r.restaurantId,
+        restaurantName: r.name,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        playCount: playCountByRestaurant.get(r.restaurantId) ?? 0,
+      }));
+  }, [allRestaurantsData, topRestaurantsData]);
 
   const avgTime = kpis?.averageListeningTimeSeconds ?? 0;
   const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
@@ -323,7 +348,7 @@ const Dashboard = () => {
         {/* ── Maps ───────────────────────────────────────────────────────────── */}
         <HeatmapSection
           points={heatmapData?.points}
-          restaurantPois={topRestaurantsData?.items}
+          poiList={heatmapPoiList}
           lookbackHours={heatmapHours}
           onLookbackHoursChange={setHeatmapHours}
         />

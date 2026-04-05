@@ -3,22 +3,31 @@ import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { MapPin } from "lucide-react";
-import type { HeatmapPoint, TopRestaurant } from "@/types/analytics";
+import type { HeatmapPoint } from "@/types/analytics";
+
+interface HeatmapPoi {
+  restaurantId: string;
+  restaurantName: string;
+  latitude: number | null;
+  longitude: number | null;
+  playCount?: number;
+}
 
 interface HeatmapSectionProps {
   /** Geo points from GET /api/analytics/heatmap */
   points?: HeatmapPoint[];
-  /** Restaurant list for POI markers on map */
-  restaurantPois?: TopRestaurant[];
+  /** POI list for markers and GPS-point density assignment */
+  poiList?: HeatmapPoi[];
   /** Current lookback window (hours) */
-  lookbackHours: 1 | 6 | 24 | 168;
+  lookbackHours: 1 | 6 | 24 | "all";
   /** Change lookback window */
-  onLookbackHoursChange: (hours: 1 | 6 | 24 | 168) => void;
+  onLookbackHoursChange: (hours: 1 | 6 | 24 | "all") => void;
 }
 
 // Vinh Khanh Food Street — center of data (Ho Chi Minh City, District 4)
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
+const POI_ASSIGNMENT_RADIUS_METERS = 120;
 const HEAT_PALETTE_7 = [
   "#0d1b8f",
   "#1f5fff",
@@ -28,14 +37,6 @@ const HEAT_PALETTE_7 = [
   "#ff9f1a",
   "#ff3b30",
 ];
-const PATH_COLORS = [
-  "hsl(221, 83%, 53%)",
-  "hsl(199, 89%, 48%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(280, 67%, 54%)",
-  "hsl(25, 95%, 53%)",
-];
-
 function paletteToGradient(palette: string[]): Record<number, string> {
   if (palette.length === 1) {
     return { 0: palette[0], 1: palette[0] };
@@ -51,9 +52,29 @@ function paletteToGradient(palette: string[]): Record<number, string> {
   return gradient;
 }
 
+function distanceMeters(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const earthRadiusMeters = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusMeters * c;
+}
+
 export function HeatmapSection({
   points = [],
-  restaurantPois = [],
+  poiList = [],
   lookbackHours,
   onLookbackHoursChange,
 }: HeatmapSectionProps) {
@@ -81,21 +102,68 @@ export function HeatmapSection({
     [points],
   );
 
-  const poiCoordinates = useMemo(() => {
-    type PoiWithCoords = TopRestaurant & {
-      latitude?: number;
-      longitude?: number;
-    };
-
-    return (restaurantPois as PoiWithCoords[])
-      .filter(
+  const poisWithCoords = useMemo(
+    () =>
+      poiList.filter(
         (r) =>
           typeof r.latitude === "number" && typeof r.longitude === "number",
-      )
-      .map(
-        (r) => [r.latitude as number, r.longitude as number] as L.LatLngTuple,
-      );
-  }, [restaurantPois]);
+      ) as Array<HeatmapPoi & { latitude: number; longitude: number }>,
+    [poiList],
+  );
+
+  const poiCoordinates = useMemo(
+    () => poisWithCoords.map((r) => [r.latitude, r.longitude] as L.LatLngTuple),
+    [poisWithCoords],
+  );
+
+  const poiGpsPointCount = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (weightedHeatPoints.length === 0 || poisWithCoords.length === 0) {
+      return counts;
+    }
+
+    for (const [lat, lng] of weightedHeatPoints) {
+      let nearestPoi:
+        | (HeatmapPoi & { latitude: number; longitude: number })
+        | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      for (const poi of poisWithCoords) {
+        const d = distanceMeters(lat, lng, poi.latitude, poi.longitude);
+        if (d < nearestDistance) {
+          nearestDistance = d;
+          nearestPoi = poi;
+        }
+      }
+
+      if (nearestPoi && nearestDistance <= POI_ASSIGNMENT_RADIUS_METERS) {
+        counts.set(
+          nearestPoi.restaurantId,
+          (counts.get(nearestPoi.restaurantId) ?? 0) + 1,
+        );
+      }
+    }
+
+    return counts;
+  }, [weightedHeatPoints, poisWithCoords]);
+
+  const poiMarkerData = useMemo(() => {
+    const rows = poisWithCoords.map((poi) => ({
+      ...poi,
+      gpsPointCount: poiGpsPointCount.get(poi.restaurantId) ?? 0,
+    }));
+    return rows.sort((a, b) => b.gpsPointCount - a.gpsPointCount);
+  }, [poisWithCoords, poiGpsPointCount]);
+
+  const maxGpsPointCount = useMemo(
+    () => Math.max(...poiMarkerData.map((x) => x.gpsPointCount), 0),
+    [poiMarkerData],
+  );
+
+  const topPoisByGpsDensity = useMemo(
+    () => poiMarkerData.filter((x) => x.gpsPointCount > 0).slice(0, 5),
+    [poiMarkerData],
+  );
 
   const handleRecenterMap = () => {
     const map = mapInstanceRef.current;
@@ -210,21 +278,28 @@ export function HeatmapSection({
       heatLayerRef.current = layer;
     }
 
-    restaurantPois.forEach((r) => {
-      const lat = (r as TopRestaurant & { latitude?: number }).latitude;
-      const lng = (r as TopRestaurant & { longitude?: number }).longitude;
-      if (typeof lat !== "number" || typeof lng !== "number") return;
-      const name = r.restaurantName ?? "";
+    poiMarkerData.forEach((poi) => {
+      const ratio =
+        maxGpsPointCount > 0 ? poi.gpsPointCount / maxGpsPointCount : 0;
+      const radius = 5 + Math.round(ratio * 8);
+      const fillColor =
+        poi.gpsPointCount > 0 ? "hsl(12, 92%, 56%)" : "hsl(199, 89%, 48%)";
 
-      L.circleMarker([lat, lng], {
-        radius: 5,
-        fillColor: "hsl(199, 89%, 48%)",
-        color: "hsl(199, 89%, 48%)",
-        weight: 2,
-        fillOpacity: 0.8,
+      L.circleMarker([poi.latitude, poi.longitude], {
+        radius,
+        fillColor,
+        color: "#ffffff",
+        weight: 1.5,
+        fillOpacity: poi.gpsPointCount > 0 ? 0.85 : 0.45,
       })
         .bindPopup(
-          `<strong>${name}</strong><br/><span style="color:#666">${r.playCount ? `${r.playCount} lượt nghe` : ""}</span>`,
+          [
+            `<strong>${poi.restaurantName ?? "(Không tên)"}</strong>`,
+            `<span style="color:#666">Điểm GPS gán: ${poi.gpsPointCount}</span>`,
+            typeof poi.playCount === "number"
+              ? `<br/><span style="color:#666">Lượt nghe: ${poi.playCount}</span>`
+              : "",
+          ].join(""),
         )
         .addTo(poiLayer);
     });
@@ -233,24 +308,43 @@ export function HeatmapSection({
       const bounds = L.latLngBounds(
         weightedHeatPoints.map((p) => [p[0], p[1]] as L.LatLngTuple),
       );
-      map.fitBounds(bounds, { padding: [40, 40] });
+      map.fitBounds(bounds, {
+        padding: [40, 40],
+        animate: true,
+        duration: 0.8,
+      });
+      return;
     }
-  }, [weightedHeatPoints, activeGradient, restaurantPois]);
+
+    if (poiCoordinates.length > 0) {
+      map.fitBounds(L.latLngBounds(poiCoordinates), {
+        padding: [40, 40],
+        animate: true,
+        duration: 0.8,
+      });
+    }
+  }, [
+    weightedHeatPoints,
+    activeGradient,
+    poiMarkerData,
+    maxGpsPointCount,
+    poiCoordinates,
+  ]);
 
   return (
     <div className="stat-card">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-foreground">
-          Bản đồ nhiệt vị trí người dùng nghe âm thanh
+          Bản đồ nhiệt vị trí người dùng
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             Khoảng thời gian
           </span>
-          {[1, 6, 24, 168].map((h) => {
-            const value = h as 1 | 6 | 24 | 168;
+          {[1, 6, 24, "all"].map((h) => {
+            const value = h as 1 | 6 | 24 | "all";
             const isActive = lookbackHours === value;
-            const label = value === 168 ? "7d" : `${value}h`;
+            const label = value === "all" ? "Tất cả" : `${value}h`;
             return (
               <button
                 key={value}
@@ -290,6 +384,23 @@ export function HeatmapSection({
           {/* <span>(7 mức)</span> */}
         </div>
       )}
+
+      {topPoisByGpsDensity.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted-foreground">
+            POI nhiều điểm GPS nhất:
+          </span>
+          {topPoisByGpsDensity.map((poi, idx) => (
+            <span
+              key={poi.restaurantId}
+              className="rounded-full border border-border bg-accent/40 px-2 py-1 text-foreground"
+            >
+              #{idx + 1} {poi.restaurantName} ({poi.gpsPointCount})
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="relative">
         <div ref={mapRef} className="h-[460px] rounded-lg overflow-hidden" />
 
