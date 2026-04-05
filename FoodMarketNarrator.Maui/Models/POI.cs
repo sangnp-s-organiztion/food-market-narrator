@@ -21,45 +21,11 @@ public class POI
     {
         get
         {
-            // Nếu không có giờ mở cửa, coi như luôn mở
-            if (string.IsNullOrWhiteSpace(OpeningHours))
-                return true;
-
-            var parts = OpeningHours.Split('-');
-            if (parts.Length != 2)
-                return true;
-
             var now = DateTime.Now.TimeOfDay;
-
-            // Parse giờ mở và giờ đóng
-            // Hỗ trợ format: "6:00 - 22:00" hoặc "06:00-22:00"
-            var openStr = parts[0].Trim();
-            var closeStr = parts[1].Trim();
-
-            // Parse giờ mở
-            var openParts = openStr.Split(':');
-            if (openParts.Length < 2) return true;
-            if (!TimeSpan.TryParse(openStr, out var openTime))
+            if (!TryGetOpeningWindow(out var openTime, out var closeTime))
             {
-                if (openParts.Length == 2 &&
-                    int.TryParse(openParts[0], out var h1) &&
-                    int.TryParse(openParts[1], out var m1))
-                    openTime = new TimeSpan(h1, m1, 0);
-                else
-                    return true;
-            }
-
-            // Parse giờ đóng
-            var closeParts = closeStr.Split(':');
-            if (closeParts.Length < 2) return true;
-            if (!TimeSpan.TryParse(closeStr, out var closeTime))
-            {
-                if (closeParts.Length == 2 &&
-                    int.TryParse(closeParts[0], out var h2) &&
-                    int.TryParse(closeParts[1], out var m2))
-                    closeTime = new TimeSpan(h2, m2, 0);
-                else
-                    return true;
+                // Không có dữ liệu giờ mở/đóng thì fallback theo trạng thái hoạt động chung.
+                return IsActive;
             }
 
             // So sánh với giờ hiện tại
@@ -85,6 +51,8 @@ public class POI
     // Thong tin bo sung
     public string? PriceRange { get; set; }
     public string? OpeningHours { get; set; }
+    public TimeSpan? OpenTime { get; set; }
+    public TimeSpan? CloseTime { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
     
@@ -139,9 +107,23 @@ public class POI
     }
 
     [Ignore]
-    public string OpeningHoursDisplay => string.IsNullOrWhiteSpace(OpeningHours)
-        ? "08:00 - 22:00"
-        : OpeningHours;
+    public string OpeningHoursDisplay
+    {
+        get
+        {
+            if (OpenTime.HasValue && CloseTime.HasValue)
+            {
+                return $"{FormatHour(OpenTime.Value)} - {FormatHour(CloseTime.Value)}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(OpeningHours))
+            {
+                return OpeningHours;
+            }
+
+            return "Đang cập nhật";
+        }
+    }
 
     [Ignore]
     public string AddressDisplay => string.IsNullOrWhiteSpace(Address)
@@ -218,4 +200,76 @@ public class POI
             .Replace("resources/images/", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Trim();
     }
+
+    private bool TryGetOpeningWindow(out TimeSpan openTime, out TimeSpan closeTime)
+    {
+        if (OpenTime.HasValue && CloseTime.HasValue)
+        {
+            openTime = OpenTime.Value;
+            closeTime = CloseTime.Value;
+            return true;
+        }
+
+        if (TryParseOpeningHoursText(OpeningHours, out openTime, out closeTime))
+        {
+            return true;
+        }
+
+        openTime = default;
+        closeTime = default;
+        return false;
+    }
+
+    private static bool TryParseOpeningHoursText(string? openingHours, out TimeSpan openTime, out TimeSpan closeTime)
+    {
+        if (string.IsNullOrWhiteSpace(openingHours))
+        {
+            openTime = default;
+            closeTime = default;
+            return false;
+        }
+
+        var normalized = openingHours
+            .Replace('–', '-')
+            .Replace('—', '-');
+
+        var parts = normalized.Split('-', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+        {
+            openTime = default;
+            closeTime = default;
+            return false;
+        }
+
+        if (!TryParseHourMinute(parts[0], out openTime) || !TryParseHourMinute(parts[1], out closeTime))
+        {
+            openTime = default;
+            closeTime = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryParseHourMinute(string value, out TimeSpan time)
+    {
+        if (TimeSpan.TryParse(value, out time))
+        {
+            return true;
+        }
+
+        var hourMinute = value.Split(':', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (hourMinute.Length == 2
+            && int.TryParse(hourMinute[0], out var hour)
+            && int.TryParse(hourMinute[1], out var minute))
+        {
+            time = new TimeSpan(hour, minute, 0);
+            return true;
+        }
+
+        time = default;
+        return false;
+    }
+
+    private static string FormatHour(TimeSpan value) => $"{value.Hours:00}:{value.Minutes:00}";
 }

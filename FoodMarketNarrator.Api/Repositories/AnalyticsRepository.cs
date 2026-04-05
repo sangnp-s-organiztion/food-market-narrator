@@ -483,17 +483,38 @@ public class AnalyticsRepository
 
         var pipeline = new[]
         {
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time_raw",
+                    new BsonDocument("$ifNull", new BsonArray
+                    {
+                        "$start_time",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            "$timestamp",
+                            "$created_at"
+                        })
+                    }))),
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time",
+                    new BsonDocument("$convert", new BsonDocument
+                    {
+                        { "input", "$event_time_raw" },
+                        { "to", "date" },
+                        { "onError", BsonNull.Value },
+                        { "onNull", BsonNull.Value }
+                    }))),
             new BsonDocument("$match",
                 new BsonDocument
                 {
-                    { "timestamp", new BsonDocument("$gte", since) },
+                    { "event_time", new BsonDocument("$ne", BsonNull.Value) },
+                    { "event_time", new BsonDocument("$gte", since) },
                     { "duration", new BsonDocument("$gte", 5) }
                 }),
             new BsonDocument("$group",
                 new BsonDocument
                 {
                     { "_id", new BsonDocument("$dateToString",
-                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$timestamp" } }) },
+                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$event_time" } }) },
                     { "count", new BsonDocument("$sum", 1) }
                 }),
             new BsonDocument("$sort",

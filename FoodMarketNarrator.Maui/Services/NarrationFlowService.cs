@@ -29,6 +29,9 @@ public class NarrationFlowService : INarrationFlowService
 
     private readonly Queue<NarrationQueueItem> _playQueue = new();
     private bool _isProcessingQueue = false;
+    private string? _currentPlayingPoiId;
+    private CancellationTokenSource? _switchCutoffCts;
+    private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3);
     private CancellationTokenSource? _qrGuardCts;
     public bool IsNarrating => _isNarrationEnabled;
 
@@ -101,6 +104,9 @@ public class NarrationFlowService : INarrationFlowService
         _audioService.StopSound();
         _qrGuardCts?.Cancel();
         _qrGuardCts = null;
+        _switchCutoffCts?.Cancel();
+        _switchCutoffCts = null;
+        _currentPlayingPoiId = null;
 
         // clear queue
         _playQueue.Clear();
@@ -212,6 +218,19 @@ public class NarrationFlowService : INarrationFlowService
         // Force luôn cho phép phát lại POI hiện tại
         if (force || !alreadyPlayed)
         {
+            var shouldInterruptForPoiSwitch = !force
+                && _audioService.IsPlaying
+                && _isProcessingQueue
+                && !string.IsNullOrWhiteSpace(_currentPlayingPoiId)
+                && !string.Equals(_currentPlayingPoiId, poiId, StringComparison.OrdinalIgnoreCase);
+
+            if (shouldInterruptForPoiSwitch)
+            {
+                // Khi chuyển sang POI mới trong lúc audio cũ đang phát,
+                // chỉ giữ lại POI mới trong queue để phát ngay sau khi cắt audio cũ.
+                _playQueue.Clear();
+            }
+
             // Thêm vào queue để phát
             _playQueue.Enqueue(new NarrationQueueItem
             {
@@ -227,6 +246,11 @@ public class NarrationFlowService : INarrationFlowService
 
             // Cập nhật thời gian phát gần nhất
             _poiLastPlayedTime[poiId] = DateTime.Now;
+
+            if (shouldInterruptForPoiSwitch)
+            {
+                ScheduleCutoffForPoiSwitch(_currentPlayingPoiId!, poiId);
+            }
 
             await ProcessQueueAsync();
         }
@@ -249,6 +273,7 @@ public class NarrationFlowService : INarrationFlowService
 
             var queueItem = _playQueue.Dequeue();
             var poi = queueItem.Poi;
+            _currentPlayingPoiId = poi.restaurantId;
             DateTime? startedAtUtc = null;
             await _audioService.PlaySound(queueItem.AudioId);
 
@@ -278,9 +303,50 @@ public class NarrationFlowService : INarrationFlowService
                     startedAtUtc.Value,
                     endedAtUtc);
             }
+
+            _currentPlayingPoiId = null;
         }
 
         _isProcessingQueue = false;
+    }
+
+    private void ScheduleCutoffForPoiSwitch(string fromPoiId, string toPoiId)
+    {
+        _switchCutoffCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _switchCutoffCts = cts;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(PoiSwitchCutoffDelay, cts.Token);
+
+                if (cts.IsCancellationRequested || !_isNarrationEnabled)
+                {
+                    return;
+                }
+
+                if (_audioService.IsPlaying
+                    && string.Equals(_currentPlayingPoiId, fromPoiId, StringComparison.OrdinalIgnoreCase))
+                {
+                    _audioService.StopSound();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            finally
+            {
+                if (ReferenceEquals(_switchCutoffCts, cts))
+                {
+                    _switchCutoffCts = null;
+                }
+
+                cts.Dispose();
+            }
+        });
     }
 
     private async Task<bool> WaitForPlaybackStartAsync(int timeoutMs = 2000)
