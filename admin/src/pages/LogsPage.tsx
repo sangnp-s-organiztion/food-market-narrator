@@ -42,6 +42,42 @@ function formatTimestamp(iso: string): string {
 
 function actionBadge(action: string): { cls: string; meaning: string } {
   const normalized = (action ?? "").toUpperCase();
+
+  if (normalized.startsWith("RESTAURANT_")) {
+    return {
+      cls: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      meaning: "thao tác nhà hàng",
+    };
+  }
+
+  if (normalized.startsWith("DISH_")) {
+    return {
+      cls: "bg-amber-100 text-amber-700 border-amber-200",
+      meaning: "thao tác món ăn",
+    };
+  }
+
+  if (normalized.startsWith("IMAGE_")) {
+    return {
+      cls: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+      meaning: "thao tác hình ảnh",
+    };
+  }
+
+  if (normalized.startsWith("AUDIO_")) {
+    return {
+      cls: "bg-cyan-100 text-cyan-700 border-cyan-200",
+      meaning: "thao tác audio",
+    };
+  }
+
+  if (normalized.startsWith("USER_")) {
+    return {
+      cls: "bg-teal-100 text-teal-700 border-teal-200",
+      meaning: "thao tác người dùng",
+    };
+  }
+
   switch (normalized) {
     case "LOGIN":
       return {
@@ -182,23 +218,31 @@ const LogsPage = () => {
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              {["LOGIN", "LOGOUT", "CREATE", "MOBILE_SYNC", "ERROR"].map(
-                (action) => {
-                  const style = actionBadge(action);
-                  return (
-                    <span
-                      key={action}
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
-                        style.cls,
-                      )}
-                      title={style.meaning}
-                    >
-                      {action}
-                    </span>
-                  );
-                },
-              )}
+              {[
+                "LOGIN",
+                "LOGOUT",
+                "RESTAURANT_UPDATE",
+                "DISH_CREATE",
+                "IMAGE_UPLOAD",
+                "AUDIO_DELETE",
+                "USER_UPDATE_STATUS",
+                "MOBILE_SYNC",
+                "ERROR",
+              ].map((action) => {
+                const style = actionBadge(action);
+                return (
+                  <span
+                    key={action}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+                      style.cls,
+                    )}
+                    title={style.meaning}
+                  >
+                    {action}
+                  </span>
+                );
+              })}
             </div>
 
             <table className="data-table">
