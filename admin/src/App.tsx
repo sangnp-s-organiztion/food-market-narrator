@@ -17,6 +17,7 @@ import RestaurantsPage from "./pages/Restaurants.tsx";
 import UsersPage from "./pages/UsersPage.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import TrajectoryPage from "./pages/TrajectoryPage.tsx";
+import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 
 import { ReactNode, useEffect } from "react";
 
@@ -36,6 +37,8 @@ const getTitleByPath = (pathname: string): string => {
     return `Nhật ký hoạt động | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/trajectory"))
     return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/translation-billing"))
+    return `Billing token dịch | ${TITLE_SUFFIX}`;
   return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 };
 
@@ -117,6 +120,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TrajectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/translation-billing"
+        element={
+          <ProtectedRoute>
+            <TranslationBillingPage />
           </ProtectedRoute>
         }
       />

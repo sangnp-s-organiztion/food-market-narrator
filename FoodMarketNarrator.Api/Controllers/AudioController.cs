@@ -3,6 +3,7 @@ using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Security.Claims;
 
 namespace food_market_narrator_api.Controllers
 {
@@ -12,11 +13,13 @@ namespace food_market_narrator_api.Controllers
     public class AudioController : ControllerBase
     {
         private readonly AudioService _audioService;
+        private readonly TranslationService _translationService;
         private readonly IWebHostEnvironment _environment;
 
-        public AudioController(AudioService audioService, IWebHostEnvironment environment)
+        public AudioController(AudioService audioService, TranslationService translationService, IWebHostEnvironment environment)
         {
             _audioService = audioService;
+            _translationService = translationService;
             _environment = environment;
         }
 
@@ -98,6 +101,78 @@ namespace food_market_narrator_api.Controllers
             string audioUrl = $"/uploads/audios/{fileName}";
             var created = await _audioService.CreateAsync(restaurantId, languageId, audioUrl);
             return Ok(created);
+        }
+
+        [HttpPost("/Restaurant/{restaurantId}/translate")]
+        public async Task<IActionResult> TranslateText(string restaurantId, [FromBody] TranslateTextRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            if (!TryGetCurrentUserId(out var sellerUserId))
+            {
+                return Unauthorized(new { message = "Unauthorized." });
+            }
+
+            try
+            {
+                var result = await _translationService.TranslateAsync(sellerUserId, restaurantId, request);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("/Restaurant/{restaurantId}/audios/from-text")]
+        public async Task<IActionResult> CreateAudioFromText(string restaurantId, [FromBody] CreateAudioFromTextRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            if (!TryGetCurrentUserId(out var sellerUserId))
+            {
+                return Unauthorized(new { message = "Unauthorized." });
+            }
+
+            try
+            {
+                var result = await _translationService.CreateAudioFromTextAsync(sellerUserId, restaurantId, request);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, new { message = ex.Message });
+            }
         }
 
         [HttpPatch("/Audios/{audioId:int}/active")]
@@ -242,6 +317,13 @@ namespace food_market_narrator_api.Controllers
 
             resolvedPath = candidate;
             return true;
+        }
+
+        private bool TryGetCurrentUserId(out int userId)
+        {
+            userId = 0;
+            var userIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdRaw, out userId);
         }
     }
 }
