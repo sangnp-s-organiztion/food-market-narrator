@@ -32,6 +32,8 @@ Luu y:
 - GET /Audio (public)
 - GET /Restaurant/{restaurantId}/audios
 - POST /Restaurant/{restaurantId}/audios
+- POST /Restaurant/{restaurantId}/translate
+- POST /Restaurant/{restaurantId}/audios/from-text
 - PATCH /Audios/{audioId:int}/active
 - DELETE /Audios/{audioId:int}
 

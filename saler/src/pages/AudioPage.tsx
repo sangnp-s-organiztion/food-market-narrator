@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  createAudioFromTextApi,
   deleteAudioApi,
   getLanguagesApi,
   getRestaurantAudiosApi,
+  translateAudioTextApi,
   updateAudioActiveApi,
   uploadAudioApi,
 } from "@/services/api";
@@ -11,6 +13,7 @@ import type { Audio, Language } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,11 +29,32 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pause, Play, Plus, Volume2, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Pause,
+  Play,
+  Plus,
+  Sparkles,
+  Trash2,
+  Volume2,
+} from "lucide-react";
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:5044";
+
+const TARGET_LANGUAGE_OPTIONS = [
+  { code: "vi", label: "Tiếng Việt" },
+  { code: "en", label: "Tiếng Anh" },
+  { code: "ja", label: "Tiếng Nhật" },
+  { code: "zh", label: "Tiếng Trung" },
+  { code: "ko", label: "Tiếng Hàn" },
+] as const;
+
+const SOURCE_LANGUAGE_OPTIONS = [
+  { code: "auto", label: "Tự động" },
+  ...TARGET_LANGUAGE_OPTIONS,
+] as const;
 
 export default function AudioPage() {
   const { selectedRestaurant } = useRestaurant();
@@ -42,7 +66,22 @@ export default function AudioPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const playerRef = useRef<HTMLAudioElement | null>(null);
-  const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
+  const [playingKey, setPlayingKey] = useState<string | null>(null);
+
+  const [sourceText, setSourceText] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [sourceLangCode, setSourceLangCode] = useState<string>("vi");
+  const [targetLangCode, setTargetLangCode] = useState<string>("en");
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState("");
+  const [generatedAudioId, setGeneratedAudioId] = useState<number | null>(null);
+  const [translateMeta, setTranslateMeta] = useState<{
+    inputChars: number;
+    outputChars: number;
+    estimatedCost: number;
+    currency: string;
+  } | null>(null);
 
   const versionByAudioId = useMemo(() => {
     const sorted = [...audios].sort((a, b) => {
@@ -194,7 +233,7 @@ export default function AudioPage() {
 
     if (!selectedRestaurant) return;
 
-    const langId = parseInt(selectedLang);
+    const langId = parseInt(selectedLang, 10);
 
     try {
       await uploadAudioApi(
@@ -237,10 +276,15 @@ export default function AudioPage() {
     return new URL(`/maui-audios/${raw}`, API_BASE).toString();
   };
 
-  const togglePlay = (audio: Audio) => {
-    if (playingAudioId === audio.audio_id && playerRef.current) {
+  const togglePlayByUrl = (audioUrl: string, key: string) => {
+    if (!audioUrl) {
+      toast.error("Không tìm thấy đường dẫn tệp âm thanh");
+      return;
+    }
+
+    if (playingKey === key && playerRef.current) {
       playerRef.current.pause();
-      setPlayingAudioId(null);
+      setPlayingKey(null);
       return;
     }
 
@@ -249,48 +293,260 @@ export default function AudioPage() {
       playerRef.current = null;
     }
 
-    const audioUrl = resolveAudioUrl(audio);
-    if (!audioUrl) {
-      toast.error("Không tìm thấy đường dẫn tệp âm thanh");
-      return;
-    }
-
     const player = new Audio(audioUrl);
     playerRef.current = player;
-    setPlayingAudioId(audio.audio_id);
+    setPlayingKey(key);
 
     player.onended = () => {
-      setPlayingAudioId(null);
+      setPlayingKey(null);
       playerRef.current = null;
     };
 
     player.onerror = () => {
-      setPlayingAudioId(null);
+      setPlayingKey(null);
       playerRef.current = null;
       toast.error("Không thể phát tệp âm thanh");
     };
 
     void player.play().catch(() => {
-      setPlayingAudioId(null);
+      setPlayingKey(null);
       playerRef.current = null;
       toast.error("Không thể phát tệp âm thanh");
     });
   };
 
+  const togglePlayAudioItem = (audio: Audio) => {
+    const audioUrl = resolveAudioUrl(audio);
+    togglePlayByUrl(audioUrl, `audio-${audio.audio_id}`);
+  };
+
+  const handleTranslateText = async () => {
+    if (!selectedRestaurant) return;
+
+    const text = sourceText.trim();
+    if (!text) {
+      toast.error("Vui lòng nhập nội dung cần dịch");
+      return;
+    }
+
+    try {
+      setIsTranslating(true);
+      const result = await translateAudioTextApi(
+        selectedRestaurant.restaurant_id,
+        {
+          text,
+          source_language_code: sourceLangCode,
+          target_language_code: targetLangCode,
+        },
+      );
+
+      setTranslatedText(result.translated_text);
+      setTranslateMeta({
+        inputChars: result.input_chars,
+        outputChars: result.output_chars,
+        estimatedCost: result.estimated_cost,
+        currency: result.currency,
+      });
+      setGeneratedAudioUrl("");
+      setGeneratedAudioId(null);
+      toast.success("Dịch văn bản thành công");
+    } catch (error) {
+      toast.error(extractErrorMessage(error, "Không thể dịch văn bản"));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleCreateAudioFromText = async () => {
+    if (!selectedRestaurant) return;
+
+    const textForAudio = (translatedText || sourceText).trim();
+    if (!textForAudio) {
+      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo audio");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const result = await createAudioFromTextApi(
+        selectedRestaurant.restaurant_id,
+        {
+          text: textForAudio,
+          language_code: targetLangCode,
+          source_text: sourceText.trim() || undefined,
+        },
+      );
+
+      const normalizedUrl = /^https?:\/\//i.test(result.audio_url)
+        ? result.audio_url
+        : new URL(result.audio_url, API_BASE).toString();
+
+      setGeneratedAudioUrl(normalizedUrl);
+      setGeneratedAudioId(result.audio_id);
+      await fetchAudioData();
+      toast.success("Đã tạo audio thành công");
+    } catch (error) {
+      toast.error(extractErrorMessage(error, "Không thể tạo audio từ text"));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const extractErrorMessage = (error: unknown, fallback: string): string => {
+    if (!(error instanceof Error) || !error.message) {
+      return fallback;
+    }
+
+    const message = error.message.trim();
+    if (!message) {
+      return fallback;
+    }
+
+    try {
+      const parsed = JSON.parse(message) as {
+        message?: string;
+        detail?: string;
+        error?: string;
+      };
+
+      return parsed.message ?? parsed.detail ?? parsed.error ?? fallback;
+    } catch {
+      return message;
+    }
+  };
+
+  const handlePlayGeneratedAudio = () => {
+    if (!generatedAudioUrl) {
+      toast.error("Chưa có audio được tạo");
+      return;
+    }
+
+    togglePlayByUrl(generatedAudioUrl, "generated");
+  };
+
   return (
-    <div className="max-w-3xl mx-auto animate-fade-in">
+    <div className="max-w-5xl mx-auto animate-fade-in space-y-6">
       <div className="page-header flex items-start justify-between">
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
           <p className="page-description">
-            Quản lý theo từng ngôn ngữ, mỗi ngôn ngữ chỉ nên có 1 âm thanh hoạt
-            động
+            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo audio bằng Edge TTS
+            và quản lý phiên bản audio của nhà hàng.
           </p>
         </div>
         <Button onClick={() => openUploadDialog()}>
           <Plus className="w-4 h-4 mr-2" /> Tải lên âm thanh
         </Button>
       </div>
+
+      <section className="dashboard-card space-y-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h2 className="font-semibold text-base">Dịch văn bản và tạo audio</h2>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="source-text">Nội dung văn bản</Label>
+          <Textarea
+            id="source-text"
+            value={sourceText}
+            onChange={(e) => setSourceText(e.target.value)}
+            placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo audio..."
+            className="min-h-36"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>Ngôn ngữ nguồn</Label>
+            <Select value={sourceLangCode} onValueChange={setSourceLangCode}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn ngôn ngữ nguồn" />
+              </SelectTrigger>
+              <SelectContent>
+                {SOURCE_LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ngôn ngữ đích</Label>
+            <Select value={targetLangCode} onValueChange={setTargetLangCode}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn ngôn ngữ đích" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            onClick={handleTranslateText}
+            disabled={isTranslating}
+          >
+            {isTranslating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Dịch
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCreateAudioFromText}
+            disabled={isGenerating}
+          >
+            {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Tạo audio
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handlePlayGeneratedAudio}
+            disabled={!generatedAudioUrl}
+          >
+            {playingKey === "generated" ? (
+              <Pause className="w-4 h-4 mr-2" />
+            ) : (
+              <Play className="w-4 h-4 mr-2" />
+            )}
+            Play audio
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Kết quả dịch</Label>
+          <Textarea
+            value={translatedText}
+            onChange={(e) => setTranslatedText(e.target.value)}
+            placeholder="Kết quả dịch sẽ hiển thị ở đây"
+            className="min-h-32"
+          />
+          {translateMeta && (
+            <p className="text-xs text-muted-foreground">
+              Input: {translateMeta.inputChars} ký tự - Output:{" "}
+              {translateMeta.outputChars} ký tự - Chi phí ước tính:{" "}
+              {translateMeta.estimatedCost.toFixed(6)} {translateMeta.currency}
+            </p>
+          )}
+          {generatedAudioId && (
+            <p className="text-xs text-muted-foreground">
+              Audio đã tạo với ID: {generatedAudioId}
+            </p>
+          )}
+        </div>
+      </section>
 
       {isLoading ? (
         <div className="form-section text-center py-12 text-muted-foreground">
@@ -348,14 +604,14 @@ export default function AudioPage() {
                         variant="ghost"
                         size="icon"
                         className="w-10 h-10 rounded-lg bg-accent shrink-0"
-                        onClick={() => togglePlay(audio)}
+                        onClick={() => togglePlayAudioItem(audio)}
                         title={
-                          playingAudioId === audio.audio_id
+                          playingKey === `audio-${audio.audio_id}`
                             ? "Tạm dừng"
                             : "Phát âm thanh"
                         }
                       >
-                        {playingAudioId === audio.audio_id ? (
+                        {playingKey === `audio-${audio.audio_id}` ? (
                           <Pause className="w-5 h-5 text-accent-foreground" />
                         ) : (
                           <Play className="w-5 h-5 text-accent-foreground" />

@@ -39,6 +39,9 @@ public class Program
         builder.Services.AddScoped<UserSessionService>();
         builder.Services.AddScoped<AudioLogRepository>();
         builder.Services.AddScoped<AudioLogService>();
+        builder.Services.AddScoped<TranslationHistoryRepository>();
+        builder.Services.AddScoped<TranslationService>();
+        builder.Services.AddHttpClient();
 
 
         builder.Services
@@ -100,6 +103,9 @@ public class Program
             options.UseSqlServer(connectionString));
 
         builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDb"));
+        builder.Services.Configure<LibreTranslateSettings>(builder.Configuration.GetSection("LibreTranslate"));
+        builder.Services.Configure<EdgeTtsSettings>(builder.Configuration.GetSection("EdgeTts"));
+        builder.Services.Configure<TranslationPricingSettings>(builder.Configuration.GetSection("TranslationPricing"));
         builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
         {
             var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
