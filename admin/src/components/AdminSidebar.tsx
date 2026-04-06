@@ -5,6 +5,7 @@ import {
   Users,
   ScrollText,
   Route,
+  Receipt,
   AudioWaveform,
   LogOut,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const navItems = [
   { path: "/restaurants", label: "Nhà hàng", icon: Store },
   { path: "/users", label: "Người dùng", icon: Users },
   { path: "/logs", label: "Nhật ký", icon: ScrollText },
+  { path: "/translation-billing", label: "Billing token dịch", icon: Receipt },
 ];
 
 const AdminSidebar = () => {

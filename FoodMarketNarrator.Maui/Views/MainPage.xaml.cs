@@ -12,6 +12,8 @@ namespace food_market_narrator.Views;
 public partial class MainPage : ContentPage
 {
     private static bool _hasAutoStartedNarrationThisSession;
+    private static bool _hasAppliedStartupTrackingDelay;
+    private static bool? _lastFloatingButtonVisibility;
     private const int FeaturedPoiPageSize = 10;
 
     // Khời tạo tọa độ và tên cho điểm
@@ -53,12 +55,32 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
         var sw = Stopwatch.StartNew();
 
+        if (_lastFloatingButtonVisibility.HasValue)
+        {
+            var cachedVisibility = _lastFloatingButtonVisibility.Value;
+            _isInsidePOIUI = cachedVisibility;
+            FloatingButton.IsVisible = cachedVisibility;
+        }
+
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
         LogPerf("OnAppearing: subscribed LocationChanged", sw);
 
         // Dời start tracking sau frame đầu để giảm giật lúc cold start.
         _ = StartTrackingDeferredAsync();
+
+        // Ưu tiên dùng vị trí cache để cập nhật nút thuyết minh ngay khi quay lại MainPage.
+        var currentLocation = _locationService.LastKnownLocation ?? _lastKnownLocation;
+        if (currentLocation != null)
+        {
+            _lastKnownLocation = currentLocation;
+            UpdateUIByLocation(currentLocation);
+            _ = EnsurePoiDataReadyForUiAsync(currentLocation);
+        }
+        else
+        {
+            _ = PrimeUiWithLatestLocationAsync();
+        }
 
         // Trả giao diện ngay, các phần nặng sẽ được tải nền.
         if (!_isInitializingMainPage)
@@ -78,12 +100,7 @@ public partial class MainPage : ContentPage
             _ = DisplayAlert("Thông báo", "Vui lòng kết nối Internet để tải dữ liệu audio.", "OK");
         }
 
-        // Cập nhật trạng thái UI dựa trên vị trí hiện tại
-        var currentLocation = _lastKnownLocation;
-        if (currentLocation != null)
-        {
-            UpdateUIByLocation(currentLocation);
-        }
+        // Cập nhật text/disabled state của nút, trạng thái visible đã được quyết định ở nhánh trên.
         UpdateFloatingButtonUI();
         LogPerf("OnAppearing: completed", sw);
     }
@@ -142,12 +159,54 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            await Task.Delay(AppSettings.StartupTrackingDelayMs);
+            if (!_hasAppliedStartupTrackingDelay)
+            {
+                _hasAppliedStartupTrackingDelay = true;
+                await Task.Delay(AppSettings.StartupTrackingDelayMs);
+            }
+
             await _locationService.StartTrackingAsync();
         }
         catch
         {
             // Ignore startup tracking failures to keep UI responsive.
+        }
+    }
+
+    private async Task PrimeUiWithLatestLocationAsync()
+    {
+        try
+        {
+            var currentLocation = await _locationService.GetCurrentLocationAsync();
+            if (currentLocation == null)
+            {
+                return;
+            }
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _lastKnownLocation = currentLocation;
+                UpdateUIByLocation(currentLocation);
+            });
+
+            await EnsurePoiDataReadyForUiAsync(currentLocation);
+        }
+        catch
+        {
+            // Ignore transient location read errors; tracking loop will update UI later.
+        }
+    }
+
+    private async Task EnsurePoiDataReadyForUiAsync(Location location)
+    {
+        try
+        {
+            await _poiService.GetAllPOIsAsync();
+            MainThread.BeginInvokeOnMainThread(() => UpdateUIByLocation(location));
+        }
+        catch
+        {
+            // Ignore background preload failures; existing UI state stays usable.
         }
     }
 
@@ -365,6 +424,21 @@ public partial class MainPage : ContentPage
     // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất
     private void UpdateUIByLocation(Location location)
     {
+        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
+
+        var shouldShow = nearest != null
+            && _poiService.GetDistanceMeters(location, nearest) <= AppSettings.TriggerDistanceMeters;
+
+        _lastFloatingButtonVisibility = shouldShow;
+
+        if (_isInsidePOIUI != shouldShow)
+        {
+            _isInsidePOIUI = shouldShow;
+            FloatingButton.IsVisible = shouldShow;
+        }
+
+        UpdateFloatingButtonUI();
+
         if (_isMapLoaded)
         {
             try
@@ -378,32 +452,9 @@ public partial class MainPage : ContentPage
             }
         }
 
-        var nearest = _poiService.GetNearestPOI(location.Latitude, location.Longitude);
-
         var shouldHighlight = nearest != null
             && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
         MapHelper.HighlightPOI(mapControl, shouldHighlight ? nearest : null);
-
-        bool shouldShow = false;
-
-        if (nearest != null)
-        {
-            var distance = _poiService.GetDistanceMeters(location, nearest);
-
-            shouldShow = distance <= AppSettings.TriggerDistanceMeters;
-        }
-
-        if (_isInsidePOIUI != shouldShow)
-        {
-            _isInsidePOIUI = shouldShow;
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                FloatingButton.IsVisible = shouldShow;
-            });
-        }
-
-        UpdateFloatingButtonUI();
     }
 
     // Cập nhật trạng thái của nút thuyết minh dựa trên trạng thái hiện tại của NarrationFlowService

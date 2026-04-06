@@ -134,7 +134,7 @@ AudioLibraryService:
 LanguageService:
 
 - Lấy danh sách ngôn ngữ từ API hoặc cache offline.
-- Đổi culture hiện tại và reload AppShell.
+- Đổi culture hiện tại và giữ nguyên navigation stack (không reset AppShell).
 
 FavoriteService:
 
@@ -148,6 +148,7 @@ LocationLogSyncService:
 
 - Buffer location sample và flush batch định kỳ 10 giây.
 - Khởi tạo user session trên backend.
+- Persist buffer location log xuống file local để không mất dữ liệu khi app bị kill lúc offline.
 
 AudioLogSyncService:
 
