@@ -6,33 +6,45 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-04-06
 
 ### Tóm tắt trong ngày
-- Changed:
-  - cập nhật giao diện maui
-  - comment
-  - cập nhật thêm mấy cái nữa
+
+- Đã thay đổi:
+  - MAUI MainPage: tối ưu khởi tạo UI khi quay lại trang chính, cache trạng thái hiển thị nút thuyết minh, chỉ delay tracking 1 lần mỗi phiên và preload POI/location nền để nút phản hồi nhanh hơn.
+  - MAUI BottomNavigation: điều hướng về Home ưu tiên pop về MainPage trong navigation stack hiện tại, tránh reset route không cần thiết.
+  - MAUI LanguageService: đổi ngôn ngữ không còn reset AppShell, giữ nguyên navigation stack và trang đang mở.
+  - MAUI LocationLogSyncService: thêm persist buffer log vị trí ra file local, tự restore khi app khởi động và tiếp tục retry sync khi online trở lại.
+  - MAUI AppSettings: cập nhật LocalApiHost cho môi trường chạy API hiện tại.
+  - Docs: cập nhật architecture/release notes để phản ánh thay đổi ở LanguageService, LocationLogSyncService và luồng UI MainPage.
 
 ### sangnpdev (3 commits)
-- [6f95960] cập nhật giao diện maui
-- [517d2de] comment
-- [8dd173f] cập nhật thêm mấy cái nữa
+
+- [6f95960] Tối ưu UI/điều hướng MAUI (MainPage + BottomNavigation), cải thiện phản hồi nút thuyết minh khi quay lại trang chính và cập nhật tài liệu kiến trúc/release notes.
+- [517d2de] Chuẩn hóa comment tiếng Việt trong LanguageService để mô tả rõ hành vi mặc định và đổi ngôn ngữ.
+- [8dd173f] Bỏ reset AppShell khi đổi ngôn ngữ, bổ sung persist/restore buffer cho LocationLogSyncService và cập nhật LocalApiHost.
 
 ## 2026-04-05
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them chi tiet nha hang o admin
   - feat: update download
   - feat(settings): add offline data usage display for cache sizes
   - feat(maui): add 3-minute POI TTL refresh with startup logs and update caching docs
   - feat: add mocks for location and QR access services in narration flow tests
-  - ... và 1 thay đổi khác
-- Changed:
+  - feat: add QR time-limited access enforcement with app auto-close on expiry
+- Đã thay đổi:
   - cập nhật docs prd
   - cập nhật prd
   - cập nhật docs
   - cập nhật ảnh các nhà hàng
   - ok ok ok ok
-  - ... và 7 thay đổi khác
+  - update logic time
+  - update lung tung
+  - update admin ui
+  - update giao diện trang nhật ký bên admin
+  - update heatmap
+  - update: optimal performence
+  - thử tính năng
 - Fixed:
   - sửa docs
   - fix audio version
@@ -46,9 +58,16 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #155 from sangnp-s-organiztion/fixbug/aa
   - Merge pull request #154 from sangnp-s-organiztion/release
   - Merge pull request #153 from sangnp-s-organiztion/develop
-  - ... và 7 thay đổi khác
+  - Merge pull request #152 from sangnp-s-organiztion/update/admin-saler-ui
+  - Merge pull request #151 from sangnp-s-organiztion/develop
+  - Merge pull request #150 from sangnp-s-organiztion/experiment-feature
+  - Merge pull request #149 from sangnp-s-organiztion/visitor/ttl-3m
+  - Merge pull request #148 from sangnp-s-organiztion/develop
+  - Merge pull request #147 from sangnp-s-organiztion/visitor/add-mini-player
+  - Merge pull request #146 from sangnp-s-organiztion/visitor/add-mini-player
 
 ### Nguyen Phuoc Sang (12 commits)
+
 - [924dc82] Merge pull request #157 from sangnp-s-organiztion/release
 - [f66bccd] Merge pull request #156 from sangnp-s-organiztion/develop
 - [8735ac8] Merge pull request #155 from sangnp-s-organiztion/fixbug/aa
@@ -63,6 +82,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [fdc2cf2] Merge pull request #146 from sangnp-s-organiztion/visitor/add-mini-player
 
 ### sangnpdev (25 commits)
+
 - [f394fb7] sửa docs
 - [2cb8c2d] cập nhật docs prd
 - [22b9f51] cập nhật prd
@@ -92,6 +112,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-04-04
 
 ### Tóm tắt trong ngày
+
 - Added:
   - feat: update changelog with new features, improvements, and fixes for MAUI
   - feat: improve audio playback handling in narration flow
@@ -99,7 +120,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - feat: add zoom controls and user location functionality to map
   - feat: filter inactive POIs when loading from API and cache
   - ... và 4 thay đổi khác
-- Changed:
+- Đã thay đổi:
   - chore: update dependencies and refactor components
 - Fixed:
   - fix ci admin saler
@@ -112,6 +133,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### Nguyen Phuoc Sang (6 commits)
+
 - [0838c68] Merge pull request #145 from sangnp-s-organiztion/visitor/add-mini-player
 - [6d6d929] Merge pull request #144 from sangnp-s-organiztion/release
 - [229a2be] Merge pull request #143 from sangnp-s-organiztion/develop
@@ -120,6 +142,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [783f4a6] Merge pull request #140 from sangnp-s-organiztion/test-v1.2
 
 ### sangnpdev (11 commits)
+
 - [dbf5efd] feat: update changelog with new features, improvements, and fixes for MAUI
 - [c5ea19f] feat: improve audio playback handling in narration flow
 - [40fd466] feat: add POI label layer and update user location functionality on map
@@ -135,6 +158,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-04-03
 
 ### Tóm tắt trong ngày
+
 - Added:
   - feat: Force React 19 in CI for admin tests
   - feat: Enhance CI workflow and add tests for admin and saler
@@ -142,11 +166,11 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - feat: enhance movement path retrieval logic; improve session grouping and add null handling for coordinates
   - feat: update login error handling and improve error messages for user feedback
   - ... và 4 thay đổi khác
-- Changed:
-  - Update documentation and structure for Food Market Narrator project
-  - Refactor code structure for improved readability and maintainability
-  - refactor: update API endpoints to remove redundant /public prefix and adjust related documentation
-  - Remove obsolete documentation and setup scripts for MongoDB and API testing; add new MSSQL and MongoDB setup guides with detailed instructions and best practices.
+- Đã thay đổi:
+  - Cập nhật tài liệu và cấu trúc cho dự án Food Market Narrator
+  - Tái cấu trúc mã để tăng khả năng đọc và bảo trì
+  - tái cấu trúc: cập nhật các endpoint API to remove dư thừa /public prefix and adjust related tài liệu
+  - Loại bỏ tài liệu và script setup lỗi thời cho MongoDB và kiểm thử API; bổ sung hướng dẫn setup MSSQL và MongoDB mới với chỉ dẫn chi tiết và best practices.
 - Fixed:
   - fixbug: audio cannot download
 - Merged:
@@ -157,8 +181,9 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #133 from sangnp-s-organiztion/fixbug/audio-download
 
 ### sangnpdev (14 commits)
+
 - [1af5ef8] feat: Force React 19 in CI for admin tests
-- [36e41d4] Update documentation and structure for Food Market Narrator project
+- [36e41d4] Cập nhật tài liệu và cấu trúc cho dự án Food Market Narrator
 - [59dbe95] feat: Enhance CI workflow and add tests for admin and saler
 - [63442e3] feat: update movement paths API to support 'all' session limit; adjust related components and services
 - [381fad9] feat: enhance movement path retrieval logic; improve session grouping and add null handling for coordinates
@@ -167,12 +192,13 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [6a7b990] Add screenshot image for FoodMarketNarrator on April 3, 2026
 - [dc21c31] Add generated image for Gemini feature
 - [145fe3e] feat: enhance user creation and status update logic; set default password and improve validation messages
-- [3fe7a6d] Refactor code structure for improved readability and maintainability
+- [3fe7a6d] Tái cấu trúc mã để tăng khả năng đọc và bảo trì
 - [288bde9] refactor: update API endpoints to remove redundant /public prefix and adjust related documentation
 - [c26b33d] fixbug: audio cannot download
-- [e3eb3d1] Remove obsolete documentation and setup scripts for MongoDB and API testing; add new MSSQL and MongoDB setup guides with detailed instructions and best practices.
+- [e3eb3d1] Loại bỏ tài liệu và script setup lỗi thời cho MongoDB và kiểm thử API; bổ sung hướng dẫn setup MSSQL và MongoDB mới với chỉ dẫn chi tiết và best practices.
 
 ### Nguyen Phuoc Sang (5 commits)
+
 - [54710b2] Merge pull request #137 from sangnp-s-organiztion/develop
 - [b065269] Merge pull request #136 from sangnp-s-organiztion/admin/create-saler-account
 - [4997968] Merge pull request #135 from sangnp-s-organiztion/develop
@@ -182,6 +208,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-04-02
 
 ### Tóm tắt trong ngày
+
 - Added:
   - feat: comment out logout button in SettingsPage.xaml
   - feat: implement logging for database connection and location sync operations
@@ -202,6 +229,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### Nguyen Phuoc Sang (6 commits)
+
 - [fa57c85] Merge pull request #132 from sangnp-s-organiztion/visitor/logging-mongo
 - [ae29a30] Merge pull request #131 from sangnp-s-organiztion/release
 - [7c7ab5d] Merge pull request #130 from sangnp-s-organiztion/develop
@@ -210,6 +238,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [d029d7f] Merge pull request #127 from sangnp-s-organiztion/fixbug/require-role-admin
 
 ### sangnpdev (17 commits)
+
 - [679ca54] feat: comment out logout button in SettingsPage.xaml
 - [4d43ad7] feat: implement logging for database connection and location sync operations
 - [9b470c8] feat: enhance session handling by implementing retry logic for missing sessions
@@ -231,6 +260,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-04-01
 
 ### Tóm tắt trong ngày
+
 - Added:
   - feat: add create restaurant functionality with validation and UI integration
   - feat: implement pagination for recent activity in Analytics module
@@ -238,14 +268,14 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - feat: implement admin stats API and integrate with frontend
   - feat(admin): replace mock data with real APIs - dashboard, logs, types, auditApi
   - ... và 12 thay đổi khác
-- Changed:
-  - refactor(audit): migrate audit logging to MongoDB and update related services
-  - chore: add .worktrees to .gitignore
-  - Refactor language handling in SettingsPage, remove redundant cases; add MongoDB setup documentation and initial scripts for collections and seed data
+- Đã thay đổi:
+  - Tái cấu trúc(audit): migrate audit logging to MongoDB and update related services
+  - tác vụ: bổ sung .worktrees to .gitignore
+  - Tái cấu trúc xử lý ngôn ngữ ở SettingsPage, loại bỏ case dư thừa; bổ sung tài liệu setup MongoDB và script khởi tạo collection/seed data.
 - Fixed:
   - fix: update activity data handling in LogsPage component
   - fix(api): remove unused TargetName field from AuditLog entity and migration
-  - fix(api): read request body before _next to capture body content
+  - fix(api): read request body before \_next to capture body content
   - sửa design và .claude
   - fix: enhance audio playback functionality and background location tracking
 - Docs:
@@ -261,6 +291,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 2 thay đổi khác
 
 ### sangnpdev (29 commits)
+
 - [dad1f26] feat: add create restaurant functionality with validation and UI integration
 - [50343c8] feat: implement pagination for recent activity in Analytics module
 - [b324d89] fix: update activity data handling in LogsPage component
@@ -272,7 +303,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [2a3b85b] feat(api): log LOGIN/LOGOUT audit events in AuthController
 - [9f765c4] feat(api): add entity-counts and listens-timeseries analytics endpoints
 - [c42a364] feat(api): add AuditLogsController and AuditLogService
-- [1a94e13] fix(api): read request body before _next to capture body content
+- [1a94e13] fix(api): read request body before \_next to capture body content
 - [0af6bc2] feat(api): add AuditLoggingMiddleware for automatic admin action tracking
 - [d29d9c9] feat(api): add AuditLoggingMiddleware for automatic admin action tracking
 - [3beab3b] feat(api): add indexes on AuditLogs(user_id, created_at)
@@ -286,12 +317,13 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [55ece82] Add MongoDB setup, seed data, and update collection configurations
 - [1bbd6d0] Add seed data for user sessions, location logs, and audio logs
 - [e331fb4] Add comprehensive documentation for MAUI app features, troubleshooting, environment variables, local development setup, API integration tests, test strategy, and unit tests
-- [a36671e] Refactor language handling in SettingsPage, remove redundant cases; add MongoDB setup documentation and initial scripts for collections and seed data
+- [a36671e] Tái cấu trúc xử lý ngôn ngữ ở SettingsPage, loại bỏ case dư thừa; bổ sung tài liệu setup MongoDB và script khởi tạo collection/seed data.
 - [a7110c9] Implement MongoDB connection and health check functionality
 - [b98593a] Add background location permission handling in SettingsPage and ILocationService
 - [a585fd1] fix: enhance audio playback functionality and background location tracking
 
 ### Nguyen Phuoc Sang (6 commits)
+
 - [8e8cecf] Merge pull request #126 from sangnp-s-organiztion/admin-real-api
 - [90f4628] Merge branch 'develop' into admin-real-api
 - [bf12649] Merge pull request #125 from sangnp-s-organiztion/config-mongodb
@@ -300,39 +332,47 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [0103578] Merge pull request #122 from sangnp-s-organiztion/visitor/setting-layout
 
 ### giathieu0311 (1 commits)
+
 - [b83f8d9] sửa design và .claude
 
 ## 2026-03-31
 
 ### Tóm tắt trong ngày
+
 - Added:
   - add design admin
 - Fixed:
   - fix dont play audio
 
 ### sangnpdev (1 commits)
+
 - [37c5a83] fix dont play audio
 
 ### giathieu0311 (1 commits)
+
 - [4defc5a] add design admin
 
 ## 2026-03-24
 
 ### Tóm tắt trong ngày
+
 - Fixed:
   - fix-url-images
 - Merged:
   - Merge pull request #121 from sangnp-s-organiztion/saler/fix-logic-dish
 
 ### Nguyen Phuoc Sang (1 commits)
+
 - [f9a68af] Merge pull request #121 from sangnp-s-organiztion/saler/fix-logic-dish
 
 ### giathieu0311 (1 commits)
+
 - [a5271df] fix-url-images
 
 ## 2026-03-22
 
 ### Tóm tắt trong ngày
+
 - Fixed:
   - fix-img-name
   - fix-logic-saler
@@ -342,26 +382,29 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #118 from sangnp-s-organiztion/main
 
 ### Nguyen Phuoc Sang (3 commits)
+
 - [afe0fb6] Merge pull request #120 from sangnp-s-organiztion/saler/fix-logic-dish
 - [89c2e44] Merge pull request #119 from sangnp-s-organiztion/saler/fix-logic-dish
 - [16a819e] Merge pull request #118 from sangnp-s-organiztion/main
 
 ### giathieu0311 (2 commits)
+
 - [5063793] fix-img-name
 - [cfa440b] fix-logic-saler
 
 ## 2026-03-21
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add permissions for contents and pull-requests in CI workflow
   - Add StatusToColorConverter and update POI status handling
-- Changed:
-  - Remove automated PR creation step from CI workflow
-  - Update GitHub Actions to use personal access token for PR creation
-  - Refactor code structure for improved readability and maintainability
-  - Refactor CheckAndNarrateAsync test to use async/await pattern
-  - Update POI model tests to include OpeningHours in status text scenarios
+- Đã thay đổi:
+  - Loại bỏ bước tạo PR tự động khỏi quy trình CI
+  - Cập nhật GitHub Actions để dùng personal access token khi tạo PR
+  - Tái cấu trúc mã để tăng khả năng đọc và bảo trì
+  - Tái cấu trúc test CheckAndNarrateAsync theo mẫu async/await
+  - Cập nhật test POI model để bao gồm OpeningHours trong các kịch bản status text
   - ... và 8 thay đổi khác
 - Fixed:
   - Fix workload restore command in CI workflow to specify project path
@@ -373,6 +416,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #113 from sangnp-s-organiztion/visitor/update-favorite
 
 ### Nguyen Phuoc Sang (5 commits)
+
 - [5244ae4] Merge pull request #117 from sangnp-s-organiztion/release
 - [a6cbf20] Merge pull request #116 from sangnp-s-organiztion/develop
 - [c0ddea2] Merge pull request #115 from sangnp-s-organiztion/visitor/update-favorite
@@ -380,12 +424,13 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [ab805b7] Merge pull request #113 from sangnp-s-organiztion/visitor/update-favorite
 
 ### sangnpdev (16 commits)
-- [24a1703] Remove automated PR creation step from CI workflow
-- [cd1c9b9] Update GitHub Actions to use personal access token for PR creation
+
+- [24a1703] Loại bỏ bước tạo PR tự động khỏi quy trình CI
+- [cd1c9b9] Cập nhật GitHub Actions để dùng personal access token khi tạo PR
 - [8dae5b1] Add permissions for contents and pull-requests in CI workflow
-- [ecbe724] Refactor code structure for improved readability and maintainability
-- [3c3da41] Refactor CheckAndNarrateAsync test to use async/await pattern
-- [f6a8618] Update POI model tests to include OpeningHours in status text scenarios
+- [ecbe724] Tái cấu trúc mã để tăng khả năng đọc và bảo trì
+- [3c3da41] Tái cấu trúc test CheckAndNarrateAsync theo mẫu async/await
+- [f6a8618] Cập nhật test POI model để bao gồm OpeningHours trong các kịch bản status text
 - [64e10df] Remove unsupported target frameworks from project file
 - [d9cdb1d] Update MAUI build step to target Android framework
 - [c6580e9] Remove Windows target framework from project file
@@ -400,29 +445,32 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-03-20
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add CI workflow for MAUI and API testing with automatic PR creation
-- Changed:
-  - Update CI workflow to run tests on Windows and add README files for Admin and Seller testing
-  - Refactor DTOs and update controller methods for consistency in naming conventions
-  - Update LocalApiHost IP, adjust FavoritePage layout, and add README files for testing
+- Đã thay đổi:
+  - Cập nhật CI để chạy test trên Windows và bổ sung README cho test Admin/Seller
+  - Tái cấu trúc DTO và cập nhật method controller để thống nhất quy ước đặt tên
+  - Cập nhật IP LocalApiHost, chỉnh layout FavoritePage, và bổ sung README cho kiểm thử
 - Fixed:
   - Fix formatting inconsistencies in CI workflow configuration
 
 ### sangnpdev (5 commits)
+
 - [060e9e9] Fix formatting inconsistencies in CI workflow configuration
-- [3c5b6f7] Update CI workflow to run tests on Windows and add README files for Admin and Seller testing
-- [92ff365] Refactor DTOs and update controller methods for consistency in naming conventions
+- [3c5b6f7] Cập nhật CI để chạy test trên Windows và bổ sung README cho test Admin/Seller
+- [92ff365] Tái cấu trúc DTO và cập nhật method controller để thống nhất quy ước đặt tên
 - [698a3b6] Add CI workflow for MAUI and API testing with automatic PR creation
-- [4c5bc16] Update LocalApiHost IP, adjust FavoritePage layout, and add README files for testing
+- [4c5bc16] Cập nhật IP LocalApiHost, chỉnh layout FavoritePage, và bổ sung README cho kiểm thử
 
 ## 2026-03-18
 
 ### Tóm tắt trong ngày
-- Changed:
-  - Update claude-start.ps1
-  - Rename CLAUDE.MD to CLAUDE.md
-  - Update CLAUDE.MD
+
+- Đã thay đổi:
+  - Cập nhật claude-start.ps1
+  - Đổi tên CLAUDE.MD thành CLAUDE.md
+  - Cập nhật CLAUDE.MD
 - Merged:
   - Merge pull request #112 from sangnp-s-organiztion/main
   - Merge pull request #111 from sangnp-s-organiztion/release
@@ -432,31 +480,33 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### Nguyen Phuoc Sang (10 commits)
+
 - [33018ba] Merge pull request #112 from sangnp-s-organiztion/main
 - [dd79abc] Merge pull request #111 from sangnp-s-organiztion/release
 - [5fd6f65] Merge pull request #110 from sangnp-s-organiztion/develop
 - [ba6f56f] Merge pull request #109 from sangnp-s-organiztion/develop
 - [051d6f0] Merge pull request #108 from sangnp-s-organiztion/sangnpdev-patch-1
-- [b3d1183] Update claude-start.ps1
+- [b3d1183] Cập nhật claude-start.ps1
 - [2430802] Merge pull request #107 from sangnp-s-organiztion/document
-- [04ff067] Rename CLAUDE.MD to CLAUDE.md
-- [a43af48] Update CLAUDE.MD
-- [a6b2ff8] Update CLAUDE.MD
+- [04ff067] Đổi tên CLAUDE.MD thành CLAUDE.md
+- [a43af48] Cập nhật CLAUDE.MD
+- [a6b2ff8] Cập nhật CLAUDE.MD
 
 ## 2026-03-17
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add unit tests for POIService and project file for testing setup
   - Add integration and unit tests for POI and history services
   - feat: add integration tests for Food Market Narrator API
   - Add unit tests for various services in the food market narrator application
   - Refactor documentation and feature requirements for Food Market Narrator
-- Changed:
-  - refactor: remove old project file and update language loading logic in SettingsPage
+- Đã thay đổi:
+  - tái cấu trúc: loại bỏ old project file and update language loading logic in SettingsPage
   - change name
   - claude start
-  - refactor: restructure claude-start.ps1 for improved readability and organization
+  - tái cấu trúc: tổ chức lại claude-start.ps1 for improved readability and organization
 - Merged:
   - Merge pull request #106 from sangnp-s-organiztion/main
   - Merge pull request #105 from sangnp-s-organiztion/release
@@ -466,6 +516,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 3 thay đổi khác
 
 ### Nguyen Phuoc Sang (8 commits)
+
 - [f8cc21a] Merge pull request #106 from sangnp-s-organiztion/main
 - [0a5f54e] Merge pull request #105 from sangnp-s-organiztion/release
 - [8407c13] Merge pull request #104 from sangnp-s-organiztion/develop
@@ -476,6 +527,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [dd73a51] Merge pull request #98 from sangnp-s-organiztion/document-v1.1
 
 ### sangnpdev (9 commits)
+
 - [7accd65] refactor: remove old project file and update language loading logic in SettingsPage
 - [04f7321] Add unit tests for POIService and project file for testing setup
 - [be19fc8] Add integration and unit tests for POI and history services
@@ -489,16 +541,17 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-03-16
 
 ### Tóm tắt trong ngày
+
 - Added:
   - add favorite page và history page
   - Add documentation for admin, seller, and visitor features in the Food Market Narrator application
   - feat(api): implement API service for restaurant management including authentication, dishes, images, and audio handling
   - feat: refactor DishesPage and ImagesPage to use API service for data fetching and manipulation
-- Changed:
-  - refactor: update language popup overlay to use Grid layout in SettingsPage
+- Đã thay đổi:
+  - tái cấu trúc: cập nhật language popup overlay to use Grid layout in SettingsPage
   - change ui of mainpage and remove change language to setting page
-  - Update documentation and add new files for Food Market Narrator project
-  - refactor(settings): centralize API host configuration and improve URL handling for Android
+  - Cập nhật tài liệu và bổ sung file mới cho dự án Food Market Narrator
+  - Tái cấu trúc(settings): centralize API host configuration and improve URL handling for Android
   - config for real android
   - ... và 1 thay đổi khác
 - Fixed:
@@ -515,6 +568,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 9 thay đổi khác
 
 ### Nguyen Phuoc Sang (14 commits)
+
 - [14909b1] Merge pull request #97 from sangnp-s-organiztion/release
 - [a14e7da] Merge pull request #96 from sangnp-s-organiztion/main
 - [1d5e442] Merge pull request #95 from sangnp-s-organiztion/develop
@@ -531,6 +585,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [7434ae0] Merge pull request #84 from sangnp-s-organiztion/selers/add-api
 
 ### sangnpdev (13 commits)
+
 - [b449580] refactor: update language popup overlay to use Grid layout in SettingsPage
 - [bc4c001] change ui of mainpage and remove change language to setting page
 - [402f8b6] fix icon policy in setting
@@ -538,7 +593,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [ffaa05d] fix logic add to favorite
 - [b4e77ab] fix favorite icon
 - [ac49d57] add favorite page và history page
-- [0c23869] Update documentation and add new files for Food Market Narrator project
+- [0c23869] Cập nhật tài liệu và bổ sung file mới cho dự án Food Market Narrator
 - [4c2e670] refactor(settings): centralize API host configuration and improve URL handling for Android
 - [3ccd804] config for real android
 - [cdb40dc] Add documentation for admin, seller, and visitor features in the Food Market Narrator application
@@ -546,11 +601,13 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [132da06] feat: refactor DishesPage and ImagesPage to use API service for data fetching and manipulation
 
 ### giathieu0311 (1 commits)
+
 - [f91d485] feat(api): implement API service for restaurant management including authentication, dishes, images, and audio handling
 
 ## 2026-03-15
 
 ### Tóm tắt trong ngày
+
 - Added:
   - feat: add geofence cooldown and debounce documentation
   - feat: implement foreground service for background location tracking and update permissions in AndroidManifest
@@ -558,12 +615,12 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - feat: enhance narration control during language change
   - feat: implement platform audio focus handling for Android
   - ... và 6 thay đổi khác
-- Changed:
-  - refactor: remove PublicEndpoint attribute and implement PublicEndpointConvention for endpoint authorization
+- Đã thay đổi:
+  - tái cấu trúc: loại bỏ PublicEndpoint attribute and implement PublicEndpointConvention for endpoint authorization
   - ss
   - sss
   - rác
-  - Refactor code structure for improved readability and maintainability
+  - Tái cấu trúc mã để tăng khả năng đọc và bảo trì
   - ... và 3 thay đổi khác
 - Merged:
   - Merge pull request #83 from sangnp-s-organiztion/release
@@ -574,6 +631,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 14 thay đổi khác
 
 ### Nguyen Phuoc Sang (19 commits)
+
 - [9e40c41] Merge pull request #83 from sangnp-s-organiztion/release
 - [64728e8] Merge pull request #82 from sangnp-s-organiztion/develop
 - [aebfc0a] Merge pull request #81 from sangnp-s-organiztion/visitor/debounce-cooldown
@@ -595,6 +653,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [5589dbf] Merge pull request #64 from sangnp-s-organiztion/visitor/update-ui
 
 ### sangnpdev (18 commits)
+
 - [8b7feb3] feat: add geofence cooldown and debounce documentation
 - [cb4422b] feat: implement foreground service for background location tracking and update permissions in AndroidManifest
 - [6c39ad7] feat: add CenterOnUserLocation method and update UI by location in MainPage
@@ -608,29 +667,31 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [49ddb64] sss
 - [6d32f16] rác
 - [c101183] feat: Add POI management page with modal functionality and local storage integration
-- [2634ad6] Refactor code structure for improved readability and maintainability
+- [2634ad6] Tái cấu trúc mã để tăng khả năng đọc và bảo trì
 - [b2d98fd] Refactor application startup and improve UI initialization for better performance
 - [25eb63f] Enhance location tracking and map loading efficiency with debounce logic and state management
 - [99d293f] Enhance search functionality in MapPage with suggestions and highlighting features
 - [c82c201] Refactor audio generation scripts to use Edge TTS and update language configurations
 
 ### giathieu0311 (1 commits)
+
 - [71e46ac] add api thieu
 
 ## 2026-03-14
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add audio cache management features and settings integration
   - Add QR code content documentation and image for app launch
   - Add intent filter for deep linking and enhance location tracking initialization
   - Add documentation for POI popup functionality on MapPage
   - Implement zoom controls and current location tracking on map
-- Changed:
-  - Enhance audio and language services with caching functionality and improve offline support
-  - Update UI text to Vietnamese for better localization
-  - Enhance POI selection and detail display on map interaction
-  - Enhance real-time location tracking and improve map loading functionality
+- Đã thay đổi:
+  - Cải thiện audio and language services with caching functionality and improve offline support
+  - Cập nhật UI text to Vietnamese for better localization
+  - Cải thiện POI selection and detail display on map interaction
+  - Cải thiện real-time location tracking and improve map loading functionality
 - Fixed:
   - Fix theme setting in MainActivity to use NoActionBar style
   - Fix real-time POI updates and enhance map highlight functionality
@@ -644,6 +705,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### sangnpdev (12 commits)
+
 - [af9700d] Add audio cache management features and settings integration
 - [cb9b8ad] Enhance audio and language services with caching functionality and improve offline support
 - [52202c9] Update UI text to Vietnamese for better localization
@@ -658,6 +720,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [1b8ddc9] Fix real-time location tracking and enhance audio generation scripts
 
 ### Nguyen Phuoc Sang (6 commits)
+
 - [7973e07] Merge pull request #63 from sangnp-s-organiztion/release
 - [662f4de] Merge pull request #62 from sangnp-s-organiztion/develop
 - [0ba51a1] Merge pull request #61 from sangnp-s-organiztion/fixbug/not-tracking-location-realtime
@@ -668,18 +731,19 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-03-13
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add user management functionality with User model, repository, and service
   - Implement GetAllLanguages API endpoint and corresponding service method
   - Add API get language by code - Language feature with repository, service, and controller
   - Add comprehensive feature overview documentation for MAUI app
   - Add copyright section to README.md
-- Changed:
+- Đã thay đổi:
   - Hide current and total time labels in audio guide section on POI detail page
-  - Enhance audio service with current track tracking and improve playback control in POI detail page
-  - Refactor API route definitions to remove redundant 'api/' prefix for consistency
-  - Refactor language selection logic to improve user experience and persist language preference
-  - Enhance language service with API integration for language retrieval and selection instead of hardcode
+  - Cải thiện audio service with current track tracking and improve playback control in POI detail page
+  - Tái cấu trúc API route definitions to remove dư thừa 'api/' prefix for consistency
+  - Tái cấu trúc language selection logic to improve user experience and persist language preference
+  - Cải thiện language service with API integration for language retrieval and selection instead of hardcode
   - ... và 1 thay đổi khác
 - Fixed:
   - Fix narration flow initialization and synchronize audio UI with service on page appearance
@@ -693,6 +757,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### sangnpdev (13 commits)
+
 - [f272023] Hide current and total time labels in audio guide section on POI detail page
 - [efc2df1] Enhance audio service with current track tracking and improve playback control in POI detail page
 - [6a6426e] Fix narration flow initialization and synchronize audio UI with service on page appearance
@@ -708,6 +773,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [67eecbc] Add copyright section to README.md
 
 ### Nguyen Phuoc Sang (6 commits)
+
 - [ddd6522] Merge pull request #57 from sangnp-s-organiztion/release
 - [698508b] Merge pull request #56 from sangnp-s-organiztion/develop
 - [474ee9f] Merge pull request #55 from sangnp-s-organiztion/fixbug/not-tracking-location-realtime
@@ -718,22 +784,26 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-03-11
 
 ### Tóm tắt trong ngày
-- Changed:
-  - Refactor map handling to use Mapsui instead of Google Maps; update related services and UI components
+
+- Đã thay đổi:
+  - Tái cấu trúc map handling to use Mapsui instead of Google Maps; update related services and UI components
 
 ### sangnpdev (1 commits)
+
 - [a6e26f5] Refactor map handling to use Mapsui instead of Google Maps; update related services and UI components
 
 ## 2026-03-10
 
 ### Tóm tắt trong ngày
-- Changed:
-  - refactor gg map sdk sang open street map
+
+- Đã thay đổi:
+  - Tái cấu trúc gg map sdk sang open street map
 - Fixed:
   - cong bug di chuyển giữa các poi gần nhau thì nó ko cập nhật location
   - fix icon
 
 ### sangnpdev (3 commits)
+
 - [b982430] cong bug di chuyển giữa các poi gần nhau thì nó ko cập nhật location
 - [b906da8] fix icon
 - [720d2ef] refactor gg map sdk sang open street map
@@ -741,7 +811,8 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-03-01
 
 ### Tóm tắt trong ngày
-- Changed:
+
+- Đã thay đổi:
   - khởi tạo saler
 - Merged:
   - Merge pull request #50 from sangnp-s-organiztion/release
@@ -749,19 +820,22 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #48 from sangnp-s-organiztion/saler/first
 
 ### Nguyen Phuoc Sang (3 commits)
+
 - [f23a104] Merge pull request #50 from sangnp-s-organiztion/release
 - [ee52912] Merge pull request #49 from sangnp-s-organiztion/develop
 - [a8c5c1e] Merge pull request #48 from sangnp-s-organiztion/saler/first
 
 ### NguyenPhuocSang1695 (1 commits)
+
 - [080cc3b] khởi tạo saler
 
 ## 2026-02-28
 
 ### Tóm tắt trong ngày
+
 - Added:
   - thêm pause và resume cho phần phát audio ở poi detail - fix bug khi nhấn nút tạm dừng thì ko dừng mà tiếp tục phát lại audio
-- Changed:
+- Đã thay đổi:
   - ở chi tiết POI nhấn nút để nghe audio, hiệu ứng động cho thanh thời gian audio
 - Merged:
   - Merge pull request #47 from sangnp-s-organiztion/release
@@ -769,20 +843,23 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #45 from sangnp-s-organiztion/visitor/offline-audio-download
 
 ### Nguyen Phuoc Sang (3 commits)
+
 - [27cee35] Merge pull request #47 from sangnp-s-organiztion/release
 - [919b8dd] Merge pull request #46 from sangnp-s-organiztion/develop
 - [1472039] Merge pull request #45 from sangnp-s-organiztion/visitor/offline-audio-download
 
 ### NguyenPhuocSang1695 (2 commits)
+
 - [7bf8a46] thêm pause và resume cho phần phát audio ở poi detail - fix bug khi nhấn nút tạm dừng thì ko dừng mà tiếp tục phát lại audio
 - [0c588cf] ở chi tiết POI nhấn nút để nghe audio, hiệu ứng động cho thanh thời gian audio
 
 ## 2026-02-26
 
 ### Tóm tắt trong ngày
+
 - Added:
   - thêm tính năng dừng thuyết minh manual
-- Changed:
+- Đã thay đổi:
   - phát audio tiếp tục sau khi bấm dừng, giao diện của nút được cập nhật
   - ẩn nút thuyết minh khi ở xa POI để giao diện đỡ rối
   - xem chi tiết POI
@@ -795,11 +872,13 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #42 from sangnp-s-organiztion/visitor/offline-audio-download
 
 ### Nguyen Phuoc Sang (3 commits)
+
 - [099c720] Merge pull request #44 from sangnp-s-organiztion/release
 - [5044f43] Merge pull request #43 from sangnp-s-organiztion/develop
 - [3135fc0] Merge pull request #42 from sangnp-s-organiztion/visitor/offline-audio-download
 
 ### NguyenPhuocSang1695 (6 commits)
+
 - [d1184b0] phát audio tiếp tục sau khi bấm dừng, giao diện của nút được cập nhật
 - [f8899cb] thêm tính năng dừng thuyết minh manual
 - [600d93f] sửa lại flow phát audio: sau khi chọn ngôn ngữ thì tự phát audio luôn
@@ -810,71 +889,82 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-23
 
 ### Tóm tắt trong ngày
+
 - Added:
   - thêm ảnh cho các quán, tạo dto để tránh loop giữa các models khi gọi api (json serialize)
-- Changed:
+- Đã thay đổi:
   - tạo trang POIDetailPage
 - Merged:
   - Merge pull request #41 from sangnp-s-organiztion/develop
   - Merge pull request #40 from sangnp-s-organiztion/visitor/poi-detail-page
 
 ### Nguyen Phuoc Sang (2 commits)
+
 - [b593e13] Merge pull request #41 from sangnp-s-organiztion/develop
 - [1c0fd08] Merge pull request #40 from sangnp-s-organiztion/visitor/poi-detail-page
 
 ### NguyenPhuocSang1695 (2 commits)
+
 - [821da14] tạo trang POIDetailPage
 - [b564972] thêm ảnh cho các quán, tạo dto để tránh loop giữa các models khi gọi api (json serialize)
 
 ## 2026-02-22
 
 ### Tóm tắt trong ngày
-- Changed:
+
+- Đã thay đổi:
   - hightlight poi nearest, xóa rác
-  - refactor lại cấu trúc thư mục, tạo Interfaces để lưu interface của services
+  - T�i c?u tr�c lại cấu trúc thư mục, tạo Interfaces để lưu interface của services
 
 ### NguyenPhuocSang1695 (2 commits)
+
 - [e1ecc38] hightlight poi nearest, xóa rác
 - [0fcd657] refactor lại cấu trúc thư mục, tạo Interfaces để lưu interface của services
 
 ## 2026-02-21
 
 ### Tóm tắt trong ngày
-- Changed:
+
+- Đã thay đổi:
   - tu dong hien PopUp chon ngon ngu khi vua load app
   - tao giao dien chon ngon ngu
-  - doi ten file audio alo-quan-beer-seafood.mp3 → sot-lau-alo-quan.mp3 quan-be-oc.mp3 → quan-bo-oc.mp3 quan-oc-thao-quan-4.mp3 → quan-oc-thao.mp3
+  - doi ten file audio alo-quan-beer-seafood.mp3 â†’ sot-lau-alo-quan.mp3 quan-be-oc.mp3 â†’ quan-bo-oc.mp3 quan-oc-thao-quan-4.mp3 â†’ quan-oc-thao.mp3
 
 ### NguyenPhuocSang1695 (3 commits)
+
 - [6780916] tu dong hien PopUp chon ngon ngu khi vua load app
 - [dfb0943] tao giao dien chon ngon ngu
-- [edec72e] doi ten file audio alo-quan-beer-seafood.mp3 → sot-lau-alo-quan.mp3 quan-be-oc.mp3 → quan-bo-oc.mp3 quan-oc-thao-quan-4.mp3 → quan-oc-thao.mp3
+- [edec72e] doi ten file audio alo-quan-beer-seafood.mp3 â†’ sot-lau-alo-quan.mp3 quan-be-oc.mp3 â†’ quan-bo-oc.mp3 quan-oc-thao-quan-4.mp3 â†’ quan-oc-thao.mp3
 
 ## 2026-02-20
 
 ### Tóm tắt trong ngày
+
 - Added:
   - thêm tính năng phát audio
-- Changed:
-  - refactor lai giao dien
+- Đã thay đổi:
+  - Tái cấu trúc lai giao dien
 - Merged:
   - Merge pull request #39 from sangnp-s-organiztion/visitor/refactor-interface
   - Merge pull request #38 from sangnp-s-organiztion/visitor/refactor-interface
 
 ### Nguyen Phuoc Sang (2 commits)
+
 - [f131dba] Merge pull request #39 from sangnp-s-organiztion/visitor/refactor-interface
 - [3d694e2] Merge pull request #38 from sangnp-s-organiztion/visitor/refactor-interface
 
 ### NguyenPhuocSang1695 (2 commits)
+
 - [e14e2e2] thêm tính năng phát audio
 - [bf4a28d] refactor lai giao dien
 
 ## 2026-02-19
 
 ### Tóm tắt trong ngày
+
 - Added:
   - thêm maui theory và cheatsheet
-- Changed:
+- Đã thay đổi:
   - tạo extensions
   - Delete food-market-narrator-maui/.github/workflows/auto-pr-release.yml
   - tạo readme.md
@@ -889,12 +979,14 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### NguyenPhuocSang1695 (4 commits)
+
 - [121ad79] tạo extensions
 - [f6be9a8] tạo readme.md
 - [ba78983] thêm maui theory và cheatsheet
 - [67397cb] sua giao dien trang MainPage
 
 ### Nguyen Phuoc Sang (7 commits)
+
 - [ceb2615] Merge pull request #37 from sangnp-s-organiztion/release
 - [65251f2] Merge pull request #36 from sangnp-s-organiztion/develop
 - [e057ca5] Delete food-market-narrator-maui/.github/workflows/auto-pr-release.yml
@@ -906,30 +998,35 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-15
 
 ### Tóm tắt trong ngày
-- Changed:
+
+- Đã thay đổi:
   - doi git ignore ra ngoai
 - Merged:
   - Merge pull request #31 from sangnp-s-organiztion/visitor/connect-database
   - Merge pull request #30 from sangnp-s-organiztion/visitor/connect-database
 
 ### Nguyen Phuoc Sang (2 commits)
+
 - [bcc5e16] Merge pull request #31 from sangnp-s-organiztion/visitor/connect-database
 - [195f04b] Merge pull request #30 from sangnp-s-organiztion/visitor/connect-database
 
 ### NguyenPhuocSang1695 (1 commits)
+
 - [6bb35fa] doi git ignore ra ngoai
 
 ## 2026-02-14
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them api de thao tac voi database
   - thêm .net webapi
-- Changed:
+- Đã thay đổi:
   - xoa webapi
   - lam chuc nang thuyet minh tu dong khi den gan POI
 
 ### NguyenPhuocSang1695 (4 commits)
+
 - [9dbd3d9] them api de thao tac voi database
 - [aa35e91] xoa webapi
 - [ce4622c] thêm .net webapi
@@ -938,9 +1035,10 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-13
 
 ### Tóm tắt trong ngày
+
 - Added:
   - Add bin/, obj/, and .vs/ to .gitignore
-- Changed:
+- Đã thay đổi:
   - tao class narrationflowservice.cs
   - xoa .vs
   - xoa bin va obj
@@ -962,6 +1060,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 12 thay đổi khác
 
 ### Nguyen Phuoc Sang (15 commits)
+
 - [2b2e0e0] Merge pull request #29 from sangnp-s-organiztion/release
 - [68e9535] Merge pull request #28 from sangnp-s-organiztion/develop
 - [0a39e83] Merge pull request #27 from sangnp-s-organiztion/visitor/auto-narrator
@@ -979,6 +1078,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [a69cb8a] Merge pull request #15 from sangnp-s-organiztion/visitor/hightlight-nearest-poi
 
 ### NguyenPhuocSang1695 (22 commits)
+
 - [957ba47] tao class narrationflowservice.cs
 - [6f7b71e] xoa .vs
 - [058b013] xoa bin va obj
@@ -1005,9 +1105,10 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-12
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them file audio bang azure
-- Changed:
+- Đã thay đổi:
   - xong tính năng get all pois và highlight nearest poi, thay đổi ngôn ngữ theo lựa chọn
   - hoan thanh tinh nang hightlight POI gan nhat va hien tat ca cac POIs
   - thay background trang MainPage
@@ -1021,6 +1122,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 2 thay đổi khác
 
 ### Nguyen Phuoc Sang (7 commits)
+
 - [d193f99] Merge pull request #14 from sangnp-s-organiztion/develop
 - [7b44a51] Merge pull request #13 from sangnp-s-organiztion/visitor/auto-narrator-tts
 - [e4fec28] Merge pull request #12 from sangnp-s-organiztion/release
@@ -1030,6 +1132,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [7b5cebe] Merge pull request #8 from sangnp-s-organiztion/develop
 
 ### NguyenPhuocSang1695 (5 commits)
+
 - [47b6887] xong tính năng get all pois và highlight nearest poi, thay đổi ngôn ngữ theo lựa chọn
 - [6e9c067] hoan thanh tinh nang hightlight POI gan nhat va hien tat ca cac POIs
 - [9378608] thay background trang MainPage
@@ -1039,9 +1142,10 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-11
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them file fa-solid-900.ttf o Fonts
-- Changed:
+- Đã thay đổi:
   - hoan thanh chuc nang hien thi tat ca POI tren ban do
   - hoan thanh auto tracking sau 3s
   - xong tính nang khi mo ban do thi tu dong focus vao vi tri hien tai
@@ -1051,10 +1155,12 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #6 from sangnp-s-organiztion/visitor/auto-tracking
 
 ### Nguyen Phuoc Sang (2 commits)
+
 - [2014101] Merge pull request #7 from sangnp-s-organiztion/visitor/display-all-pois
 - [1a8036b] Merge pull request #6 from sangnp-s-organiztion/visitor/auto-tracking
 
 ### NguyenPhuocSang1695 (5 commits)
+
 - [7fdd9d8] hoan thanh chuc nang hien thi tat ca POI tren ban do
 - [23ab7a2] hoan thanh auto tracking sau 3s
 - [fec2811] xong tính nang khi mo ban do thi tu dong focus vao vi tri hien tai
@@ -1064,6 +1170,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-03
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them audios and scripts tieng anh va trung
   - them file flow.md
@@ -1073,9 +1180,11 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - Merge pull request #5 from sangnp-s-organiztion/add_file/folder
 
 ### Nguyen Phuoc Sang (1 commits)
+
 - [67769a0] Merge pull request #5 from sangnp-s-organiztion/add_file/folder
 
 ### NguyenPhuocSang1695 (4 commits)
+
 - [48f32a9] them audios and scripts tieng anh va trung
 - [0bf2f34] them file flow.md
 - [a694576] them file features.txt va restaurants-list.md
@@ -1084,11 +1193,12 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-02
 
 ### Tóm tắt trong ngày
+
 - Added:
   - them file .txt o tung thu muc - tac dung cua tung thu muc
   - them noi dung file index
   - them file index
-- Changed:
+- Đã thay đổi:
   - Bump actions/setup-dotnet from 3 to 5
   - Bump actions/checkout from 4 to 6
   - xoa file code-style.yml trong github/workflows, comment file checkfolder.yml
@@ -1097,6 +1207,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
   - ... và 1 thay đổi khác
 
 ### NguyenPhuocSang1695 (6 commits)
+
 - [6c7c0f5] them file .txt o tung thu muc - tac dung cua tung thu muc
 - [95aa581] xoa file code-style.yml trong github/workflows, comment file checkfolder.yml
 - [b2a3258] them noi dung file index
@@ -1105,6 +1216,7 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [b129d70] tao cau truc thu muc co ban
 
 ### dependabot[bot] (3 commits)
+
 - [16e8d20] Bump actions/setup-dotnet from 3 to 5
 - [49869e8] Bump actions/checkout from 4 to 6
 - [4393f23] Bump github/codeql-action from 2 to 4
@@ -1112,36 +1224,41 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 ## 2026-02-01
 
 ### Tóm tắt trong ngày
-- Changed:
-  - Enhance README introduction with bold formatting
-  - Revise README with enhanced project overview
-  - Update author information in README.md
-  - Update backend run command in README
-  - Revise directory structure format in README
+
+- Đã thay đổi:
+  - Cải thiện phần giới thiệu trong README bằng định dạng in đậm
+  - Chỉnh sửa README với phần tổng quan dự án đầy đủ hơn
+  - Cập nhật thông tin tác giả trong README.md
+  - Cập nhật lệnh chạy backend trong README
+  - Điều chỉnh lại định dạng phần cấu trúc thư mục trong README
   - ... và 2 thay đổi khác
 
 ### Nguyen Phuoc Sang (6 commits)
-- [dc1fcb6] Enhance README introduction with bold formatting
-- [bd9c934] Revise README with enhanced project overview
-- [dae8c4b] Update author information in README.md
-- [4e6afd9] Update backend run command in README
-- [300b59c] Revise directory structure format in README
+
+- [dc1fcb6] Cải thiện phần giới thiệu trong README bằng định dạng in đậm
+- [bd9c934] Chỉnh sửa README với phần tổng quan dự án đầy đủ hơn
+- [dae8c4b] Cập nhật thông tin tác giả trong README.md
+- [4e6afd9] Cập nhật lệnh chạy backend trong README
+- [300b59c] Điều chỉnh lại định dạng phần cấu trúc thư mục trong README
 - [df8deb1] Revise README with project details and instructions
 
 ### NguyenPhuocSang1695 (1 commits)
+
 - [fe314f3] tao dotnet new console
 
 ## 2026-01-19
 
 ### Tóm tắt trong ngày
-- Changed:
+
+- Đã thay đổi:
   - Initial commit
 
 ### Nguyen Phuoc Sang (1 commits)
+
 - [685c145] Initial commit
 
 ## 2026-03-29
 
 ### Tóm tắt trong ngày
-- Không có commit trong ngày này (đã kiểm tra theo all refs).
 
+- Không có commit trong ngày này (đã kiểm tra theo all refs).
