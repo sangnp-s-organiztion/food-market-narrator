@@ -27,6 +27,11 @@ Luu y:
 
 - GET /Users/{userId:int}/restaurants
 
+## Admin Translation Billing
+
+- GET /api/admin/translation-billing/monthly
+- GET /api/admin/translation-billing/usage
+
 ## Audio
 
 - GET /Audio (public)
