@@ -33,7 +33,11 @@ const formatDateTime = (iso: string) => {
   });
 };
 
-const MonthlyBillingTable = ({ items }: { items: TranslationMonthlyBillingItem[] }) => {
+const MonthlyBillingTable = ({
+  items,
+}: {
+  items: TranslationMonthlyBillingItem[];
+}) => {
   if (items.length === 0) {
     return (
       <tr>
@@ -49,14 +53,20 @@ const MonthlyBillingTable = ({ items }: { items: TranslationMonthlyBillingItem[]
       {items.map((item) => (
         <tr key={`${item.sellerUserId}-${item.billingMonth}`}>
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
-          <td className="mono text-xs text-muted-foreground">{item.sellerUserId}</td>
+          <td className="mono text-xs text-muted-foreground">
+            {item.sellerUserId}
+          </td>
           <td className="mono text-xs">{item.billingMonth}</td>
           <td className="mono text-xs">{formatNumber(item.totalRequests)}</td>
           <td className="mono text-xs text-emerald-700">
             {formatNumber(item.successRequests)}
           </td>
-          <td className="mono text-xs text-red-600">{formatNumber(item.failedRequests)}</td>
-          <td className="mono text-xs">{formatNumber(item.totalBillableUnits)}</td>
+          <td className="mono text-xs text-red-600">
+            {formatNumber(item.failedRequests)}
+          </td>
+          <td className="mono text-xs">
+            {formatNumber(item.totalBillableUnits)}
+          </td>
           <td className="mono text-xs font-medium">
             {formatNumber(item.totalAmount)} {item.currency}
           </td>
@@ -66,7 +76,11 @@ const MonthlyBillingTable = ({ items }: { items: TranslationMonthlyBillingItem[]
   );
 };
 
-const UsageLedgerTable = ({ items }: { items: TranslationUsageLedgerItem[] }) => {
+const UsageLedgerTable = ({
+  items,
+}: {
+  items: TranslationUsageLedgerItem[];
+}) => {
   if (items.length === 0) {
     return (
       <tr>
@@ -85,7 +99,9 @@ const UsageLedgerTable = ({ items }: { items: TranslationUsageLedgerItem[] }) =>
             {formatDateTime(item.createdAtUtc)}
           </td>
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
-          <td className="mono text-xs text-muted-foreground">{item.sellerUserId}</td>
+          <td className="mono text-xs text-muted-foreground">
+            {item.sellerUserId}
+          </td>
           <td className="mono text-xs">{item.actionType}</td>
           <td className="mono text-xs">{item.status}</td>
           <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
@@ -93,7 +109,9 @@ const UsageLedgerTable = ({ items }: { items: TranslationUsageLedgerItem[] }) =>
           <td className="mono text-xs font-medium">
             {formatNumber(item.totalAmount)} {item.currency}
           </td>
-          <td className="mono text-xs text-muted-foreground">{item.provider}</td>
+          <td className="mono text-xs text-muted-foreground">
+            {item.provider}
+          </td>
         </tr>
       ))}
     </>
@@ -103,7 +121,9 @@ const UsageLedgerTable = ({ items }: { items: TranslationUsageLedgerItem[] }) =>
 const TranslationBillingPage = () => {
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
   const [sellerUserIdRaw, setSellerUserIdRaw] = useState("");
-  const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">("all");
+  const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">(
+    "all",
+  );
   const [monthlyPage, setMonthlyPage] = useState(1);
   const [usagePage, setUsagePage] = useState(1);
 
@@ -217,7 +237,9 @@ const TranslationBillingPage = () => {
                 className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={usageStatus}
                 onChange={(e) => {
-                  setUsageStatus(e.target.value as "all" | "billable" | "failed");
+                  setUsageStatus(
+                    e.target.value as "all" | "billable" | "failed",
+                  );
                   setUsagePage(1);
                 }}
               >
@@ -245,14 +267,17 @@ const TranslationBillingPage = () => {
           <div className="stat-card">
             <span className="stat-label">Tổng tiền</span>
             <div className="stat-value mono mt-2">
-              {formatNumber(monthlyData?.summary.totalAmount ?? 0)} {monthlyData?.summary.currency ?? "USD"}
+              {formatNumber(monthlyData?.summary.totalAmount ?? 0)}{" "}
+              {monthlyData?.summary.currency ?? "USD"}
             </div>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Tổng hợp theo seller/tháng</h2>
+            <h2 className="text-lg font-semibold">
+              Tổng hợp theo seller/tháng
+            </h2>
             <span className="text-xs text-muted-foreground mono">
               {monthlyData?.totalCount ?? 0} bản ghi
             </span>
@@ -274,7 +299,10 @@ const TranslationBillingPage = () => {
             <tbody>
               {monthlyLoading && (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={8}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Đang tải dữ liệu billing...
                   </td>
                 </tr>
@@ -340,7 +368,10 @@ const TranslationBillingPage = () => {
             <tbody>
               {usageLoading && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={9}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Đang tải lịch sử usage...
                   </td>
                 </tr>
