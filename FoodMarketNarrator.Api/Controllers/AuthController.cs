@@ -169,13 +169,13 @@ namespace food_market_narrator_api.Controllers
         [Authorize]
         public async Task<IActionResult> Me()
         {
-            string? username = User.Identity?.Name;
-            if (string.IsNullOrWhiteSpace(username))
+            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(currentUserIdRaw, out var currentUserId))
             {
                 return Unauthorized(new { message = "Unauthorized." });
             }
 
-            MeResponse? me = await _authService.GetMeAsync(username);
+            MeResponse? me = await _authService.GetMeByUserIdAsync(currentUserId);
             if (me == null)
             {
                 return Unauthorized(new { message = "Unauthorized." });
@@ -188,13 +188,13 @@ namespace food_market_narrator_api.Controllers
         [Authorize]
         public async Task<IActionResult> AdminMe()
         {
-            string? username = User.Identity?.Name;
-            if (string.IsNullOrWhiteSpace(username))
+            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(currentUserIdRaw, out var currentUserId))
             {
                 return Unauthorized(new { message = "Unauthorized." });
             }
 
-            MeResponse? me = await _authService.GetMeAsync(username);
+            MeResponse? me = await _authService.GetMeByUserIdAsync(currentUserId);
             if (me == null)
             {
                 return Unauthorized(new { message = "Unauthorized." });
@@ -237,6 +237,66 @@ namespace food_market_narrator_api.Controllers
             }
 
             return Ok(new { message = "Password updated." });
+        }
+
+        [HttpPatch("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(currentUserIdRaw, out var currentUserId))
+            {
+                return Unauthorized(new { message = "Unauthorized." });
+            }
+
+            DTOs.User.UserResponse? updated;
+            try
+            {
+                updated = await _userService.UpdateProfileAsync(
+                    currentUserId,
+                    request.Username,
+                    request.Phone,
+                    request.Email);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+            if (updated == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, updated.UserId.ToString()),
+                new Claim(ClaimTypes.Name, updated.Username),
+                new Claim(ClaimTypes.Role, updated.Role)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                });
+
+            return Ok(new
+            {
+                updated.UserId,
+                updated.Username,
+                updated.Role,
+                updated.Phone,
+                updated.Email,
+                updated.IsActive,
+                updated.CreatedAt
+            });
         }
     }
 }

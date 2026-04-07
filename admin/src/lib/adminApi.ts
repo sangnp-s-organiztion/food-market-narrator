@@ -81,6 +81,44 @@ export interface CreateRestaurantRequest {
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
+export interface TourStopResponse {
+  stopOrder: number;
+  restaurantId: string;
+  restaurantName: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  primaryImageUrl: string | null;
+}
+
+export interface TourResponse {
+  tourId: number;
+  name: string;
+  shortDescription: string | null;
+  description: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  isFeatured: boolean;
+  sortPriority: number;
+  stopCount: number;
+  nearbyStopCount: number;
+  nearestDistanceMeters: number | null;
+  stops: TourStopResponse[];
+}
+
+export interface AddTourRestaurantRequest {
+  restaurantId: string;
+}
+
+export interface ReorderTourStopsRequest {
+  restaurantIds: string[];
+}
+
+export interface UpdateTourRequest {
+  estimatedDurationMinutes: number | null;
+  sortPriority: number;
+  isFeatured: boolean;
+}
 
 // ─── User types ──────────────────────────────────────────────────────────────
 
@@ -113,6 +151,12 @@ export interface UpdateUserStatusRequest {
 export interface UpdateUserPasswordRequest {
   oldPassword: string;
   newPassword: string;
+}
+
+export interface UpdateMyProfileRequest {
+  username: string;
+  phone: string;
+  email: string;
 }
 
 export interface CountResponse {
@@ -222,6 +266,29 @@ export const restaurantApi = {
 
 // ─── User API ────────────────────────────────────────────────────────────────
 
+export const tourApi = {
+  getAll: () => adminFetch<TourResponse[]>("/Tour"),
+
+  getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  reorderStops: (id: number, data: ReorderTourStopsRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: UpdateTourRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+};
 export const userApi = {
   getAll: () => adminFetch<UserResponse[]>("/api/users"),
 
@@ -247,6 +314,12 @@ export const userApi = {
 
   updateMyPassword: (data: UpdateUserPasswordRequest) =>
     adminFetch<{ message: string }>("/Auth/password", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  updateMyProfile: (data: UpdateMyProfileRequest) =>
+    adminFetch<UserResponse>("/Auth/profile", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
@@ -314,3 +387,4 @@ export const translationBillingApi = {
     );
   },
 };
+

@@ -20,20 +20,22 @@ import LogsPage from "./pages/LogsPage.tsx";
 import TrajectoryPage from "./pages/TrajectoryPage.tsx";
 import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
+import ToursPage from "./pages/ToursPage.tsx";
 
 const queryClient = new QueryClient();
 const TITLE_SUFFIX = "Food Market Narrator Admin";
 
 const getTitleByPath = (pathname: string): string => {
-  if (pathname === "/login") return `Dang nhap | ${TITLE_SUFFIX}`;
-  if (pathname === "/") return `Tong quan | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/restaurants")) return `Quan ly nha hang | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/users")) return `Quan ly nguoi dung | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/logs")) return `Nhat ky hoat dong | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/trajectory")) return `Lo trinh nguoi dung | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/translation-billing")) return `Billing token dich | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/account")) return `Tai khoan | ${TITLE_SUFFIX}`;
-  return `Khong tim thay trang | ${TITLE_SUFFIX}`;
+  if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
+  if (pathname === "/") return `Tổng quan | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/restaurants")) return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/users")) return `Quản lý người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/logs")) return `Nhật ký hoạt động | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/trajectory")) return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/tours")) return `Quản lý tour | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/translation-billing")) return `Chi phí dịch token | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/account")) return `Tài khoản | ${TITLE_SUFFIX}`;
+  return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 };
 
 const RouteTitleManager = () => {
@@ -50,7 +52,7 @@ const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
     <div className="flex flex-col items-center gap-3">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      <p className="text-sm text-muted-foreground">Dang khoi tao...</p>
+      <p className="text-sm text-muted-foreground">Đang khởi tạo...</p>
     </div>
   </div>
 );
@@ -113,6 +115,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TrajectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tours"
+        element={
+          <ProtectedRoute>
+            <ToursPage />
           </ProtectedRoute>
         }
       />

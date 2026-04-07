@@ -1,4 +1,4 @@
-type EntityStatus = "active" | "inactive";
+﻿type EntityStatus = "active" | "inactive";
 
 const statusLabels: Record<string, string> = {
   active: "Hoạt động",
