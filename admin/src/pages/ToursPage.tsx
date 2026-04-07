@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   restaurantApi,
@@ -31,6 +32,9 @@ const ToursPage = () => {
   const [addRestaurantId, setAddRestaurantId] = useState("");
   const [draftStops, setDraftStops] = useState<TourStopResponse[]>([]);
   const [draggingRestaurantId, setDraggingRestaurantId] = useState<string | null>(null);
+  const [draftEstimatedDurationMinutes, setDraftEstimatedDurationMinutes] = useState("");
+  const [draftSortPriority, setDraftSortPriority] = useState("");
+  const [draftIsFeatured, setDraftIsFeatured] = useState(false);
 
   const {
     data: tours = [],
@@ -62,11 +66,21 @@ const ToursPage = () => {
   useEffect(() => {
     if (!selectedTour) {
       setDraftStops([]);
+      setDraftEstimatedDurationMinutes("");
+      setDraftSortPriority("");
+      setDraftIsFeatured(false);
       return;
     }
 
     const sorted = [...selectedTour.stops].sort((a, b) => a.stopOrder - b.stopOrder);
     setDraftStops(sorted);
+    setDraftEstimatedDurationMinutes(
+      selectedTour.estimatedDurationMinutes !== null
+        ? `${selectedTour.estimatedDurationMinutes}`
+        : "",
+    );
+    setDraftSortPriority(`${selectedTour.sortPriority}`);
+    setDraftIsFeatured(selectedTour.isFeatured);
   }, [selectedTour]);
 
   const availableRestaurants = useMemo(() => {
@@ -86,6 +100,33 @@ const ToursPage = () => {
 
     return original.some((restaurantId, index) => restaurantId !== draft[index]);
   }, [selectedTour, draftStops]);
+
+  const hasMetaChanges = useMemo(() => {
+    if (!selectedTour) return false;
+
+    const estimatedDuration =
+      draftEstimatedDurationMinutes.trim().length === 0
+        ? null
+        : Number(draftEstimatedDurationMinutes);
+    const sortPriority = Number(draftSortPriority);
+
+    if (
+      estimatedDuration !== selectedTour.estimatedDurationMinutes ||
+      sortPriority !== selectedTour.sortPriority ||
+      draftIsFeatured !== selectedTour.isFeatured
+    ) {
+      return true;
+    }
+
+    return false;
+  }, [
+    selectedTour,
+    draftEstimatedDurationMinutes,
+    draftSortPriority,
+    draftIsFeatured,
+  ]);
+
+  const hasUnsavedChanges = hasOrderChanges || hasMetaChanges;
 
   const addRestaurantMutation = useMutation({
     mutationFn: (payload: { tourId: number; restaurantId: string }) =>
@@ -107,19 +148,38 @@ const ToursPage = () => {
     },
   });
 
-  const reorderStopsMutation = useMutation({
-    mutationFn: (payload: { tourId: number; restaurantIds: string[] }) =>
-      tourApi.reorderStops(payload.tourId, { restaurantIds: payload.restaurantIds }),
+  const saveChangesMutation = useMutation({
+    mutationFn: async (payload: {
+      tourId: number;
+      restaurantIds: string[];
+      estimatedDurationMinutes: number | null;
+      sortPriority: number;
+      isFeatured: boolean;
+      hasOrderChanges: boolean;
+      hasMetaChanges: boolean;
+    }) => {
+      if (payload.hasOrderChanges) {
+        await tourApi.reorderStops(payload.tourId, { restaurantIds: payload.restaurantIds });
+      }
+
+      if (payload.hasMetaChanges) {
+        await tourApi.update(payload.tourId, {
+          estimatedDurationMinutes: payload.estimatedDurationMinutes,
+          sortPriority: payload.sortPriority,
+          isFeatured: payload.isFeatured,
+        });
+      }
+    },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
       if (selectedTourId !== null) {
         await qc.invalidateQueries({ queryKey: ["admin", "tour", selectedTourId] });
       }
 
-      toast.success("Đã cập nhật thứ tự stop_order");
+      toast.success("Đã lưu cập nhật tour");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Cập nhật thứ tự thất bại");
+      toast.error(err.message ?? "Lưu cập nhật thất bại");
     },
   });
 
@@ -136,6 +196,9 @@ const ToursPage = () => {
       setAddRestaurantId("");
       setDraftStops([]);
       setDraggingRestaurantId(null);
+      setDraftEstimatedDurationMinutes("");
+      setDraftSortPriority("");
+      setDraftIsFeatured(false);
     }
   };
 
@@ -148,8 +211,8 @@ const ToursPage = () => {
       return;
     }
 
-    if (hasOrderChanges) {
-      toast.error("Vui lòng lưu thứ tự hiện tại trước khi thêm nhà hàng mới");
+    if (hasUnsavedChanges) {
+      toast.error("Vui lòng lưu cập nhật hiện tại trước khi thêm nhà hàng mới");
       return;
     }
 
@@ -179,11 +242,33 @@ const ToursPage = () => {
     setDraggingRestaurantId(null);
   };
 
-  const handleSaveOrder = () => {
-    if (selectedTourId === null || !hasOrderChanges) return;
-    reorderStopsMutation.mutate({
+  const handleSaveChanges = () => {
+    if (selectedTourId === null || !hasUnsavedChanges) return;
+
+    const estimatedDuration =
+      draftEstimatedDurationMinutes.trim().length === 0
+        ? null
+        : Number(draftEstimatedDurationMinutes);
+    const sortPriority = Number(draftSortPriority);
+
+    if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
+      toast.error("Thời gian dự kiến phải là số nguyên lớn hơn hoặc bằng 0");
+      return;
+    }
+
+    if (!Number.isInteger(sortPriority) || sortPriority < 0) {
+      toast.error("Ưu tiên phải là số nguyên lớn hơn hoặc bằng 0");
+      return;
+    }
+
+    saveChangesMutation.mutate({
       tourId: selectedTourId,
       restaurantIds: draftStops.map((s) => s.restaurantId),
+      estimatedDurationMinutes: estimatedDuration,
+      sortPriority,
+      isFeatured: draftIsFeatured,
+      hasOrderChanges,
+      hasMetaChanges,
     });
   };
 
@@ -276,6 +361,40 @@ const ToursPage = () => {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Tổng số điểm dừng: {selectedTour.stopCount}
                 </p>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  <div>
+                    <Label className="text-xs">Thời gian dự kiến (phút)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={draftEstimatedDurationMinutes}
+                      onChange={(e) => setDraftEstimatedDurationMinutes(e.target.value)}
+                      className="mt-1"
+                      placeholder="Để trống nếu không đặt"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Ưu tiên</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={draftSortPriority}
+                      onChange={(e) => setDraftSortPriority(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Nổi bật</Label>
+                    <select
+                      value={draftIsFeatured ? "true" : "false"}
+                      onChange={(e) => setDraftIsFeatured(e.target.value === "true")}
+                      className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="true">Có</option>
+                      <option value="false">Không</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="rounded-md border p-4">
@@ -330,10 +449,10 @@ const ToursPage = () => {
                 </table>
                 <div className="mt-4 flex items-center justify-end">
                   <Button
-                    onClick={handleSaveOrder}
-                    disabled={!hasOrderChanges || reorderStopsMutation.isPending}
+                    onClick={handleSaveChanges}
+                    disabled={!hasUnsavedChanges || saveChangesMutation.isPending}
                   >
-                    {reorderStopsMutation.isPending ? "Đang cập nhật..." : "Lưu cập nhật thứ tự"}
+                    {saveChangesMutation.isPending ? "Đang lưu..." : "Lưu cập nhật"}
                   </Button>
                 </div>
               </div>
@@ -368,7 +487,7 @@ const ToursPage = () => {
                     disabled={
                       addRestaurantMutation.isPending ||
                       availableRestaurants.length === 0 ||
-                      hasOrderChanges
+                      hasUnsavedChanges
                     }
                     className="gap-2"
                   >

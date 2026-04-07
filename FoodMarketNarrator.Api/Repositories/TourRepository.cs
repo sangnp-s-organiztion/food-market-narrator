@@ -134,4 +134,25 @@ public class TourRepository
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();
     }
+
+    public async Task<bool> UpdateTourMetadataAsync(
+        int tourId,
+        int? estimatedDurationMinutes,
+        int sortPriority,
+        bool isFeatured)
+    {
+        var tour = await _context.Tour.FirstOrDefaultAsync(t => t.TourId == tourId);
+        if (tour == null)
+        {
+            return false;
+        }
+
+        tour.EstimatedDurationMinutes = estimatedDurationMinutes;
+        tour.SortPriority = sortPriority;
+        tour.IsFeatured = isFeatured;
+        tour.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

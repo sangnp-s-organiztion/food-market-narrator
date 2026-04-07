@@ -115,6 +115,36 @@ public class TourService
         return ReorderTourStopsResult.Success();
     }
 
+    public async Task<UpdateTourResult> UpdateTourAsync(
+        int tourId,
+        int? estimatedDurationMinutes,
+        int sortPriority,
+        bool isFeatured)
+    {
+        if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
+        {
+            return UpdateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
+        }
+
+        if (sortPriority < 0)
+        {
+            return UpdateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
+        }
+
+        var updated = await _tourRepository.UpdateTourMetadataAsync(
+            tourId,
+            estimatedDurationMinutes,
+            sortPriority,
+            isFeatured);
+
+        if (!updated)
+        {
+            return UpdateTourResult.NotFound("Tour not found.");
+        }
+
+        return UpdateTourResult.Success();
+    }
+
     private static TourResponse MapTour(TourModel tour, double? latitude, double? longitude, double radiusMeters)
     {
         var orderedStops = tour.TourRestaurants
@@ -252,4 +282,25 @@ public class ReorderTourStopsResult
 
     public static ReorderTourStopsResult Invalid(string message) =>
         new() { Status = ReorderTourStopsStatus.Invalid, Message = message };
+}
+
+public enum UpdateTourStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class UpdateTourResult
+{
+    public UpdateTourStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static UpdateTourResult Success() => new() { Status = UpdateTourStatus.Success };
+
+    public static UpdateTourResult NotFound(string message) =>
+        new() { Status = UpdateTourStatus.NotFound, Message = message };
+
+    public static UpdateTourResult Invalid(string message) =>
+        new() { Status = UpdateTourStatus.Invalid, Message = message };
 }

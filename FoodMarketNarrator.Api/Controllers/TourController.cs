@@ -90,4 +90,22 @@ public class TourController : ControllerBase
             _ => BadRequest(new { message = "Unable to reorder stops." })
         };
     }
+
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> UpdateTour(int id, [FromBody] UpdateTourRequest request)
+    {
+        var result = await _tourService.UpdateTourAsync(
+            id,
+            request.EstimatedDurationMinutes,
+            request.SortPriority,
+            request.IsFeatured);
+
+        return result.Status switch
+        {
+            UpdateTourStatus.Success => Ok(new { message = "Tour updated." }),
+            UpdateTourStatus.NotFound => NotFound(new { message = result.Message }),
+            UpdateTourStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to update tour." })
+        };
+    }
 }

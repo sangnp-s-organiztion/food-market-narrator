@@ -14,3 +14,10 @@ public class ReorderTourStopsRequest
     [Required]
     public List<string> RestaurantIds { get; set; } = new();
 }
+
+public class UpdateTourRequest
+{
+    public int? EstimatedDurationMinutes { get; set; }
+    public int SortPriority { get; set; }
+    public bool IsFeatured { get; set; }
+}

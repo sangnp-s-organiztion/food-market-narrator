@@ -114,6 +114,12 @@ export interface ReorderTourStopsRequest {
   restaurantIds: string[];
 }
 
+export interface UpdateTourRequest {
+  estimatedDurationMinutes: number | null;
+  sortPriority: number;
+  isFeatured: boolean;
+}
+
 // ─── User types ──────────────────────────────────────────────────────────────
 
 export interface UserResponse {
@@ -274,6 +280,12 @@ export const tourApi = {
   reorderStops: (id: number, data: ReorderTourStopsRequest) =>
     adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
       method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: UpdateTourRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}`, {
+      method: "PATCH",
       body: JSON.stringify(data),
     }),
 };
