@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, Plus } from "lucide-react";
+import { Eye, GripVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   restaurantApi,
   tourApi,
   type TourResponse,
+  type TourStopResponse,
 } from "@/lib/adminApi";
 
 function getNextStopOrder(tour: TourResponse | undefined): number {
@@ -28,6 +29,8 @@ const ToursPage = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
   const [addRestaurantId, setAddRestaurantId] = useState("");
+  const [draftStops, setDraftStops] = useState<TourStopResponse[]>([]);
+  const [draggingRestaurantId, setDraggingRestaurantId] = useState<string | null>(null);
 
   const {
     data: tours = [],
@@ -56,12 +59,33 @@ const ToursPage = () => {
     staleTime: 30_000,
   });
 
+  useEffect(() => {
+    if (!selectedTour) {
+      setDraftStops([]);
+      return;
+    }
+
+    const sorted = [...selectedTour.stops].sort((a, b) => a.stopOrder - b.stopOrder);
+    setDraftStops(sorted);
+  }, [selectedTour]);
+
   const availableRestaurants = useMemo(() => {
-    const stopIds = new Set(selectedTour?.stops.map((s) => s.restaurantId) ?? []);
+    const stopIds = new Set(draftStops.map((s) => s.restaurantId));
     return restaurants
       .filter((r) => r.isActive && !stopIds.has(r.restaurantId))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [restaurants, selectedTour]);
+  }, [restaurants, draftStops]);
+
+  const hasOrderChanges = useMemo(() => {
+    if (!selectedTour) return false;
+    const original = [...selectedTour.stops]
+      .sort((a, b) => a.stopOrder - b.stopOrder)
+      .map((s) => s.restaurantId);
+    const draft = draftStops.map((s) => s.restaurantId);
+    if (original.length !== draft.length) return true;
+
+    return original.some((restaurantId, index) => restaurantId !== draft[index]);
+  }, [selectedTour, draftStops]);
 
   const addRestaurantMutation = useMutation({
     mutationFn: (payload: { tourId: number; restaurantId: string }) =>
@@ -83,6 +107,22 @@ const ToursPage = () => {
     },
   });
 
+  const reorderStopsMutation = useMutation({
+    mutationFn: (payload: { tourId: number; restaurantIds: string[] }) =>
+      tourApi.reorderStops(payload.tourId, { restaurantIds: payload.restaurantIds }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
+      if (selectedTourId !== null) {
+        await qc.invalidateQueries({ queryKey: ["admin", "tour", selectedTourId] });
+      }
+
+      toast.success("Da cap nhat thu tu stop_order");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Cap nhat thu tu that bai");
+    },
+  });
+
   const handleOpenDetail = (tourId: number) => {
     setSelectedTourId(tourId);
     setAddRestaurantId("");
@@ -94,6 +134,8 @@ const ToursPage = () => {
     if (!open) {
       setSelectedTourId(null);
       setAddRestaurantId("");
+      setDraftStops([]);
+      setDraggingRestaurantId(null);
     }
   };
 
@@ -106,9 +148,42 @@ const ToursPage = () => {
       return;
     }
 
+    if (hasOrderChanges) {
+      toast.error("Vui long luu thu tu hien tai truoc khi them nha hang moi");
+      return;
+    }
+
     addRestaurantMutation.mutate({
       tourId: selectedTourId,
       restaurantId,
+    });
+  };
+
+  const handleDropOnStop = (targetRestaurantId: string) => {
+    if (!draggingRestaurantId || draggingRestaurantId === targetRestaurantId) return;
+
+    const current = [...draftStops];
+    const fromIndex = current.findIndex((s) => s.restaurantId === draggingRestaurantId);
+    const toIndex = current.findIndex((s) => s.restaurantId === targetRestaurantId);
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+
+    const normalized = current.map((stop, index) => ({
+      ...stop,
+      stopOrder: index + 1,
+    }));
+
+    setDraftStops(normalized);
+    setDraggingRestaurantId(null);
+  };
+
+  const handleSaveOrder = () => {
+    if (selectedTourId === null || !hasOrderChanges) return;
+    reorderStopsMutation.mutate({
+      tourId: selectedTourId,
+      restaurantIds: draftStops.map((s) => s.restaurantId),
     });
   };
 
@@ -211,6 +286,7 @@ const ToursPage = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
+                      <th className="w-12"></th>
                       <th className="w-28">Stop order</th>
                       <th className="w-64">Restaurant ID</th>
                       <th>Ten nha hang</th>
@@ -218,15 +294,32 @@ const ToursPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedTour.stops.length === 0 && (
+                    {draftStops.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-6 text-center text-muted-foreground">
+                        <td colSpan={5} className="py-6 text-center text-muted-foreground">
                           Tour nay chua co nha hang nao.
                         </td>
                       </tr>
                     )}
-                    {selectedTour.stops.map((stop) => (
-                      <tr key={stop.restaurantId}>
+                    {draftStops.map((stop) => (
+                      <tr
+                        key={stop.restaurantId}
+                        draggable
+                        onDragStart={() => setDraggingRestaurantId(stop.restaurantId)}
+                        onDragEnd={() => setDraggingRestaurantId(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDropOnStop(stop.restaurantId)}
+                        className={draggingRestaurantId === stop.restaurantId ? "opacity-60" : ""}
+                      >
+                        <td>
+                          <button
+                            type="button"
+                            className="text-muted-foreground hover:text-foreground"
+                            title="Keo tha de sap xep thu tu"
+                          >
+                            <GripVertical className="h-4 w-4" />
+                          </button>
+                        </td>
                         <td>{stop.stopOrder}</td>
                         <td className="mono text-xs">{stop.restaurantId}</td>
                         <td className="font-medium">{stop.restaurantName}</td>
@@ -235,6 +328,14 @@ const ToursPage = () => {
                     ))}
                   </tbody>
                 </table>
+                <div className="mt-4 flex items-center justify-end">
+                  <Button
+                    onClick={handleSaveOrder}
+                    disabled={!hasOrderChanges || reorderStopsMutation.isPending}
+                  >
+                    {reorderStopsMutation.isPending ? "Dang cap nhat..." : "Luu cap nhat thu tu"}
+                  </Button>
+                </div>
               </div>
 
               <div className="rounded-md border p-4">
@@ -264,7 +365,11 @@ const ToursPage = () => {
                 <div className="mt-4">
                   <Button
                     onClick={handleAddRestaurant}
-                    disabled={addRestaurantMutation.isPending || availableRestaurants.length === 0}
+                    disabled={
+                      addRestaurantMutation.isPending ||
+                      availableRestaurants.length === 0 ||
+                      hasOrderChanges
+                    }
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />

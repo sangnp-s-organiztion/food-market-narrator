@@ -91,4 +91,47 @@ public class TourRepository
         _context.TourRestaurant.Add(entity);
         await _context.SaveChangesAsync();
     }
+
+    public Task<List<string>> GetTourRestaurantIdsAsync(int tourId)
+    {
+        return _context.TourRestaurant
+            .Where(tr => tr.TourId == tourId)
+            .Select(tr => tr.RestaurantId)
+            .ToListAsync();
+    }
+
+    public async Task ReorderStopsAsync(int tourId, IReadOnlyList<string> orderedRestaurantIds)
+    {
+        var stopOrderMap = orderedRestaurantIds
+            .Select((restaurantId, index) => new { restaurantId, stopOrder = index + 1 })
+            .ToDictionary(x => x.restaurantId, x => x.stopOrder, StringComparer.OrdinalIgnoreCase);
+
+        var entities = await _context.TourRestaurant
+            .Where(tr => tr.TourId == tourId)
+            .ToListAsync();
+
+        // 2-phase update prevents transient unique-key conflicts on (tour_id, stop_order).
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        foreach (var entity in entities)
+        {
+            if (stopOrderMap.TryGetValue(entity.RestaurantId, out var newOrder))
+            {
+                entity.StopOrder = -newOrder;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        foreach (var entity in entities)
+        {
+            if (stopOrderMap.TryGetValue(entity.RestaurantId, out var newOrder))
+            {
+                entity.StopOrder = newOrder;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
 }

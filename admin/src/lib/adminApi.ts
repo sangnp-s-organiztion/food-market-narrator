@@ -110,6 +110,10 @@ export interface AddTourRestaurantRequest {
   restaurantId: string;
 }
 
+export interface ReorderTourStopsRequest {
+  restaurantIds: string[];
+}
+
 // ─── User types ──────────────────────────────────────────────────────────────
 
 export interface UserResponse {
@@ -264,6 +268,12 @@ export const tourApi = {
   addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
     adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {
       method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  reorderStops: (id: number, data: ReorderTourStopsRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
+      method: "PUT",
       body: JSON.stringify(data),
     }),
 };

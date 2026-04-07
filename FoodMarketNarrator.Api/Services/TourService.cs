@@ -70,6 +70,51 @@ public class TourService
         return AddTourRestaurantResult.Success();
     }
 
+    public async Task<ReorderTourStopsResult> ReorderTourStopsAsync(int tourId, IReadOnlyList<string> orderedRestaurantIds)
+    {
+        if (orderedRestaurantIds == null || orderedRestaurantIds.Count == 0)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return ReorderTourStopsResult.NotFound("Tour not found.");
+        }
+
+        var normalizedIds = orderedRestaurantIds
+            .Select(id => id?.Trim() ?? string.Empty)
+            .ToList();
+
+        if (normalizedIds.Any(string.IsNullOrWhiteSpace))
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds contains invalid value.");
+        }
+
+        var hasDuplicates = normalizedIds.Count != normalizedIds.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        if (hasDuplicates)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds contains duplicated values.");
+        }
+
+        var currentIds = await _tourRepository.GetTourRestaurantIdsAsync(tourId);
+        if (currentIds.Count != normalizedIds.Count)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds must contain all stops in the tour.");
+        }
+
+        var currentSet = new HashSet<string>(currentIds, StringComparer.OrdinalIgnoreCase);
+        var incomingSet = new HashSet<string>(normalizedIds, StringComparer.OrdinalIgnoreCase);
+        if (!currentSet.SetEquals(incomingSet))
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds must match current stops in the tour.");
+        }
+
+        await _tourRepository.ReorderStopsAsync(tourId, normalizedIds);
+        return ReorderTourStopsResult.Success();
+    }
+
     private static TourResponse MapTour(TourModel tour, double? latitude, double? longitude, double radiusMeters)
     {
         var orderedStops = tour.TourRestaurants
@@ -186,4 +231,25 @@ public class AddTourRestaurantResult
 
     public static AddTourRestaurantResult Invalid(string message) =>
         new() { Status = AddTourRestaurantStatus.Invalid, Message = message };
+}
+
+public enum ReorderTourStopsStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class ReorderTourStopsResult
+{
+    public ReorderTourStopsStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static ReorderTourStopsResult Success() => new() { Status = ReorderTourStopsStatus.Success };
+
+    public static ReorderTourStopsResult NotFound(string message) =>
+        new() { Status = ReorderTourStopsStatus.NotFound, Message = message };
+
+    public static ReorderTourStopsResult Invalid(string message) =>
+        new() { Status = ReorderTourStopsStatus.Invalid, Message = message };
 }

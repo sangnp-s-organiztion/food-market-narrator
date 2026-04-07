@@ -72,4 +72,22 @@ public class TourController : ControllerBase
             _ => BadRequest(new { message = "Unable to add restaurant to tour." })
         };
     }
+
+    [HttpPut("{id:int}/stops/order")]
+    public async Task<IActionResult> ReorderStops(int id, [FromBody] ReorderTourStopsRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _tourService.ReorderTourStopsAsync(id, request.RestaurantIds);
+        return result.Status switch
+        {
+            ReorderTourStopsStatus.Success => Ok(new { message = "Tour stop order updated." }),
+            ReorderTourStopsStatus.NotFound => NotFound(new { message = result.Message }),
+            ReorderTourStopsStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to reorder stops." })
+        };
+    }
 }

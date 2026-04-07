@@ -8,3 +8,9 @@ public class AddTourRestaurantRequest
     [MaxLength(100)]
     public string RestaurantId { get; set; } = string.Empty;
 }
+
+public class ReorderTourStopsRequest
+{
+    [Required]
+    public List<string> RestaurantIds { get; set; } = new();
+}
