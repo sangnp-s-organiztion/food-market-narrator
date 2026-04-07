@@ -87,6 +87,8 @@ export interface UpdateStatusRequest {
 export interface UserResponse {
   userId: number;
   username: string;
+  phone?: string | null;
+  email?: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -95,6 +97,8 @@ export interface UserResponse {
 export interface CreateUserRequest {
   username: string;
   password: string;
+  phone: string;
+  email: string;
   role: string;
 }
 

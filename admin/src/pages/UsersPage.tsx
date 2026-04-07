@@ -1,19 +1,15 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Lock, Plus, Shield, Unlock } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
-import {
-  userApi,
-  type UserResponse,
-  type CreateUserRequest,
-} from "@/lib/adminApi";
-import { Plus, Lock, Unlock, Shield } from "lucide-react";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,20 +19,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { userApi, type CreateUserRequest, type UserResponse } from "@/lib/adminApi";
 import { toast } from "sonner";
-import ConfirmDialog from "@/components/ConfirmDialog";
 
-// Map API response → page-local shape
+const PHONE_REGEX = /^0\d{9,10}$/;
+const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 function toPageUser(r: UserResponse) {
   const normalizedRole = (r.role ?? "").toLowerCase();
   return {
     user_id: r.userId,
     username: r.username,
+    phone: r.phone ?? "",
+    email: r.email ?? "",
     role: normalizedRole === "admin" ? ("admin" as const) : ("saler" as const),
     is_active: r.isActive,
     created_at: r.createdAt ? r.createdAt.split("T")[0] : "",
   };
 }
+
+const emptyForm = {
+  username: "",
+  password: "",
+  confirmPassword: "",
+  phone: "",
+  email: "",
+  role: "saler" as const,
+};
 
 const UsersPage = () => {
   const qc = useQueryClient();
@@ -46,15 +55,17 @@ const UsersPage = () => {
     username: string;
     password: string;
     confirmPassword: string;
+    phone: string;
+    email: string;
     role: "admin" | "saler";
-  }>({ username: "", password: "", confirmPassword: "", role: "saler" });
+  }>(emptyForm);
+
   const [confirmUser, setConfirmUser] = useState<{
     id: number;
     name: string;
     lock: boolean;
   } | null>(null);
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
   const {
     data: apiUsers = [],
     isLoading,
@@ -67,18 +78,16 @@ const UsersPage = () => {
 
   const pageUsers = apiUsers.map(toPageUser);
 
-  // ── Mutations ────────────────────────────────────────────────────────────────
-
   const createMutation = useMutation({
     mutationFn: (data: CreateUserRequest) => userApi.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Tạo người dùng thành công");
+      toast.success("Tao nguoi dung thanh cong");
       setDialogOpen(false);
-      setForm({ username: "", password: "", confirmPassword: "", role: "saler" });
+      setForm(emptyForm);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Tạo người dùng thất bại");
+      toast.error(err.message ?? "Tao nguoi dung that bai");
     },
   });
 
@@ -87,33 +96,45 @@ const UsersPage = () => {
       userApi.updateStatus(id, { isActive }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Cập nhật trạng thái thành công");
+      toast.success("Cap nhat trang thai thanh cong");
       setConfirmUser(null);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Cập nhật thất bại");
+      toast.error(err.message ?? "Cap nhat that bai");
     },
   });
 
   const handleCreate = () => {
     if (!form.username.trim()) {
-      toast.error("Vui lòng nhập tên đăng nhập");
+      toast.error("Vui long nhap ten dang nhap");
       return;
     }
 
     if (!form.password.trim()) {
-      toast.error("Vui lòng nhập mật khẩu");
+      toast.error("Vui long nhap mat khau");
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      toast.error("Mật khẩu nhập lại không khớp");
+      toast.error("Mat khau nhap lai khong khop");
+      return;
+    }
+
+    if (!PHONE_REGEX.test(form.phone.trim())) {
+      toast.error("So dien thoai khong hop le (bat dau bang 0, gom 10-11 so)");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(form.email.trim())) {
+      toast.error("Email khong hop le");
       return;
     }
 
     createMutation.mutate({
       username: form.username.trim(),
       password: form.password.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
       role: form.role,
     });
   };
@@ -121,90 +142,84 @@ const UsersPage = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1 className="page-title">Quản lý người dùng</h1>
+        <h1 className="page-title">Quan ly nguoi dung</h1>
         <Button
           onClick={() => {
-            setForm({ username: "", password: "", confirmPassword: "", role: "saler" });
+            setForm(emptyForm);
             setDialogOpen(true);
           }}
           size="sm"
         >
-          <Plus className="h-4 w-4 mr-1.5" />
-          Tạo người dùng
+          <Plus className="mr-1.5 h-4 w-4" />
+          Tao nguoi dung
         </Button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-6">
+      <div className="mx-auto max-w-7xl px-8 py-6">
         <div className="stat-card">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Tên đăng nhập</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th className="w-32">Hành động</th>
+                <th>Ten dang nhap</th>
+                <th>So dien thoai</th>
+                <th>Email</th>
+                <th>Vai tro</th>
+                <th>Trang thai</th>
+                <th>Ngay tao</th>
+                <th className="w-32">Hanh dong</th>
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    Đang tải…
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                    Dang tai...
                   </td>
                 </tr>
               )}
+
               {isError && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-destructive">
-                    Không thể tải danh sách người dùng. Vui lòng thử lại.
+                  <td colSpan={7} className="py-8 text-center text-destructive">
+                    Khong the tai danh sach nguoi dung. Vui long thu lai.
                   </td>
                 </tr>
               )}
+
               {!isLoading && !isError && pageUsers.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    Chưa có người dùng nào.
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                    Chua co nguoi dung nao.
                   </td>
                 </tr>
               )}
+
               {!isLoading &&
                 !isError &&
                 pageUsers.map((u) => (
                   <tr key={u.user_id}>
                     <td className="font-medium">{u.username}</td>
+                    <td className="mono text-xs text-muted-foreground">{u.phone || "-"}</td>
+                    <td className="text-xs text-muted-foreground">{u.email || "-"}</td>
                     <td>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                           u.role === "admin"
                             ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
                         <Shield className="h-3 w-3" />
-                        {u.role === "admin" ? "Quản trị viên" : "Người bán"}
+                        {u.role === "admin" ? "Quan tri vien" : "Nguoi ban"}
                       </span>
                     </td>
                     <td>
-                      <span
-                        className={
-                          u.is_active ? "status-active" : "status-inactive"
-                        }
-                      >
-                        {u.is_active ? "Hoạt động" : "Ngừng hoạt động"}
+                      <span className={u.is_active ? "status-active" : "status-inactive"}>
+                        {u.is_active ? "Hoat dong" : "Ngung hoat dong"}
                       </span>
                     </td>
-                    <td className="mono text-xs text-muted-foreground">
-                      {u.created_at}
-                    </td>
+                    <td className="mono text-xs text-muted-foreground">{u.created_at}</td>
                     <td className="flex items-center gap-1">
-                      {/* Lock / unlock */}
                       <button
                         onClick={() =>
                           setConfirmUser({
@@ -213,22 +228,13 @@ const UsersPage = () => {
                             lock: u.is_active,
                           })
                         }
-                        className={`p-1.5 rounded-md hover:bg-muted transition-colors ${
-                          !u.is_active
-                            ? "text-destructive"
-                            : "text-muted-foreground"
+                        className={`rounded-md p-1.5 transition-colors hover:bg-muted ${
+                          !u.is_active ? "text-destructive" : "text-muted-foreground"
                         }`}
-                        title={
-                          u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"
-                        }
+                        title={u.is_active ? "Khoa nguoi dung" : "Mo khoa nguoi dung"}
                       >
-                        {u.is_active ? (
-                          <Unlock className="h-4 w-4" />
-                        ) : (
-                          <Lock className="h-4 w-4" />
-                        )}
+                        {u.is_active ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                       </button>
-
                     </td>
                   </tr>
                 ))}
@@ -237,15 +243,14 @@ const UsersPage = () => {
         </div>
       </div>
 
-      {/* Create user dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tạo người dùng mới</DialogTitle>
+            <DialogTitle>Tao nguoi dung moi</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3 py-2">
             <div>
-              <Label className="text-xs">Tên đăng nhập</Label>
+              <Label className="text-xs">Ten dang nhap</Label>
               <Input
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
@@ -255,66 +260,77 @@ const UsersPage = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Mật khẩu</Label>
+              <Label className="text-xs">So dien thoai</Label>
+              <Input
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="mt-1"
+                placeholder="0900000001"
+                autoComplete="tel"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="mt-1"
+                placeholder="user@example.com"
+                autoComplete="email"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Mat khau</Label>
               <Input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="mt-1"
-                placeholder="Nhập mật khẩu"
+                placeholder="Nhap mat khau"
                 autoComplete="new-password"
               />
             </div>
             <div>
-              <Label className="text-xs">Nhập lại mật khẩu</Label>
+              <Label className="text-xs">Nhap lai mat khau</Label>
               <Input
                 type="password"
                 value={form.confirmPassword}
-                onChange={(e) =>
-                  setForm({ ...form, confirmPassword: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                 className="mt-1"
-                placeholder="Nhập lại mật khẩu"
+                placeholder="Nhap lai mat khau"
                 autoComplete="new-password"
               />
             </div>
             <div>
-              <Label className="text-xs">Vai trò</Label>
+              <Label className="text-xs">Vai tro</Label>
               <Select
                 value={form.role}
-                onValueChange={(v) =>
-                  setForm({ ...form, role: v as "admin" | "saler" })
-                }
+                onValueChange={(v) => setForm({ ...form, role: v as "admin" | "saler" })}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Quản trị viên</SelectItem>
-                  <SelectItem value="saler">Người bán</SelectItem>
+                  <SelectItem value="admin">Quan tri vien</SelectItem>
+                  <SelectItem value="saler">Nguoi ban</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              onClick={handleCreate}
-              className="mt-2"
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? "Đang tạo…" : "Tạo mới"}
+            <Button onClick={handleCreate} className="mt-2" disabled={createMutation.isPending}>
+              {createMutation.isPending ? "Dang tao..." : "Tao moi"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Confirm lock/unlock */}
       <ConfirmDialog
         open={!!confirmUser}
         onOpenChange={(open) => !open && setConfirmUser(null)}
-        title={confirmUser?.lock ? "Khóa người dùng" : "Mở khóa người dùng"}
+        title={confirmUser?.lock ? "Khoa nguoi dung" : "Mo khoa nguoi dung"}
         description={
           confirmUser?.lock
-            ? "Người dùng sẽ không thể đăng nhập. Bạn có chắc không?"
-            : "Người dùng sẽ có thể đăng nhập trở lại."
+            ? "Nguoi dung se khong the dang nhap. Ban co chac khong?"
+            : "Nguoi dung se co the dang nhap tro lai."
         }
         onConfirm={() => {
           if (!confirmUser) return;
