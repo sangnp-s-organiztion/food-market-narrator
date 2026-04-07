@@ -46,4 +46,49 @@ public class TourRepository
 
         return await query.FirstOrDefaultAsync();
     }
+
+    public Task<bool> ExistsAsync(int id, bool includeInactive = false)
+    {
+        var query = _context.Tour.Where(t => t.TourId == id).AsQueryable();
+        if (!includeInactive)
+        {
+            query = query.Where(t => t.IsActive);
+        }
+
+        return query.AnyAsync();
+    }
+
+    public Task<bool> RestaurantExistsAsync(string restaurantId)
+    {
+        return _context.Restaurant.AnyAsync(r => r.RestaurantId == restaurantId);
+    }
+
+    public Task<bool> TourRestaurantExistsAsync(int tourId, string restaurantId)
+    {
+        return _context.TourRestaurant.AnyAsync(tr => tr.TourId == tourId && tr.RestaurantId == restaurantId);
+    }
+
+    public async Task<int> GetNextStopOrderAsync(int tourId)
+    {
+        var maxStopOrder = await _context.TourRestaurant
+            .Where(tr => tr.TourId == tourId)
+            .Select(tr => (int?)tr.StopOrder)
+            .MaxAsync();
+
+        return (maxStopOrder ?? 0) + 1;
+    }
+
+    public async Task AddRestaurantToTourAsync(int tourId, string restaurantId, int stopOrder)
+    {
+        var entity = new TourRestaurantModel
+        {
+            TourId = tourId,
+            RestaurantId = restaurantId,
+            StopOrder = stopOrder,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.TourRestaurant.Add(entity);
+        await _context.SaveChangesAsync();
+    }
 }

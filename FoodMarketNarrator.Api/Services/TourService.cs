@@ -38,6 +38,38 @@ public class TourService
         return MapTour(tour, latitude, longitude, radiusMeters);
     }
 
+    public async Task<AddTourRestaurantResult> AddRestaurantToTourAsync(int tourId, string restaurantId)
+    {
+        var normalizedRestaurantId = restaurantId.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedRestaurantId))
+        {
+            return AddTourRestaurantResult.Invalid("restaurantId is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return AddTourRestaurantResult.NotFound("Tour not found.");
+        }
+
+        var restaurantExists = await _tourRepository.RestaurantExistsAsync(normalizedRestaurantId);
+        if (!restaurantExists)
+        {
+            return AddTourRestaurantResult.NotFound("Restaurant not found.");
+        }
+
+        var mappingExists = await _tourRepository.TourRestaurantExistsAsync(tourId, normalizedRestaurantId);
+        if (mappingExists)
+        {
+            return AddTourRestaurantResult.Conflict("Restaurant already exists in this tour.");
+        }
+
+        var effectiveStopOrder = await _tourRepository.GetNextStopOrderAsync(tourId);
+
+        await _tourRepository.AddRestaurantToTourAsync(tourId, normalizedRestaurantId, effectiveStopOrder);
+        return AddTourRestaurantResult.Success();
+    }
+
     private static TourResponse MapTour(TourModel tour, double? latitude, double? longitude, double radiusMeters)
     {
         var orderedStops = tour.TourRestaurants
@@ -129,4 +161,29 @@ public class TourService
     {
         return degrees * (Math.PI / 180);
     }
+}
+
+public enum AddTourRestaurantStatus
+{
+    Success,
+    NotFound,
+    Conflict,
+    Invalid
+}
+
+public class AddTourRestaurantResult
+{
+    public AddTourRestaurantStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static AddTourRestaurantResult Success() => new() { Status = AddTourRestaurantStatus.Success };
+
+    public static AddTourRestaurantResult NotFound(string message) =>
+        new() { Status = AddTourRestaurantStatus.NotFound, Message = message };
+
+    public static AddTourRestaurantResult Conflict(string message) =>
+        new() { Status = AddTourRestaurantStatus.Conflict, Message = message };
+
+    public static AddTourRestaurantResult Invalid(string message) =>
+        new() { Status = AddTourRestaurantStatus.Invalid, Message = message };
 }

@@ -20,6 +20,7 @@ import LogsPage from "./pages/LogsPage.tsx";
 import TrajectoryPage from "./pages/TrajectoryPage.tsx";
 import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
+import ToursPage from "./pages/ToursPage.tsx";
 
 const queryClient = new QueryClient();
 const TITLE_SUFFIX = "Food Market Narrator Admin";
@@ -31,6 +32,7 @@ const getTitleByPath = (pathname: string): string => {
   if (pathname.startsWith("/users")) return `Quan ly nguoi dung | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/logs")) return `Nhat ky hoat dong | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/trajectory")) return `Lo trinh nguoi dung | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/tours")) return `Quan ly tour | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/translation-billing")) return `Billing token dich | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/account")) return `Tai khoan | ${TITLE_SUFFIX}`;
   return `Khong tim thay trang | ${TITLE_SUFFIX}`;
@@ -113,6 +115,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TrajectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tours"
+        element={
+          <ProtectedRoute>
+            <ToursPage />
           </ProtectedRoute>
         }
       />

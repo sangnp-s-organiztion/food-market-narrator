@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", label: "Tong quan", icon: LayoutDashboard },
-  { path: "/trajectory", label: "Tuyen di chuyen", icon: Route },
+  { path: "/tours", label: "Tour", icon: Route },
   { path: "/restaurants", label: "Nha hang", icon: Store },
   { path: "/users", label: "Nguoi dung", icon: Users },
   { path: "/logs", label: "Nhat ky", icon: ScrollText },

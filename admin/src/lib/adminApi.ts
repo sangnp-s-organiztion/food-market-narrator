@@ -81,6 +81,34 @@ export interface CreateRestaurantRequest {
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
+export interface TourStopResponse {
+  stopOrder: number;
+  restaurantId: string;
+  restaurantName: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  primaryImageUrl: string | null;
+}
+
+export interface TourResponse {
+  tourId: number;
+  name: string;
+  shortDescription: string | null;
+  description: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  isFeatured: boolean;
+  sortPriority: number;
+  stopCount: number;
+  nearbyStopCount: number;
+  nearestDistanceMeters: number | null;
+  stops: TourStopResponse[];
+}
+
+export interface AddTourRestaurantRequest {
+  restaurantId: string;
+}
 
 // ─── User types ──────────────────────────────────────────────────────────────
 
@@ -228,6 +256,17 @@ export const restaurantApi = {
 
 // ─── User API ────────────────────────────────────────────────────────────────
 
+export const tourApi = {
+  getAll: () => adminFetch<TourResponse[]>("/Tour"),
+
+  getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
 export const userApi = {
   getAll: () => adminFetch<UserResponse[]>("/api/users"),
 
@@ -326,3 +365,4 @@ export const translationBillingApi = {
     );
   },
 };
+

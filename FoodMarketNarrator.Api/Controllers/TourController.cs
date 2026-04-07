@@ -1,4 +1,5 @@
 using food_market_narrator_api.Services;
+using food_market_narrator_api.DTOs.Tour;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,5 +51,25 @@ public class TourController : ControllerBase
         }
 
         return Ok(data);
+    }
+
+    [HttpPost("{id:int}/restaurants")]
+    public async Task<IActionResult> AddRestaurantToTour(int id, [FromBody] AddTourRestaurantRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _tourService.AddRestaurantToTourAsync(id, request.RestaurantId);
+
+        return result.Status switch
+        {
+            AddTourRestaurantStatus.Success => Ok(new { message = "Restaurant added to tour." }),
+            AddTourRestaurantStatus.NotFound => NotFound(new { message = result.Message }),
+            AddTourRestaurantStatus.Conflict => Conflict(new { message = result.Message }),
+            AddTourRestaurantStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to add restaurant to tour." })
+        };
     }
 }
