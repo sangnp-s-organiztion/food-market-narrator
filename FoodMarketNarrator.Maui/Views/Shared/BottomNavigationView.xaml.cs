@@ -98,7 +98,7 @@ public partial class BottomNavigationView : ContentView
     // Mở bản đồ khi nhấn vào MapIcon hoặc MapText
     private async void OpenMap(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//MapPage");
+        await Shell.Current.GoToAsync("//MapPage?tourPoiIds=&tourName=");
     }
 
     // Mở trang OpenMainPage khi nhấn vào HomeIcon hoặc HomeText

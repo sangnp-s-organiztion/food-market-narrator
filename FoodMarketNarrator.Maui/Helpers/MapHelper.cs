@@ -115,15 +115,23 @@ namespace food_market_narrator.Helpers
         /// <summary>
         /// Highlight the nearest POI on map without moving camera.
         /// </summary>
-        public static void HighlightPOI(MapControl mapControl, POI? nearest, bool isSearchResult = false)
+        public static void HighlightPOI(
+            MapControl mapControl,
+            POI? nearest,
+            bool isSearchResult = false,
+            IEnumerable<string>? visiblePoiIds = null)
         {
             var ids = nearest?.restaurantId == null
                 ? null
                 : new[] { nearest.restaurantId };
-            HighlightPOIs(mapControl, ids, isSearchResult);
+            HighlightPOIs(mapControl, ids, isSearchResult, visiblePoiIds);
         }
 
-        public static void HighlightPOIs(MapControl mapControl, IEnumerable<string>? highlightedPoiIds, bool isSearchResult = false)
+        public static void HighlightPOIs(
+            MapControl mapControl,
+            IEnumerable<string>? highlightedPoiIds,
+            bool isSearchResult = false,
+            IEnumerable<string>? visiblePoiIds = null)
         {
             var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
             if (poiLayer == null) return;
@@ -134,12 +142,25 @@ namespace food_market_narrator.Helpers
                     .Where(id => !string.IsNullOrWhiteSpace(id))
                     .ToHashSet(StringComparer.Ordinal);
 
+            var visibleSet = visiblePoiIds == null
+                ? null
+                : visiblePoiIds
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToHashSet(StringComparer.Ordinal);
+
             var highlightedFeatures = new List<PointFeature>();
 
             foreach (var feature in poiLayer.Features.OfType<PointFeature>())
             {
                 feature.Styles.Clear();
                 var featureId = feature["id"]?.ToString();
+                var isVisible = visibleSet == null || (featureId != null && visibleSet.Contains(featureId));
+
+                if (!isVisible)
+                {
+                    continue;
+                }
+
                 bool isHighlighted = featureId != null && idSet.Contains(featureId);
                 feature.Styles.Add(CreateMarkerStyle(isHighlighted, isSearchResult && isHighlighted));
                 if (isHighlighted)

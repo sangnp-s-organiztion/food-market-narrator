@@ -49,7 +49,19 @@ public partial class TourPage : ContentPage
 
         if (button.CommandParameter is int tourId && _tourMap.TryGetValue(tourId, out var tour))
         {
-            await DisplayAlertAsync("Tour", $"Bắt đầu: {tour.Name}", "OK");
+            var poiIds = tour.Stops
+                .Select(s => s.RestaurantId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
+            if (poiIds.Count > 0)
+            {
+                var encodedPoiIds = Uri.EscapeDataString(string.Join(',', poiIds));
+                var encodedTourName = Uri.EscapeDataString(tour.Name ?? string.Empty);
+                await Shell.Current.GoToAsync($"//MapPage?tourPoiIds={encodedPoiIds}&tourName={encodedTourName}");
+                return;
+            }
         }
 
         await Shell.Current.GoToAsync("//MapPage");
