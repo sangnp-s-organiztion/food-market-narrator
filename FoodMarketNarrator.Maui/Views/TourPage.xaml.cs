@@ -7,19 +7,34 @@ namespace food_market_narrator.Views;
 public partial class TourPage : ContentPage
 {
     private readonly ITourService? _tourService;
+    private readonly TourImageWarmupService? _tourImageWarmupService;
     private readonly Dictionary<int, TourModel> _tourMap = new();
 
     public TourPage()
+        : this(
+            Application.Current?.Handler?.MauiContext?.Services?.GetService<ITourService>(),
+            Application.Current?.Handler?.MauiContext?.Services?.GetService<TourImageWarmupService>())
+    {
+    }
+
+    public TourPage(ITourService? tourService, TourImageWarmupService? warmupService)
     {
         InitializeComponent();
-        var services = Application.Current?.Handler?.MauiContext?.Services;
-        _tourService = services?.GetService<ITourService>();
+        _tourService = tourService;
+        _tourImageWarmupService = warmupService;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadToursAsync();
+        try
+        {
+            await LoadToursAsync();
+        }
+        catch
+        {
+            TourCollectionView.ItemsSource = new List<TourModel>();
+        }
     }
 
     private async Task LoadToursAsync()
@@ -38,6 +53,16 @@ public partial class TourPage : ContentPage
         {
             _tourMap[tour.TourId] = tour;
         }
+
+        // Warmup ảnh chỉ là tối ưu, không được làm crash flow Tour.
+        try
+        {
+            _tourImageWarmupService?.WarmupTourImages(tours);
+        }
+        catch
+        {
+            // Ignore warmup failure to keep Tour page stable in release mode.
+        }
     }
 
     private async void OnStartTourClicked(object sender, EventArgs e)
@@ -47,23 +72,30 @@ public partial class TourPage : ContentPage
             return;
         }
 
-        if (button.CommandParameter is int tourId && _tourMap.TryGetValue(tourId, out var tour))
+        try
         {
-            var poiIds = tour.Stops
-                .Select(s => s.RestaurantId)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Distinct(StringComparer.Ordinal)
-                .ToList();
-
-            if (poiIds.Count > 0)
+            if (button.CommandParameter is int tourId && _tourMap.TryGetValue(tourId, out var tour))
             {
-                var encodedPoiIds = Uri.EscapeDataString(string.Join(',', poiIds));
-                var encodedTourName = Uri.EscapeDataString(tour.Name ?? string.Empty);
-                await Shell.Current.GoToAsync($"//MapPage?tourPoiIds={encodedPoiIds}&tourName={encodedTourName}");
-                return;
-            }
-        }
+                var poiIds = (tour.Stops ?? new List<TourStopModel>())
+                    .Select(s => s.RestaurantId)
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList();
 
-        await Shell.Current.GoToAsync("//MapPage");
+                if (poiIds.Count > 0)
+                {
+                    var encodedPoiIds = Uri.EscapeDataString(string.Join(',', poiIds));
+                    var encodedTourName = Uri.EscapeDataString(tour.Name ?? string.Empty);
+                    await Shell.Current.GoToAsync($"//MapPage?tourPoiIds={encodedPoiIds}&tourName={encodedTourName}");
+                    return;
+                }
+            }
+
+            await Shell.Current.GoToAsync("//MapPage");
+        }
+        catch
+        {
+            await Shell.Current.GoToAsync("//MapPage");
+        }
     }
 }

@@ -59,8 +59,7 @@
                         <VerticalStackLayout Spacing="0">
                             <Border StrokeThickness="0"
                                     StrokeShape="RoundRectangle 24,24,0,0"
-                                    HeightRequest="220"
-                                    ClipToBounds="True">
+                                    HeightRequest="220">
                                 <Image Source="{Binding DisplayImageSource}" Aspect="AspectFill"/>
                             </Border>
 

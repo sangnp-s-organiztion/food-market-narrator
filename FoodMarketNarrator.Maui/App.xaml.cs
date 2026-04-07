@@ -1,4 +1,5 @@
 ﻿using food_market_narrator.Services;
+using food_market_narrator.Settings;
 using System.Diagnostics;
 
 namespace food_market_narrator;
@@ -8,6 +9,7 @@ public partial class App : Application
     private readonly ILocationService _locationService;
     private readonly ILocationLogSyncService _locationLogSyncService;
     private readonly IPOIService _poiService;
+    private readonly ITourService _tourService;
     private readonly ILanguageService _languageService;
     private readonly IAudioLibraryService _audioLibraryService;
     private readonly IQrAccessService _qrAccessService;
@@ -19,6 +21,7 @@ public partial class App : Application
         ILocationService locationService,
         ILocationLogSyncService locationLogSyncService,
         IPOIService poiService,
+        ITourService tourService,
         ILanguageService languageService,
         IAudioLibraryService audioLibraryService,
         IQrAccessService qrAccessService,
@@ -28,6 +31,7 @@ public partial class App : Application
         _locationService = locationService;
 		_locationLogSyncService = locationLogSyncService;
 		_poiService = poiService;
+        _tourService = tourService;
 		_languageService = languageService;
         _audioLibraryService = audioLibraryService;
         _qrAccessService = qrAccessService;
@@ -176,10 +180,12 @@ public partial class App : Application
             var sw = Stopwatch.StartNew();
             try
             {
+                await Task.Delay(AppSettings.StartupWarmupDelayMs);
+
                 // Console.WriteLine("[Perf][App] Warm-up started");
-                await Task.WhenAll(
-                    _poiService.GetAllPOIsAsync(),
-                    _languageService.GetAllLanguagesAsync());
+                await _languageService.GetAllLanguagesAsync();
+                await _tourService.GetToursAsync();
+                await _poiService.GetAllPOIsAsync();
                 // Console.WriteLine($"[Perf][App] Warm-up finished in {sw.ElapsedMilliseconds} ms");
             }
             catch (Exception)

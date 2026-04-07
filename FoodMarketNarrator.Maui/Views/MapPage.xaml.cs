@@ -5,6 +5,7 @@ using food_market_narrator.Services;
 using Mapsui;
 using Mapsui.Projections;
 using Mapsui.UI.Maui;
+using Microsoft.Maui.Networking;
 using System.Globalization;
 using System.Text;
 
@@ -35,6 +36,7 @@ public partial class MapPage : ContentPage
     private string? _tourPoiIdsRaw;
     private Location? _lastKnownLocation;
     private bool _isMapLoaded;
+    private bool _hasShownOfflineMapUnavailableNotice;
     private CancellationTokenSource? _searchDebounceCts;
 
     public double Latitude { get; set; }
@@ -92,6 +94,8 @@ public partial class MapPage : ContentPage
                 initialZoomLevel: DefaultZoomLevel);
             _isMapLoaded = true;
         }
+
+        await ShowOfflineMapNoticeIfNeededAsync();
 
         if (_pois.Count == 0)
         {
@@ -617,6 +621,30 @@ public partial class MapPage : ContentPage
     {
         _selectedPoi = null;
         SelectedPoiCard.IsVisible = false;
+    }
+
+    private async Task ShowOfflineMapNoticeIfNeededAsync()
+    {
+        if (_hasShownOfflineMapUnavailableNotice)
+        {
+            return;
+        }
+
+        if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+        {
+            return;
+        }
+
+        if (MapHelper.HasCachedMapTiles())
+        {
+            return;
+        }
+
+        _hasShownOfflineMapUnavailableNotice = true;
+        await DisplayAlertAsync(
+            "Bản đồ offline",
+            "Hiện không có Internet và chưa có dữ liệu nền bản đồ đã lưu. Bạn vẫn xem và tương tác được các địa điểm, nhưng nền bản đồ có thể chưa hiển thị.",
+            "Đóng");
     }
 
     private async void OnViewDetailClicked(object sender, EventArgs e)

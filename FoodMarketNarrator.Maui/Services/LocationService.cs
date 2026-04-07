@@ -10,6 +10,8 @@ public class LocationService : ILocationService
     private Task? _trackingTask;
     private Location? _lastKnownLocation;
     private Location? _lastPublishedLocation;
+    private readonly SemaphoreSlim _trackingInitLock = new(1, 1);
+    private readonly SemaphoreSlim _permissionLock = new(1, 1);
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
     private const double MinPublishDistanceMeters = 6;
@@ -48,12 +50,20 @@ public class LocationService : ILocationService
 
     public async Task StartTrackingAsync()
     {
-        if (_isTracking) return;
+        if (_isTracking)
+        {
+            return;
+        }
 
-        var granted = await EnsureForegroundTrackingPermissionAsync();
-
+        await _trackingInitLock.WaitAsync();
         try
         {
+            if (_isTracking)
+            {
+                return;
+            }
+
+            var granted = await EnsureForegroundTrackingPermissionAsync();
             if (granted)
             {
                 StartForegroundTrackingServiceIfNeeded();
@@ -68,6 +78,10 @@ public class LocationService : ILocationService
         {
             _isTracking = false;
             // Console.WriteLine($"Error starting tracking: {ex.Message}");
+        }
+        finally
+        {
+            _trackingInitLock.Release();
         }
     }
 
@@ -222,38 +236,46 @@ public class LocationService : ILocationService
 
     private async Task<bool> EnsureForegroundTrackingPermissionAsync()
     {
-        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-        if (whileInUseStatus != PermissionStatus.Granted)
+        await _permissionLock.WaitAsync();
+        try
         {
-            if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+            var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (whileInUseStatus != PermissionStatus.Granted)
             {
-                await ShowInfoAsync(
-                    "Can quyen vi tri",
-                    "Ung dung can quyen truy cap vi tri de phat hien POI gan ban.");
+                if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+                {
+                    await ShowInfoAsync(
+                        "Can quyen vi tri",
+                        "Ung dung can quyen truy cap vi tri de phat hien POI gan ban.");
+                }
+
+                whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
             }
 
-            whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-        }
-
-        if (whileInUseStatus != PermissionStatus.Granted)
-        {
-            return false;
-        }
+            if (whileInUseStatus != PermissionStatus.Granted)
+            {
+                return false;
+            }
 
 #if ANDROID
-        if (OperatingSystem.IsAndroidVersionAtLeast(33))
-        {
-            // Notification permission is optional for location data, but requested so foreground
-            // notification can be shown reliably on Android 13+.
-            var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-            if (notificationStatus != PermissionStatus.Granted)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
-                _ = await Permissions.RequestAsync<Permissions.PostNotifications>();
+                // Notification permission is optional for location data, but requested so foreground
+                // notification can be shown reliably on Android 13+.
+                var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+                if (notificationStatus != PermissionStatus.Granted)
+                {
+                    _ = await Permissions.RequestAsync<Permissions.PostNotifications>();
+                }
             }
-        }
 #endif
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            _permissionLock.Release();
+        }
     }
 
     private static Task ShowInfoAsync(string title, string message)
