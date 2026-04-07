@@ -22,4 +22,29 @@ public class AppDbContext : DbContext
     public DbSet<LanguageModel> Language { get; set; }
     public DbSet<UserModel> User { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<TourModel> Tour { get; set; }
+    public DbSet<TourRestaurantModel> TourRestaurant { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<TourRestaurantModel>()
+            .HasKey(tr => new { tr.TourId, tr.RestaurantId });
+
+        modelBuilder.Entity<TourRestaurantModel>()
+            .HasOne(tr => tr.Tour)
+            .WithMany(t => t.TourRestaurants)
+            .HasForeignKey(tr => tr.TourId);
+
+        modelBuilder.Entity<TourRestaurantModel>()
+            .HasOne(tr => tr.Restaurant)
+            .WithMany()
+            .HasForeignKey(tr => tr.RestaurantId);
+
+        modelBuilder.Entity<TourModel>()
+            .HasOne(t => t.Image)
+            .WithMany()
+            .HasForeignKey(t => t.ImageId);
+    }
 }

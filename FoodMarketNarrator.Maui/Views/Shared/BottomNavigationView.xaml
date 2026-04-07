@@ -9,7 +9,7 @@
         <Border.Shadow>
             <Shadow Brush="#E0E0E0" Offset="0,-5" Radius="10" Opacity="0.2"/>
         </Border.Shadow>
-        <Grid ColumnDefinitions="*,*,*,*" VerticalOptions="Center">
+        <Grid ColumnDefinitions="*,*,*,*,*" VerticalOptions="Center">
             <!-- Trang chủ -->
             <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
@@ -33,7 +33,7 @@
             </VerticalStackLayout>
 
             <!-- Yêu thích -->
-            <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm OpenFavorite khi nhấn vào nút yêu thích -->
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OpenFavorite"/>
@@ -43,8 +43,18 @@
                 <Label Text="Yêu thích" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
             </VerticalStackLayout>
 
+            <!-- Tour -->
+            <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OpenTour"/>
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Label Text="&#xf4d7;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="TourIcon"/>
+                <Label Text="Tour" FontSize="10" HorizontalOptions="Center" x:Name="TourText"/>
+            </VerticalStackLayout>
+
             <!-- Cài đặt -->
-            <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm để mở Cài đặt -->
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OpenSettings"/>

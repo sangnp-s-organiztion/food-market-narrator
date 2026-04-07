@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:food_market_narrator.Models"
+             xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
+             x:Class="food_market_narrator.Views.TourPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#FFFCF8">
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="White" Padding="20,18,20,14" Spacing="8">
+            <Label Text="Bạn muốn khám phá gì&#10;hôm nay?"
+                   FontSize="48"
+                   FontFamily="OpenSansSemibold"
+                   TextColor="#1A1A1A"
+                   LineBreakMode="WordWrap" />
+            <Label Text="Chọn một hành trình ẩm thực tại phố Vĩnh Khánh để bắt đầu trải nghiệm của bạn."
+                   FontSize="14"
+                   TextColor="#8D6E63"
+                   LineBreakMode="WordWrap" />
+        </VerticalStackLayout>
+
+        <CollectionView x:Name="TourCollectionView"
+                        Grid.Row="1"
+                        Margin="0"
+                        SelectionMode="None"
+                        VerticalOptions="FillAndExpand"
+                        VerticalScrollBarVisibility="Never"
+                        ItemsLayout="VerticalList">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="20,50"
+                                     Spacing="10"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Label Text="&#xf5a0;"
+                           FontFamily="FASolid"
+                           FontSize="48"
+                           TextColor="#E0E0E0"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Chưa có tour khả dụng"
+                           FontSize="16"
+                           TextColor="#9E9E9E"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Vui lòng kiểm tra lại kết nối hoặc dữ liệu tour từ server"
+                           FontSize="13"
+                           TextColor="#BDBDBD"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:TourModel">
+                    <Border Margin="20,14,20,0"
+                            BackgroundColor="White"
+                            Stroke="#EDE7E1"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 24"
+                            Padding="0">
+                        <VerticalStackLayout Spacing="0">
+                            <Border StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 24,24,0,0"
+                                    HeightRequest="220"
+                                    ClipToBounds="True">
+                                <Image Source="{Binding DisplayImageSource}" Aspect="AspectFill"/>
+                            </Border>
+
+                            <VerticalStackLayout Padding="16,14,16,16" Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="33"
+                                           FontFamily="OpenSansSemibold"
+                                           TextColor="#1A1A1A"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"/>
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="#FFF1E3"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 14"
+                                            Padding="10,4">
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Label Text="&#xf005;"
+                                                   FontFamily="FASolid"
+                                                   FontSize="11"
+                                                   TextColor="#F48C06"
+                                                   VerticalOptions="Center"/>
+                                            <Label Text="{Binding BadgeText}"
+                                                   FontSize="13"
+                                                   TextColor="#8D6E63"
+                                                   FontAttributes="Bold"
+                                                   VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </Grid>
+
+                                <HorizontalStackLayout Spacing="14">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="&#xf017;" FontFamily="FASolid" FontSize="12" TextColor="#8D6E63" VerticalOptions="Center"/>
+                                        <Label Text="{Binding DurationDisplay}" FontSize="12" FontAttributes="Bold" TextColor="#8D6E63" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#8D6E63" VerticalOptions="Center"/>
+                                        <Label Text="{Binding StopCountDisplay}" FontSize="12" FontAttributes="Bold" TextColor="#8D6E63" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </HorizontalStackLayout>
+
+                                <Button Text="BẮT ĐẦU HÀNH TRÌNH"
+                                        Clicked="OnStartTourClicked"
+                                        CommandParameter="{Binding TourId}"
+                                        BackgroundColor="#F48C06"
+                                        TextColor="White"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="44"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <shared:BottomNavigationView Grid.Row="2" ActiveTab="Tour"/>
+    </Grid>
+</ContentPage>

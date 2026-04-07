@@ -47,6 +47,10 @@ public partial class BottomNavigationView : ContentView
                 SetActive(MapIcon, MapText);
                 break;
 
+            case BottomTab.Tour:
+                SetActive(TourIcon, TourText);
+                break;
+
             case BottomTab.Favorite:
                 SetActive(FavoriteIcon, FavoriteText);
                 break;
@@ -70,6 +74,12 @@ public partial class BottomNavigationView : ContentView
         // Set màu cho FavoriteIcon
         FavoriteIcon.TextColor = InactiveColor;
         FavoriteText.TextColor = InactiveColor;
+
+        // Set màu cho TourIcon
+        if (TourIcon != null)
+            TourIcon.TextColor = InactiveColor;
+        if (TourText != null)
+            TourText.TextColor = InactiveColor;
 
         // Set màu cho SettingIcon
         if (SettingIcon != null)
@@ -118,6 +128,11 @@ public partial class BottomNavigationView : ContentView
     private async void OpenFavorite(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("//FavoritePage");
+    }
+
+    private async void OpenTour(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("//TourPage");
     }
 
     private async void OpenSettings(object sender, EventArgs e)

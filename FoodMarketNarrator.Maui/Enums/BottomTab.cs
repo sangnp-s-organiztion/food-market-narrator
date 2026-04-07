@@ -8,6 +8,7 @@ namespace food_market_narrator.Enums
     {
         Home, // Main Page
         Map,
+        Tour,
         Favorite,
         Setting,
         None

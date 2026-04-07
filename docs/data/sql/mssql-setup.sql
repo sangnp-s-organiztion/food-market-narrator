@@ -120,7 +120,7 @@ CREATE TABLE dbo.Tour (
     short_description NVARCHAR(500) NULL,
     description NVARCHAR(MAX) NULL,
     estimated_duration_minutes INT NULL,
-    image_url NVARCHAR(500) NULL,
+	image_id INT NOT NULL,
     is_active BIT NOT NULL DEFAULT 1,
     is_featured BIT NOT NULL DEFAULT 0,
     sort_priority INT NOT NULL DEFAULT 0,
@@ -130,6 +130,7 @@ CREATE TABLE dbo.Tour (
     updated_at DATETIME2 NULL,
     CONSTRAINT FK_Tour_CreatedBy FOREIGN KEY (created_by) REFERENCES dbo.Users(user_id),
     CONSTRAINT FK_Tour_UpdatedBy FOREIGN KEY (updated_by) REFERENCES dbo.Users(user_id),
+	CONSTRAINT FK_Tour_Image FOREIGN KEY (image_id) REFERENCES dbo.Restaurant_Image(image_id),
     CONSTRAINT CK_Tour_Duration CHECK (estimated_duration_minutes IS NULL OR estimated_duration_minutes > 0)
 );
 
