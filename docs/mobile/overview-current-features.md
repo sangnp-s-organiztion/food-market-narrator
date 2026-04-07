@@ -64,8 +64,10 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Khi mới vào app:
   - Nếu chưa chọn ngôn ngữ: tự mở popup chọn ngôn ngữ.
   - Nếu đã chọn: tự bật narration 1 lần cho mỗi phiên chạy app.
-- Start tracking được trì hoãn ~1.2 giây sau khi vào MainPage để ưu tiên render frame đầu, giảm skipped frames/ANR log lúc cold start.
+- Start tracking được trì hoãn ~1.2 giây ở lần vào đầu tiên trong phiên app; các lần quay lại MainPage sẽ không delay lại.
 - Floating button chỉ hiện khi ở trong phạm vi TriggerDistanceMeters (30m) so với POI gần nhất.
+- Floating button có cache trạng thái hiển thị gần nhất để render nhanh ngay frame đầu khi quay lại MainPage.
+- MainPage ưu tiên cập nhật trạng thái floating button trước các thao tác map nặng để giảm cảm giác trễ nút.
 
 ## 6) MapPage
 
@@ -83,6 +85,12 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Mã ngôn ngữ đang dùng: vi-VN, en-US, zh-CN, ko-KR, ja-JP.
 - Lựa chọn ngôn ngữ được lưu Preferences.
 - Khi đổi ngôn ngữ, UI được cập nhật và luồng audio sử dụng audio tương ứng theo ngôn ngữ mới.
+- Đổi ngôn ngữ trong Settings không còn reset về MainPage; người dùng vẫn ở lại SettingsPage.
+
+## 7.1) Điều hướng tab Home
+
+- BottomNavigationView khi bấm Home sẽ ưu tiên pop về MainPage có sẵn trong navigation stack.
+- Chỉ fallback GoToAsync("//MainPage") khi MainPage không có trong stack hiện tại.
 
 ## 8) Narration flow
 
@@ -196,3 +204,11 @@ Trade-off hiện tại:
 
 - Ưu điểm: startup mượt hơn, giảm khả năng khựng khi mới mở app/chuyển tab đầu.
 - Nhược điểm: tổng thời gian prefetch đầy đủ ảnh có thể dài hơn trước.
+
+## 18) Đồng bộ location logs khi offline
+
+- Location logs vẫn được gom batch và gửi định kỳ mỗi 10 giây.
+- Nếu gửi thất bại (mất mạng/lỗi server), batch được đưa lại vào buffer để retry.
+- Buffer được lưu thêm xuống file local: AppData/offline_cache/location_logs_buffer.json.
+- Khi app mở lại, service nạp lại buffer từ file và tiếp tục sync.
+- Khi gửi hết thành công, file buffer sẽ bị xóa.
