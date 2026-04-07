@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import TrajectorySection from "@/components/TrajectorySection";
@@ -19,8 +19,7 @@ const TrajectoryPage = () => {
         <div>
           <h1 className="page-title">Tuyến di chuyển người dùng</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe
-            audio
+            Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe audio
           </p>
         </div>
       </div>

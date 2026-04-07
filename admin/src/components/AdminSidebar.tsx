@@ -14,13 +14,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { path: "/", label: "Tong quan", icon: LayoutDashboard },
+  { path: "/", label: "Tổng quan", icon: LayoutDashboard },
   { path: "/tours", label: "Tour", icon: Route },
-  { path: "/restaurants", label: "Nha hang", icon: Store },
-  { path: "/users", label: "Nguoi dung", icon: Users },
-  { path: "/logs", label: "Nhat ky", icon: ScrollText },
-  { path: "/translation-billing", label: "Billing token dich", icon: Receipt },
-  { path: "/account", label: "Tai khoan", icon: CircleUser },
+  { path: "/restaurants", label: "Nhà hàng", icon: Store },
+  { path: "/users", label: "Người dùng", icon: Users },
+  { path: "/logs", label: "Nhật ký", icon: ScrollText },
+  { path: "/translation-billing", label: "Chi phí dịch token", icon: Receipt },
+  { path: "/account", label: "Tài khoản", icon: CircleUser },
 ];
 
 const AdminSidebar = () => {
@@ -30,9 +30,9 @@ const AdminSidebar = () => {
 
   const roleLabel =
     user?.role?.toLowerCase() === "admin"
-      ? "Quan tri vien"
+      ? "Quản trị viên"
       : user?.role?.toLowerCase() === "saler"
-        ? "Nguoi ban"
+        ? "Người bán"
         : (user?.role ?? "");
 
   const handleLogout = async () => {
@@ -97,7 +97,7 @@ const AdminSidebar = () => {
           <button
             onClick={handleLogout}
             className="rounded-md p-1.5 transition-colors hover:bg-white/10"
-            title="Dang xuat"
+            title="Đăng xuất"
           >
             <LogOut className="h-4 w-4" style={{ color: "hsl(215, 20%, 65%)" }} />
           </button>

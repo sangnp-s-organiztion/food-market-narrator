@@ -45,14 +45,14 @@ const AccountPage = () => {
         email: profileForm.email.trim(),
       }),
     onSuccess: async () => {
-      toast.success("Cap nhat thong tin tai khoan thanh cong");
+      toast.success("Cập nhật thông tin tài khoản thành công");
       await refreshMe();
       qc.invalidateQueries({ queryKey: ["admin", "account", userId] });
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       setIsEditingProfile(false);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Cap nhat thong tin that bai");
+      toast.error(err.message ?? "Cập nhật thông tin thất bại");
     },
   });
 
@@ -63,11 +63,11 @@ const AccountPage = () => {
         newPassword: passwordForm.newPassword.trim(),
       }),
     onSuccess: () => {
-      toast.success("Doi mat khau thanh cong");
+      toast.success("Đổi mật khẩu thành công");
       setPasswordForm({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Doi mat khau that bai");
+      toast.error(err.message ?? "Đổi mật khẩu thất bại");
     },
   });
 
@@ -82,17 +82,17 @@ const AccountPage = () => {
 
   const handleSaveProfile = () => {
     if (!profileForm.username.trim()) {
-      toast.error("Vui long nhap ten dang nhap");
+      toast.error("Vui lòng nhập tên đăng nhập");
       return;
     }
 
     if (!PHONE_REGEX.test(profileForm.phone.trim())) {
-      toast.error("So dien thoai khong hop le (bat dau bang 0, gom 10-11 so)");
+      toast.error("Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 số)");
       return;
     }
 
     if (!EMAIL_REGEX.test(profileForm.email.trim())) {
-      toast.error("Email khong hop le");
+      toast.error("Email không hợp lệ");
       return;
     }
 
@@ -101,22 +101,22 @@ const AccountPage = () => {
 
   const handleChangePassword = () => {
     if (!passwordForm.oldPassword.trim()) {
-      toast.error("Vui long nhap mat khau cu");
+      toast.error("Vui lòng nhập mật khẩu cũ");
       return;
     }
 
     if (!passwordForm.newPassword.trim()) {
-      toast.error("Vui long nhap mat khau moi");
+      toast.error("Vui lòng nhập mật khẩu mới");
       return;
     }
 
     if (passwordForm.newPassword.trim().length < 6) {
-      toast.error("Mat khau moi phai co it nhat 6 ky tu");
+      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-      toast.error("Nhap lai mat khau moi khong khop");
+      toast.error("Nhập lại mật khẩu mới không khớp");
       return;
     }
 
@@ -126,17 +126,17 @@ const AccountPage = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1 className="page-title">Tai khoan</h1>
+        <h1 className="page-title">Tài khoản</h1>
       </div>
 
       <div className="mx-auto grid max-w-4xl gap-6 px-8 py-6">
         <section className="stat-card p-6">
           <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 className="text-base font-semibold">Thong tin tai khoan hien tai</h2>
+            <h2 className="text-base font-semibold">Thông tin tài khoản hiện tại</h2>
             {!isEditingProfile ? (
               <Button size="sm" variant="outline" onClick={startEditProfile}>
                 <Pencil className="mr-1.5 h-4 w-4" />
-                Chinh sua
+                Chỉnh sửa
               </Button>
             ) : (
               <Button
@@ -145,28 +145,28 @@ const AccountPage = () => {
                 onClick={() => setIsEditingProfile(false)}
               >
                 <X className="mr-1.5 h-4 w-4" />
-                Huy
+                Hủy
               </Button>
             )}
           </div>
 
-          {isLoading && <p className="text-sm text-muted-foreground">Dang tai thong tin...</p>}
+          {isLoading && <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>}
           {isError && (
-            <p className="text-sm text-destructive">Khong the tai thong tin tai khoan.</p>
+            <p className="text-sm text-destructive">Không thể tải thông tin tài khoản.</p>
           )}
 
           {!isLoading && !isError && data && !isEditingProfile && (
             <div className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
-                <p className="text-muted-foreground">Ten dang nhap</p>
+                <p className="text-muted-foreground">Tên đăng nhập</p>
                 <p className="font-medium">{data.username}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Vai tro</p>
+                <p className="text-muted-foreground">Vai trò</p>
                 <p className="font-medium">{data.role}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">So dien thoai</p>
+                <p className="text-muted-foreground">Số điện thoại</p>
                 <p className="font-medium">{data.phone || "-"}</p>
               </div>
               <div>
@@ -179,7 +179,7 @@ const AccountPage = () => {
           {!isLoading && !isError && data && isEditingProfile && (
             <div className="grid gap-3">
               <div>
-                <Label className="text-xs">Ten dang nhap</Label>
+                <Label className="text-xs">Tên đăng nhập</Label>
                 <Input
                   className="mt-1"
                   value={profileForm.username}
@@ -187,7 +187,7 @@ const AccountPage = () => {
                 />
               </div>
               <div>
-                <Label className="text-xs">So dien thoai</Label>
+                <Label className="text-xs">Số điện thoại</Label>
                 <Input
                   className="mt-1"
                   value={profileForm.phone}
@@ -207,17 +207,17 @@ const AccountPage = () => {
                 onClick={handleSaveProfile}
                 disabled={updateProfileMutation.isPending}
               >
-                {updateProfileMutation.isPending ? "Dang cap nhat..." : "Luu thong tin"}
+                {updateProfileMutation.isPending ? "Đang cập nhật..." : "Lưu thông tin"}
               </Button>
             </div>
           )}
         </section>
 
         <section className="stat-card p-6">
-          <h2 className="mb-4 text-base font-semibold">Doi mat khau</h2>
+          <h2 className="mb-4 text-base font-semibold">Đổi mật khẩu</h2>
           <div className="grid gap-3">
             <div>
-              <Label className="text-xs">Mat khau cu</Label>
+              <Label className="text-xs">Mật khẩu cũ</Label>
               <Input
                 type="password"
                 className="mt-1"
@@ -227,7 +227,7 @@ const AccountPage = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Mat khau moi</Label>
+              <Label className="text-xs">Mật khẩu mới</Label>
               <Input
                 type="password"
                 className="mt-1"
@@ -237,7 +237,7 @@ const AccountPage = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Nhap lai mat khau moi</Label>
+              <Label className="text-xs">Nhập lại mật khẩu mới</Label>
               <Input
                 type="password"
                 className="mt-1"
@@ -253,7 +253,7 @@ const AccountPage = () => {
               onClick={handleChangePassword}
               disabled={changePasswordMutation.isPending || userId <= 0}
             >
-              {changePasswordMutation.isPending ? "Dang cap nhat..." : "Cap nhat mat khau"}
+              {changePasswordMutation.isPending ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
             </Button>
           </div>
         </section>
