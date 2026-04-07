@@ -237,6 +237,12 @@ type ApiUserProfile = {
   email?: string | null;
 };
 
+type UpdateProfilePayload = {
+  username: string;
+  phone: string;
+  email: string;
+};
+
 export async function loginApi(
   username: string,
   password: string,
@@ -290,6 +296,23 @@ export async function updateMyPasswordApi(
       newPassword,
     }),
   });
+}
+
+export async function updateMyProfileApi(payload: UpdateProfilePayload): Promise<User> {
+  const response = await request<ApiUserProfile>(`/Auth/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+  return {
+    user_id: response.userId,
+    username: response.username,
+    role: response.role,
+    is_active: response.isActive,
+    created_at: response.createdAt,
+    phone: response.phone ?? "",
+    email: response.email ?? "",
+  };
 }
 
 export async function logoutApi(): Promise<void> {

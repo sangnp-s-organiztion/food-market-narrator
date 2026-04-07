@@ -1,4 +1,4 @@
-import {
+﻿import {
   createContext,
   useContext,
   useState,
@@ -13,60 +13,52 @@ interface AuthContextType {
   user: LoginResponse | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshMe: () => Promise<void>;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
-
 export const useAuth = () => useContext(AuthContext);
 
-// Persist auth state in memory only — the cookie is the real source of truth.
-// On bootstrap, verify the cookie is still valid via GET /Auth/me.
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<LoginResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // bootstrap phase
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ── Bootstrap: verify existing cookie session ──────────────────────────────
+  const refreshMe = useCallback(async () => {
+    const me: MeResponse = await authApi.getMe();
+    setUser({
+      userId: me.userId,
+      username: me.username,
+      role: me.role,
+      isActive: true,
+    });
+    setIsAuthenticated(true);
+  }, []);
+
   useEffect(() => {
-    authApi
-      .getMe()
-      .then((me: MeResponse) => {
-        // Cookie is valid — restore session from /Auth/me
-        setUser({
-          userId: me.userId,
-          username: me.username,
-          role: me.role,
-          isActive: true,
-        });
-        setIsAuthenticated(true);
-      })
+    refreshMe()
       .catch(() => {
-        // No valid cookie — stay on login page
         setIsAuthenticated(false);
         setUser(null);
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [refreshMe]);
 
-  // ── Login ────────────────────────────────────────────────────────────────
   const login = useCallback(async (username: string, password: string) => {
     const res = await authApi.login({ username, password });
     setUser(res);
     setIsAuthenticated(true);
   }, []);
 
-  // ── Logout ──────────────────────────────────────────────────────────────
   const logout = useCallback(async () => {
-    await authApi.logout().catch(() => {
-      // Best-effort logout — clear local state regardless
-    });
+    await authApi.logout().catch(() => undefined);
     setUser(null);
     setIsAuthenticated(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, refreshMe, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

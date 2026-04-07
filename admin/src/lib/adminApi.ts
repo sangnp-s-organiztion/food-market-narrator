@@ -115,6 +115,12 @@ export interface UpdateUserPasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateMyProfileRequest {
+  username: string;
+  phone: string;
+  email: string;
+}
+
 export interface CountResponse {
   count: number;
 }
@@ -247,6 +253,12 @@ export const userApi = {
 
   updateMyPassword: (data: UpdateUserPasswordRequest) =>
     adminFetch<{ message: string }>("/Auth/password", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  updateMyProfile: (data: UpdateMyProfileRequest) =>
+    adminFetch<UserResponse>("/Auth/profile", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),

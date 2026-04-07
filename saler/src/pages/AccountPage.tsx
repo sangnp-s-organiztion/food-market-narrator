@@ -1,12 +1,15 @@
 ﻿import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { KeyRound, UserRound } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { KeyRound, Pencil, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMyAccountApi, updateMyPasswordApi } from "@/services/api";
+import { getMyAccountApi, updateMyPasswordApi, updateMyProfileApi } from "@/services/api";
+
+const PHONE_REGEX = /^0\d{9,10}$/;
+const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 function parseErrorMessage(error: unknown, fallback: string): string {
   if (!(error instanceof Error)) return fallback;
@@ -25,7 +28,14 @@ function parseErrorMessage(error: unknown, fallback: string): string {
 }
 
 export default function AccountPage() {
-  const { user } = useAuth();
+  const qc = useQueryClient();
+  const { user, refreshMe } = useAuth();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    username: "",
+    phone: "",
+    email: "",
+  });
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -53,6 +63,24 @@ export default function AccountPage() {
     },
     onError: (error) => {
       toast.error(parseErrorMessage(error, "Khong the doi mat khau"));
+    },
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: () =>
+      updateMyProfileApi({
+        username: profileForm.username.trim(),
+        phone: profileForm.phone.trim(),
+        email: profileForm.email.trim(),
+      }),
+    onSuccess: async () => {
+      toast.success("Cap nhat thong tin tai khoan thanh cong");
+      await refreshMe();
+      qc.invalidateQueries({ queryKey: ["saler", "account", userId] });
+      setIsEditingProfile(false);
+    },
+    onError: (error) => {
+      toast.error(parseErrorMessage(error, "Khong the cap nhat thong tin tai khoan"));
     },
   });
 
@@ -92,6 +120,34 @@ export default function AccountPage() {
     changePasswordMutation.mutate();
   };
 
+  const startEditProfile = () => {
+    setProfileForm({
+      username: account?.username ?? user?.username ?? "",
+      phone: account?.phone ?? "",
+      email: account?.email ?? "",
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = () => {
+    if (!profileForm.username.trim()) {
+      toast.error("Vui long nhap ten dang nhap");
+      return;
+    }
+
+    if (!PHONE_REGEX.test(profileForm.phone.trim())) {
+      toast.error("So dien thoai khong hop le (bat dau bang 0, gom 10-11 so)");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(profileForm.email.trim())) {
+      toast.error("Email khong hop le");
+      return;
+    }
+
+    updateProfileMutation.mutate();
+  };
+
   return (
     <div className="mx-auto max-w-3xl animate-fade-in space-y-6">
       <div className="page-header">
@@ -100,9 +156,22 @@ export default function AccountPage() {
       </div>
 
       <div className="form-section space-y-4">
-        <h3 className="flex items-center gap-2 font-medium text-foreground">
-          <UserRound className="h-4 w-4 text-primary" /> Thong tin tai khoan
-        </h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="flex items-center gap-2 font-medium text-foreground">
+            <UserRound className="h-4 w-4 text-primary" /> Thong tin tai khoan
+          </h3>
+          {!isEditingProfile ? (
+            <Button size="sm" variant="outline" onClick={startEditProfile}>
+              <Pencil className="mr-1.5 h-4 w-4" />
+              Chinh sua
+            </Button>
+          ) : (
+            <Button size="sm" variant="ghost" onClick={() => setIsEditingProfile(false)}>
+              <X className="mr-1.5 h-4 w-4" />
+              Huy
+            </Button>
+          )}
+        </div>
 
         {isLoading && <p className="text-sm text-muted-foreground">Dang tai thong tin...</p>}
 
@@ -110,7 +179,7 @@ export default function AccountPage() {
           <p className="text-sm text-destructive">Khong the tai thong tin tai khoan.</p>
         )}
 
-        {!isLoading && !isError && (
+        {!isLoading && !isError && !isEditingProfile && (
           <div className="grid gap-4 text-sm md:grid-cols-2">
             <div>
               <p className="text-muted-foreground">Ten dang nhap</p>
@@ -128,6 +197,40 @@ export default function AccountPage() {
               <p className="text-muted-foreground">Email</p>
               <p className="font-medium">{account?.email || "-"}</p>
             </div>
+          </div>
+        )}
+
+        {!isLoading && !isError && isEditingProfile && (
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Ten dang nhap</Label>
+              <Input
+                className="mt-1"
+                value={profileForm.username}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, username: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label className="text-xs">So dien thoai</Label>
+              <Input
+                className="mt-1"
+                value={profileForm.phone}
+                onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                className="mt-1"
+                value={profileForm.email}
+                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+              />
+            </div>
+            <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
+              {updateProfileMutation.isPending ? "Dang cap nhat..." : "Luu thong tin"}
+            </Button>
           </div>
         )}
       </div>
