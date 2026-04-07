@@ -33,6 +33,7 @@ public partial class MapPage : ContentPage
     private HashSet<string> _tourPoiFilterIds = new(StringComparer.Ordinal);
     private string? _activeTourName;
     private string? _tourPoiIdsRaw;
+    private Location? _lastKnownLocation;
     private bool _isMapLoaded;
     private CancellationTokenSource? _searchDebounceCts;
 
@@ -102,6 +103,7 @@ public partial class MapPage : ContentPage
 
         SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(SearchEntry.Text);
         SearchSuggestionsContainer.IsVisible = false;
+        _lastKnownLocation = _locationService.LastKnownLocation;
 
         HideSelectedPoiCard();
         ApplyPoiModeFromState(focusOnTour: true);
@@ -122,6 +124,7 @@ public partial class MapPage : ContentPage
         // Cập nhật vị trí người dùng trên bản đồ và kiểm tra POI gần nhất
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            _lastKnownLocation = location;
             MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
 
             if (_searchHighlightedPoiIds.Count > 0 || _tourPoiFilterIds.Count > 0)
@@ -156,8 +159,10 @@ public partial class MapPage : ContentPage
             return;
         }
 
+    _lastKnownLocation = currentLocation;
         CenterMapOn(currentLocation.Latitude, currentLocation.Longitude, MyLocationZoomLevel);
         MapHelper.UpdateUserLocation(mapControl, currentLocation.Latitude, currentLocation.Longitude);
+    ApplyPoiModeFromState(focusOnTour: false);
     }
 
     private void AdjustZoom(double factor)
@@ -215,6 +220,7 @@ public partial class MapPage : ContentPage
         if (e.WorldPosition == null)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
@@ -225,6 +231,7 @@ public partial class MapPage : ContentPage
         if (nearestPoi == null)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
@@ -235,6 +242,7 @@ public partial class MapPage : ContentPage
         if (distanceMeters > tapThresholdMeters)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
@@ -492,11 +500,23 @@ public partial class MapPage : ContentPage
 
         if (_selectedPoi != null)
         {
-            MapHelper.HighlightPOI(mapControl, _selectedPoi);
+            MapHelper.HighlightPOI(mapControl, _selectedPoi, visiblePoiIds: visiblePoiIds);
             return;
         }
 
-        MapHelper.HighlightPOIs(mapControl, null);
+        var location = _lastKnownLocation ?? _locationService.LastKnownLocation;
+        var nearest = location == null
+            ? null
+            : _poiService.GetNearestPOI(location.Latitude, location.Longitude);
+
+        var shouldHighlightNearest = location != null
+            && nearest != null
+            && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
+
+        MapHelper.HighlightPOI(
+            mapControl,
+            shouldHighlightNearest ? nearest : null,
+            visiblePoiIds: visiblePoiIds);
     }
 
     private List<POI> GetInteractivePois()
