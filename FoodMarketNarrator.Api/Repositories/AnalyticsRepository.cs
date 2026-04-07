@@ -50,16 +50,22 @@ public class AnalyticsRepository
         return await _db.GetCollection<BsonDocument>("AudioLogs").CountDocumentsAsync(filter);
     }
 
-    // ─── Heatmap: GeoJSON points from LocationLogs (last 24h) ──────────────────
-    public async Task<List<GeoJsonPoint>> GetHeatmapPointsAsync(int hours = 24)
+    // ─── Heatmap: GeoJSON points from LocationLogs (hours window or all-time) ─
+    public async Task<List<GeoJsonPoint>> GetHeatmapPointsAsync(int? hours = 24)
     {
-        var since = DateTime.UtcNow.AddHours(-hours);
+        var pipeline = new List<BsonDocument>();
 
-        var pipeline = new[]
+        if (hours.HasValue)
         {
-            new BsonDocument("$match",
-                new BsonDocument("timestamp",
-                    new BsonDocument("$gte", since))),
+            var since = DateTime.UtcNow.AddHours(-hours.Value);
+            pipeline.Add(
+                new BsonDocument("$match",
+                    new BsonDocument("timestamp",
+                        new BsonDocument("$gte", since))));
+        }
+
+        pipeline.AddRange(new[]
+        {
             new BsonDocument("$project",
                 new BsonDocument
                 {
@@ -73,7 +79,7 @@ public class AnalyticsRepository
                         new BsonDocument("$ne", new BsonArray { "$lng", BsonNull.Value }),
                         new BsonDocument("$ne", new BsonArray { "$lat", BsonNull.Value })
                     })))
-        };
+        });
 
         var points = await _db.GetCollection<BsonDocument>("LocationLogs")
             .Aggregate<BsonDocument>(pipeline)
@@ -477,17 +483,38 @@ public class AnalyticsRepository
 
         var pipeline = new[]
         {
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time_raw",
+                    new BsonDocument("$ifNull", new BsonArray
+                    {
+                        "$start_time",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            "$timestamp",
+                            "$created_at"
+                        })
+                    }))),
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time",
+                    new BsonDocument("$convert", new BsonDocument
+                    {
+                        { "input", "$event_time_raw" },
+                        { "to", "date" },
+                        { "onError", BsonNull.Value },
+                        { "onNull", BsonNull.Value }
+                    }))),
             new BsonDocument("$match",
                 new BsonDocument
                 {
-                    { "timestamp", new BsonDocument("$gte", since) },
+                    { "event_time", new BsonDocument("$ne", BsonNull.Value) },
+                    { "event_time", new BsonDocument("$gte", since) },
                     { "duration", new BsonDocument("$gte", 5) }
                 }),
             new BsonDocument("$group",
                 new BsonDocument
                 {
                     { "_id", new BsonDocument("$dateToString",
-                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$timestamp" } }) },
+                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$event_time" } }) },
                     { "count", new BsonDocument("$sum", 1) }
                 }),
             new BsonDocument("$sort",

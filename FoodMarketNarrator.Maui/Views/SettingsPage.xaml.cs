@@ -5,11 +5,16 @@ using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.Generic;
 using food_market_narrator.Helpers;
+using IOPath = System.IO.Path;
 
 namespace food_market_narrator.Views;
 
 public partial class SettingsPage : ContentPage
 {
+    private const string OfflineCacheFolderName = "offline_cache";
+    private const string ImageCacheFolderName = "image_cache";
+    private const string MapTileCacheFolderName = "osm_tiles";
+
     private readonly IAudioService? _audioService;
     private readonly ILanguageService? _languageService;
     private readonly IFavoriteService? _favoriteService;
@@ -23,6 +28,7 @@ public partial class SettingsPage : ContentPage
     private bool _isUpdatingBackgroundToggle;
     private VerticalStackLayout? _languageOptionsContainer;
     private Grid? _languagePopupOverlay;
+    private StorageUsageSummary _lastStorageUsage = new();
 
     public SettingsPage()
     {
@@ -50,14 +56,167 @@ public partial class SettingsPage : ContentPage
             CurrentLanguageLabel.Text = GetLanguageDisplayName(_languageService.CurrentLanguage);
         }
 
-        // Load cache size
-        if (_audioService != null)
-        {
-            var cacheBytes = await _audioService.GetCachedAudioSizeBytesAsync();
-            CacheSizeLabel.Text = FormatBytes(cacheBytes);
-        }
+        await LoadOfflineDataUsageAsync();
 
         await UpdateBackgroundPermissionStatusAsync();
+    }
+
+    private async Task LoadOfflineDataUsageAsync()
+    {
+        try
+        {
+            _lastStorageUsage = await ReadStorageUsageAsync();
+            StorageTotalSizeLabel.Text = FormatBytesCompact(_lastStorageUsage.TotalBytes);
+
+            StorageMapLegendLabel.Text = $"Bản đồ {FormatBytesCompact(_lastStorageUsage.MapBytes)}";
+            StorageImageLegendLabel.Text = $"Ảnh {FormatBytesCompact(_lastStorageUsage.ImageBytes)}";
+            StorageOtherLegendLabel.Text = $"Khác {FormatBytesCompact(_lastStorageUsage.OtherBytes)}";
+
+            ApplyStorageBarSegments(_lastStorageUsage);
+        }
+        catch
+        {
+            _lastStorageUsage = new StorageUsageSummary();
+            StorageTotalSizeLabel.Text = "0 B";
+            StorageMapLegendLabel.Text = "Bản đồ 0 B";
+            StorageImageLegendLabel.Text = "Ảnh 0 B";
+            StorageOtherLegendLabel.Text = "Khác 0 B";
+            ApplyStorageBarSegments(_lastStorageUsage);
+        }
+    }
+
+    private async Task<StorageUsageSummary> ReadStorageUsageAsync()
+    {
+        var appData = FileSystem.AppDataDirectory;
+        var cacheData = FileSystem.CacheDirectory;
+
+        var offlineCacheRoot = IOPath.Combine(appData, OfflineCacheFolderName);
+        var imageCacheRoot = IOPath.Combine(appData, ImageCacheFolderName);
+        var mapCacheRoot = IOPath.Combine(cacheData, MapTileCacheFolderName);
+
+        var poiFilePath = IOPath.Combine(offlineCacheRoot, "pois.json");
+        var languageFilePath = IOPath.Combine(offlineCacheRoot, "languages.json");
+        var dishesDirPath = IOPath.Combine(offlineCacheRoot, "dishes");
+
+        var audioBytes = _audioService != null
+            ? await _audioService.GetCachedAudioSizeBytesAsync()
+            : GetDirectorySizeSafe(IOPath.Combine(appData, "audio_cache"));
+
+        var poiBytes = GetFileSizeSafe(poiFilePath);
+        var languageBytes = GetFileSizeSafe(languageFilePath);
+        var dishesBytes = GetDirectorySizeSafe(dishesDirPath);
+        var imageBytes = GetDirectorySizeSafe(imageCacheRoot);
+        var mapBytes = GetDirectorySizeSafe(mapCacheRoot);
+
+        return new StorageUsageSummary
+        {
+            AudioBytes = audioBytes,
+            PoiBytes = poiBytes,
+            DishesBytes = dishesBytes,
+            LanguageBytes = languageBytes,
+            ImageBytes = imageBytes,
+            MapBytes = mapBytes,
+            ImageFileCount = GetFileCountSafe(imageCacheRoot),
+            MapFileCount = GetFileCountSafe(mapCacheRoot),
+            DishesFileCount = GetFileCountSafe(dishesDirPath)
+        };
+    }
+
+    private void ApplyStorageBarSegments(StorageUsageSummary usage)
+    {
+        var total = usage.TotalBytes;
+        if (total <= 0)
+        {
+            MapSegmentColumn.Width = new GridLength(0, GridUnitType.Star);
+            ImageSegmentColumn.Width = new GridLength(0, GridUnitType.Star);
+            OtherSegmentColumn.Width = new GridLength(0, GridUnitType.Star);
+            UnusedSegmentColumn.Width = new GridLength(1, GridUnitType.Star);
+            return;
+        }
+
+        var map = usage.MapBytes;
+        var image = usage.ImageBytes;
+        var other = usage.OtherBytes;
+
+        var mapShare = map / (double)total;
+        var imageShare = image / (double)total;
+        var otherShare = other / (double)total;
+
+        mapShare = ApplyMinVisibleShare(mapShare, map);
+        imageShare = ApplyMinVisibleShare(imageShare, image);
+        otherShare = ApplyMinVisibleShare(otherShare, other);
+
+        var sum = mapShare + imageShare + otherShare;
+        if (sum <= 0)
+        {
+            UnusedSegmentColumn.Width = new GridLength(1, GridUnitType.Star);
+            return;
+        }
+
+        var scale = 1d / sum;
+        mapShare *= scale;
+        imageShare *= scale;
+        otherShare *= scale;
+
+        MapSegmentColumn.Width = new GridLength(mapShare, GridUnitType.Star);
+        ImageSegmentColumn.Width = new GridLength(imageShare, GridUnitType.Star);
+        OtherSegmentColumn.Width = new GridLength(otherShare, GridUnitType.Star);
+        UnusedSegmentColumn.Width = new GridLength(0, GridUnitType.Star);
+    }
+
+    private static double ApplyMinVisibleShare(double share, long bytes)
+    {
+        if (bytes <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Max(share, 0.04d);
+    }
+
+    private static long GetFileSizeSafe(string filePath)
+    {
+        try
+        {
+            return File.Exists(filePath) ? new FileInfo(filePath).Length : 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private static long GetDirectorySizeSafe(string directoryPath)
+    {
+        try
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                return 0;
+            }
+
+            return Directory
+                .EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories)
+                .Sum(path => GetFileSizeSafe(path));
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private static int GetFileCountSafe(string directoryPath)
+    {
+        try
+        {
+            return Directory.Exists(directoryPath)
+                ? Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories).Count()
+                : 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     private async Task UpdateBackgroundPermissionStatusAsync()
@@ -120,6 +279,23 @@ public partial class SettingsPage : ContentPage
 
         var mb = kb / 1024d;
         return $"{mb:F1} MB";
+    }
+
+    private static string FormatBytesCompact(long bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+
+        var kb = bytes / 1024d;
+        if (kb < 1024)
+            return $"{kb:F1} KB";
+
+        var mb = kb / 1024d;
+        if (mb < 1024)
+            return $"{mb:F1} MB";
+
+        var gb = mb / 1024d;
+        return $"{gb:F1} GB";
     }
 
     private async void OnLanguageTapped(object sender, EventArgs e)
@@ -397,11 +573,82 @@ public partial class SettingsPage : ContentPage
             return;
 
         await _audioService.ClearAudioCacheAsync();
-
-        var newSize = await _audioService.GetCachedAudioSizeBytesAsync();
-        CacheSizeLabel.Text = FormatBytes(newSize);
+        await LoadOfflineDataUsageAsync();
 
         await DisplayAlert("Hoàn tất", "Đã xóa bộ nhớ audio", "OK");
+    }
+
+    private async void OnStorageDetailsClicked(object sender, EventArgs e)
+    {
+        var usage = _lastStorageUsage;
+        var message = string.Join(Environment.NewLine, new[]
+        {
+            $"Tổng dữ liệu: {FormatBytesCompact(usage.TotalBytes)}",
+            $"Bản đồ: {FormatBytesCompact(usage.MapBytes)} ({usage.MapFileCount} file)",
+            $"Ảnh: {FormatBytesCompact(usage.ImageBytes)} ({usage.ImageFileCount} file)",
+            $"Audio: {FormatBytesCompact(usage.AudioBytes)}",
+            $"POI: {FormatBytesCompact(usage.PoiBytes)}",
+            $"Món ăn: {FormatBytesCompact(usage.DishesBytes)} ({usage.DishesFileCount} file)",
+            $"Ngôn ngữ: {FormatBytesCompact(usage.LanguageBytes)}"
+        });
+
+        await DisplayAlert("Chi tiết bộ nhớ", message, "OK");
+    }
+
+    private async void OnClearAllDataClicked(object sender, EventArgs e)
+    {
+        var confirm = await DisplayAlert(
+            "Xóa toàn bộ dữ liệu",
+            "Thao tác này sẽ xóa cache bản đồ, ảnh, audio và dữ liệu offline đã tải. Bạn có chắc chắn?",
+            "Xóa",
+            "Hủy");
+
+        if (!confirm)
+            return;
+
+        if (_audioService != null)
+        {
+            await _audioService.ClearAudioCacheAsync();
+        }
+
+        DeleteDirectorySafe(IOPath.Combine(FileSystem.AppDataDirectory, OfflineCacheFolderName));
+        DeleteDirectorySafe(IOPath.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName));
+        DeleteDirectorySafe(IOPath.Combine(FileSystem.CacheDirectory, MapTileCacheFolderName));
+
+        await LoadOfflineDataUsageAsync();
+
+        await DisplayAlert("Hoàn tất", "Đã xóa toàn bộ dữ liệu offline.", "OK");
+    }
+
+    private static void DeleteDirectorySafe(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+        catch
+        {
+            // Ignore delete failures to avoid breaking settings UI.
+        }
+    }
+
+    private sealed class StorageUsageSummary
+    {
+        public long MapBytes { get; set; }
+        public long ImageBytes { get; set; }
+        public long AudioBytes { get; set; }
+        public long PoiBytes { get; set; }
+        public long DishesBytes { get; set; }
+        public long LanguageBytes { get; set; }
+        public int MapFileCount { get; set; }
+        public int ImageFileCount { get; set; }
+        public int DishesFileCount { get; set; }
+
+        public long OtherBytes => AudioBytes + PoiBytes + DishesBytes + LanguageBytes;
+        public long TotalBytes => MapBytes + ImageBytes + OtherBytes;
     }
 
     private async void OnClearHistoryClicked(object sender, EventArgs e)

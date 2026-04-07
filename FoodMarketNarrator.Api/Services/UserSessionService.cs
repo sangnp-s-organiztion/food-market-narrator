@@ -18,12 +18,16 @@ public class UserSessionService
         var sessionId = request.SessionId.Trim();
         var deviceId = request.DeviceId.Trim();
         var deviceInfo = (request.DeviceInfo ?? string.Empty).Trim();
+        var qrAccessExpiresAtUtc = request.QrAccessExpiresAtUtc.HasValue
+            ? DateTime.SpecifyKind(request.QrAccessExpiresAtUtc.Value, DateTimeKind.Utc)
+            : (DateTime?)null;
 
         await _userSessionRepository.UpsertStartAsync(new UserSessionStartRecord
         {
             SessionId = sessionId,
             DeviceId = deviceId,
-            DeviceInfo = string.IsNullOrWhiteSpace(deviceInfo) ? "unknown" : deviceInfo
+            DeviceInfo = string.IsNullOrWhiteSpace(deviceInfo) ? "unknown" : deviceInfo,
+            QrAccessExpiresAtUtc = qrAccessExpiresAtUtc
         });
     }
 
@@ -48,4 +52,47 @@ public class UserSessionService
     {
         return _userSessionRepository.FindObjectIdBySessionIdAsync(sessionId);
     }
+
+    public async Task<UserSessionQrAccessStatus> GetQrAccessStatusAsync(string sessionId)
+    {
+        var record = await _userSessionRepository.GetQrAccessBySessionIdAsync(sessionId);
+        if (record == null)
+        {
+            return new UserSessionQrAccessStatus
+            {
+                Exists = false,
+                Allowed = false,
+                Reason = "session_not_found"
+            };
+        }
+
+        if (!record.QrAccessExpiresAtUtc.HasValue)
+        {
+            return new UserSessionQrAccessStatus
+            {
+                Exists = true,
+                Allowed = true,
+                Reason = "unrestricted"
+            };
+        }
+
+        var expiresAtUtc = DateTime.SpecifyKind(record.QrAccessExpiresAtUtc.Value, DateTimeKind.Utc);
+        var isAllowed = DateTime.UtcNow <= expiresAtUtc;
+
+        return new UserSessionQrAccessStatus
+        {
+            Exists = true,
+            Allowed = isAllowed,
+            ExpiresAtUtc = expiresAtUtc,
+            Reason = isAllowed ? "active" : "expired"
+        };
+    }
+}
+
+public class UserSessionQrAccessStatus
+{
+    public bool Exists { get; set; }
+    public bool Allowed { get; set; }
+    public DateTime? ExpiresAtUtc { get; set; }
+    public string Reason { get; set; } = string.Empty;
 }

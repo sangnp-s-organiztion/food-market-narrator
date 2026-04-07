@@ -31,6 +31,23 @@ namespace food_market_narrator_api.Repositories
             return await _context.User.FindAsync(id);
         }
 
+        public async Task<List<UserModel>> GetByIdsAsync(IEnumerable<int> userIds)
+        {
+            var ids = userIds
+                .Where(id => id > 0)
+                .Distinct()
+                .ToArray();
+
+            if (ids.Length == 0)
+            {
+                return new List<UserModel>();
+            }
+
+            return await _context.User
+                .Where(u => ids.Contains(u.UserId))
+                .ToListAsync();
+        }
+
         public async Task<UserModel?> GetByUsernameAsync(string username)
         {
             return await _context.User

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Translation + TTS Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f6f3;
+        --card: #ffffff;
+        --text: #2b2a28;
+        --muted: #6a6966;
+        --primary: #d55a1f;
+        --primary-hover: #b94c19;
+        --border: #e7e1d8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(
+          circle at top right,
+          #ffe8db 0,
+          var(--bg) 45%
+        );
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 24px;
+      }
+
+      p {
+        margin: 0 0 14px;
+        color: var(--muted);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      textarea,
+      select,
+      input[type="text"] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-secondary {
+        background: #f2ece4;
+        color: #3a3936;
+      }
+
+      .meta {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      audio {
+        width: 100%;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Demo Dịch + Tạo Audio</h1>
+        <p>
+          Demo thuần HTML/CSS/JS để test flow: nhập nội dung -> dịch -> tạo
+          audio -> phát audio.
+        </p>
+
+        <label for="apiBase">API Base</label>
+        <input id="apiBase" type="text" value="http://localhost:5044" />
+
+        <label for="restaurantId" style="margin-top: 12px">Restaurant ID</label>
+        <input
+          id="restaurantId"
+          type="text"
+          placeholder="ví dụ: chilli-bbq-hotpot-restaurant"
+        />
+
+        <label for="sourceText" style="margin-top: 12px">Nội dung gốc</label>
+        <textarea id="sourceText" placeholder="Nhập nội dung..."></textarea>
+
+        <div class="grid">
+          <div>
+            <label for="sourceLang">Ngôn ngữ nguồn</label>
+            <select id="sourceLang">
+              <option value="auto">Tự động</option>
+              <option value="vi">Tiếng Việt</option>
+              <option value="en">Tiếng Anh</option>
+              <option value="ja">Tiếng Nhật</option>
+              <option value="zh">Tiếng Trung</option>
+              <option value="ko">Tiếng Hàn</option>
+            </select>
+          </div>
+          <div>
+            <label for="targetLang">Ngôn ngữ đích</label>
+            <select id="targetLang">
+              <option value="en">Tiếng Anh</option>
+              <option value="vi">Tiếng Việt</option>
+              <option value="ja">Tiếng Nhật</option>
+              <option value="zh">Tiếng Trung</option>
+              <option value="ko">Tiếng Hàn</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnTranslate" class="btn-primary">Dịch</button>
+          <button id="btnCreateAudio" class="btn-secondary">Tạo audio</button>
+        </div>
+
+        <label for="translatedText" style="margin-top: 14px"
+          >Kết quả dịch</label
+        >
+        <textarea id="translatedText" placeholder="Kết quả dịch..."></textarea>
+
+        <div id="meta" class="meta"></div>
+        <audio id="audioPlayer" controls></audio>
+      </div>
+    </div>
+
+    <script>
+      async function apiRequest(url, options) {
+        const response = await fetch(url, {
+          ...options,
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(options && options.headers ? options.headers : {}),
+          },
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Request failed");
+        }
+
+        return response.json();
+      }
+
+      function normalizeAudioUrl(base, path) {
+        if (!path) return "";
+        if (/^https?:\/\//i.test(path)) return path;
+        return new URL(path, base).toString();
+      }
+
+      const apiBaseEl = document.getElementById("apiBase");
+      const restaurantIdEl = document.getElementById("restaurantId");
+      const sourceTextEl = document.getElementById("sourceText");
+      const sourceLangEl = document.getElementById("sourceLang");
+      const targetLangEl = document.getElementById("targetLang");
+      const translatedTextEl = document.getElementById("translatedText");
+      const metaEl = document.getElementById("meta");
+      const audioPlayerEl = document.getElementById("audioPlayer");
+
+      document
+        .getElementById("btnTranslate")
+        .addEventListener("click", async () => {
+          try {
+            const apiBase = apiBaseEl.value.trim();
+            const restaurantId = restaurantIdEl.value.trim();
+            const text = sourceTextEl.value.trim();
+            if (!restaurantId || !text) {
+              alert("Vui lòng nhập restaurantId và nội dung");
+              return;
+            }
+
+            const data = await apiRequest(
+              `${apiBase}/Restaurant/${restaurantId}/translate`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  text,
+                  sourceLanguageCode: sourceLangEl.value,
+                  targetLanguageCode: targetLangEl.value,
+                }),
+              },
+            );
+
+            translatedTextEl.value = data.translatedText || "";
+            metaEl.textContent = `Input ${data.inputChars} chars | Output ${data.outputChars} chars | Estimated ${data.estimatedCost} ${data.currency}`;
+          } catch (error) {
+            alert(`Dịch thất bại: ${error.message}`);
+          }
+        });
+
+      document
+        .getElementById("btnCreateAudio")
+        .addEventListener("click", async () => {
+          try {
+            const apiBase = apiBaseEl.value.trim();
+            const restaurantId = restaurantIdEl.value.trim();
+            const text = (translatedTextEl.value || sourceTextEl.value).trim();
+            if (!restaurantId || !text) {
+              alert("Vui lòng nhập restaurantId và nội dung");
+              return;
+            }
+
+            const data = await apiRequest(
+              `${apiBase}/Restaurant/${restaurantId}/audios/from-text`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  text,
+                  languageCode: targetLangEl.value,
+                  sourceText: sourceTextEl.value.trim() || undefined,
+                }),
+              },
+            );
+
+            const audioUrl = normalizeAudioUrl(apiBase, data.audioUrl);
+            audioPlayerEl.src = audioUrl;
+            audioPlayerEl.play().catch(() => {});
+          } catch (error) {
+            alert(`Tạo audio thất bại: ${error.message}`);
+          }
+        });
+    </script>
+  </body>
+</html>

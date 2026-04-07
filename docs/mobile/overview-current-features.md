@@ -18,6 +18,16 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - POIService tải dữ liệu từ endpoint restaurant qua HttpClient.
 - Có fallback base URL theo AppSettings.ApiFallbackBaseUrls.
 - Có cache offline POI vào file cục bộ: offline_cache/pois.json.
+- Có TTL 3 phút cho cache in-memory POI list trong GetAllPOIsAsync.
+- Khi hết TTL: app thử refresh lại dữ liệu; \_lastFetchUtc chỉ cập nhật nếu fetch API thành công.
+- Có warm-up nền để prefetch ảnh POI vào cache local (AppData/image_cache) cho offline rendering.
+- Có cache dishes theo từng nhà hàng (AppData/offline_cache/dishes/{restaurantId}.json) và fallback khi offline/API fail.
+- Warm-up offline dùng queue ưu tiên theo 2 phase (A/B), có concurrency limit và dedupe để tránh tải/ghi trùng.
+- Warm-up có tuning để giảm giật lúc startup:
+  - Delay khởi động warm-up phase A: 2 giây.
+  - Delay warm-up phase B: 10 giây.
+  - Concurrency tải ảnh: 1 job đồng thời (ưu tiên mượt UI hơn tốc độ prefetch).
+  - Verbose image warm-up logs: tắt mặc định, chỉ giữ log lỗi quan trọng.
 - Cung cấp các hàm:
   - GetAllPOIsAsync
   - GetPOIByIdAsync
@@ -54,7 +64,10 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Khi mới vào app:
   - Nếu chưa chọn ngôn ngữ: tự mở popup chọn ngôn ngữ.
   - Nếu đã chọn: tự bật narration 1 lần cho mỗi phiên chạy app.
+- Start tracking được trì hoãn ~1.2 giây ở lần vào đầu tiên trong phiên app; các lần quay lại MainPage sẽ không delay lại.
 - Floating button chỉ hiện khi ở trong phạm vi TriggerDistanceMeters (30m) so với POI gần nhất.
+- Floating button có cache trạng thái hiển thị gần nhất để render nhanh ngay frame đầu khi quay lại MainPage.
+- MainPage ưu tiên cập nhật trạng thái floating button trước các thao tác map nặng để giảm cảm giác trễ nút.
 
 ## 6) MapPage
 
@@ -72,6 +85,12 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - Mã ngôn ngữ đang dùng: vi-VN, en-US, zh-CN, ko-KR, ja-JP.
 - Lựa chọn ngôn ngữ được lưu Preferences.
 - Khi đổi ngôn ngữ, UI được cập nhật và luồng audio sử dụng audio tương ứng theo ngôn ngữ mới.
+- Đổi ngôn ngữ trong Settings không còn reset về MainPage; người dùng vẫn ở lại SettingsPage.
+
+## 7.1) Điều hướng tab Home
+
+- BottomNavigationView khi bấm Home sẽ ưu tiên pop về MainPage có sẵn trong navigation stack.
+- Chỉ fallback GoToAsync("//MainPage") khi MainPage không có trong stack hiện tại.
 
 ## 8) Narration flow
 
@@ -109,7 +128,8 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
   - Đồng bộ icon và progress bar.
   - Timer cập nhật tiến trình mỗi 200ms.
 - Có nút back về MainPage.
-- Hai nút Đường đi và Gọi điện ngay hiện là UI, chưa thấy handler code-behind.
+- Có nút Chia sẻ để gửi nhanh thông tin quán + link bản đồ.
+- Có nút Đường đi để mở Google Maps/map app và nút Gọi điện ngay để mở dialer.
 
 ## 11) FavoritePage (Yêu thích)
 
@@ -155,14 +175,40 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 Chưa hoàn thiện hoặc mới ở mức khung:
 
 - Filter chip danh mục trên MapPage chưa có logic lọc dữ liệu.
-- Nút Share trên POIDetailPage chưa nối logic.
-- Nút Đường đi/Gọi điện trên POIDetailPage chưa xử lý sự kiện.
 
 ## 16) Cấu hình API hiện tại
 
 - AppSettings dùng host động trên Android:
   - Emulator: 10.0.2.2
-  - Thiết bị thật: LocalApiHost (hiện tại là 192.168.1.7)
+  - Thiết bị thật: LocalApiHost (hiện tại là 192.168.1.8)
 - Port mặc định:
   - HTTP: 5044
   - HTTPS: 7041
+
+## 17) Startup performance tuning (AppSettings)
+
+Các tham số đang dùng trong AppSettings để cân bằng mượt UI và tốc độ warm-up:
+
+- StartupTrackingDelayMs = 1200
+  - Trì hoãn StartTrackingAsync khoảng 1.2 giây sau khi vào MainPage.
+- OfflineWarmupInitialDelayMs = 2000
+  - Trì hoãn warm-up phase A để nhường tài nguyên cho first render.
+- OfflineWarmupPhaseBDelayMs = 10000
+  - Dời phase B sang sau để tránh spike network/IO lúc đầu phiên.
+- OfflineWarmupImageConcurrency = 1
+  - Giảm RAM/GC pressure do tải ảnh lớn đồng thời.
+- EnableVerboseImageWarmupLogs = false
+  - Giảm overhead log và nhiễu log; vẫn giữ log lỗi quan trọng (401/403/404, exception, all-candidates-failed).
+
+Trade-off hiện tại:
+
+- Ưu điểm: startup mượt hơn, giảm khả năng khựng khi mới mở app/chuyển tab đầu.
+- Nhược điểm: tổng thời gian prefetch đầy đủ ảnh có thể dài hơn trước.
+
+## 18) Đồng bộ location logs khi offline
+
+- Location logs vẫn được gom batch và gửi định kỳ mỗi 10 giây.
+- Nếu gửi thất bại (mất mạng/lỗi server), batch được đưa lại vào buffer để retry.
+- Buffer được lưu thêm xuống file local: AppData/offline_cache/location_logs_buffer.json.
+- Khi app mở lại, service nạp lại buffer từ file và tiếp tục sync.
+- Khi gửi hết thành công, file buffer sẽ bị xóa.

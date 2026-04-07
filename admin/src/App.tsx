@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,10 +17,40 @@ import RestaurantsPage from "./pages/Restaurants.tsx";
 import UsersPage from "./pages/UsersPage.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import TrajectoryPage from "./pages/TrajectoryPage.tsx";
+import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
 const queryClient = new QueryClient();
+
+const TITLE_SUFFIX = "Food Market Narrator Admin";
+
+const getTitleByPath = (pathname: string): string => {
+  if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
+  if (pathname === "/") return `Tổng quan | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/restaurants")) {
+    return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
+  }
+  if (pathname.startsWith("/users"))
+    return `Quản lý người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/logs"))
+    return `Nhật ký hoạt động | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/trajectory"))
+    return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/translation-billing"))
+    return `Billing token dịch | ${TITLE_SUFFIX}`;
+  return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
+};
+
+const RouteTitleManager = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    document.title = getTitleByPath(location.pathname);
+  }, [location.pathname]);
+
+  return null;
+};
 
 // Shown during auth bootstrap (GET /Auth/me round-trip)
 const LoadingScreen = () => (
@@ -87,6 +123,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/translation-billing"
+        element={
+          <ProtectedRoute>
+            <TranslationBillingPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -98,6 +142,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteTitleManager />
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>

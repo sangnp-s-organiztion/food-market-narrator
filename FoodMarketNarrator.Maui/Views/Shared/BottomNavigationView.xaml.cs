@@ -1,4 +1,5 @@
 using food_market_narrator.Enums;
+using food_market_narrator.Views;
 
 namespace food_market_narrator.Views.Shared;
 
@@ -103,7 +104,23 @@ public partial class BottomNavigationView : ContentView
     // Mở trang OpenMainPage khi nhấn vào HomeIcon hoặc HomeText
     private async void OpenMainPage(object sender, EventArgs e)
     {
-        // Use absolute route to reset to the main tab/page
+        if (Shell.Current?.CurrentPage is MainPage)
+        {
+            return;
+        }
+
+        var navigation = Shell.Current?.Navigation;
+        if (navigation?.NavigationStack != null && navigation.NavigationStack.Any(p => p is MainPage))
+        {
+            while (navigation.NavigationStack.Count > 1 && navigation.NavigationStack[^1] is not MainPage)
+            {
+                await navigation.PopAsync(false);
+            }
+
+            return;
+        }
+
+        // Fallback to absolute route when MainPage is not in current stack.
         await Shell.Current.GoToAsync("//MainPage");
     }
 

@@ -1,111 +1,111 @@
-﻿# Admin Features (React + TypeScript + Vite)
+﻿# Tính năng Admin (React + TypeScript + Vite)
 
-Last updated: 2026-04-01
+Cập nhật lần cuối: 2026-04-01
 
-## 1. Scope
+## 1. Phạm vi
 
-This document describes the **current implemented state** of the new Admin frontend in `admin/`.
+Tài liệu này mô tả **trạng thái đã triển khai hiện tại** của frontend Admin mới trong `admin/`.
 
-It focuses on:
+Nội dung tập trung vào:
 
-- routes and pages
-- authentication flow
-- data source status (real API vs mock)
-- analytics integration status
-- known gaps and safe next steps
+- các route và trang
+- luồng xác thực
+- trạng thái nguồn dữ liệu (API thật so với mock)
+- trạng thái tích hợp analytics
+- các khoảng trống đã biết và bước tiếp theo an toàn
 
-## 2. Tech Stack (Admin)
+## 2. Công nghệ sử dụng (Admin)
 
 - React 18 + TypeScript + Vite
 - React Router v6
 - TanStack Query
 - shadcn/ui + Tailwind
-- Leaflet map for heatmap and movement paths
+- Bản đồ Leaflet cho heatmap và đường di chuyển
 
-## 3. Routing and Navigation
+## 3. Điều hướng và định tuyến
 
-Protected routes are defined in `admin/src/App.tsx` and guarded by `AuthProvider` + `ProtectedRoute`.
+Các route bảo vệ được khai báo trong `admin/src/App.tsx` và được chặn bởi `AuthProvider` + `ProtectedRoute`.
 
-- `/login`: login page
-- `/`: dashboard (overview + analytics widgets)
-- `/restaurants`: restaurant management
-- `/users`: user management
-- `/logs`: recent listening activity
+- `/login`: trang đăng nhập
+- `/`: dashboard (tổng quan + widget analytics)
+- `/restaurants`: quản lý nhà hàng
+- `/users`: quản lý người dùng
+- `/logs`: hoạt động nghe gần đây
 
-Sidebar menu is defined in `admin/src/components/AdminSidebar.tsx`.
+Menu sidebar được định nghĩa trong `admin/src/components/AdminSidebar.tsx`.
 
-## 4. Authentication (Cookie-based)
+## 4. Xác thực (dùng Cookie)
 
-Current flow uses backend auth APIs and cookie session:
+Luồng hiện tại sử dụng API xác thực backend và phiên cookie:
 
 - `POST /Auth/login`
 - `GET /Auth/me`
 - `POST /Auth/logout`
 
-Implementation files:
+Các file triển khai:
 
 - `admin/src/lib/authApi.ts`
 - `admin/src/contexts/AuthContext.tsx`
 - `admin/src/pages/LoginPage.tsx`
 
-Behavior:
+Hành vi:
 
-- On app bootstrap, frontend calls `/Auth/me` to restore auth state from cookie.
-- Protected routes wait for bootstrap completion (`isLoading`) before redirecting.
-- Logout is best-effort API call, then local auth state is cleared.
+- Khi app khởi động, frontend gọi `/Auth/me` để khôi phục trạng thái đăng nhập từ cookie.
+- Route bảo vệ sẽ chờ hoàn tất bootstrap (`isLoading`) trước khi chuyển hướng.
+- Logout gọi API theo cơ chế best-effort, sau đó xóa trạng thái xác thực cục bộ.
 
-## 5. Data Source Status (Important)
+## 5. Trạng thái nguồn dữ liệu (Quan trọng)
 
-### 5.1 Features already using real APIs
+### 5.1 Các tính năng đã dùng API thật
 
-1. Users management page (`/users`)
+1. Trang quản lý người dùng (`/users`)
 
 - GET `/api/users`
 - POST `/api/users`
 - PATCH `/api/users/{id}/role`
 - PATCH `/api/users/{id}/status`
 
-2. Restaurants management page (`/restaurants`)
+2. Trang quản lý nhà hàng (`/restaurants`)
 
 - GET `/api/restaurant`
 - GET `/api/restaurant/{id}`
 - PATCH `/api/restaurant/{id}`
 - PATCH `/api/restaurant/{id}/status`
 
-3. Analytics widgets on dashboard (`/`)
+3. Widget analytics trên dashboard (`/`)
 
 - GET `/api/analytics/kpis`
 - GET `/api/analytics/top-restaurants`
 - GET `/api/analytics/heatmap`
 - GET `/api/analytics/movement-paths`
 
-4. Activity logs page (`/logs`)
+4. Trang nhật ký hoạt động (`/logs`)
 
 - GET `/api/analytics/recent-activity`
 
-### 5.2 Parts still using static/mock data
+### 5.2 Các phần vẫn dùng dữ liệu tĩnh/mock
 
-1. Dashboard entity KPI cards (total restaurants/audios/users/dishes)
+1. Các thẻ KPI thực thể trên dashboard (tổng nhà hàng/audio/người dùng/món ăn)
 
-- still uses local constants and `mockData` import
+- vẫn dùng hằng số cục bộ và import `mockData`
 
-2. Dashboard chart "Lượt nghe theo ngày"
+2. Biểu đồ dashboard "Lượt nghe theo ngày"
 
-- currently hard-coded chart dataset in page component
+- hiện đang hard-code dataset ngay trong component trang
 
-3. Heatmap POI markers fallback
+3. Fallback marker POI cho heatmap
 
-- if API POI data is empty, map falls back to mock restaurant list
+- nếu dữ liệu POI từ API rỗng, bản đồ sẽ fallback sang danh sách nhà hàng mock
 
 4. `admin/src/lib/mockData.ts`
 
-- still present and partly referenced for UI fallback/placeholder behavior
+- vẫn còn tồn tại và còn được tham chiếu một phần cho hành vi fallback/placeholder UI
 
-## 6. Analytics API Contract Used by Admin
+## 6. Hợp đồng Analytics API được Admin sử dụng
 
-Client definition is in `admin/src/lib/analyticsApi.ts` and expected response types are in `admin/src/types/analytics.ts`.
+Định nghĩa client nằm ở `admin/src/lib/analyticsApi.ts` và kiểu response kỳ vọng nằm ở `admin/src/types/analytics.ts`.
 
-### 6.1 Endpoints used
+### 6.1 Endpoint đang dùng
 
 - `GET /api/analytics/kpis`
 - `GET /api/analytics/heatmap?hours={number}`
@@ -115,91 +115,91 @@ Client definition is in `admin/src/lib/analyticsApi.ts` and expected response ty
 - `GET /api/analytics/recent-activity?limit={number}`
 - `GET /api/analytics/audio-stats`
 
-### 6.2 UI usage by page
+### 6.2 Cách UI dùng theo trang
 
-- Dashboard currently consumes: kpis, heatmap, top-restaurants, movement-paths
-- Logs page consumes: recent-activity (auto-refresh every 30s)
-- top-audios/audio-stats APIs are available in client but not yet rendered on a dedicated page/widget
+- Dashboard hiện dùng: kpis, heatmap, top-restaurants, movement-paths
+- Trang logs dùng: recent-activity (tự làm mới mỗi 30 giây)
+- API top-audios/audio-stats đã có trong client nhưng chưa render thành trang/widget riêng
 
-## 7. Page-by-Page Feature Snapshot
+## 7. Ảnh chụp nhanh tính năng theo từng trang
 
 ### 7.1 Dashboard (`/`)
 
-Implemented:
+Đã triển khai:
 
-- system overview layout
-- analytics KPI cards (total valid plays, average listening time)
-- top restaurants bar chart (API)
-- heatmap section (API points)
-- anonymous movement paths map (API sessions)
+- layout tổng quan hệ thống
+- thẻ KPI analytics (tổng lượt phát hợp lệ, thời gian nghe trung bình)
+- biểu đồ cột top nhà hàng (API)
+- khu vực heatmap (điểm API)
+- bản đồ đường di chuyển ẩn danh (phiên API)
 
-Partially implemented / placeholder:
+Triển khai một phần / placeholder:
 
-- entity KPI cards still static
-- daily listens area chart still static dataset
+- thẻ KPI thực thể vẫn là dữ liệu tĩnh
+- biểu đồ vùng lượt nghe theo ngày vẫn là dataset tĩnh
 
-### 7.2 Restaurants (`/restaurants`)
+### 7.2 Nhà hàng (`/restaurants`)
 
-Implemented:
+Đã triển khai:
 
-- fetch restaurant list from API
-- search by name/address (client-side)
-- lock/unlock restaurant via status API
-- loading/empty/error states
+- lấy danh sách nhà hàng từ API
+- tìm kiếm theo tên/địa chỉ (phía client)
+- khóa/mở khóa nhà hàng qua status API
+- trạng thái loading/empty/error
 
-### 7.3 Users (`/users`)
+### 7.3 Người dùng (`/users`)
 
-Implemented:
+Đã triển khai:
 
-- fetch user list from API
-- create user
-- lock/unlock user
-- change role (admin/editor mapping)
-- loading/empty/error states
+- lấy danh sách người dùng từ API
+- tạo người dùng
+- khóa/mở khóa người dùng
+- đổi vai trò (mapping admin/editor)
+- trạng thái loading/empty/error
 
-### 7.4 Logs (`/logs`)
+### 7.4 Nhật ký (`/logs`)
 
-Implemented:
+Đã triển khai:
 
-- read recent activity from analytics API
-- display inferred action label by duration
-- auto refresh every 30 seconds
-- loading/empty/error states
+- đọc hoạt động gần đây từ analytics API
+- hiển thị nhãn hành động suy luận theo thời lượng
+- tự làm mới mỗi 30 giây
+- trạng thái loading/empty/error
 
-## 8. Environment Configuration
+## 8. Cấu hình môi trường
 
-All API clients use:
+Tất cả API client đều dùng:
 
-- `VITE_API_BASE_URL` (if provided)
+- `VITE_API_BASE_URL` (nếu được cung cấp)
 - fallback: `http://localhost:5044`
 
-This applies to:
+Áp dụng cho:
 
 - `authApi`
 - `adminApi`
 - `analyticsApi`
 
-All calls send `credentials: include` to support cookie auth.
+Mọi request đều gửi `credentials: include` để hỗ trợ cookie auth.
 
-## 9. Known Integration Risks
+## 9. Rủi ro tích hợp đã biết
 
-1. If backend route naming differs from `/api/...`, frontend will fail until route/base-path is aligned.
-2. If CORS cookie policy is not configured correctly, authenticated requests will fail even after login.
-3. Dashboard still mixes real analytics and static cards, which may confuse operators if values do not match.
+1. Nếu cách đặt tên route backend khác `/api/...`, frontend sẽ lỗi cho đến khi đồng bộ route/base-path.
+2. Nếu chính sách cookie CORS chưa cấu hình đúng, request cần xác thực sẽ thất bại dù đã đăng nhập.
+3. Dashboard vẫn đang trộn analytics thật và thẻ tĩnh, có thể gây nhiễu cho người vận hành khi số liệu lệch nhau.
 
-## 10. Recommended Next Steps (Additive)
+## 10. Bước tiếp theo khuyến nghị (theo hướng bổ sung)
 
-1. Replace static entity KPI cards with real API counts.
-2. Replace static daily listens chart with an analytics endpoint (timeseries).
-3. Remove mock fallback from heatmap once production data is stable.
-4. Add a dedicated widget/page for top audios using existing `getTopAudios` or `getAudioStats` client methods.
+1. Thay các thẻ KPI thực thể tĩnh bằng số liệu đếm từ API thật.
+2. Thay biểu đồ lượt nghe theo ngày tĩnh bằng endpoint analytics dạng timeseries.
+3. Bỏ fallback mock của heatmap khi dữ liệu production đã ổn định.
+4. Thêm widget/trang riêng cho top audio bằng các hàm client sẵn có `getTopAudios` hoặc `getAudioStats`.
 
-## 11. Acceptance Checklist
+## 11. Checklist nghiệm thu
 
-- [x] Login uses backend cookie auth APIs
-- [x] Users page reads/writes real API
-- [x] Restaurants page reads/writes real API
-- [x] Logs page reads real analytics API
-- [x] Dashboard reads core analytics APIs
-- [ ] All dashboard metrics fully real-time (still has static parts)
-- [ ] Mock data fully removed from runtime path
+- [x] Đăng nhập dùng API cookie auth từ backend
+- [x] Trang users đọc/ghi API thật
+- [x] Trang restaurants đọc/ghi API thật
+- [x] Trang logs đọc API analytics thật
+- [x] Dashboard đọc các API analytics cốt lõi
+- [ ] Toàn bộ chỉ số dashboard đều real-time hoàn toàn (vẫn còn phần tĩnh)
+- [ ] Dữ liệu mock đã được loại bỏ hoàn toàn khỏi runtime path

@@ -167,4 +167,564 @@
     "$date": "2026-03-12T10:43:00.000Z"
   },
   "duration": 180
+},
+{
+  "_id": {
+    "$oid": "69cd9cd50f0313bfa4bc7e60"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-01T22:31:04.210Z"
+  },
+  "end_time": {
+    "$date": "2026-04-01T22:31:48.160Z"
+  },
+  "duration": 44,
+  "created_at": {
+    "$date": "2026-04-01T22:31:49.373Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd9ec50f0313bfa4bc7e71"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-01T22:39:40.525Z"
+  },
+  "end_time": {
+    "$date": "2026-04-01T22:40:04.887Z"
+  },
+  "duration": 24,
+  "created_at": {
+    "$date": "2026-04-01T22:40:05.988Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cda06b0f0313bfa4bc7ef0"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-01T22:46:41.727Z"
+  },
+  "end_time": {
+    "$date": "2026-04-01T22:47:05.905Z"
+  },
+  "duration": 24,
+  "created_at": {
+    "$date": "2026-04-01T22:47:07.005Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce679eb732e661529a3dff"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-02T12:56:44.304Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T12:56:59.595Z"
+  },
+  "duration": 15,
+  "created_at": {
+    "$date": "2026-04-02T12:57:02.073Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce67b7b732e661529a3e0a"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lau-met-nuong-79k",
+  "audio_id": 3,
+  "start_time": {
+    "$date": "2026-04-02T12:57:06.209Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T12:57:24.807Z"
+  },
+  "duration": 19,
+  "created_at": {
+    "$date": "2026-04-02T12:57:27.195Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce6b76b80d5a8e54ab7989"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-02T13:13:21.915Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T13:13:23.972Z"
+  },
+  "duration": 2,
+  "created_at": {
+    "$date": "2026-04-02T13:13:26.434Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce6ba2b80d5a8e54ab799a"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "them-nuong-yakiniku",
+  "audio_id": 16,
+  "start_time": {
+    "$date": "2026-04-02T13:13:48.283Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T13:14:08.494Z"
+  },
+  "duration": 20,
+  "created_at": {
+    "$date": "2026-04-02T13:14:10.887Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce76ba3150ac7319cabf0b"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-02T14:01:26.353Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T14:01:28.151Z"
+  },
+  "duration": 2,
+  "created_at": {
+    "$date": "2026-04-02T14:01:30.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce77e53150ac7319cabf1c"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 2,
+  "start_time": {
+    "$date": "2026-04-02T14:06:24.234Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T14:06:27.146Z"
+  },
+  "duration": 3,
+  "created_at": {
+    "$date": "2026-04-02T14:06:29.569Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce78123150ac7319cabf2d"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "chilli-bbq-hotpot-restaurant",
+  "audio_id": 17,
+  "start_time": {
+    "$date": "2026-04-02T14:07:05.733Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T14:07:11.680Z"
+  },
+  "duration": 6,
+  "created_at": {
+    "$date": "2026-04-02T14:07:14.068Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce85309b5dc6363dc4c522"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-02T15:03:05.743Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T15:03:12.280Z"
+  },
+  "duration": 7,
+  "created_at": {
+    "$date": "2026-04-02T15:03:12.623Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce87f65823f9d3700adf6b"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-02T15:14:56.886Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T15:15:02.252Z"
+  },
+  "duration": 5,
+  "created_at": {
+    "$date": "2026-04-02T15:15:02.613Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce896a5823f9d3700adf76"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-02T15:21:06.725Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T15:21:14.645Z"
+  },
+  "duration": 8,
+  "created_at": {
+    "$date": "2026-04-02T15:21:14.934Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce8b512a2e173cf0bad600"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-02T15:29:16.476Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T15:29:21.125Z"
+  },
+  "duration": 5,
+  "created_at": {
+    "$date": "2026-04-02T15:29:21.496Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69ce8cd82a2e173cf0bad60d"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-02T15:35:46.563Z"
+  },
+  "end_time": {
+    "$date": "2026-04-02T15:35:52.276Z"
+  },
+  "duration": 6,
+  "created_at": {
+    "$date": "2026-04-02T15:35:52.550Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cf8cf3b71f7674cd0273f0"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-03T09:48:16.625Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T09:48:33.619Z"
+  },
+  "duration": 17,
+  "created_at": {
+    "$date": "2026-04-03T09:48:35.315Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cf8cf4b71f7674cd0273f1"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "chilli-bbq-hotpot-restaurant",
+  "audio_id": 17,
+  "start_time": {
+    "$date": "2026-04-03T09:48:32.685Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T09:48:34.786Z"
+  },
+  "duration": 2,
+  "created_at": {
+    "$date": "2026-04-03T09:48:36.381Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cf8ea9353926158bfada6d"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-03T09:55:43.558Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T09:55:51.644Z"
+  },
+  "duration": 8,
+  "created_at": {
+    "$date": "2026-04-03T09:55:53.313Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cf9d50ef62dcdacfeef8f1"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-03T10:58:18.399Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T10:58:22.953Z"
+  },
+  "duration": 5,
+  "created_at": {
+    "$date": "2026-04-03T10:58:24.641Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfa8a0890ebec0a4616897"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lang-restaurant",
+  "audio_id": 18,
+  "start_time": {
+    "$date": "2026-04-03T11:46:13.662Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T11:46:39.154Z"
+  },
+  "duration": 25,
+  "created_at": {
+    "$date": "2026-04-03T11:46:40.831Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfab996d02766aa0c24313"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 29,
+  "start_time": {
+    "$date": "2026-04-03T11:59:15.357Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T11:59:20.264Z"
+  },
+  "duration": 5,
+  "created_at": {
+    "$date": "2026-04-03T11:59:21.960Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfab9f6d02766aa0c24314"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "lau-met-nuong-79k",
+  "audio_id": 19,
+  "start_time": {
+    "$date": "2026-04-03T11:59:23.880Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T11:59:25.376Z"
+  },
+  "duration": 1,
+  "created_at": {
+    "$date": "2026-04-03T11:59:27.029Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfaba36d02766aa0c24317"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "oc-cuc-vinh-khanh",
+  "audio_id": 21,
+  "start_time": {
+    "$date": "2026-04-03T11:59:29.719Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T11:59:31.857Z"
+  },
+  "duration": 2,
+  "created_at": {
+    "$date": "2026-04-03T11:59:31.009Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfabd86d02766aa0c2432a"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "oc-phat",
+  "audio_id": 26,
+  "start_time": {
+    "$date": "2026-04-03T12:00:00.624Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T12:00:25.344Z"
+  },
+  "duration": 25,
+  "created_at": {
+    "$date": "2026-04-03T12:00:24.495Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc6dbec5e51ef8cf802f4"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 29,
+  "start_time": {
+    "$date": "2026-04-03T13:55:35.417Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T13:55:40.689Z"
+  },
+  "duration": 5,
+  "created_at": {
+    "$date": "2026-04-03T13:55:39.926Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfca84123f86a32db0fa05"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 29,
+  "start_time": {
+    "$date": "2026-04-03T14:11:10.141Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T14:11:17.659Z"
+  },
+  "duration": 8,
+  "created_at": {
+    "$date": "2026-04-03T14:11:16.892Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcb3d123f86a32db0fa33"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 29,
+  "start_time": {
+    "$date": "2026-04-03T14:14:18.383Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T14:14:22.006Z"
+  },
+  "duration": 4,
+  "created_at": {
+    "$date": "2026-04-03T14:14:21.186Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcbb9123f86a32db0fa3b"
+  },
+  "session_id": {
+    "$oid": "69cd88556eaac95250c16273"
+  },
+  "restaurant_id": "quan-oc-vu",
+  "audio_id": 29,
+  "start_time": {
+    "$date": "2026-04-03T14:16:24.251Z"
+  },
+  "end_time": {
+    "$date": "2026-04-03T14:16:26.250Z"
+  },
+  "duration": 2,
+  "created_at": {
+    "$date": "2026-04-03T14:16:25.425Z"
+  }
 }]

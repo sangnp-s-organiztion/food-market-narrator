@@ -27,11 +27,18 @@ Luu y:
 
 - GET /Users/{userId:int}/restaurants
 
+## Admin Translation Billing
+
+- GET /api/admin/translation-billing/monthly
+- GET /api/admin/translation-billing/usage
+
 ## Audio
 
 - GET /Audio (public)
 - GET /Restaurant/{restaurantId}/audios
 - POST /Restaurant/{restaurantId}/audios
+- POST /Restaurant/{restaurantId}/translate
+- POST /Restaurant/{restaurantId}/audios/from-text
 - PATCH /Audios/{audioId:int}/active
 - DELETE /Audios/{audioId:int}
 
@@ -61,6 +68,7 @@ Luu y:
 
 - GET /Mongo/test-connect (public)
 - POST /api/user-sessions/start (public)
+- GET /api/user-sessions/{sessionId}/qr-access (public)
 - POST /api/location-logs/batch (public)
 - POST /api/audio-logs (public)
 

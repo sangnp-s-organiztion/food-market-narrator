@@ -1,170 +1,3555 @@
 [{
   "_id": {
-    "$oid": "69cccd44de842faf0b15b77d"
+    "$oid": "69cd39f796471aec74b4094c"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456781"
-  },
-  "restaurant_id": "oc-loan",
-  "audio_id": 8,
-  "start_time": {
-    "$date": "2026-03-12T08:05:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T08:07:30.000Z"
-  },
-  "duration": 150
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:29:59.094Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b77e"
+    "$oid": "69cd39f896471aec74b4094d"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456782"
-  },
-  "restaurant_id": "oc-oanh",
-  "audio_id": 9,
-  "start_time": {
-    "$date": "2026-03-12T08:10:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T08:12:00.000Z"
-  },
-  "duration": 120
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:30:00.147Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b77f"
+    "$oid": "69cd39fa96471aec74b4094e"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456783"
-  },
-  "restaurant_id": "oc-phat",
-  "audio_id": 10,
-  "start_time": {
-    "$date": "2026-03-12T08:15:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T08:19:00.000Z"
-  },
-  "duration": 240
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:30:02.417Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b780"
+    "$oid": "69cd39ff96471aec74b4094f"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456784"
-  },
-  "restaurant_id": "oc-loan",
-  "audio_id": 8,
-  "start_time": {
-    "$date": "2026-03-12T08:20:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T08:22:30.000Z"
-  },
-  "duration": 150
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:30:07.592Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b781"
+    "$oid": "69cd3bb8546ec4ad33602925"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456785"
-  },
-  "restaurant_id": "chilli-bbq-hotpot-restaurant",
-  "audio_id": 1,
-  "start_time": {
-    "$date": "2026-03-12T08:25:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T08:26:30.000Z"
-  },
-  "duration": 90
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:37:28.229Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b782"
+    "$oid": "69cd3bb8546ec4ad33602926"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456786"
-  },
-  "restaurant_id": "quan-oc-vu",
-  "audio_id": 13,
-  "start_time": {
-    "$date": "2026-03-12T09:10:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T09:14:00.000Z"
-  },
-  "duration": 240
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:37:28.482Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b783"
+    "$oid": "69cd3c8f546ec4ad33602927"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456787"
-  },
-  "restaurant_id": "the-gioi-bo",
-  "audio_id": 15,
-  "start_time": {
-    "$date": "2026-03-12T09:20:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T09:23:00.000Z"
-  },
-  "duration": 180
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:41:03.650Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b784"
+    "$oid": "69cd3e313c52dc3812752da5"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456788"
-  },
-  "restaurant_id": "oc-loan",
-  "audio_id": 8,
-  "start_time": {
-    "$date": "2026-03-12T09:30:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T09:33:00.000Z"
-  },
-  "duration": 180
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:48:01.370Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b785"
+    "$oid": "69cd3e8e3c52dc3812752da6"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456789"
-  },
-  "restaurant_id": "lau-met-nuong-79k",
-  "audio_id": 3,
-  "start_time": {
-    "$date": "2026-03-12T10:10:00.000Z"
-  },
-  "end_time": {
-    "$date": "2026-03-12T10:12:00.000Z"
-  },
-  "duration": 120
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:49:34.034Z"
+  }
 },
 {
   "_id": {
-    "$oid": "69cccd44de842faf0b15b786"
+    "$oid": "69cd3edf3c52dc3812752da7"
   },
-  "session_id": {
-    "$oid": "65432101abcdef0123456790"
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:50:55.961Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3edf3c52dc3812752da8"
   },
-  "restaurant_id": "oc-oanh",
-  "audio_id": 9,
-  "start_time": {
-    "$date": "2026-03-12T10:40:00.000Z"
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:50:55.971Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3ee43c52dc3812752da9"
   },
-  "end_time": {
-    "$date": "2026-03-12T10:43:00.000Z"
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:51:00.583Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3ef99a1216b1db2080b8"
   },
-  "duration": 180
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:51:21.624Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3f019a1216b1db2080b9"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:51:29.900Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3f169a1216b1db2080ba"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:51:50.378Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3f269a1216b1db2080bb"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:52:06.728Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd3f69ce2e2696e3babdde"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:53:12.995Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4019ce2e2696e3babddf"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:56:09.364Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd402ece2e2696e3babde0"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1002",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:56:30.130Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4070ce2e2696e3babde1"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:57:36.478Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4072ce2e2696e3babde2"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:57:38.761Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd40e5ae59d551289b58f8"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:59:33.312Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd40ffae59d551289b58f9"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T15:59:59.568Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4106ae59d551289b58fa"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:00:06.970Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd42bad663429ab160b747"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:07:22.051Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd42bed663429ab160b748"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:07:26.934Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd42c5d663429ab160b749"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:07:33.890Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd42c8d663429ab160b74a"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:07:36.870Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4becf96a29875179e336"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:46:36.320Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4c6bf96a29875179e337"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:48:43.963Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4c7ef96a29875179e338"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "UPDATE_ROLE",
+  "target_type": "Users",
+  "target_id": "1003",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:49:02.248Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4c80f96a29875179e339"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1002",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:49:04.372Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4c9ff96a29875179e33a"
+  },
+  "user_id": 1003,
+  "username": "phuosang",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1003",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:49:35.319Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4ee2f96a29875179e33b"
+  },
+  "user_id": 1003,
+  "username": "phuosang",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1003",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:59:14.376Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cd4ee3f96a29875179e33c"
+  },
+  "user_id": 1002,
+  "username": "admin2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1002",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-01T16:59:15.749Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc739ec5e51ef8cf802f7"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T13:57:13.948Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc792ec5e51ef8cf802f8"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T13:58:42.273Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc792ec5e51ef8cf802f9"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T13:58:42.345Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc792ec5e51ef8cf802fa"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T13:58:42.421Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc8f2ec5e51ef8cf802fb"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:04:34.285Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc8f2ec5e51ef8cf802fc"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:04:34.606Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc8f2ec5e51ef8cf802fd"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:04:34.623Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc9d5123f86a32db0f9fb"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:08:21.756Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc9d6123f86a32db0f9fc"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:08:22.390Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfc9d6123f86a32db0f9fd"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:08:22.463Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfca3d123f86a32db0f9fe"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:10:05.855Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfca3d123f86a32db0f9ff"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:10:05.875Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfca3d123f86a32db0fa00"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:10:05.890Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcadc123f86a32db0fa22"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:12:44.624Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcadc123f86a32db0fa23"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:12:44.963Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcadc123f86a32db0fa24"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:12:44.978Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcb87123f86a32db0fa3a"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:15:35.273Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcc9df14efa3d3c1d389e"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:20:13.815Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcc9df14efa3d3c1d389f"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:20:13.989Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcd94c82dbf9f203338a1"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:24:20.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcd95c82dbf9f203338a2"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:24:21.833Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcd9ac82dbf9f203338a3"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "UPDATE_STATUS",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:24:26.525Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcdb3c82dbf9f203338a4"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:24:51.091Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcdb3c82dbf9f203338a5"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:24:51.093Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcdf9c82dbf9f203338a6"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "UPDATE_STATUS",
+  "target_type": "Users",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:26:01.905Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfce2bd113ab0caf4c6441"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "UPDATE_STATUS",
+  "target_type": "Users",
+  "target_id": "1003",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:26:51.358Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfce2cd113ab0caf4c6442"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "UPDATE_STATUS",
+  "target_type": "Users",
+  "target_id": "1003",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:26:52.889Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcef9b11708a465edeb96"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:30:17.777Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcefbb11708a465edeb97"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:30:19.055Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcefcb11708a465edeb98"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:30:20.512Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcf00b11708a465edeb99"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:30:24.879Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcf02b11708a465edeb9a"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:30:26.317Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcfa8b11708a465edeb9b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:33:12.929Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcfaab11708a465edeb9c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:33:14.444Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfcfebb11708a465edeb9d"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "4",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:34:19.632Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd086b11708a465edeb9e"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:36:54.074Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd0a3b11708a465edeb9f"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:37:23.315Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd0a3b11708a465edeba0"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:37:23.744Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd11eb11708a465edeba1"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:39:26.989Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd11fb11708a465edeba2"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:39:27.011Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd13ab11708a465edeba3"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:39:54.142Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd13ab11708a465edeba4"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:39:54.162Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd17eb11708a465edeba5"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:02.756Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd17eb11708a465edeba6"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:02.778Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd1a4b11708a465edeba7"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:40.697Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd1a4b11708a465edeba8"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:40.721Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd1b0b11708a465edeba9"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:52.561Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd1b0b11708a465edebaa"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:41:52.581Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd229b11708a465edebab"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:43:53.608Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd229b11708a465edebac"
+  },
+  "user_id": 4,
+  "username": "saler2",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:43:53.683Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd33cb11708a465edebad"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:48:28.730Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd35db11708a465edebae"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:49:01.659Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd37bb11708a465edebaf"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:49:31.820Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd37bb11708a465edebb0"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:49:31.861Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd37bb11708a465edebb1"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "DELETE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:49:31.874Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd3a1b11708a465edebb2"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:50:09.719Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd3a9b11708a465edebb3"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:50:17.118Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd3aab11708a465edebb4"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:50:18.189Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd42d6b547deef3dc2d85"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:29.165Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd4356b547deef3dc2d86"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:37.780Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd4356b547deef3dc2d87"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:37.791Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd4396b547deef3dc2d88"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:41.887Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd4396b547deef3dc2d89"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:41.892Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd4426b547deef3dc2d8a"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:52:50.107Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd51029167d2e104a3819"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:56:16.641Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfd51029167d2e104a381a"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T14:56:16.822Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb2a27be84ca9b9fc19"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:38.215Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb2a27be84ca9b9fc1a"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:38.701Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb2a27be84ca9b9fc1b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:38.787Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb2a27be84ca9b9fc1c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:38.945Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc1d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.079Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc1e"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.152Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc1f"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.233Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc20"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.287Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc21"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.427Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc22"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.519Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc23"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.577Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc24"
+  },
+  "user_id": 3,
+  "username": "legacy_0db2d10fc049468c86d0ace0d0dc08f7",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.870Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc25"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.931Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb3a27be84ca9b9fc26"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:39.951Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc27"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.071Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc28"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.138Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc29"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.272Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2a"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.400Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2b"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.537Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2c"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.550Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.606Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2e"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc2f"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.683Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc30"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.755Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc31"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.820Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc32"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.846Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc33"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.916Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc34"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.956Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb4a27be84ca9b9fc35"
+  },
+  "user_id": 3,
+  "username": "new_saler_5709e7ddb3074129998624dc7e55ae2b",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:40.970Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb5a27be84ca9b9fc36"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:41.029Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb5a27be84ca9b9fc37"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:41.102Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdfb5a27be84ca9b9fc38"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:41:41.173Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffaab3977f73413ed28"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:50.210Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffaab3977f73413ed29"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:50.677Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffaab3977f73413ed2a"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:50.762Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffaab3977f73413ed2b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:50.923Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed2c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.069Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed2d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.144Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed2e"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed2f"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.284Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed30"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.426Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed31"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.521Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed32"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.581Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed33"
+  },
+  "user_id": 3,
+  "username": "legacy_798ccc8e0e9d4f1bb75a20255f2b68b7",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.904Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed34"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.967Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffbab3977f73413ed35"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:51.988Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed36"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.056Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed37"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.202Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed38"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.295Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed39"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.501Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3a"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.644Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3b"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.659Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.719Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.730Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3e"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.797Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed3f"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.873Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed40"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.944Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffcab3977f73413ed41"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:52.967Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed42"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.036Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed43"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.072Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed44"
+  },
+  "user_id": 3,
+  "username": "new_saler_1910d6593b87485f9727980a2c7165d4",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.088Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed45"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.150Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed46"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfdffdab3977f73413ed47"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T15:42:53.307Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45a5e69fcec0be66bf5"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:30.513Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45a5e69fcec0be66bf6"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:30.974Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bf7"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.057Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bf8"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.208Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bf9"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.339Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bfa"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.408Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bfb"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.499Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bfc"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.564Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bfd"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.740Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bfe"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.834Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45b5e69fcec0be66bff"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:31.895Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c00"
+  },
+  "user_id": 3,
+  "username": "legacy_bbfff39ac0824da28424e43859e32882",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c01"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.296Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c02"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.319Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c03"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.385Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c04"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.521Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c05"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.602Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c06"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.812Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c07"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.979Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45c5e69fcec0be66c08"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:32.993Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c09"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.063Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0a"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.075Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.154Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0c"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0d"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.301Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0e"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.326Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c0f"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.392Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c10"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.430Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c11"
+  },
+  "user_id": 3,
+  "username": "new_saler_691cda985237462f8363e0922b08dad0",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.446Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c12"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.518Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c13"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.603Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe45d5e69fcec0be66c14"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:01:33.679Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe606c126af528b078f78"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:38.826Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f79"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.274Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7a"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.354Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.497Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.634Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.701Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7e"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.791Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f7f"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.843Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe607c126af528b078f80"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:39.996Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f81"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.091Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f82"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.210Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f83"
+  },
+  "user_id": 3,
+  "username": "legacy_216b5a6b12e3445a93e826d96dcb788d",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.672Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f84"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.814Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f85"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.849Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe608c126af528b078f86"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:40.960Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe609c126af528b078f87"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:41.207Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe609c126af528b078f88"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:41.349Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe609c126af528b078f89"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:41.656Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe609c126af528b078f8a"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:41.895Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe609c126af528b078f8b"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:41.919Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f8c"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.068Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f8d"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.089Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f8e"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.182Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f8f"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.304Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f90"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.424Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f91"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "UPDATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.463Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f92"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.559Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f93"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.614Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f94"
+  },
+  "user_id": 3,
+  "username": "new_saler_367e30b2bb004249bbffef11e6fb27bb",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "3",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.632Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f95"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.739Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f96"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.839Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfe60ac126af528b078f97"
+  },
+  "user_id": 2,
+  "username": "seller1",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": null,
+  "created_at": {
+    "$date": "2026-04-03T16:08:42.978Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfeb3edd02a9e32b092d79"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T16:30:54.676Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfeb42dd02a9e32b092d7a"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T16:30:58.349Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfeb42dd02a9e32b092d7b"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T16:30:58.362Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69cfeb4add02a9e32b092d7c"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-03T16:31:06.324Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69d0e7d4cf174b94052c2af1"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "1",
+  "details": "Admin portal login",
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-04T10:28:36.855Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69d0e7d5cf174b94052c2af2"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "CREATE",
+  "target_type": "Unknown",
+  "target_id": null,
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-04T10:28:37.082Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69d0e7e0cf174b94052c2af3"
+  },
+  "user_id": 1,
+  "username": "admin",
+  "action": "LOGOUT",
+  "target_type": "User",
+  "target_id": "1",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-04T10:28:48.970Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69d0e7efcf174b94052c2af4"
+  },
+  "user_id": 2,
+  "username": "seller",
+  "action": "LOGIN",
+  "target_type": "User",
+  "target_id": "2",
+  "details": null,
+  "ip_address": "127.0.0.1",
+  "created_at": {
+    "$date": "2026-04-04T10:29:03.073Z"
+  }
 }]

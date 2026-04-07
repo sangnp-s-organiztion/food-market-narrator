@@ -1,16 +1,16 @@
 # MAUI Docs
 
-Tai lieu tong quan cho FoodMarketNarrator.Maui.
+Tài liệu tổng quan cho FoodMarketNarrator.Maui.
 
-## Muc tieu app
+## Mục tiêu app
 
-Ung dung mobile visitor voi tinh nang:
+Ứng dụng mobile visitor với tính năng:
 
-- Theo doi vi tri GPS
+- Theo dõi vị trí GPS
 - Geofence theo POI
-- Tu dong phat audio thuyet minh
-- Ho tro da ngon ngu
-- Cache offline co ban cho POI va audio
+- Tự động phát audio thuyết minh
+- Hỗ trợ đa ngôn ngữ
+- Cache offline cơ bản cho POI và audio
 
 ## Stack
 
@@ -18,26 +18,32 @@ Ung dung mobile visitor voi tinh nang:
 - Mapsui
 - Plugin.Maui.Audio
 
-## Luong narration
+## Luồng narration
 
-- Poll vi tri theo chu ky
-- Xac dinh POI gan nhat
+- Poll vị trí theo chu kỳ
+- Xác định POI gần nhất
 - Trigger enter/switch theo geofence
-- Chon audio theo ngon ngu hien tai
-- Chong lap bang session state va cooldown
+- Chọn audio theo ngôn ngữ hiện tại
+- Chống lặp bằng session state và cooldown
 
-## Cau hinh API
+Ghi chú hành vi hiện tại:
 
-Cau hinh host va endpoint trong:
+- Khi đang phát audio POI A mà chuyển sang POI B, audio POI A sẽ phát thêm khoảng 3 giây, sau đó bị ngắt để chuyển sang audio POI B.
+- Trạng thái mở/đóng ưu tiên tính theo `OpenTime/CloseTime` từ API; nếu không có thì mới fallback parse `OpeningHours`.
+- Nếu thiếu cả dữ liệu giờ mở/đóng, UI hiển thị `Đang cập nhật` thay vì dùng giờ mặc định cố định.
+
+## Cấu hình API
+
+Cấu hình host và endpoint trong:
 
 - FoodMarketNarrator.Maui/Settings/AppSettings.cs
 
-Luu y thiet bi that:
+Lưu ý thiết bị thật:
 
-- Dien thoai va may chay API phai cung mang
-- API local thong thuong: <http://localhost:5044>
+- Điện thoại và máy chạy API phải cùng mạng
+- API local thông thường: <http://localhost:5044>
 
-## Chay local
+## Chạy local
 
 ```bash
 cd FoodMarketNarrator.Maui
@@ -46,15 +52,16 @@ dotnet build
 dotnet run -f net10.0-android
 ```
 
-## Chay test
+## Chạy test
 
 ```bash
 dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj
 ```
 
-## Tai lieu lien quan
+## Tài liệu liên quan
 
 - overview-current-features.md
 - narration-geofence-trigger-flow.md
+- qr-access-session-flow.md
 - audio-cache-storage.md
 - ../testing/unit/maui-unit-test-cases.md

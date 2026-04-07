@@ -22,7 +22,14 @@
       "Bash(xargs grep:*)",
       "Bash(cd:*)",
       "Bash(git -C /d/Program/food-market-narrator/.worktrees/admin-real-api show 95669226:FoodMarketNarrator.Api/DTOs/Analytics/EntityCountsResponse.cs)",
-      "Bash(git -C /d/Program/food-market-narrator/.worktrees/admin-real-api show 4a588c7e:FoodMarketNarrator.Api/DTOs/Analytics/EntityCountsResponse.cs)"
+      "Bash(git -C /d/Program/food-market-narrator/.worktrees/admin-real-api show 4a588c7e:FoodMarketNarrator.Api/DTOs/Analytics/EntityCountsResponse.cs)",
+      "Bash(node -e \"const p=require\\(''./package.json''\\);console.log\\(''react:'',p.dependencies[''react''],''react-dom:'',p.dependencies[''react-dom'']\\)\")",
+      "Bash(node -e \"const p=require\\(''./package.json''\\);console.log\\(''react:'',p.dependencies[''react''],''react-dom:'',p.dependencies[''react-dom''],''react-leaflet:'',p.dependencies[''react-leaflet'']\\)\")",
+      "Bash(npm view:*)",
+      "Bash(node -e \"const p=require\\(''./node_modules/react/package.json''\\);const d=require\\(''./node_modules/react-dom/package.json''\\);const rl=require\\(''./node_modules/react-leaflet/package.json''\\);const nt=require\\(''./node_modules/next-themes/package.json''\\);console.log\\(''react:'',p.version,''react-dom:'',d.version,''react-leaflet:'',rl.version,''next-themes:'',nt.version\\)\")",
+      "Bash(node -e \"const p=require\\(''./node_modules/react/package.json''\\);const d=require\\(''./node_modules/react-dom/package.json''\\);const vl=require\\(''./node_modules/vaul/package.json''\\);console.log\\(''react:'',p.version,''react-dom:'',d.version,''vaul:'',vl.version\\)\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\Program\\\\food-market-narrator\" -Force)",
+      "Bash(Select-Object Name, Mode)"
     ]
   }
 }

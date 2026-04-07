@@ -1,14 +1,14 @@
 # Admin Docs
 
-Tai lieu tong quan cho web admin.
+Tài liệu tổng quan cho web admin.
 
-## Muc tieu
+## Mục tiêu
 
-Admin dashboard dung de:
+Admin dashboard dùng để:
 
-- Quan ly users va role/status
-- Quan ly restaurants
-- Theo doi analytics (kpi, heatmap, top audios, movement)
+- Quản lý users và role/status
+- Quản lý restaurants
+- Theo dõi analytics (kpi, heatmap, top audios, movement)
 - Xem audit logs
 
 ## Stack
@@ -17,7 +17,7 @@ Admin dashboard dung de:
 - TanStack Query
 - Vitest
 
-## Chay local
+## Chạy local
 
 ```bash
 cd admin
@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-## Build va test
+## Build và test
 
 ```bash
 cd admin
@@ -34,7 +34,7 @@ npm run lint
 npm test
 ```
 
-## API chinh
+## API chính
 
 - Auth: /Auth/admin/login, /Auth/admin/me, /Auth/logout
 - Users: /api/users/\*
@@ -43,13 +43,13 @@ npm test
 - Analytics: /api/analytics/\*
 - Audit logs: /api/audit-logs
 
-## Luu y
+## Lưu ý
 
-- Can gui cookie auth (`credentials: include`).
-- Login fail duoc chuan hoa ve mot thong bao khong hop le.
-- Movement paths ho tro sessionLimit = all (gui gia tri 0).
+- Cần gửi cookie auth (`credentials: include`).
+- Login fail được chuẩn hóa về một thông báo không hợp lệ.
+- Movement paths hỗ trợ `sessionLimit = all` (gửi giá trị `0`).
 
-## Tai lieu lien quan
+## Tài liệu liên quan
 
 - ../architecture/overview.md
 - ../testing/test-strategy.md
