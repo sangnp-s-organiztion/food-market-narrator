@@ -10,6 +10,7 @@ using Mapsui.Styles;
 using Mapsui.Tiling.Layers;
 using Mapsui.UI.Maui;
 using Microsoft.Maui.Devices.Sensors;
+using System.Runtime.CompilerServices;
 
 namespace food_market_narrator.Helpers
 {
@@ -21,6 +22,7 @@ namespace food_market_narrator.Helpers
         private const string OsmLayerName = "OpenStreetMap";
         private const double PoiLabelOffsetMeters = 8;
         private const double PoiLabelVisibleRadiusMeters = 40;
+        private static readonly ConditionalWeakTable<MapControl, List<PointFeature>> AllPoiFeaturesByMap = new();
 
         public static async Task LoadMapAsync(
             MapControl mapControl,
@@ -87,6 +89,9 @@ namespace food_market_narrator.Helpers
                 };
                 mapControl.Map.Layers.Add(poiLayer);
 
+                AllPoiFeaturesByMap.Remove(mapControl);
+                AllPoiFeaturesByMap.Add(mapControl, features.ToList());
+
                 var poiLabelLayer = new MemoryLayer
                 {
                     Name = PoiLabelLayerName,
@@ -136,6 +141,16 @@ namespace food_market_narrator.Helpers
             var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
             if (poiLayer == null) return;
 
+            var allFeatures = AllPoiFeaturesByMap.TryGetValue(mapControl, out var cachedFeatures)
+                ? cachedFeatures
+                : poiLayer.Features.OfType<PointFeature>().ToList();
+
+            if (!AllPoiFeaturesByMap.TryGetValue(mapControl, out _))
+            {
+                AllPoiFeaturesByMap.Remove(mapControl);
+                AllPoiFeaturesByMap.Add(mapControl, allFeatures);
+            }
+
             var idSet = highlightedPoiIds == null
                 ? new HashSet<string>()
                 : highlightedPoiIds
@@ -149,8 +164,9 @@ namespace food_market_narrator.Helpers
                     .ToHashSet(StringComparer.Ordinal);
 
             var highlightedFeatures = new List<PointFeature>();
+            var visibleFeatures = new List<PointFeature>();
 
-            foreach (var feature in poiLayer.Features.OfType<PointFeature>())
+            foreach (var feature in allFeatures)
             {
                 feature.Styles.Clear();
                 var featureId = feature["id"]?.ToString();
@@ -160,6 +176,8 @@ namespace food_market_narrator.Helpers
                 {
                     continue;
                 }
+
+                visibleFeatures.Add(feature);
 
                 bool isHighlighted = featureId != null && idSet.Contains(featureId);
                 feature.Styles.Add(CreateMarkerStyle(isHighlighted, isSearchResult && isHighlighted));
@@ -171,8 +189,7 @@ namespace food_market_narrator.Helpers
 
             if (highlightedFeatures.Count > 0)
             {
-                var reordered = poiLayer.Features
-                    .OfType<PointFeature>()
+                var reordered = visibleFeatures
                     .Where(f => !highlightedFeatures.Contains(f))
                     .Cast<IFeature>()
                     .ToList();
@@ -180,6 +197,13 @@ namespace food_market_narrator.Helpers
                 reordered.AddRange(highlightedFeatures);
                 poiLayer.Features = reordered;
             }
+            else
+            {
+                poiLayer.Features = visibleFeatures.Cast<IFeature>().ToList();
+            }
+
+            // Keep label layer in sync with currently visible POIs (tour/search modes).
+            RefreshPoiLabelsFromCurrentUserLocation(mapControl);
 
             // FIX: Invalidate layer data cache trước, sau đó force re-render graphics.
             // RefreshData() đơn độc không đủ khi 2 POI gần nhau vì Mapsui
@@ -276,6 +300,19 @@ namespace food_market_narrator.Helpers
 
             poiLabelLayer.Features = labelFeatures;
             poiLabelLayer.DataHasChanged();
+        }
+
+        private static void RefreshPoiLabelsFromCurrentUserLocation(MapControl mapControl)
+        {
+            var userLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == UserLocationLayerName) as MemoryLayer;
+            var userFeature = userLayer?.Features?.OfType<PointFeature>().FirstOrDefault();
+            if (userFeature == null)
+            {
+                return;
+            }
+
+            var lonLat = SphericalMercator.ToLonLat(userFeature.Point.X, userFeature.Point.Y);
+            RefreshPoiLabelsByUserLocation(mapControl, lonLat.lat, lonLat.lon);
         }
 
         private static bool TryGetCoordinate(object? value, out double coordinate)
