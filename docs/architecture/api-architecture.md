@@ -10,6 +10,8 @@ File này đóng vai trò index trong `docs/` để gom cấu trúc theo nhóm t
 
 - `GET /Restaurant`
 - `GET /Restaurant/{id}`
+- `GET /Tour`
+- `GET /Tour/{id}`
 - `GET /Language`
 - `GET /Language/{languageCode}`
 - `GET /Restaurant/{restaurantId}/images`

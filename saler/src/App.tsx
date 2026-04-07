@@ -1,10 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
-  Navigate,
   useLocation,
 } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,26 +19,22 @@ import RestaurantPage from "@/pages/RestaurantPage";
 import DishesPage from "@/pages/DishesPage";
 import ImagesPage from "@/pages/ImagesPage";
 import AudioPage from "@/pages/AudioPage";
+import AccountPage from "@/pages/AccountPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
-
 const TITLE_SUFFIX = "Food Market Narrator Saler";
 
 function getTitleByPath(pathname: string): string {
-  if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
-  if (pathname === "/select-restaurant")
-    return `Chọn nhà hàng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/restaurant"))
-    return `Thông tin nhà hàng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/dishes"))
-    return `Quản lý món ăn | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/images"))
-    return `Quản lý hình ảnh | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/audio"))
-    return `Quản lý audio | ${TITLE_SUFFIX}`;
+  if (pathname === "/login") return `Dang nhap | ${TITLE_SUFFIX}`;
+  if (pathname === "/select-restaurant") return `Chon nha hang | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/restaurant")) return `Thong tin nha hang | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/dishes")) return `Quan ly mon an | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/images")) return `Quan ly hinh anh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/audio")) return `Quan ly audio | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/account")) return `Tai khoan | ${TITLE_SUFFIX}`;
   if (pathname === "/") return TITLE_SUFFIX;
-  return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
+  return `Khong tim thay trang | ${TITLE_SUFFIX}`;
 }
 
 function RouteTitleManager() {
@@ -64,13 +60,7 @@ function AppRoutes() {
     <Routes>
       <Route
         path="/login"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/select-restaurant" replace />
-          ) : (
-            <LoginPage />
-          )
-        }
+        element={isAuthenticated ? <Navigate to="/select-restaurant" replace /> : <LoginPage />}
       />
       <Route
         path="/select-restaurant"
@@ -93,15 +83,11 @@ function AppRoutes() {
         <Route path="dishes" element={<DishesPage />} />
         <Route path="images" element={<ImagesPage />} />
         <Route path="audio" element={<AudioPage />} />
+        <Route path="account" element={<AccountPage />} />
       </Route>
       <Route
         path="/"
-        element={
-          <Navigate
-            to={isAuthenticated ? "/select-restaurant" : "/login"}
-            replace
-          />
-        }
+        element={<Navigate to={isAuthenticated ? "/select-restaurant" : "/login"} replace />}
       />
       <Route path="*" element={<NotFound />} />
     </Routes>

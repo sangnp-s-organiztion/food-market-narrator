@@ -35,6 +35,7 @@ public static class AppSettings
 #endif
 
     public const string RestaurantEndpoint = "restaurant";
+    public const string TourEndpoint = "tour";
     public const string LanguageEndpoint = "language";
     public const string UserSessionsStartEndpoint = "api/user-sessions/start";
     public const string UserSessionQrAccessEndpointFormat = "api/user-sessions/{0}/qr-access";

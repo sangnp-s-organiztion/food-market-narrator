@@ -26,6 +26,12 @@ namespace food_market_narrator_api.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Column("phone")]
+        public string? Phone { get; set; }
+
+        [Column("email")]
+        public string? Email { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

@@ -2,6 +2,10 @@ export interface User {
   user_id: number;
   username: string;
   role: string;
+  phone?: string;
+  email?: string;
+  is_active?: boolean;
+  created_at?: string;
 }
 
 export interface UserRestaurant {

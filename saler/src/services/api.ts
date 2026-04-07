@@ -227,6 +227,16 @@ type LoginResponse = {
   role: string;
 };
 
+type ApiUserProfile = {
+  userId: number;
+  username: string;
+  role: string;
+  isActive?: boolean;
+  createdAt?: string;
+  phone?: string | null;
+  email?: string | null;
+};
+
 export async function loginApi(
   username: string,
   password: string,
@@ -250,6 +260,36 @@ export async function getMeApi(): Promise<User> {
     username: response.username,
     role: response.role,
   };
+}
+
+export async function getMyAccountApi(userId: number): Promise<User> {
+  const response = await request<ApiUserProfile>(`/api/users/${userId}`, {
+    method: "GET",
+  });
+
+  return {
+    user_id: response.userId,
+    username: response.username,
+    role: response.role,
+    is_active: response.isActive,
+    created_at: response.createdAt,
+    phone: response.phone ?? "",
+    email: response.email ?? "",
+  };
+}
+
+export async function updateMyPasswordApi(
+  _userId: number,
+  oldPassword: string,
+  newPassword: string,
+): Promise<void> {
+  await request<{ message: string }>(`/Auth/password`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      oldPassword,
+      newPassword,
+    }),
+  });
 }
 
 export async function logoutApi(): Promise<void> {
