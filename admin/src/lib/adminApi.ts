@@ -110,6 +110,11 @@ export interface UpdateUserStatusRequest {
   isActive: boolean;
 }
 
+export interface UpdateUserPasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface CountResponse {
   count: number;
 }
@@ -236,6 +241,12 @@ export const userApi = {
 
   updateStatus: (id: number, data: UpdateUserStatusRequest) =>
     adminFetch<{ message: string }>(`/api/users/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  updateMyPassword: (data: UpdateUserPasswordRequest) =>
+    adminFetch<{ message: string }>("/Auth/password", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),

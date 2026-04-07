@@ -15,11 +15,16 @@ namespace food_market_narrator_api.Controllers
     {
         private const string AdminRole = "admin";
         private readonly AuthService _authService;
+        private readonly UserService _userService;
         private readonly AuditLogService _auditLogService;
 
-        public AuthController(AuthService authService, AuditLogService auditLogService)
+        public AuthController(
+            AuthService authService,
+            UserService userService,
+            AuditLogService auditLogService)
         {
             _authService = authService;
+            _userService = userService;
             _auditLogService = auditLogService;
         }
 
@@ -201,6 +206,37 @@ namespace food_market_narrator_api.Controllers
             }
 
             return Ok(me);
+        }
+
+        [HttpPatch("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(currentUserIdRaw, out var currentUserId))
+            {
+                return Unauthorized(new { message = "Unauthorized." });
+            }
+
+            bool updated;
+            try
+            {
+                updated = await _userService.ChangePasswordAsync(
+                    currentUserId,
+                    request.OldPassword,
+                    request.NewPassword);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+            if (!updated)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            return Ok(new { message = "Password updated." });
         }
     }
 }

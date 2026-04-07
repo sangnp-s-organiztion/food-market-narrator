@@ -90,6 +90,46 @@ public class UserService
         return await _userRepository.UpdateStatusAsync(userId, isActive);
     }
 
+    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(oldPassword))
+        {
+            throw new ArgumentException("Mật khẩu cũ là bắt buộc.");
+        }
+
+        if (string.IsNullOrWhiteSpace(newPassword))
+        {
+            throw new ArgumentException("Mật khẩu mới là bắt buộc.");
+        }
+
+        if (newPassword.Trim().Length < 6)
+        {
+            throw new ArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var isOldPasswordValid = PasswordHasher.IsHashed(user.Password)
+            ? PasswordHasher.Verify(oldPassword, user.Password)
+            : string.Equals(user.Password, oldPassword, StringComparison.Ordinal);
+
+        if (!isOldPasswordValid)
+        {
+            throw new ArgumentException("Mật khẩu cũ không đúng.");
+        }
+
+        if (string.Equals(oldPassword, newPassword, StringComparison.Ordinal))
+        {
+            throw new ArgumentException("Mật khẩu mới không được trùng mật khẩu cũ.");
+        }
+
+        return await _userRepository.UpdatePasswordAsync(userId, PasswordHasher.Hash(newPassword));
+    }
+
     private static UserResponse MapUser(UserModel u)
     {
         var normalizedRole = UserRoleParser.TryParse(u.Role, out var parsedRole)
