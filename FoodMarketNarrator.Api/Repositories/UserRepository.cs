@@ -102,5 +102,14 @@ namespace food_market_narrator_api.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, string passwordHash)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.Password = passwordHash;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

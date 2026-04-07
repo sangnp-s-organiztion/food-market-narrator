@@ -6,7 +6,8 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="#FFFCF8">
     <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
-        <Grid Grid.Row="0" BackgroundColor="White" Padding="20,14" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" BackgroundColor="White" Padding="20,14" ColumnDefinitions="*">
+            <!--
             <Border StrokeThickness="0"
                     BackgroundColor="#FFF1E3"
                     HeightRequest="36"
@@ -20,13 +21,14 @@
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
             </Border>
+            -->
 
-            <Label Grid.Column="1"
+            <Label Grid.Column="0"
                    Text="Cài đặt"
                    FontSize="30"
                    FontFamily="OpenSansSemibold"
                    TextColor="#1F2937"
-                   Margin="12,0,0,0"
+                   Margin="0"
                    VerticalOptions="Center"/>
         </Grid>
 
@@ -245,10 +247,23 @@
                         <BoxView HeightRequest="1" Color="#F3ECE5"/>
 
                         <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnOpenHistoryTapped"/>
+                            </Grid.GestureRecognizers>
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Xóa lịch sử xem" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="Lịch sử đã nghe" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#F3ECE5"/>
+
+                        <Grid Padding="0,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
+                                <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="Xóa lịch sử đã nghe" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Button Grid.Column="2" Text="Xóa" Clicked="OnClearHistoryClicked"
                                     BackgroundColor="#FFE8EA" TextColor="#E57373" FontSize="12"
                                     CornerRadius="12" HeightRequest="32" Padding="12,0" VerticalOptions="Center"/>

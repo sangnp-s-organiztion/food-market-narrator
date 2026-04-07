@@ -146,4 +146,16 @@ public partial class HistoryPage : ContentPage
     {
         await Shell.Current.GoToAsync("//MainPage");
     }
+
+    private async void OnBackButtonTapped(object sender, EventArgs e)
+    {
+        var navigation = Shell.Current?.Navigation;
+        if (navigation?.NavigationStack != null && navigation.NavigationStack.Count > 1)
+        {
+            await navigation.PopAsync(false);
+            return;
+        }
+
+        await Shell.Current.GoToAsync("//SettingsPage");
+    }
 }
