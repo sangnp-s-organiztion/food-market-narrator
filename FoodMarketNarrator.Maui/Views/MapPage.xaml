@@ -95,6 +95,37 @@
                     </CollectionView>
                 </Border>
 
+                <Border x:Name="TourFilterBanner"
+                        IsVisible="False"
+                        Margin="0,-2,50,0"
+                        StrokeShape="RoundRectangle 14"
+                        BackgroundColor="#FFF7ED"
+                        Stroke="#FED7AA"
+                        StrokeThickness="1"
+                        Padding="10,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="0">
+                            <Label x:Name="TourFilterTitle"
+                                   Text="Đang xem theo tour"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="#9A3412" />
+                            <Label Text="Chỉ hiển thị các POI thuộc tour đã chọn"
+                                   FontSize="11"
+                                   TextColor="#C2410C" />
+                        </VerticalStackLayout>
+                        <Button Text="Hiện tất cả"
+                                Clicked="OnClearTourFilterClicked"
+                                BackgroundColor="#F48C06"
+                                TextColor="White"
+                                FontSize="11"
+                                Padding="12,4"
+                                CornerRadius="12"
+                                HeightRequest="30"
+                                VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
                 <!-- Filters -->
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                     <HorizontalStackLayout Spacing="10" HeightRequest="40" Padding="0,5">

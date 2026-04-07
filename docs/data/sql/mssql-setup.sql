@@ -120,7 +120,7 @@ CREATE TABLE dbo.Tour (
     short_description NVARCHAR(500) NULL,
     description NVARCHAR(MAX) NULL,
     estimated_duration_minutes INT NULL,
-    image_url NVARCHAR(500) NULL,
+	image_id INT NOT NULL,
     is_active BIT NOT NULL DEFAULT 1,
     is_featured BIT NOT NULL DEFAULT 0,
     sort_priority INT NOT NULL DEFAULT 0,
@@ -130,6 +130,7 @@ CREATE TABLE dbo.Tour (
     updated_at DATETIME2 NULL,
     CONSTRAINT FK_Tour_CreatedBy FOREIGN KEY (created_by) REFERENCES dbo.Users(user_id),
     CONSTRAINT FK_Tour_UpdatedBy FOREIGN KEY (updated_by) REFERENCES dbo.Users(user_id),
+	CONSTRAINT FK_Tour_Image FOREIGN KEY (image_id) REFERENCES dbo.Restaurant_Image(image_id),
     CONSTRAINT CK_Tour_Duration CHECK (estimated_duration_minutes IS NULL OR estimated_duration_minutes > 0)
 );
 
@@ -139,14 +140,14 @@ CREATE TABLE dbo.Tour_Restaurant (
     stop_order INT NOT NULL,
     -- stay_minutes INT NULL,
     -- is_must_visit BIT NOT NULL DEFAULT 1,
-    custom_radius_meters INT NULL,
+    -- custom_radius_meters INT NULL,
     created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     PRIMARY KEY (tour_id, restaurant_id),
     CONSTRAINT UQ_Tour_Restaurant_Order UNIQUE (tour_id, stop_order),
     CONSTRAINT FK_Tour_Restaurant_Tour FOREIGN KEY (tour_id) REFERENCES dbo.Tour(tour_id) ON DELETE CASCADE,
     CONSTRAINT FK_Tour_Restaurant_Restaurant FOREIGN KEY (restaurant_id) REFERENCES dbo.Restaurant(restaurant_id),
     -- CONSTRAINT CK_Tour_Restaurant_Stay CHECK (stay_minutes IS NULL OR stay_minutes > 0),
-    CONSTRAINT CK_Tour_Restaurant_Radius CHECK (custom_radius_meters IS NULL OR custom_radius_meters > 0)
+    -- CONSTRAINT CK_Tour_Restaurant_Radius CHECK (custom_radius_meters IS NULL OR custom_radius_meters > 0)
 );
 
 CREATE INDEX IX_Tour_Active_Priority ON dbo.Tour(is_active, is_featured, sort_priority);
