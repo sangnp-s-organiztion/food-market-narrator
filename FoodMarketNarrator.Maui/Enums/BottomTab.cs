@@ -9,7 +9,6 @@ namespace food_market_narrator.Enums
         Home, // Main Page
         Map,
         Favorite,
-        History,
         Setting,
         None
     }

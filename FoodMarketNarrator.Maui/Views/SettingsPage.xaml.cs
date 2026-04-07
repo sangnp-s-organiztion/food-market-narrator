@@ -658,7 +658,7 @@ public partial class SettingsPage : ContentPage
 
         var confirm = await DisplayAlert(
             "Xóa lịch sử",
-            "Bạn có chắc muốn xóa toàn bộ lịch sử đã xem?",
+            "Bạn có chắc muốn xóa toàn bộ lịch sử đã nghe?",
             "Xóa",
             "Hủy");
 
@@ -667,7 +667,12 @@ public partial class SettingsPage : ContentPage
 
         _historyService.ClearHistory();
 
-        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử xem", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử đã nghe", "OK");
+    }
+
+    private async void OnOpenHistoryTapped(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(HistoryPage));
     }
 
     private async void OnClearFavoritesClicked(object sender, EventArgs e)

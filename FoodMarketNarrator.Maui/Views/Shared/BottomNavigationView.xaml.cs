@@ -51,10 +51,6 @@ public partial class BottomNavigationView : ContentView
                 SetActive(FavoriteIcon, FavoriteText);
                 break;
 
-            case BottomTab.History:
-                SetActive(HistoryIcon, HistoryText);
-                break;
-
             case BottomTab.Setting:
                 SetActive(SettingIcon, SettingText);
                 break;
@@ -74,12 +70,6 @@ public partial class BottomNavigationView : ContentView
         // Set màu cho FavoriteIcon
         FavoriteIcon.TextColor = InactiveColor;
         FavoriteText.TextColor = InactiveColor;
-
-        // Set màu cho HistoryIcon
-        if (HistoryIcon != null)
-            HistoryIcon.TextColor = InactiveColor;
-        if (HistoryText != null)
-            HistoryText.TextColor = InactiveColor;
 
         // Set màu cho SettingIcon
         if (SettingIcon != null)
@@ -128,12 +118,6 @@ public partial class BottomNavigationView : ContentView
     private async void OpenFavorite(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("//FavoritePage");
-    }
-
-    // Mở trang Lịch sử
-    private async void OpenHistory(object sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("//HistoryPage");
     }
 
     private async void OpenSettings(object sender, EventArgs e)

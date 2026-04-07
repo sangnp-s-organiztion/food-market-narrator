@@ -9,7 +9,7 @@
         <Border.Shadow>
             <Shadow Brush="#E0E0E0" Offset="0,-5" Radius="10" Opacity="0.2"/>
         </Border.Shadow>
-        <Grid ColumnDefinitions="*,*,*,*,*" VerticalOptions="Center">
+        <Grid ColumnDefinitions="*,*,*,*" VerticalOptions="Center">
             <!-- Trang chủ -->
             <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm OpenMap mở bản đồ khi nhấn vào nút bản đồ -->
@@ -43,19 +43,8 @@
                 <Label Text="Yêu thích" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
             </VerticalStackLayout>
 
-            <!-- Lịch sử -->
-            <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
-                <!-- Gọi hàm OpenHistory để mở lịch sử -->
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OpenHistory"/>
-                </VerticalStackLayout.GestureRecognizers>
-
-                <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="HistoryIcon"/>
-                <Label Text="Lịch sử" FontSize="10" HorizontalOptions="Center" x:Name="HistoryText"/>
-            </VerticalStackLayout>
-
             <!-- Cài đặt -->
-            <VerticalStackLayout Grid.Column="4" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="3" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <!-- Gọi hàm để mở Cài đặt -->
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OpenSettings"/>
