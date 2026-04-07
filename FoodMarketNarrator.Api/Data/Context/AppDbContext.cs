@@ -45,6 +45,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<TourModel>()
             .HasOne(t => t.Image)
             .WithMany()
-            .HasForeignKey(t => t.ImageId);
+            .HasForeignKey(t => t.ImageId)
+            .IsRequired(false);
     }
 }

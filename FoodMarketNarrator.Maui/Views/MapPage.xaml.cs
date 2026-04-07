@@ -483,17 +483,25 @@ public partial class MapPage : ContentPage
         if (_tourPoiFilterIds.Count > 0)
         {
             var tourPois = GetInteractivePois();
+            var tourLocation = _lastKnownLocation ?? _locationService.LastKnownLocation;
+            var nearestTourPoi = tourLocation == null
+                ? null
+                : _poiService.GetNearestPOI(tourLocation, tourPois);
+
+            var shouldHighlightNearestTourPoi = tourLocation != null
+                && nearestTourPoi != null
+                && _poiService.GetDistanceMeters(tourLocation, nearestTourPoi) < AppSettings.MapHighlightDistanceMeters;
+
             if (focusOnTour && tourPois.Count > 0)
             {
-                var firstPoi = tourPois[0];
-                CenterMapOn(firstPoi.Latitude, firstPoi.Longitude, MyLocationZoomLevel);
-                ShowSelectedPoiCard(firstPoi);
+                var focusPoi = nearestTourPoi ?? tourPois[0];
+                CenterMapOn(focusPoi.Latitude, focusPoi.Longitude, MyLocationZoomLevel);
+                ShowSelectedPoiCard(focusPoi);
             }
 
             MapHelper.HighlightPOIs(
                 mapControl,
-                tourPois.Select(p => p.restaurantId),
-                isSearchResult: true,
+                shouldHighlightNearestTourPoi ? new[] { nearestTourPoi!.restaurantId } : null,
                 visiblePoiIds: visiblePoiIds);
             return;
         }

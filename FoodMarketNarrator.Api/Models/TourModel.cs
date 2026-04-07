@@ -26,7 +26,7 @@ public class TourModel
     public int? EstimatedDurationMinutes { get; set; }
 
     [Column("image_id")]
-    public int ImageId { get; set; }
+    public int? ImageId { get; set; }
 
     [Column("is_active")]
     public bool IsActive { get; set; }
