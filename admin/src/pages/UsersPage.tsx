@@ -45,8 +45,9 @@ const UsersPage = () => {
   const [form, setForm] = useState<{
     username: string;
     password: string;
+    confirmPassword: string;
     role: "admin" | "saler";
-  }>({ username: "", password: "", role: "saler" });
+  }>({ username: "", password: "", confirmPassword: "", role: "saler" });
   const [confirmUser, setConfirmUser] = useState<{
     id: number;
     name: string;
@@ -74,7 +75,7 @@ const UsersPage = () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       toast.success("Tạo người dùng thành công");
       setDialogOpen(false);
-      setForm({ username: "", password: "", role: "saler" });
+      setForm({ username: "", password: "", confirmPassword: "", role: "saler" });
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Tạo người dùng thất bại");
@@ -94,23 +95,22 @@ const UsersPage = () => {
     },
   });
 
-  const roleMutation = useMutation({
-    mutationFn: ({ id, role }: { id: number; role: string }) =>
-      userApi.updateRole(id, { role }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Cập nhật vai trò thành công");
-    },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Cập nhật thất bại");
-    },
-  });
-
   const handleCreate = () => {
     if (!form.username.trim()) {
       toast.error("Vui lòng nhập tên đăng nhập");
       return;
     }
+
+    if (!form.password.trim()) {
+      toast.error("Vui lòng nhập mật khẩu");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Mật khẩu nhập lại không khớp");
+      return;
+    }
+
     createMutation.mutate({
       username: form.username.trim(),
       password: form.password.trim(),
@@ -124,7 +124,7 @@ const UsersPage = () => {
         <h1 className="page-title">Quản lý người dùng</h1>
         <Button
           onClick={() => {
-            setForm({ username: "", password: "", role: "saler" });
+            setForm({ username: "", password: "", confirmPassword: "", role: "saler" });
             setDialogOpen(true);
           }}
           size="sm"
@@ -229,24 +229,6 @@ const UsersPage = () => {
                         )}
                       </button>
 
-                      {/* Role selector */}
-                      <Select
-                        value={u.role}
-                        onValueChange={(v) =>
-                          roleMutation.mutate({
-                            id: u.user_id,
-                            role: v,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="h-7 w-24 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Quản trị viên</SelectItem>
-                          <SelectItem value="saler">Người bán</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </td>
                   </tr>
                 ))}
@@ -279,7 +261,20 @@ const UsersPage = () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="mt-1"
-                placeholder="Để trống sẽ dùng 123456"
+                placeholder="Nhập mật khẩu"
+                autoComplete="new-password"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Nhập lại mật khẩu</Label>
+              <Input
+                type="password"
+                value={form.confirmPassword}
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
+                className="mt-1"
+                placeholder="Nhập lại mật khẩu"
                 autoComplete="new-password"
               />
             </div>
