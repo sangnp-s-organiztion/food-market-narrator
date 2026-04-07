@@ -52,6 +52,23 @@ const formatDateChip = (value?: Date): string => {
   return value.toLocaleDateString("vi-VN");
 };
 
+const getMonthKey = (timestamp: number): string => {
+  if (!timestamp) return "";
+  const date = new Date(timestamp);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${date.getFullYear()}-${month}`;
+};
+
+const isSameMonth = (timestamp: number, monthKey: string): boolean => {
+  return getMonthKey(timestamp) === monthKey;
+};
+
+const formatMonthLabel = (monthKey: string): string => {
+  if (!monthKey) return "Tất cả tháng";
+  const [year, month] = monthKey.split("-");
+  return `${month}/${year}`;
+};
+
 export function TrajectorySection({
   movementPaths = [],
 }: TrajectorySectionProps) {
@@ -60,6 +77,7 @@ export function TrajectorySection({
     null,
   );
   const [dateSortOrder, setDateSortOrder] = useState<DateSortOrder>("desc");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -96,11 +114,40 @@ export function TrajectorySection({
   }, [movementPaths, dateSortOrder]);
 
   const dateFilteredPaths = useMemo<SortedPath[]>(() => {
-    if (!selectedDate) {
-      return sortedMovementPaths;
+    let pathsAfterMonth = sortedMovementPaths;
+
+    if (selectedMonth !== "all") {
+      pathsAfterMonth = sortedMovementPaths
+        .map((path) => {
+          const pointsInMonth = path.points.filter((point) =>
+            isSameMonth(toTimestamp(point.timestamp), selectedMonth),
+          );
+
+          if (pointsInMonth.length === 0) {
+            return null;
+          }
+
+          return {
+            ...path,
+            points: pointsInMonth,
+            latestTimestamp: toTimestamp(
+              pointsInMonth[pointsInMonth.length - 1].timestamp,
+            ),
+          };
+        })
+        .filter((path): path is SortedPath => path !== null);
     }
 
-    return sortedMovementPaths
+    if (!selectedDate) {
+      return [...pathsAfterMonth].sort((a, b) => {
+        if (dateSortOrder === "asc") {
+          return a.latestTimestamp - b.latestTimestamp;
+        }
+        return b.latestTimestamp - a.latestTimestamp;
+      });
+    }
+
+    return pathsAfterMonth
       .map((path) => {
         const pointsInDay = path.points.filter((point) =>
           isSameDate(toTimestamp(point.timestamp), selectedDate),
@@ -125,7 +172,21 @@ export function TrajectorySection({
         }
         return b.latestTimestamp - a.latestTimestamp;
       });
-  }, [dateSortOrder, selectedDate, sortedMovementPaths]);
+  }, [dateSortOrder, selectedDate, selectedMonth, sortedMovementPaths]);
+
+  const availableMonths = useMemo(() => {
+    return Array.from(
+      new Set(
+        sortedMovementPaths
+          .map((path) => getMonthKey(path.latestTimestamp))
+          .filter((monthKey) => Boolean(monthKey)),
+      ),
+    ).sort((a, b) => {
+      if (a < b) return 1;
+      if (a > b) return -1;
+      return 0;
+    });
+  }, [sortedMovementPaths]);
 
   const dateSessionRows = useMemo(
     () =>
@@ -355,7 +416,25 @@ export function TrajectorySection({
 
           <div className="mb-2 rounded-md border border-border p-2">
             <div className="mb-2 text-[11px] font-medium text-muted-foreground">
-              Lọc theo ngày
+              Lọc theo tháng / ngày
+            </div>
+            <div className="mb-2">
+              <select
+                value={selectedMonth}
+                onChange={(event) => {
+                  setSelectedMonth(event.target.value);
+                  setSelectedDate(undefined);
+                  setCurrentPage(1);
+                }}
+                className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground"
+              >
+                <option value="all">Tất cả tháng</option>
+                {availableMonths.map((monthKey) => (
+                  <option key={monthKey} value={monthKey}>
+                    {formatMonthLabel(monthKey)}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex items-center gap-2">
               <Popover>
@@ -380,12 +459,19 @@ export function TrajectorySection({
 
               <button
                 type="button"
-                onClick={() => setSelectedDate(undefined)}
+                onClick={() => {
+                  setSelectedDate(undefined);
+                  setSelectedMonth("all");
+                }}
                 className="rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
               >
                 Xóa
               </button>
             </div>
+          </div>
+
+          <div className="mb-2 text-[11px] text-muted-foreground">
+            Phân trang {SESSION_IDS_PER_PAGE} session/trang
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
@@ -499,28 +585,30 @@ export function TrajectorySection({
       <div className="mt-4 rounded-lg border border-border bg-background p-3">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="text-sm font-semibold text-foreground">
-            Bảng tuyến theo ngày
+            Bảng tuyến theo thời gian
           </h4>
           <span className="text-xs text-muted-foreground">
             {selectedDate
               ? `${dateSessionRows.length} session trong ngày ${formatDateChip(selectedDate)}`
-              : "Chọn ngày để xem bảng"}
+              : selectedMonth !== "all"
+                ? `${dateSessionRows.length} session trong tháng ${formatMonthLabel(selectedMonth)}`
+                : `${dateSessionRows.length} session`}
           </span>
         </div>
 
-        {!selectedDate && (
+        {!selectedDate && selectedMonth === "all" && (
           <p className="text-xs text-muted-foreground">
-            Chưa chọn ngày. Hãy chọn ngày để xem các tuyến di chuyển tương ứng.
+            Chưa chọn bộ lọc thời gian. Hãy chọn tháng hoặc ngày để thu hẹp dữ liệu.
           </p>
         )}
 
-        {selectedDate && dateSessionRows.length === 0 && (
+        {(selectedDate || selectedMonth !== "all") && dateSessionRows.length === 0 && (
           <p className="text-xs text-muted-foreground">
-            Không có dữ liệu tuyến di chuyển trong ngày đã chọn.
+            Không có dữ liệu tuyến di chuyển theo bộ lọc đã chọn.
           </p>
         )}
 
-        {selectedDate && dateSessionRows.length > 0 && (
+        {dateSessionRows.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
