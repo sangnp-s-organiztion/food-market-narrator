@@ -124,6 +124,13 @@ export interface TranslationUsageLedgerResponse {
   summary: TranslationUsageLedgerSummary;
 }
 
+export interface AnalyticsKpi {
+  total_users: number;
+  average_listening_time_seconds: number;
+  average_listening_time_formatted: string;
+  total_poi_plays: number;
+}
+
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;

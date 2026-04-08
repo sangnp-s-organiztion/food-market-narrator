@@ -32,6 +32,21 @@ public class AnalyticsService
         };
     }
 
+    public async Task<KpiResponse> GetRestaurantKpisAsync(string restaurantId)
+    {
+        var totalUsers = await _analyticsRepository.GetTotalSessionCountByRestaurantAsync(restaurantId);
+        var avgDuration = await _analyticsRepository.GetAverageListeningTimeByRestaurantAsync(restaurantId);
+        var totalPlays = await _analyticsRepository.GetTotalPlayCountByRestaurantAsync(restaurantId);
+
+        return new KpiResponse
+        {
+            TotalUsers = (int)totalUsers,
+            AverageListeningTimeSeconds = Math.Round(avgDuration, 2),
+            AverageListeningTimeFormatted = FormatDuration(avgDuration),
+            TotalPoiPlays = (int)totalPlays
+        };
+    }
+
     // ─── Heatmap Points (hours window or all-time when null) ──────────────────
     public async Task<HeatmapResponse> GetHeatmapAsync(int? hours = 24)
     {

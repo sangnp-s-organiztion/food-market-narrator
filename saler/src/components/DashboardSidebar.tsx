@@ -35,7 +35,7 @@ const navItems = [
 
 const audioSubItems = [
   { title: "Mô tả âm thanh", url: "/dashboard/audio/description" },
-  { title: "Lịch sử thay đổi", url: "/dashboard/audio/history" },
+  { title: "Thống kê", url: "/dashboard/audio/history" },
 ];
 
 export function DashboardSidebar() {

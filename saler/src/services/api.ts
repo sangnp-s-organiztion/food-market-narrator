@@ -1,5 +1,6 @@
 import type {
   Audio,
+  AnalyticsKpi,
   CreateAudioFromTextResult,
   Dish,
   Language,
@@ -231,6 +232,13 @@ type ApiTranslationUsageLedgerResponse = {
   page: number;
   pageSize: number;
   summary: ApiTranslationUsageLedgerSummary;
+};
+
+type ApiAnalyticsKpi = {
+  totalUsers: number;
+  averageListeningTimeSeconds: number;
+  averageListeningTimeFormatted: string;
+  totalPoiPlays: number;
 };
 
 function mapAudio(item: ApiAudio): Audio {
@@ -710,5 +718,21 @@ export async function getMyTranslationUsageApi(filter: {
       total_amount: data.summary.totalAmount,
       currency: data.summary.currency,
     },
+  };
+}
+
+export async function getRestaurantKpisApi(
+  restaurantId: string,
+): Promise<AnalyticsKpi> {
+  const data = await request<ApiAnalyticsKpi>(
+    `/api/analytics/restaurants/${encodeURIComponent(restaurantId)}/kpis`,
+    { method: "GET" },
+  );
+
+  return {
+    total_users: data.totalUsers,
+    average_listening_time_seconds: data.averageListeningTimeSeconds,
+    average_listening_time_formatted: data.averageListeningTimeFormatted,
+    total_poi_plays: data.totalPoiPlays,
   };
 }

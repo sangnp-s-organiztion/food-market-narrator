@@ -2,7 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { getMyTranslationUsageApi } from "@/services/api";
+import { getMyTranslationUsageApi, getRestaurantKpisApi } from "@/services/api";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 
 const PAGE_SIZE = 20;
 
@@ -29,7 +30,16 @@ const formatDateTime = (iso: string) => {
   });
 };
 
+function formatMinutesSeconds(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return m > 0
+    ? `${m}:${String(s).padStart(2, "0")}`
+    : `0:${String(s).padStart(2, "0")}`;
+}
+
 export default function AudioHistoryPage() {
+  const { selectedRestaurant } = useRestaurant();
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
   const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">("all");
   const [page, setPage] = useState(1);
@@ -46,10 +56,20 @@ export default function AudioHistoryPage() {
     placeholderData: (previous) => previous,
   });
 
+  const { data: restaurantKpis } = useQuery({
+    queryKey: ["saler", "analytics", "restaurant-kpis", selectedRestaurant?.restaurant_id],
+    queryFn: () => getRestaurantKpisApi(selectedRestaurant?.restaurant_id ?? ""),
+    enabled: !!selectedRestaurant?.restaurant_id,
+    staleTime: 30_000,
+  });
+
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil((data?.total_count ?? 0) / PAGE_SIZE)),
     [data?.total_count],
   );
+
+  const avgTime = restaurantKpis?.average_listening_time_seconds ?? 0;
+  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
@@ -182,6 +202,28 @@ export default function AudioHistoryPage() {
           >
             Trang sau
           </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="dashboard-card">
+          <span className="stat-label">Tổng lượt nghe</span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">
+              {(restaurantKpis?.total_poi_plays ?? 0).toLocaleString("vi-VN")}
+            </span>
+            <span className="text-xs text-muted-foreground mb-0.5">lượt</span>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">{formattedAvgTime}</span>
+            {avgTime > 0 && (
+              <span className="text-xs text-muted-foreground mb-0.5">phút</span>
+            )}
+          </div>
         </div>
       </div>
     </div>
