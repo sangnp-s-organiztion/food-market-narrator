@@ -1,9 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5044";
 
 async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...options?.headers,
+    },
     ...options,
   });
 
@@ -279,6 +283,25 @@ export const restaurantApi = {
         body: JSON.stringify(data),
       },
     ),
+
+  uploadImage: (
+    id: string,
+    file: File,
+    options?: { isPrimary?: boolean; sortOrder?: number },
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("is_primary", `${options?.isPrimary ?? true}`);
+    formData.append("sort_order", `${options?.sortOrder ?? 1}`);
+
+    return adminFetch<RestaurantImageResponse>(
+      `/Restaurant/${encodeURIComponent(id)}/images`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+  },
 };
 
 // ─── User API ────────────────────────────────────────────────────────────────

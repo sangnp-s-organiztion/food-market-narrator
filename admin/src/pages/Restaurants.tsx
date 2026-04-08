@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import {
@@ -8,7 +8,7 @@ import {
   type RestaurantResponse,
   type CreateRestaurantRequest,
 } from "@/lib/adminApi";
-import { Search, Lock, Unlock, Plus, Eye } from "lucide-react";
+import { Search, Lock, Unlock, Plus, Eye, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -147,6 +147,31 @@ const RestaurantsPage = () => {
     openTime: "",
     closeTime: "",
   });
+  const [createAvatarFile, setCreateAvatarFile] = useState<File | null>(null);
+  const [createAvatarPreview, setCreateAvatarPreview] = useState<string | null>(
+    null,
+  );
+  const createAvatarInputRef = useRef<HTMLInputElement | null>(null);
+
+  const resetCreateDialog = () => {
+    setCreateForm({
+      name: "",
+      userId: "",
+      description: "",
+      phone: "",
+      address: "",
+      googleMapsUrl: "",
+      latitude: "",
+      longitude: "",
+      openTime: "",
+      closeTime: "",
+    });
+    setCreateAvatarFile(null);
+    setCreateAvatarPreview(null);
+    if (createAvatarInputRef.current) {
+      createAvatarInputRef.current.value = "";
+    }
+  };
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const {
@@ -194,23 +219,27 @@ const RestaurantsPage = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: CreateRestaurantRequest) => restaurantApi.create(data),
+    mutationFn: async ({
+      data,
+      avatarFile,
+    }: {
+      data: CreateRestaurantRequest;
+      avatarFile: File | null;
+    }) => {
+      const created = await restaurantApi.create(data);
+      if (avatarFile) {
+        await restaurantApi.uploadImage(created.restaurantId, avatarFile, {
+          isPrimary: true,
+          sortOrder: 1,
+        });
+      }
+      return created;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "restaurants"] });
       toast.success("Thêm nhà hàng thành công");
       setCreateOpen(false);
-      setCreateForm({
-        name: "",
-        userId: "",
-        description: "",
-        phone: "",
-        address: "",
-        googleMapsUrl: "",
-        latitude: "",
-        longitude: "",
-        openTime: "",
-        closeTime: "",
-      });
+      resetCreateDialog();
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Thêm nhà hàng thất bại");
@@ -247,17 +276,36 @@ const RestaurantsPage = () => {
     }
 
     createMutation.mutate({
-      name: trimmedName,
-      userId: parsedUserId,
-      description: createForm.description.trim() || null,
-      phone: createForm.phone.trim() || null,
-      address: createForm.address.trim() || null,
-      latitude: toNullableNumber(createForm.latitude),
-      longitude: toNullableNumber(createForm.longitude),
-      openTime: createForm.openTime || null,
-      closeTime: createForm.closeTime || null,
-      isActive: true,
+      data: {
+        name: trimmedName,
+        userId: parsedUserId,
+        description: createForm.description.trim() || null,
+        phone: createForm.phone.trim() || null,
+        address: createForm.address.trim() || null,
+        latitude: toNullableNumber(createForm.latitude),
+        longitude: toNullableNumber(createForm.longitude),
+        openTime: createForm.openTime || null,
+        closeTime: createForm.closeTime || null,
+        isActive: true,
+      },
+      avatarFile: createAvatarFile,
     });
+  };
+
+  const handleCreateAvatarFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0] ?? null;
+    setCreateAvatarFile(file);
+
+    if (!file) {
+      setCreateAvatarPreview(null);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => setCreateAvatarPreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleGoogleMapsUrlChange = (value: string) => {
@@ -462,9 +510,12 @@ const RestaurantsPage = () => {
         open={createOpen}
         onOpenChange={(open) => {
           setCreateOpen(open);
+          if (!open) {
+            resetCreateDialog();
+          }
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Thêm nhà hàng mới</DialogTitle>
           </DialogHeader>
@@ -589,6 +640,44 @@ const RestaurantsPage = () => {
                   className="mt-1"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Ảnh đại diện nhà hàng</Label>
+              <div
+                className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                onClick={() => createAvatarInputRef.current?.click()}
+              >
+                {createAvatarPreview ? (
+                  <div className="space-y-2">
+                    <img
+                      src={createAvatarPreview}
+                      alt="Xem trước ảnh nhà hàng"
+                      className="max-h-36 mx-auto rounded-md object-contain"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Nhấn để chọn ảnh khác
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground py-2">
+                    <Upload className="w-6 h-6" />
+                    <p className="text-sm">Nhấn để chọn ảnh</p>
+                    <p className="text-xs">JPG, PNG, WEBP</p>
+                  </div>
+                )}
+                <input
+                  ref={createAvatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleCreateAvatarFileChange}
+                />
+              </div>
+              {createAvatarFile && (
+                <p className="text-xs text-muted-foreground">
+                  Đã chọn: {createAvatarFile.name}
+                </p>
+              )}
             </div>
             <Button
               onClick={handleCreateRestaurant}
