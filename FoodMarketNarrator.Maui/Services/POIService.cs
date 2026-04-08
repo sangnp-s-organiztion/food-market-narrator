@@ -973,14 +973,15 @@ public class POIService : IPOIService
     }
 
     // Láº¥y POI gáº§n nháº¥t dá»±a trÃªn vá»‹ trÃ­ hiá»‡n táº¡i vÃ  cÃ¡c POIs
-    public POI? UpdateNearestPOI(double currentLat, double currentLng)
+    public POI? UpdateNearestPOI(double currentLat, double currentLng, IEnumerable<POI>? pois = null)
     {
-        if (_pois == null || !_pois.Any())
+        var source = pois?.ToList() ?? _pois;
+        if (source == null || source.Count == 0)
             return null;
 
         var currentLocation = new Location(currentLat, currentLng);
 
-        var nearest = GetNearestPOI(currentLocation, _pois);
+        var nearest = GetNearestPOI(currentLocation, source);
 
         if (nearest == null)
             return null;
