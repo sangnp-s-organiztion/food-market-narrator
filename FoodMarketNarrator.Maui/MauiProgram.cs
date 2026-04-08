@@ -50,6 +50,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IFavoriteService, FavoriteService>();
         builder.Services.AddSingleton<IHistoryService, HistoryService>();
         builder.Services.AddSingleton<ITourService, TourService>();
+        builder.Services.AddSingleton<TourImageWarmupService>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<MapPage>();
         builder.Services.AddTransient<TourPage>();

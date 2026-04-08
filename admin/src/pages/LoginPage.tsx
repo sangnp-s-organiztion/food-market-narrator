@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -55,7 +55,7 @@ const LoginPage = () => {
           <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-2">
             <Lock className="w-7 h-7 text-primary" />
           </div>
-          <CardTitle className="text-2xl">SonicMap Admin</CardTitle>
+          <CardTitle className="text-2xl">Food Market Narrator Admin</CardTitle>
           <CardDescription>Đăng nhập để quản lý hệ thống</CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,7 +110,7 @@ const LoginPage = () => {
               size="lg"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Đang đăng nhập…" : "Đăng nhập"}
+              {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </form>
         </CardContent>

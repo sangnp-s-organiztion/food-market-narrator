@@ -82,12 +82,12 @@ const UsersPage = () => {
     mutationFn: (data: CreateUserRequest) => userApi.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Tao nguoi dung thanh cong");
+      toast.success("Tạo người dùng thành công");
       setDialogOpen(false);
       setForm(emptyForm);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Tao nguoi dung that bai");
+      toast.error(err.message ?? "Tạo người dùng thất bại");
     },
   });
 
@@ -96,37 +96,37 @@ const UsersPage = () => {
       userApi.updateStatus(id, { isActive }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Cap nhat trang thai thanh cong");
+      toast.success("Cập nhật trạng thái thành công");
       setConfirmUser(null);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Cap nhat that bai");
+      toast.error(err.message ?? "Cập nhật thất bại");
     },
   });
 
   const handleCreate = () => {
     if (!form.username.trim()) {
-      toast.error("Vui long nhap ten dang nhap");
+      toast.error("Vui lòng nhập tên đăng nhập");
       return;
     }
 
     if (!form.password.trim()) {
-      toast.error("Vui long nhap mat khau");
+      toast.error("Vui lòng nhập mật khẩu");
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      toast.error("Mat khau nhap lai khong khop");
+      toast.error("Mật khẩu nhập lại không khớp");
       return;
     }
 
     if (!PHONE_REGEX.test(form.phone.trim())) {
-      toast.error("So dien thoai khong hop le (bat dau bang 0, gom 10-11 so)");
+      toast.error("Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 số)");
       return;
     }
 
     if (!EMAIL_REGEX.test(form.email.trim())) {
-      toast.error("Email khong hop le");
+      toast.error("Email không hợp lệ");
       return;
     }
 
@@ -142,7 +142,7 @@ const UsersPage = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1 className="page-title">Quan ly nguoi dung</h1>
+        <h1 className="page-title">Quản lý người dùng</h1>
         <Button
           onClick={() => {
             setForm(emptyForm);
@@ -151,7 +151,7 @@ const UsersPage = () => {
           size="sm"
         >
           <Plus className="mr-1.5 h-4 w-4" />
-          Tao nguoi dung
+          Tạo người dùng
         </Button>
       </div>
 
@@ -160,20 +160,20 @@ const UsersPage = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Ten dang nhap</th>
-                <th>So dien thoai</th>
+                <th>Tên đăng nhập</th>
+                <th>Số điện thoại</th>
                 <th>Email</th>
-                <th>Vai tro</th>
-                <th>Trang thai</th>
-                <th>Ngay tao</th>
-                <th className="w-32">Hanh dong</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th className="w-32">Hành động</th>
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                    Dang tai...
+                    Đang tải...
                   </td>
                 </tr>
               )}
@@ -181,7 +181,7 @@ const UsersPage = () => {
               {isError && (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-destructive">
-                    Khong the tai danh sach nguoi dung. Vui long thu lai.
+                    Không thể tải danh sách người dùng. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
@@ -189,7 +189,7 @@ const UsersPage = () => {
               {!isLoading && !isError && pageUsers.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                    Chua co nguoi dung nao.
+                    Chưa có người dùng nào.
                   </td>
                 </tr>
               )}
@@ -210,12 +210,12 @@ const UsersPage = () => {
                         }`}
                       >
                         <Shield className="h-3 w-3" />
-                        {u.role === "admin" ? "Quan tri vien" : "Nguoi ban"}
+                        {u.role === "admin" ? "Quản trị viên" : "Người bán"}
                       </span>
                     </td>
                     <td>
                       <span className={u.is_active ? "status-active" : "status-inactive"}>
-                        {u.is_active ? "Hoat dong" : "Ngung hoat dong"}
+                        {u.is_active ? "Hoạt động" : "Ngừng hoạt động"}
                       </span>
                     </td>
                     <td className="mono text-xs text-muted-foreground">{u.created_at}</td>
@@ -231,7 +231,7 @@ const UsersPage = () => {
                         className={`rounded-md p-1.5 transition-colors hover:bg-muted ${
                           !u.is_active ? "text-destructive" : "text-muted-foreground"
                         }`}
-                        title={u.is_active ? "Khoa nguoi dung" : "Mo khoa nguoi dung"}
+                        title={u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"}
                       >
                         {u.is_active ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                       </button>
@@ -246,11 +246,11 @@ const UsersPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tao nguoi dung moi</DialogTitle>
+            <DialogTitle>Tạo người dùng mới</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3 py-2">
             <div>
-              <Label className="text-xs">Ten dang nhap</Label>
+              <Label className="text-xs">Tên đăng nhập</Label>
               <Input
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
@@ -260,7 +260,7 @@ const UsersPage = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">So dien thoai</Label>
+              <Label className="text-xs">Số điện thoại</Label>
               <Input
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -280,29 +280,29 @@ const UsersPage = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Mat khau</Label>
+              <Label className="text-xs">Mật khẩu</Label>
               <Input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="mt-1"
-                placeholder="Nhap mat khau"
+                placeholder="Nhập mật khẩu"
                 autoComplete="new-password"
               />
             </div>
             <div>
-              <Label className="text-xs">Nhap lai mat khau</Label>
+              <Label className="text-xs">Nhập lại mật khẩu</Label>
               <Input
                 type="password"
                 value={form.confirmPassword}
                 onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                 className="mt-1"
-                placeholder="Nhap lai mat khau"
+                placeholder="Nhập lại mật khẩu"
                 autoComplete="new-password"
               />
             </div>
             <div>
-              <Label className="text-xs">Vai tro</Label>
+              <Label className="text-xs">Vai trò</Label>
               <Select
                 value={form.role}
                 onValueChange={(v) => setForm({ ...form, role: v as "admin" | "saler" })}
@@ -311,13 +311,13 @@ const UsersPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Quan tri vien</SelectItem>
-                  <SelectItem value="saler">Nguoi ban</SelectItem>
+                  <SelectItem value="admin">Quản trị viên</SelectItem>
+                  <SelectItem value="saler">Người bán</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <Button onClick={handleCreate} className="mt-2" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Dang tao..." : "Tao moi"}
+              {createMutation.isPending ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>
         </DialogContent>
@@ -326,11 +326,11 @@ const UsersPage = () => {
       <ConfirmDialog
         open={!!confirmUser}
         onOpenChange={(open) => !open && setConfirmUser(null)}
-        title={confirmUser?.lock ? "Khoa nguoi dung" : "Mo khoa nguoi dung"}
+        title={confirmUser?.lock ? "Khóa người dùng" : "Mở khóa người dùng"}
         description={
           confirmUser?.lock
-            ? "Nguoi dung se khong the dang nhap. Ban co chac khong?"
-            : "Nguoi dung se co the dang nhap tro lai."
+            ? "Người dùng sẽ không thể đăng nhập. Bạn có chắc không?"
+            : "Người dùng sẽ có thể đăng nhập trở lại."
         }
         onConfirm={() => {
           if (!confirmUser) return;

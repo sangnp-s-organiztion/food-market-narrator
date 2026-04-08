@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ const MonthlyBillingTable = ({
     return (
       <tr>
         <td colSpan={8} className="text-center py-8 text-muted-foreground">
-          Chưa có dữ liệu billing theo bộ lọc.
+          Chưa có dữ liệu chi phí theo bộ lọc.
         </td>
       </tr>
     );
@@ -195,9 +195,9 @@ const TranslationBillingPage = () => {
     <AdminLayout>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Billing token dịch</h1>
+          <h1 className="page-title">Chi phí dịch token</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Theo dõi lịch sử usage token dịch và tổng tiền theo tháng
+            Theo dõi lịch sử sử dụng token dịch và tổng chi phí theo tháng
           </p>
         </div>
       </div>
@@ -206,7 +206,7 @@ const TranslationBillingPage = () => {
         <div className="stat-card">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="stat-label">Tháng billing</label>
+              <label className="stat-label">Tháng</label>
               <Input
                 type="month"
                 value={billingMonth}
@@ -219,7 +219,7 @@ const TranslationBillingPage = () => {
               />
             </div>
             <div>
-              <label className="stat-label">Seller User ID</label>
+              <label className="stat-label">ID người bán</label>
               <Input
                 value={sellerUserIdRaw}
                 onChange={(e) => {
@@ -232,7 +232,7 @@ const TranslationBillingPage = () => {
               />
             </div>
             <div>
-              <label className="stat-label">Trạng thái usage</label>
+              <label className="stat-label">Trạng thái sử dụng</label>
               <select
                 className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={usageStatus}
@@ -244,8 +244,8 @@ const TranslationBillingPage = () => {
                 }}
               >
                 <option value="all">Tất cả</option>
-                <option value="billable">Billable</option>
-                <option value="failed">Failed</option>
+                <option value="billable">Tính phí</option>
+                <option value="failed">Thất bại</option>
               </select>
             </div>
           </div>
@@ -253,13 +253,13 @@ const TranslationBillingPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="stat-card">
-            <span className="stat-label">Tổng requests</span>
+            <span className="stat-label">Tổng yêu cầu</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalRequests ?? 0)}
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Tổng billable units</span>
+            <span className="stat-label">Tổng đơn vị tính phí</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalBillableUnits ?? 0)}
             </div>
@@ -276,7 +276,7 @@ const TranslationBillingPage = () => {
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">
-              Tổng hợp theo seller/tháng
+              Tổng hợp theo người bán/tháng
             </h2>
             <span className="text-xs text-muted-foreground mono">
               {monthlyData?.totalCount ?? 0} bản ghi
@@ -286,13 +286,13 @@ const TranslationBillingPage = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Seller</th>
-                <th>Seller ID</th>
+                <th>Người bán</th>
+                <th>ID người bán</th>
                 <th>Tháng</th>
-                <th>Requests</th>
-                <th>Success</th>
-                <th>Failed</th>
-                <th>Billable Units</th>
+                <th>Yêu cầu</th>
+                <th>Thành công</th>
+                <th>Thất bại</th>
+                <th>Đơn vị tính phí</th>
                 <th>Tổng tiền</th>
               </tr>
             </thead>
@@ -303,14 +303,14 @@ const TranslationBillingPage = () => {
                     colSpan={8}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Đang tải dữ liệu billing...
+                    Đang tải dữ liệu chi phí...
                   </td>
                 </tr>
               )}
               {monthlyError && (
                 <tr>
                   <td colSpan={8} className="text-center py-8 text-destructive">
-                    Không thể tải dữ liệu billing theo tháng.
+                    Không thể tải dữ liệu chi phí theo tháng.
                   </td>
                 </tr>
               )}
@@ -345,7 +345,7 @@ const TranslationBillingPage = () => {
 
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Lịch sử usage token dịch</h2>
+            <h2 className="text-lg font-semibold">Lịch sử sử dụng token dịch</h2>
             <span className="text-xs text-muted-foreground mono">
               {usageData?.totalCount ?? 0} sự kiện
             </span>
@@ -355,14 +355,14 @@ const TranslationBillingPage = () => {
             <thead>
               <tr>
                 <th>Thời gian</th>
-                <th>Seller</th>
-                <th>Seller ID</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>Input chars</th>
-                <th>Billable units</th>
+                <th>Người bán</th>
+                <th>ID người bán</th>
+                <th>Hành động</th>
+                <th>Trạng thái</th>
+                <th>Ký tự đầu vào</th>
+                <th>Đơn vị tính phí</th>
                 <th>Tổng tiền</th>
-                <th>Provider</th>
+                <th>Nhà cung cấp</th>
               </tr>
             </thead>
             <tbody>
@@ -372,14 +372,14 @@ const TranslationBillingPage = () => {
                     colSpan={9}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Đang tải lịch sử usage...
+                    Đang tải lịch sử sử dụng...
                   </td>
                 </tr>
               )}
               {usageError && (
                 <tr>
                   <td colSpan={9} className="text-center py-8 text-destructive">
-                    Không thể tải lịch sử usage token.
+                    Không thể tải lịch sử sử dụng token.
                   </td>
                 </tr>
               )}

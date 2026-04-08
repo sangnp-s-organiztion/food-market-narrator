@@ -2,6 +2,7 @@
 using BruTile.Web;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
+using food_market_narrator.Settings;
 using Mapsui;
 using Mapsui.Extensions;
 using Mapsui.Layers;
@@ -24,6 +25,29 @@ namespace food_market_narrator.Helpers
         private const double PoiLabelVisibleRadiusMeters = 40;
         private static readonly ConditionalWeakTable<MapControl, List<PointFeature>> AllPoiFeaturesByMap = new();
 
+        public static string GetTileCacheDirectory()
+        {
+            return AppSettings.MapTileCacheDirectory;
+        }
+
+        public static bool HasCachedMapTiles()
+        {
+            try
+            {
+                var cacheDir = GetTileCacheDirectory();
+                if (!Directory.Exists(cacheDir))
+                {
+                    return false;
+                }
+
+                return Directory.EnumerateFiles(cacheDir, "*.png", SearchOption.AllDirectories).Any();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static async Task LoadMapAsync(
             MapControl mapControl,
             IPOIService poiService,
@@ -37,7 +61,7 @@ namespace food_market_narrator.Helpers
 
                 if (!mapControl.Map.Layers.Any(l => l.Name == OsmLayerName))
                 {
-                    var cacheDir = Path.Combine(FileSystem.CacheDirectory, "osm_tiles");
+                    var cacheDir = GetTileCacheDirectory();
                     Directory.CreateDirectory(cacheDir);
 
                     var tileSource = new HttpTileSource(

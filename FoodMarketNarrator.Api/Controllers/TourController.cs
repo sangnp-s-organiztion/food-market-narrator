@@ -1,4 +1,5 @@
 using food_market_narrator_api.Services;
+using food_market_narrator_api.DTOs.Tour;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,5 +51,61 @@ public class TourController : ControllerBase
         }
 
         return Ok(data);
+    }
+
+    [HttpPost("{id:int}/restaurants")]
+    public async Task<IActionResult> AddRestaurantToTour(int id, [FromBody] AddTourRestaurantRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _tourService.AddRestaurantToTourAsync(id, request.RestaurantId);
+
+        return result.Status switch
+        {
+            AddTourRestaurantStatus.Success => Ok(new { message = "Restaurant added to tour." }),
+            AddTourRestaurantStatus.NotFound => NotFound(new { message = result.Message }),
+            AddTourRestaurantStatus.Conflict => Conflict(new { message = result.Message }),
+            AddTourRestaurantStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to add restaurant to tour." })
+        };
+    }
+
+    [HttpPut("{id:int}/stops/order")]
+    public async Task<IActionResult> ReorderStops(int id, [FromBody] ReorderTourStopsRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _tourService.ReorderTourStopsAsync(id, request.RestaurantIds);
+        return result.Status switch
+        {
+            ReorderTourStopsStatus.Success => Ok(new { message = "Tour stop order updated." }),
+            ReorderTourStopsStatus.NotFound => NotFound(new { message = result.Message }),
+            ReorderTourStopsStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to reorder stops." })
+        };
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> UpdateTour(int id, [FromBody] UpdateTourRequest request)
+    {
+        var result = await _tourService.UpdateTourAsync(
+            id,
+            request.EstimatedDurationMinutes,
+            request.SortPriority,
+            request.IsFeatured);
+
+        return result.Status switch
+        {
+            UpdateTourStatus.Success => Ok(new { message = "Tour updated." }),
+            UpdateTourStatus.NotFound => NotFound(new { message = result.Message }),
+            UpdateTourStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to update tour." })
+        };
     }
 }
