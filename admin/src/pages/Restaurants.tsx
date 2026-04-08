@@ -260,6 +260,17 @@ const RestaurantsPage = () => {
   };
 
   const handleGoogleMapsUrlChange = (value: string) => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      setCreateForm((prev) => ({
+        ...prev,
+        googleMapsUrl: value,
+        latitude: "",
+        longitude: "",
+      }));
+      return;
+    }
+
     const coords = extractCoordinatesFromGoogleMapsUrl(value);
 
     setCreateForm((prev) => ({
