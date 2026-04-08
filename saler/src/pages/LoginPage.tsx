@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,9 +66,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}

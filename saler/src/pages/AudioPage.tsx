@@ -28,6 +28,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -62,6 +72,9 @@ export default function AudioPage() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingDeleteAudio, setPendingDeleteAudio] = useState<Audio | null>(
+    null,
+  );
   const [selectedLang, setSelectedLang] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -191,12 +204,23 @@ export default function AudioPage() {
     };
   }, []);
 
-  const toggleActive = async (id: number) => {
+  const toggleActive = async (id: number, nextChecked: boolean) => {
     const current = audios.find((a) => a.audio_id === id);
     if (!current) return;
 
+    if (current.is_active && !nextChecked) {
+      const activeCountInLanguage = audios.filter(
+        (a) => a.language_id === current.language_id && a.is_active,
+      ).length;
+
+      if (activeCountInLanguage <= 1) {
+        toast.error("Mỗi ngôn ngữ phải có ít nhất 1 bản thuyết minh hoạt động");
+        return;
+      }
+    }
+
     try {
-      await updateAudioActiveApi(id, !current.is_active);
+      await updateAudioActiveApi(id, nextChecked);
       await fetchAudioData();
       toast.success("Đã cập nhật trạng thái âm thanh");
     } catch {
@@ -205,6 +229,18 @@ export default function AudioPage() {
   };
 
   const deleteAudio = async (id: number) => {
+    const current = audios.find((a) => a.audio_id === id);
+    if (!current) return;
+
+    const totalInLanguage = audios.filter(
+      (a) => a.language_id === current.language_id,
+    ).length;
+
+    if (totalInLanguage <= 1) {
+      toast.error("Mỗi ngôn ngữ phải có ít nhất 1 bản thuyết minh");
+      return;
+    }
+
     try {
       await deleteAudioApi(id);
       await fetchAudioData();
@@ -212,6 +248,12 @@ export default function AudioPage() {
     } catch {
       toast.error("Không thể xóa âm thanh");
     }
+  };
+
+  const confirmDeleteAudio = async () => {
+    if (!pendingDeleteAudio) return;
+    await deleteAudio(pendingDeleteAudio.audio_id);
+    setPendingDeleteAudio(null);
   };
 
   const openUploadDialog = (languageId?: number) => {
@@ -362,7 +404,7 @@ export default function AudioPage() {
 
     const textForAudio = (translatedText || sourceText).trim();
     if (!textForAudio) {
-      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo audio");
+      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo âm thanh");
       return;
     }
 
@@ -384,9 +426,9 @@ export default function AudioPage() {
       setGeneratedAudioUrl(normalizedUrl);
       setGeneratedAudioId(result.audio_id);
       await fetchAudioData();
-      toast.success("Đã tạo audio thành công");
+      toast.success("Đã tạo âm thanh thành công");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Không thể tạo audio từ text"));
+      toast.error(extractErrorMessage(error, "Không thể tạo âm thanh từ văn bản"));
     } finally {
       setIsGenerating(false);
     }
@@ -417,7 +459,7 @@ export default function AudioPage() {
 
   const handlePlayGeneratedAudio = () => {
     if (!generatedAudioUrl) {
-      toast.error("Chưa có audio được tạo");
+      toast.error("Chưa có âm thanh được tạo");
       return;
     }
 
@@ -430,8 +472,8 @@ export default function AudioPage() {
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
           <p className="page-description">
-            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo audio bằng Edge TTS
-            và quản lý phiên bản audio của nhà hàng.
+            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo âm thanh bằng Edge TTS
+            và quản lý phiên bản âm thanh của nhà hàng.
           </p>
         </div>
         <Button onClick={() => openUploadDialog()}>
@@ -442,7 +484,7 @@ export default function AudioPage() {
       <section className="dashboard-card space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-base">Dịch văn bản và tạo audio</h2>
+          <h2 className="font-semibold text-base">Dịch văn bản và tạo âm thanh</h2>
         </div>
 
         <div className="space-y-2">
@@ -451,7 +493,7 @@ export default function AudioPage() {
             id="source-text"
             value={sourceText}
             onChange={(e) => setSourceText(e.target.value)}
-            placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo audio..."
+            placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo âm thanh..."
             className="min-h-36"
           />
         </div>
@@ -507,7 +549,7 @@ export default function AudioPage() {
             disabled={isGenerating}
           >
             {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Tạo audio
+            Tạo âm thanh
           </Button>
 
           <Button
@@ -521,7 +563,7 @@ export default function AudioPage() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            Play audio
+            Phát âm thanh
           </Button>
         </div>
 
@@ -535,14 +577,14 @@ export default function AudioPage() {
           />
           {translateMeta && (
             <p className="text-xs text-muted-foreground">
-              Input: {translateMeta.inputChars} ký tự - Output:{" "}
+              Đầu vào: {translateMeta.inputChars} ký tự - Đầu ra:{" "}
               {translateMeta.outputChars} ký tự - Chi phí ước tính:{" "}
               {translateMeta.estimatedCost.toFixed(6)} {translateMeta.currency}
             </p>
           )}
           {generatedAudioId && (
             <p className="text-xs text-muted-foreground">
-              Audio đã tạo với ID: {generatedAudioId}
+              Âm thanh đã tạo với mã: {generatedAudioId}
             </p>
           )}
         </div>
@@ -638,13 +680,17 @@ export default function AudioPage() {
                           </span>
                           <Switch
                             checked={audio.is_active}
-                            onCheckedChange={() => toggleActive(audio.audio_id)}
+                            disabled={audio.is_active && group.activeCount <= 1}
+                            onCheckedChange={(checked) =>
+                              toggleActive(audio.audio_id, checked)
+                            }
                           />
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => deleteAudio(audio.audio_id)}
+                          disabled={group.items.length <= 1}
+                          onClick={() => setPendingDeleteAudio(audio)}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
@@ -713,6 +759,39 @@ export default function AudioPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={pendingDeleteAudio !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteAudio(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa thuyết minh</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc muốn xóa{" "}
+              {pendingDeleteAudio
+                ? `Phiên bản ${
+                    versionByAudioId.get(pendingDeleteAudio.audio_id) ?? 1
+                  }`
+                : "thuyết minh này"}
+              ? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                void confirmDeleteAudio();
+              }}
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

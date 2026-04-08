@@ -28,6 +28,18 @@ public class AnalyticsController : ControllerBase
         return Ok(kpis);
     }
 
+    [HttpGet("restaurants/{restaurantId}/kpis")]
+    public async Task<IActionResult> GetRestaurantKpis([FromRoute] string restaurantId)
+    {
+        if (string.IsNullOrWhiteSpace(restaurantId))
+        {
+            return BadRequest(new { message = "restaurantId is required." });
+        }
+
+        var kpis = await _analyticsService.GetRestaurantKpisAsync(restaurantId);
+        return Ok(kpis);
+    }
+
     /// <summary>
     /// GeoJSON heatmap points from LocationLogs.
     /// Query params:
