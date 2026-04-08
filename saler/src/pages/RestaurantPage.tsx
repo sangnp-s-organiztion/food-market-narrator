@@ -1,7 +1,11 @@
 ﻿import { useState, useEffect, useCallback } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { Restaurant } from "@/types";
-import { updateRestaurantApi, updateRestaurantStatusApi } from "@/services/api";
+import {
+  resolveMapCoordinatesApi,
+  updateRestaurantApi,
+  updateRestaurantStatusApi,
+} from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,15 +28,61 @@ function isWithinSchedule(openTime: string, closeTime: string): boolean {
   return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
 }
 
+function isValidCoordinatePair(latitude: number, longitude: number): boolean {
+  return (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+}
+
+function extractCoordinatesFromGoogleMapsUrl(
+  rawUrl: string,
+): { latitude: number; longitude: number } | null {
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(rawUrl);
+    } catch {
+      return rawUrl;
+    }
+  })();
+
+  const candidates: RegExp[] = [
+    /@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i,
+    /[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+    /[?&]ll=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+  ];
+
+  for (const pattern of candidates) {
+    const match = decoded.match(pattern);
+    if (!match) continue;
+
+    const latitude = Number(match[1]);
+    const longitude = Number(match[2]);
+
+    if (isValidCoordinatePair(latitude, longitude)) {
+      return { latitude, longitude };
+    }
+  }
+
+  return null;
+}
+
 export default function RestaurantPage() {
   const { selectedRestaurant, refreshRestaurants } = useRestaurant();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(selectedRestaurant ? { ...selectedRestaurant } : null);
+  const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
 
   useEffect(() => {
     if (selectedRestaurant) {
       setRestaurant({ ...selectedRestaurant });
+      setGoogleMapsUrl("");
       setAutoMode(true);
     }
   }, [selectedRestaurant]);
@@ -81,6 +131,40 @@ export default function RestaurantPage() {
       toast.error("Không thể lưu thay đổi");
     }
     setSaving(false);
+  };
+
+  const applyCoordinates = (latitude: number, longitude: number) => {
+    setRestaurant((prev) => (prev ? { ...prev, latitude, longitude } : prev));
+  };
+
+  const handleGoogleMapsUrlChange = (value: string) => {
+    setGoogleMapsUrl(value);
+
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return;
+
+    const coords = extractCoordinatesFromGoogleMapsUrl(trimmedValue);
+    if (coords) {
+      applyCoordinates(coords.latitude, coords.longitude);
+    }
+  };
+
+  const handleGoogleMapsUrlBlur = async () => {
+    const raw = googleMapsUrl.trim();
+    if (!raw) return;
+
+    const directCoords = extractCoordinatesFromGoogleMapsUrl(raw);
+    if (directCoords) {
+      applyCoordinates(directCoords.latitude, directCoords.longitude);
+      return;
+    }
+
+    try {
+      const resolved = await resolveMapCoordinatesApi(raw);
+      applyCoordinates(resolved.latitude, resolved.longitude);
+    } catch {
+      toast.error("Không đọc được tọa độ từ link Google Maps");
+    }
   };
 
   if (!selectedRestaurant || !restaurant) return null;
@@ -168,6 +252,16 @@ export default function RestaurantPage() {
           <h3 className="font-medium text-foreground flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" /> Vị trí
           </h3>
+          <div className="space-y-2">
+            <Label htmlFor="google_maps_url">Link Google Maps</Label>
+            <Input
+              id="google_maps_url"
+              value={googleMapsUrl}
+              onChange={(e) => handleGoogleMapsUrlChange(e.target.value)}
+              onBlur={handleGoogleMapsUrlBlur}
+              placeholder="Dán link Google Maps..."
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lat">Vĩ độ</Label>

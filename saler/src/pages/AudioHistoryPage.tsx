@@ -80,6 +80,28 @@ export default function AudioHistoryPage() {
         </p>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="dashboard-card">
+          <span className="stat-label">Tổng lượt nghe</span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">
+              {(restaurantKpis?.total_poi_plays ?? 0).toLocaleString("vi-VN")}
+            </span>
+            <span className="text-xs text-muted-foreground mb-0.5">lượt</span>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">{formattedAvgTime}</span>
+            {avgTime > 0 && (
+              <span className="text-xs text-muted-foreground mb-0.5">phút</span>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-card space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -205,27 +227,6 @@ export default function AudioHistoryPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="dashboard-card">
-          <span className="stat-label">Tổng lượt nghe</span>
-          <div className="mt-2 flex items-baseline gap-1">
-            <span className="stat-value mono">
-              {(restaurantKpis?.total_poi_plays ?? 0).toLocaleString("vi-VN")}
-            </span>
-            <span className="text-xs text-muted-foreground mb-0.5">lượt</span>
-          </div>
-        </div>
-
-        <div className="dashboard-card">
-          <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
-          <div className="mt-2 flex items-baseline gap-1">
-            <span className="stat-value mono">{formattedAvgTime}</span>
-            {avgTime > 0 && (
-              <span className="text-xs text-muted-foreground mb-0.5">phút</span>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

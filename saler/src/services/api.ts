@@ -241,6 +241,11 @@ type ApiAnalyticsKpi = {
   totalPoiPlays: number;
 };
 
+type ApiResolvedMapCoordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 function mapAudio(item: ApiAudio): Audio {
   return {
     audio_id: item.audioId,
@@ -735,4 +740,14 @@ export async function getRestaurantKpisApi(
     average_listening_time_formatted: data.averageListeningTimeFormatted,
     total_poi_plays: data.totalPoiPlays,
   };
+}
+
+export async function resolveMapCoordinatesApi(url: string): Promise<{
+  latitude: number;
+  longitude: number;
+}> {
+  return request<ApiResolvedMapCoordinates>(
+    `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
+    { method: "GET" },
+  );
 }
