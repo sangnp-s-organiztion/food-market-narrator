@@ -109,22 +109,22 @@
                         <!-- Other Categories -->
                         <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf6d7;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- 'Oc' icon? Using generic food -->
-                                 <Label Text="Ốc" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label Text="Gần bạn" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
                          <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf818;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- Bowl appx -->
-                                 <Label Text="Phá lấu" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label Text="Yêu thích" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
                          <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf805;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/> <!-- Fire/Grill appx -->
-                                 <Label Text="Đồ nướng" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label Text="&#xf017;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label Text="Đang mở" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>
