@@ -674,6 +674,23 @@ public partial class SettingsPage : ContentPage
         await Shell.Current.GoToAsync(nameof(HistoryPage));
     }
 
+    private async void OnOpenTourBannerClicked(object sender, EventArgs e)
+    {
+        if (Shell.Current == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await Shell.Current.GoToAsync("//TourPage");
+        }
+        catch
+        {
+            // Ignore navigation race errors to keep settings page stable.
+        }
+    }
+
     private async void OnClearFavoritesClicked(object sender, EventArgs e)
     {
         if (_favoriteService == null)
