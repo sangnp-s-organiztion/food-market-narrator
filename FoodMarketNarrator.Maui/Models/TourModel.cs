@@ -31,6 +31,10 @@ public class TourModel
         ? $"{EstimatedDurationMinutes.Value} PHÚT"
         : "ĐANG CẬP NHẬT";
 
+    public string DurationCompactDisplay => EstimatedDurationMinutes.HasValue
+        ? $"{EstimatedDurationMinutes.Value}p"
+        : "--";
+
     public string StopCountDisplay => $"{StopCount} ĐIỂM DỪNG";
 
     public string BadgeText
