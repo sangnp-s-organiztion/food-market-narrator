@@ -89,6 +89,7 @@
                                     FontFamily="OpenSansSemibold"
                                     CornerRadius="24"
                                     HeightRequest="46"
+                                    Clicked="OnOpenTourBannerClicked"
                                     HorizontalOptions="Start"
                                     Padding="20,0"/>
                         </VerticalStackLayout>
