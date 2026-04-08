@@ -404,7 +404,7 @@ export default function AudioPage() {
 
     const textForAudio = (translatedText || sourceText).trim();
     if (!textForAudio) {
-      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo audio");
+      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo âm thanh");
       return;
     }
 
@@ -426,9 +426,9 @@ export default function AudioPage() {
       setGeneratedAudioUrl(normalizedUrl);
       setGeneratedAudioId(result.audio_id);
       await fetchAudioData();
-      toast.success("Đã tạo audio thành công");
+      toast.success("Đã tạo âm thanh thành công");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Không thể tạo audio từ text"));
+      toast.error(extractErrorMessage(error, "Không thể tạo âm thanh từ văn bản"));
     } finally {
       setIsGenerating(false);
     }
@@ -459,7 +459,7 @@ export default function AudioPage() {
 
   const handlePlayGeneratedAudio = () => {
     if (!generatedAudioUrl) {
-      toast.error("Chưa có audio được tạo");
+      toast.error("Chưa có âm thanh được tạo");
       return;
     }
 
@@ -472,8 +472,8 @@ export default function AudioPage() {
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
           <p className="page-description">
-            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo audio bằng Edge TTS
-            và quản lý phiên bản audio của nhà hàng.
+            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo âm thanh bằng Edge TTS
+            và quản lý phiên bản âm thanh của nhà hàng.
           </p>
         </div>
         <Button onClick={() => openUploadDialog()}>
@@ -484,7 +484,7 @@ export default function AudioPage() {
       <section className="dashboard-card space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-base">Dịch văn bản và tạo audio</h2>
+          <h2 className="font-semibold text-base">Dịch văn bản và tạo âm thanh</h2>
         </div>
 
         <div className="space-y-2">
@@ -493,7 +493,7 @@ export default function AudioPage() {
             id="source-text"
             value={sourceText}
             onChange={(e) => setSourceText(e.target.value)}
-            placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo audio..."
+            placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo âm thanh..."
             className="min-h-36"
           />
         </div>
@@ -549,7 +549,7 @@ export default function AudioPage() {
             disabled={isGenerating}
           >
             {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Tạo audio
+            Tạo âm thanh
           </Button>
 
           <Button
@@ -563,7 +563,7 @@ export default function AudioPage() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            Play audio
+            Phát âm thanh
           </Button>
         </div>
 
@@ -577,14 +577,14 @@ export default function AudioPage() {
           />
           {translateMeta && (
             <p className="text-xs text-muted-foreground">
-              Input: {translateMeta.inputChars} ký tự - Output:{" "}
+              Đầu vào: {translateMeta.inputChars} ký tự - Đầu ra:{" "}
               {translateMeta.outputChars} ký tự - Chi phí ước tính:{" "}
               {translateMeta.estimatedCost.toFixed(6)} {translateMeta.currency}
             </p>
           )}
           {generatedAudioId && (
             <p className="text-xs text-muted-foreground">
-              Audio đã tạo với ID: {generatedAudioId}
+              Âm thanh đã tạo với mã: {generatedAudioId}
             </p>
           )}
         </div>

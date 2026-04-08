@@ -26,15 +26,15 @@ const queryClient = new QueryClient();
 const TITLE_SUFFIX = "Food Market Narrator Saler";
 
 function getTitleByPath(pathname: string): string {
-  if (pathname === "/login") return `Dang nhap | ${TITLE_SUFFIX}`;
-  if (pathname === "/select-restaurant") return `Chon nha hang | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/restaurant")) return `Thong tin nha hang | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/dishes")) return `Quan ly mon an | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/images")) return `Quan ly hinh anh | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/audio")) return `Quan ly audio | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/account")) return `Tai khoan | ${TITLE_SUFFIX}`;
+  if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
+  if (pathname === "/select-restaurant") return `Chọn nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/restaurant")) return `Thông tin nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/dishes")) return `Quản lý món ăn | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/images")) return `Quản lý hình ảnh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/audio")) return `Quản lý âm thanh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/account")) return `Tài khoản | ${TITLE_SUFFIX}`;
   if (pathname === "/") return TITLE_SUFFIX;
-  return `Khong tim thay trang | ${TITLE_SUFFIX}`;
+  return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 }
 
 function RouteTitleManager() {

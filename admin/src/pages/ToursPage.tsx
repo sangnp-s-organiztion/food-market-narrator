@@ -501,7 +501,7 @@ const ToursPage = () => {
           {!isDetailLoading && !isDetailError && selectedTour && (
             <div className="space-y-5">
               <div className="rounded-md border p-4">
-                <p className="text-sm text-muted-foreground">Tour</p>
+                <p className="text-sm text-muted-foreground">Tên tour</p>
                 <p className="mt-1 text-base font-semibold">{selectedTour.name}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Tổng số điểm dừng: {selectedTour.stopCount}
@@ -544,15 +544,15 @@ const ToursPage = () => {
 
               <div className="rounded-md border p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Danh sách nhà hàng theo stop_order</h3>
+                  <h3 className="text-sm font-semibold">Danh sách nhà hàng theo thứ tự điểm dừng</h3>
                 </div>
 
                 <table className="data-table">
                   <thead>
                     <tr>
                       <th className="w-12"></th>
-                      <th className="w-28">Stop order</th>
-                      <th className="w-64">Restaurant ID</th>
+                      <th className="w-28">Thứ tự điểm dừng</th>
+                      <th className="w-64">Mã nhà hàng</th>
                       <th>Tên nhà hàng</th>
                       <th>Địa chỉ</th>
                     </tr>
@@ -623,7 +623,7 @@ const ToursPage = () => {
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Stop order sẽ tự động là: {getNextStopOrder(selectedTour)}
+                  Thứ tự điểm dừng sẽ tự động là: {getNextStopOrder(selectedTour)}
                 </p>
 
                 <div className="mt-4">

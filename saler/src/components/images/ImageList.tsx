@@ -1,4 +1,4 @@
-import { ImageIcon } from "lucide-react";
+﻿import { ImageIcon } from "lucide-react";
 import type { RestaurantImage } from "@/types";
 import { ImageCard } from "./ImageCard";
 
@@ -11,18 +11,6 @@ interface ImageListProps {
   onReplace: (id: number) => void;
 }
 
-/**
- * ImageList renders all restaurant images in a grid layout.
- *
- * Display rules:
- * - Images are sorted by sort_order (ascending)
- * - Primary image (is_primary = 1) always appears first via sorting
- * - Non-primary images follow as gallery items
- *
- * POIs:
- * - page load → renders image grid
- * - item click → handled by ImageCard actions
- */
 export function ImageList({
   images,
   onSetPrimary,

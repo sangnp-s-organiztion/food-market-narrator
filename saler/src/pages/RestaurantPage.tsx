@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { Restaurant } from "@/types";
 import { updateRestaurantApi, updateRestaurantStatusApi } from "@/services/api";
@@ -30,7 +30,6 @@ export default function RestaurantPage() {
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
 
-  // Sync when switching restaurants
   useEffect(() => {
     if (selectedRestaurant) {
       setRestaurant({ ...selectedRestaurant });
@@ -94,7 +93,6 @@ export default function RestaurantPage() {
       </div>
 
       <div className="space-y-6">
-        {/* Status Toggle */}
         <div className="form-section">
           <div className="flex items-center justify-between">
             <div>
@@ -114,7 +112,6 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        {/* Schedule */}
         <div className="form-section space-y-4">
           <h3 className="font-medium text-foreground flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" /> Giờ hoạt động của nhà hàng
@@ -137,11 +134,10 @@ export default function RestaurantPage() {
             <Switch checked={autoMode} onCheckedChange={handleAutoModeToggle} />
           </div>
           {!autoMode && (
-            <p className="text-xs text-muted-foreground italic">Chế độ thủ công đang bật — lịch trình tạm thời bị bỏ qua.</p>
+            <p className="text-xs text-muted-foreground italic">Chế độ thủ công đang bật, lịch trình tạm thời bị bỏ qua.</p>
           )}
         </div>
 
-        {/* Basic Info */}
         <div className="form-section space-y-4">
           <h3 className="font-medium text-foreground">Thông tin cơ bản</h3>
           <div className="space-y-2">
@@ -154,7 +150,6 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        {/* Contact */}
         <div className="form-section space-y-4">
           <h3 className="font-medium text-foreground flex items-center gap-2">
             <Phone className="w-4 h-4 text-primary" /> Liên hệ
@@ -169,7 +164,6 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        {/* Location */}
         <div className="form-section space-y-4">
           <h3 className="font-medium text-foreground flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" /> Vị trí
@@ -197,7 +191,6 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        {/* Save */}
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving}>
             <Save className="w-4 h-4 mr-2" />
