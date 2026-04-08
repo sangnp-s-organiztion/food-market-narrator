@@ -87,6 +87,8 @@ export interface UpdateStatusRequest {
 export interface UserResponse {
   userId: number;
   username: string;
+  phone?: string | null;
+  email?: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -95,6 +97,8 @@ export interface UserResponse {
 export interface CreateUserRequest {
   username: string;
   password: string;
+  phone: string;
+  email: string;
   role: string;
 }
 
@@ -104,6 +108,11 @@ export interface UpdateUserRoleRequest {
 
 export interface UpdateUserStatusRequest {
   isActive: boolean;
+}
+
+export interface UpdateUserPasswordRequest {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export interface CountResponse {
@@ -232,6 +241,12 @@ export const userApi = {
 
   updateStatus: (id: number, data: UpdateUserStatusRequest) =>
     adminFetch<{ message: string }>(`/api/users/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  updateMyPassword: (data: UpdateUserPasswordRequest) =>
+    adminFetch<{ message: string }>("/Auth/password", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),

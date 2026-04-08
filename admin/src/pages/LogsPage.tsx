@@ -210,11 +210,8 @@ const LogsPage = () => {
       <div className="max-w-7xl mx-auto px-8 py-6">
         <div className="stat-card">
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3">
               <h2 className="text-lg font-semibold">Nhật ký hệ thống</h2>
-              <span className="text-xs text-muted-foreground mono">
-                Nguồn: MongoDB AuditLogs
-              </span>
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -370,11 +367,8 @@ const LogsPage = () => {
 
           <div className="h-px bg-border mb-6" />
 
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3">
             <h2 className="text-lg font-semibold">Nhật ký nghe audio</h2>
-            <span className="text-xs text-muted-foreground mono">
-              Nguồn: MongoDB AudioLogs
-            </span>
           </div>
 
           {/* Subtle hint for action types */}

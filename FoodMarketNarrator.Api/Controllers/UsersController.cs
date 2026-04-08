@@ -106,4 +106,37 @@ public class UsersController : ControllerBase
         }
         return Ok(new { message = "User status updated." });
     }
+
+    // PATCH api/users/{id}/password
+    [HttpPatch("{id:int}/password")]
+    public async Task<IActionResult> UpdatePassword(int id, [FromBody] UpdateUserPasswordRequest request)
+    {
+        var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(currentUserIdRaw, out var currentUserId))
+        {
+            return Unauthorized(new { message = "Unauthorized." });
+        }
+
+        if (currentUserId != id)
+        {
+            return Forbid();
+        }
+
+        bool updated;
+        try
+        {
+            updated = await _userService.ChangePasswordAsync(id, request.OldPassword, request.NewPassword);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+        if (!updated)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+
+        return Ok(new { message = "Password updated." });
+    }
 }

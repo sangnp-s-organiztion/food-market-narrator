@@ -39,6 +39,8 @@ public class Program
         builder.Services.AddScoped<UserSessionService>();
         builder.Services.AddScoped<AudioLogRepository>();
         builder.Services.AddScoped<AudioLogService>();
+        builder.Services.AddScoped<TourRepository>();
+        builder.Services.AddScoped<TourService>();
         builder.Services.AddScoped<TranslationHistoryRepository>();
         builder.Services.AddScoped<TranslationService>();
         builder.Services.AddScoped<AdminTranslationBillingService>();
