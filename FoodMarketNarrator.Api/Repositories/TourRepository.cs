@@ -139,6 +139,7 @@ public class TourRepository
         int tourId,
         int? estimatedDurationMinutes,
         int sortPriority,
+        bool isActive,
         bool isFeatured)
     {
         var tour = await _context.Tour.FirstOrDefaultAsync(t => t.TourId == tourId);
@@ -149,10 +150,37 @@ public class TourRepository
 
         tour.EstimatedDurationMinutes = estimatedDurationMinutes;
         tour.SortPriority = sortPriority;
+        tour.IsActive = isActive;
         tour.IsFeatured = isFeatured;
         tour.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<TourModel> CreateTourAsync(
+        string name,
+        string? shortDescription,
+        string? description,
+        int? estimatedDurationMinutes,
+        bool isActive,
+        bool isFeatured,
+        int sortPriority)
+    {
+        var entity = new TourModel
+        {
+            Name = name,
+            ShortDescription = shortDescription,
+            Description = description,
+            EstimatedDurationMinutes = estimatedDurationMinutes,
+            IsActive = isActive,
+            IsFeatured = isFeatured,
+            SortPriority = sortPriority,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Tour.Add(entity);
+        await _context.SaveChangesAsync();
+        return entity;
     }
 }

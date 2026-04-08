@@ -1,4 +1,4 @@
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+﻿import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,6 @@ export default function DashboardLayout() {
   const location = useLocation();
   const isAccountPage = location.pathname.startsWith("/dashboard/account");
 
-  // Redirect to selection page if no restaurant selected (except account page)
   if (!selectedRestaurant && !isAccountPage) {
     return <Navigate to="/select-restaurant" replace />;
   }
@@ -42,10 +41,7 @@ export default function DashboardLayout() {
                   </SelectTrigger>
                   <SelectContent>
                     {restaurants.map((r) => (
-                      <SelectItem
-                        key={r.restaurant_id}
-                        value={String(r.restaurant_id)}
-                      >
+                      <SelectItem key={r.restaurant_id} value={String(r.restaurant_id)}>
                         {r.name}
                       </SelectItem>
                     ))}
@@ -54,9 +50,7 @@ export default function DashboardLayout() {
               </div>
             )}
             <div className="flex-1" />
-            <span className="text-sm text-muted-foreground">
-              {user?.username}
-            </span>
+            <span className="text-sm text-muted-foreground">{user?.username}</span>
           </header>
           <main className="flex-1 p-6 overflow-auto">
             <Outlet />

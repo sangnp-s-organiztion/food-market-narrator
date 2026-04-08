@@ -1,14 +1,13 @@
-import { useRestaurant } from "@/contexts/RestaurantContext";
+﻿import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useNavigate } from "react-router-dom";
 import { Store, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
 export default function SelectRestaurantPage() {
-  const { restaurants, selectRestaurant, selectedRestaurant } = useRestaurant();
+  const { restaurants, selectRestaurant } = useRestaurant();
   const navigate = useNavigate();
 
-  // Auto-select if only one restaurant
   useEffect(() => {
     if (restaurants.length === 1) {
       selectRestaurant(restaurants[0].restaurant_id);
@@ -34,8 +33,7 @@ export default function SelectRestaurantPage() {
             Chọn nhà hàng để quản lý
           </h1>
           <p className="text-muted-foreground mt-2">
-            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để
-            tiếp tục.
+            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để tiếp tục.
           </p>
         </div>
 
