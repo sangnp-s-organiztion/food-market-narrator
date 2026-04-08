@@ -34,47 +34,65 @@
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16,14,16,100" Spacing="16">
-                <Border BackgroundColor="White"
-                        Stroke="#F3ECE5"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 28"
-                        Padding="20,18">
-                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Border BackgroundColor="#F57C00"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 34"
+                        Padding="22,18,22,20">
+                    <Grid>
                         <Border StrokeThickness="0"
-                                BackgroundColor="#FFF1E3"
-                                HeightRequest="44"
-                                WidthRequest="44"
-                                StrokeShape="RoundRectangle 22"
-                                HorizontalOptions="Center">
-                            <Label Text="&#xf007;"
-                                   FontFamily="FASolid"
-                                   FontSize="16"
-                                   TextColor="#F48C06"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center"/>
-                        </Border>
+                                BackgroundColor="#D86C00"
+                                Opacity="0.55"
+                                HeightRequest="92"
+                                WidthRequest="92"
+                                StrokeShape="RoundRectangle 46"
+                                HorizontalOptions="End"
+                                VerticalOptions="Start"
+                                Margin="0,-20,-18,0"/>
 
-                        <Label Text="Chào mừng bạn!"
-                               FontSize="28"
-                               FontFamily="OpenSansSemibold"
-                               TextColor="#1F2937"
-                               HorizontalOptions="Center"/>
+                        <VerticalStackLayout Spacing="11">
+                            <HorizontalStackLayout Spacing="8">
+                                <Border StrokeThickness="0"
+                                        BackgroundColor="#F8A74D"
+                                        HeightRequest="28"
+                                        WidthRequest="28"
+                                        StrokeShape="RoundRectangle 14"
+                                        VerticalOptions="Center">
+                                    <Label Text="&#xf0eb;"
+                                           FontFamily="FASolid"
+                                           FontSize="12"
+                                           TextColor="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                                <Label Text="MẸO HÔM NAY"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#FFE4BF"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-                        <Label Text="Đăng nhập để đồng bộ đơn hàng và nhận nhiều ưu đãi hơn."
-                               FontSize="13"
-                               TextColor="#94A3B8"
-                               HorizontalTextAlignment="Center"
-                               LineBreakMode="WordWrap"/>
+                            <Label Text="Trải nghiệm hành trình khám phá"
+                                FontSize="19"
+                                   FontFamily="OpenSansSemibold"
+                                   TextColor="White"
+                                   LineHeight="1.15"/>
 
-                        <Button Text="&#xf2f6;  Đăng nhập"
-                                FontFamily="FASolid"
-                                BackgroundColor="#F48C06"
-                                TextColor="White"
-                                FontSize="15"
-                                FontAttributes="Bold"
-                                CornerRadius="20"
-                                HeightRequest="44"/>
-                    </VerticalStackLayout>
+                            <Label Text="Bật thuyết minh tự động và tận hưởng những câu chuyện thú vị tại mỗi điểm dừng."
+                                   FontSize="15"
+                                   TextColor="#FFE7C9"
+                                   LineBreakMode="WordWrap"/>
+
+                            <Button Text="Trải nghiệm ngay  ->"
+                                    BackgroundColor="White"
+                                    TextColor="#E07400"
+                                    FontSize="16"
+                                    FontFamily="OpenSansSemibold"
+                                    CornerRadius="24"
+                                    HeightRequest="46"
+                                    HorizontalOptions="Start"
+                                    Padding="20,0"/>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Border>
 
                 <Label Text="ỨNG DỤNG"
@@ -93,7 +111,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf57d;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Ngôn ngữ" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="Ngôn ngữ thuyết minh" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" x:Name="CurrentLanguageLabel" Text="Tiếng Việt" FontSize="14" TextColor="#F48C06" VerticalOptions="Center" HorizontalOptions="End"/>
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLanguageTapped"/>
