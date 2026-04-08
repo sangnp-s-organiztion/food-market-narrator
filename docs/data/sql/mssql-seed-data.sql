@@ -192,3 +192,115 @@ INSERT INTO food_market_narrator.dbo.Users (username,password_hash,[role],is_act
 	 (N'saler4',N'123456',N'saler',1,'2026-02-08 09:13:08.0'),
 	 (N'admin2',N'sangnp123',N'admin',1,'2026-04-01 15:56:02.727'),
 	 (N'phuosang',N'admin123',N'admin',1,'2026-04-01 16:48:43.837');
+
+
+
+-- Insert 4 sample tours
+INSERT INTO dbo.Tour (
+    name,
+    short_description,
+    description,
+    estimated_duration_minutes,
+    is_active,
+    is_featured,
+    sort_priority,
+    created_by,
+    updated_by
+)
+VALUES
+(
+    N'Tour Oc Vinh Khanh',
+    N'Cluster cac quan oc noi bat tren duong Vinh Khanh.',
+    N'Phu hop cho visitor muon trai nghiem nhieu mon oc, di bo ngan va dung chan nhanh.',
+    120,
+    1,
+    1,
+    100,
+    NULL,
+    NULL
+),
+(
+    N'Tour Nuong Lau Buoi Toi',
+    N'Tour danh cho nhom ban thich nuong va lau vao buoi toi.',
+    N'Ket hop cac diem nuong lau pho bien, phu hop 2-4 nguoi.',
+    150,
+    1,
+    1,
+    90,
+    NULL,
+    NULL
+),
+(
+    N'Tour Gia Dinh Cuoi Tuan',
+    N'Tour de di cho gia dinh, diem dung can bang giua khong gian va mon an.',
+    N'Lich trinh de chiu, co nhieu lua chon mon nuong hai san va nha hang co khong gian rong.',
+    180,
+    1,
+    0,
+    80,
+    NULL,
+    NULL
+),
+(
+    N'Tour Hai San Signature',
+    N'Chon loc cac diem hai san duoc visitor quan tam nhieu.',
+    N'Tour tap trung vao nhom mon hai san va oc signature de visitor de chon quan.',
+    165,
+    1,
+    0,
+    85,
+    NULL,
+    NULL
+);
+
+DECLARE @TourOcVinhKhanhId INT;
+DECLARE @TourNuongLauId INT;
+DECLARE @TourGiaDinhId INT;
+DECLARE @TourHaiSanId INT;
+
+SET @TourOcVinhKhanhId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Oc Vinh Khanh' ORDER BY tour_id DESC);
+SET @TourNuongLauId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Nuong Lau Buoi Toi' ORDER BY tour_id DESC);
+SET @TourGiaDinhId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Gia Dinh Cuoi Tuan' ORDER BY tour_id DESC);
+SET @TourHaiSanId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Hai San Signature' ORDER BY tour_id DESC);
+
+-- Tour 1: 8 restaurants
+INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
+VALUES
+(@TourOcVinhKhanhId, 'oc-loan', 1, NULL),
+(@TourOcVinhKhanhId, 'oc-oanh', 2, NULL),
+(@TourOcVinhKhanhId, 'oc-phat', 3, NULL),
+(@TourOcVinhKhanhId, 'oc-cuc-vinh-khanh', 4, NULL),
+(@TourOcVinhKhanhId, 'oc-hoa-kieu', 5, NULL),
+(@TourOcVinhKhanhId, 'oc-hong-nhung', 6, NULL),
+(@TourOcVinhKhanhId, 'quan-oc-thao', 7, NULL),
+(@TourOcVinhKhanhId, 'quan-oc-vu', 8, NULL);
+
+-- Tour 2: 6 restaurants
+INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
+VALUES
+(@TourNuongLauId, 'chilli-bbq-hotpot-restaurant', 1, NULL),
+(@TourNuongLauId, 'lau-met-nuong-79k', 2, NULL),
+(@TourNuongLauId, 'lau-nuong-thuan-viet', 3, NULL),
+(@TourNuongLauId, 'sot-lau-alo-quan', 4, NULL),
+(@TourNuongLauId, 'them-nuong-yakiniku', 5, NULL),
+(@TourNuongLauId, 'the-gioi-bo', 6, NULL);
+
+-- Tour 3: 5 restaurants
+INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
+VALUES
+(@TourGiaDinhId, 'lang-restaurant', 1, NULL),
+(@TourGiaDinhId, 'the-gioi-bo', 2, NULL),
+(@TourGiaDinhId, 'quan-bo-oc', 3, NULL),
+(@TourGiaDinhId, 'chilli-bbq-hotpot-restaurant', 4, NULL),
+(@TourGiaDinhId, 'oc-cuc-vinh-khanh', 5, NULL);
+
+-- Tour 4: 7 restaurants
+INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
+VALUES
+(@TourHaiSanId, 'quan-bo-oc', 1, NULL),
+(@TourHaiSanId, 'oc-cuc-vinh-khanh', 2, NULL),
+(@TourHaiSanId, 'oc-hong-nhung', 3, NULL),
+(@TourHaiSanId, 'oc-phat', 4, NULL),
+(@TourHaiSanId, 'oc-oanh', 5, NULL),
+(@TourHaiSanId, 'quan-oc-vu', 6, NULL),
+(@TourHaiSanId, 'lang-restaurant', 7, NULL);

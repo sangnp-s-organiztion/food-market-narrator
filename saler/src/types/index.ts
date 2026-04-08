@@ -2,6 +2,10 @@ export interface User {
   user_id: number;
   username: string;
   role: string;
+  phone?: string;
+  email?: string;
+  is_active?: boolean;
+  created_at?: string;
 }
 
 export interface UserRestaurant {
@@ -59,6 +63,26 @@ export interface Audio {
   version: number;
   is_active: boolean;
   date_generation: string;
+}
+
+export interface TranslateTextResult {
+  request_id: string;
+  source_language_code: string;
+  target_language_code: string;
+  translated_text: string;
+  input_chars: number;
+  output_chars: number;
+  estimated_cost: number;
+  currency: string;
+}
+
+export interface CreateAudioFromTextResult {
+  request_id: string;
+  audio_id: number;
+  audio_url: string;
+  language_code: string;
+  voice: string;
+  created_at: string;
 }
 
 export interface AuthState {

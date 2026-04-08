@@ -1,0 +1,25 @@
+services:
+  edge-tts:
+    build:
+      context: ./tools/edge-tts-service
+      dockerfile: Dockerfile
+    container_name: fmn-edge-tts
+    restart: unless-stopped
+    ports:
+      - "6000:6000"
+    environment:
+      EDGE_TTS_DEFAULT_VOICE_EN: "en-US-JennyNeural"
+      EDGE_TTS_DEFAULT_VOICE_VI: "vi-VN-HoaiMyNeural"
+      EDGE_TTS_DEFAULT_VOICE_JA: "ja-JP-NanamiNeural"
+      EDGE_TTS_DEFAULT_VOICE_ZH: "zh-CN-XiaoxiaoNeural"
+      EDGE_TTS_DEFAULT_VOICE_KO: "ko-KR-SunHiNeural"
+      EDGE_TTS_ENABLE_GTTS_FALLBACK: "true"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:6000/health'', timeout=5)"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5

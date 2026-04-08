@@ -11,6 +11,8 @@ public static class PublicEndpoints
         new("GET", "/Language/{languageCode}"),
         new("GET", "/Restaurant"),
         new("GET", "/Restaurant/{id}"),
+        new("GET", "/Tour"),
+        new("GET", "/Tour/{id:int}"),
         new("GET", "/audio"),
         new("GET", "/Mongo/test-connect"),
         new("POST", "/api/user-sessions/start"),

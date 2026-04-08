@@ -1,11 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
-  Navigate,
   useLocation,
 } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,26 +18,22 @@ import RestaurantsPage from "./pages/Restaurants.tsx";
 import UsersPage from "./pages/UsersPage.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import TrajectoryPage from "./pages/TrajectoryPage.tsx";
-
-import { ReactNode, useEffect } from "react";
+import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
+import AccountPage from "./pages/AccountPage.tsx";
 
 const queryClient = new QueryClient();
-
 const TITLE_SUFFIX = "Food Market Narrator Admin";
 
 const getTitleByPath = (pathname: string): string => {
-  if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
-  if (pathname === "/") return `Tổng quan | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/restaurants")) {
-    return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
-  }
-  if (pathname.startsWith("/users"))
-    return `Quản lý người dùng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/logs"))
-    return `Nhật ký hoạt động | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/trajectory"))
-    return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
-  return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
+  if (pathname === "/login") return `Dang nhap | ${TITLE_SUFFIX}`;
+  if (pathname === "/") return `Tong quan | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/restaurants")) return `Quan ly nha hang | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/users")) return `Quan ly nguoi dung | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/logs")) return `Nhat ky hoat dong | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/trajectory")) return `Lo trinh nguoi dung | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/translation-billing")) return `Billing token dich | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/account")) return `Tai khoan | ${TITLE_SUFFIX}`;
+  return `Khong tim thay trang | ${TITLE_SUFFIX}`;
 };
 
 const RouteTitleManager = () => {
@@ -49,12 +46,11 @@ const RouteTitleManager = () => {
   return null;
 };
 
-// Shown during auth bootstrap (GET /Auth/me round-trip)
 const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
+  <div className="flex min-h-screen items-center justify-center bg-background">
     <div className="flex flex-col items-center gap-3">
-      <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-      <p className="text-sm text-muted-foreground">Đang khởi tạo…</p>
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <p className="text-sm text-muted-foreground">Dang khoi tao...</p>
     </div>
   </div>
 );
@@ -117,6 +113,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TrajectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/translation-billing"
+        element={
+          <ProtectedRoute>
+            <TranslationBillingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute>
+            <AccountPage />
           </ProtectedRoute>
         }
       />

@@ -1,9 +1,11 @@
 import type {
   Audio,
+  CreateAudioFromTextResult,
   Dish,
   Language,
   Restaurant,
   RestaurantImage,
+  TranslateTextResult,
   User,
 } from "@/types";
 
@@ -171,6 +173,26 @@ type ApiAudio = {
   dateGeneration: string;
 };
 
+type ApiTranslateTextResponse = {
+  requestId: string;
+  sourceLanguageCode: string;
+  targetLanguageCode: string;
+  translatedText: string;
+  inputChars: number;
+  outputChars: number;
+  estimatedCost: number;
+  currency: string;
+};
+
+type ApiCreateAudioFromTextResponse = {
+  requestId: string;
+  audioId: number;
+  audioUrl: string;
+  languageCode: string;
+  voice: string;
+  createdAt: string;
+};
+
 function mapAudio(item: ApiAudio): Audio {
   return {
     audio_id: item.audioId,
@@ -205,6 +227,16 @@ type LoginResponse = {
   role: string;
 };
 
+type ApiUserProfile = {
+  userId: number;
+  username: string;
+  role: string;
+  isActive?: boolean;
+  createdAt?: string;
+  phone?: string | null;
+  email?: string | null;
+};
+
 export async function loginApi(
   username: string,
   password: string,
@@ -228,6 +260,36 @@ export async function getMeApi(): Promise<User> {
     username: response.username,
     role: response.role,
   };
+}
+
+export async function getMyAccountApi(userId: number): Promise<User> {
+  const response = await request<ApiUserProfile>(`/api/users/${userId}`, {
+    method: "GET",
+  });
+
+  return {
+    user_id: response.userId,
+    username: response.username,
+    role: response.role,
+    is_active: response.isActive,
+    created_at: response.createdAt,
+    phone: response.phone ?? "",
+    email: response.email ?? "",
+  };
+}
+
+export async function updateMyPasswordApi(
+  _userId: number,
+  oldPassword: string,
+  newPassword: string,
+): Promise<void> {
+  await request<{ message: string }>(`/Auth/password`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      oldPassword,
+      newPassword,
+    }),
+  });
 }
 
 export async function logoutApi(): Promise<void> {
@@ -454,4 +516,72 @@ export async function deleteAudioApi(audioId: number): Promise<void> {
   await request<{ message: string }>(`/Audios/${audioId}`, {
     method: "DELETE",
   });
+}
+
+export async function translateAudioTextApi(
+  restaurantId: string,
+  payload: {
+    text: string;
+    source_language_code?: string;
+    target_language_code: string;
+    request_id?: string;
+  },
+): Promise<TranslateTextResult> {
+  const data = await request<ApiTranslateTextResponse>(
+    `/Restaurant/${restaurantId}/translate`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        text: payload.text,
+        sourceLanguageCode: payload.source_language_code,
+        targetLanguageCode: payload.target_language_code,
+        requestId: payload.request_id,
+      }),
+    },
+  );
+
+  return {
+    request_id: data.requestId,
+    source_language_code: data.sourceLanguageCode,
+    target_language_code: data.targetLanguageCode,
+    translated_text: data.translatedText,
+    input_chars: data.inputChars,
+    output_chars: data.outputChars,
+    estimated_cost: data.estimatedCost,
+    currency: data.currency,
+  };
+}
+
+export async function createAudioFromTextApi(
+  restaurantId: string,
+  payload: {
+    text: string;
+    language_code: string;
+    source_text?: string;
+    voice?: string;
+    request_id?: string;
+  },
+): Promise<CreateAudioFromTextResult> {
+  const data = await request<ApiCreateAudioFromTextResponse>(
+    `/Restaurant/${restaurantId}/audios/from-text`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        text: payload.text,
+        languageCode: payload.language_code,
+        sourceText: payload.source_text,
+        voice: payload.voice,
+        requestId: payload.request_id,
+      }),
+    },
+  );
+
+  return {
+    request_id: data.requestId,
+    audio_id: data.audioId,
+    audio_url: normalizeAudioUrl(data.audioUrl),
+    language_code: data.languageCode,
+    voice: data.voice,
+    created_at: data.createdAt,
+  };
 }

@@ -31,6 +31,23 @@ namespace food_market_narrator_api.Repositories
             return await _context.User.FindAsync(id);
         }
 
+        public async Task<List<UserModel>> GetByIdsAsync(IEnumerable<int> userIds)
+        {
+            var ids = userIds
+                .Where(id => id > 0)
+                .Distinct()
+                .ToArray();
+
+            if (ids.Length == 0)
+            {
+                return new List<UserModel>();
+            }
+
+            return await _context.User
+                .Where(u => ids.Contains(u.UserId))
+                .ToListAsync();
+        }
+
         public async Task<UserModel?> GetByUsernameAsync(string username)
         {
             return await _context.User
@@ -82,6 +99,15 @@ namespace food_market_narrator_api.Repositories
             var user = await _context.User.FindAsync(userId);
             if (user == null) return false;
             user.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, string passwordHash)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+            user.Password = passwordHash;
             await _context.SaveChangesAsync();
             return true;
         }

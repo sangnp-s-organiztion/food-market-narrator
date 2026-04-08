@@ -87,6 +87,8 @@ export interface UpdateStatusRequest {
 export interface UserResponse {
   userId: number;
   username: string;
+  phone?: string | null;
+  email?: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -95,6 +97,8 @@ export interface UserResponse {
 export interface CreateUserRequest {
   username: string;
   password: string;
+  phone: string;
+  email: string;
   role: string;
 }
 
@@ -106,8 +110,84 @@ export interface UpdateUserStatusRequest {
   isActive: boolean;
 }
 
+export interface UpdateUserPasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface CountResponse {
   count: number;
+}
+
+export interface TranslationMonthlyBillingItem {
+  sellerUserId: number;
+  sellerUsername: string;
+  billingMonth: string;
+  totalRequests: number;
+  successRequests: number;
+  failedRequests: number;
+  totalBillableUnits: number;
+  totalAmount: number;
+  currency: string;
+  lastRecomputedAtUtc: string;
+}
+
+export interface TranslationMonthlyBillingSummary {
+  billingMonth: string;
+  sellerCount: number;
+  totalRequests: number;
+  successRequests: number;
+  failedRequests: number;
+  totalBillableUnits: number;
+  totalAmount: number;
+  currency: string;
+}
+
+export interface TranslationMonthlyBillingResponse {
+  items: TranslationMonthlyBillingItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: TranslationMonthlyBillingSummary;
+}
+
+export interface TranslationUsageLedgerItem {
+  usageEventId: string;
+  requestId: string;
+  sellerUserId: number;
+  sellerUsername: string;
+  restaurantId: string;
+  audioId: number | null;
+  provider: string;
+  actionType: string;
+  unitType: string;
+  inputChars: number;
+  outputChars: number;
+  billableUnits: number;
+  costAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  billingMonth: string;
+  createdAtUtc: string;
+}
+
+export interface TranslationUsageLedgerSummary {
+  billingMonth: string;
+  status: string;
+  eventCount: number;
+  totalBillableUnits: number;
+  totalAmount: number;
+  currency: string;
+}
+
+export interface TranslationUsageLedgerResponse {
+  items: TranslationUsageLedgerItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: TranslationUsageLedgerSummary;
 }
 
 // ─── Restaurant API ──────────────────────────────────────────────────────────
@@ -164,6 +244,12 @@ export const userApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+
+  updateMyPassword: (data: UpdateUserPasswordRequest) =>
+    adminFetch<{ message: string }>("/Auth/password", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ─── Admin Stats API ───────────────────────────────────────────────────────
@@ -179,4 +265,52 @@ export const adminStatsApi = {
 
   getDishCount: () =>
     adminFetch<CountResponse>("/api/admin/stats/dishes/count"),
+};
+
+type TranslationBillingFilter = {
+  billingMonth?: string;
+  sellerUserId?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+const toQueryString = (params: Record<string, string | number | undefined>) => {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && `${value}`.trim().length > 0) {
+      query.set(key, `${value}`);
+    }
+  });
+  return query.toString();
+};
+
+export const translationBillingApi = {
+  getMonthly: (filter: TranslationBillingFilter) => {
+    const query = toQueryString({
+      billingMonth: filter.billingMonth,
+      sellerUserId: filter.sellerUserId,
+      page: filter.page ?? 1,
+      pageSize: filter.pageSize ?? 20,
+    });
+
+    return adminFetch<TranslationMonthlyBillingResponse>(
+      `/api/admin/translation-billing/monthly?${query}`,
+    );
+  },
+
+  getUsage: (
+    filter: TranslationBillingFilter & { status?: "billable" | "failed" },
+  ) => {
+    const query = toQueryString({
+      billingMonth: filter.billingMonth,
+      sellerUserId: filter.sellerUserId,
+      status: filter.status,
+      page: filter.page ?? 1,
+      pageSize: filter.pageSize ?? 20,
+    });
+
+    return adminFetch<TranslationUsageLedgerResponse>(
+      `/api/admin/translation-billing/usage?${query}`,
+    );
+  },
 };
