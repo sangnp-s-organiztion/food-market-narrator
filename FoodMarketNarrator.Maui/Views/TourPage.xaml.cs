@@ -72,9 +72,35 @@ public partial class TourPage : ContentPage
             return;
         }
 
+        if (button.CommandParameter is int tourId && _tourMap.TryGetValue(tourId, out var tour))
+        {
+            await NavigateTourToMapAsync(tour);
+            return;
+        }
+
+        await NavigateTourToMapAsync(null);
+    }
+
+    private async void OnTourCardTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is not Border border)
+        {
+            return;
+        }
+
+        await NavigateTourToMapAsync(border.BindingContext as TourModel);
+    }
+
+    private static async Task NavigateTourToMapAsync(TourModel? tour)
+    {
+        if (Shell.Current == null)
+        {
+            return;
+        }
+
         try
         {
-            if (button.CommandParameter is int tourId && _tourMap.TryGetValue(tourId, out var tour))
+            if (tour != null)
             {
                 var poiIds = (tour.Stops ?? new List<TourStopModel>())
                     .Select(s => s.RestaurantId)
