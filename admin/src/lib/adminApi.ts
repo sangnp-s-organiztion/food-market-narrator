@@ -98,6 +98,7 @@ export interface TourResponse {
   description: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl: string | null;
+  isActive: boolean;
   isFeatured: boolean;
   sortPriority: number;
   stopCount: number;
@@ -117,6 +118,17 @@ export interface ReorderTourStopsRequest {
 export interface UpdateTourRequest {
   estimatedDurationMinutes: number | null;
   sortPriority: number;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+export interface CreateTourRequest {
+  name: string;
+  shortDescription?: string | null;
+  description?: string | null;
+  estimatedDurationMinutes: number | null;
+  sortPriority: number;
+  isActive: boolean;
   isFeatured: boolean;
 }
 
@@ -270,6 +282,12 @@ export const tourApi = {
   getAll: () => adminFetch<TourResponse[]>("/Tour"),
 
   getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  create: (data: CreateTourRequest) =>
+    adminFetch<TourResponse>("/Tour", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
     adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {

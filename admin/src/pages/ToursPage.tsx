@@ -1,8 +1,9 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, GripVertical, Plus } from "lucide-react";
+import { Eye, GripVertical, Lock, Plus, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   restaurantApi,
   tourApi,
@@ -27,14 +29,29 @@ function getNextStopOrder(tour: TourResponse | undefined): number {
 
 const ToursPage = () => {
   const qc = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
   const [addRestaurantId, setAddRestaurantId] = useState("");
+  const [confirmTour, setConfirmTour] = useState<{
+    id: number;
+    name: string;
+    lock: boolean;
+    estimatedDurationMinutes: number | null;
+    sortPriority: number;
+    isFeatured: boolean;
+  } | null>(null);
   const [draftStops, setDraftStops] = useState<TourStopResponse[]>([]);
   const [draggingRestaurantId, setDraggingRestaurantId] = useState<string | null>(null);
   const [draftEstimatedDurationMinutes, setDraftEstimatedDurationMinutes] = useState("");
   const [draftSortPriority, setDraftSortPriority] = useState("");
   const [draftIsFeatured, setDraftIsFeatured] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createShortDescription, setCreateShortDescription] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
+  const [createEstimatedDurationMinutes, setCreateEstimatedDurationMinutes] = useState("");
+  const [createSortPriority, setCreateSortPriority] = useState("0");
+  const [createIsFeatured, setCreateIsFeatured] = useState(false);
 
   const {
     data: tours = [],
@@ -148,12 +165,75 @@ const ToursPage = () => {
     },
   });
 
+  const createTourMutation = useMutation({
+    mutationFn: (payload: {
+      name: string;
+      shortDescription: string | null;
+      description: string | null;
+      estimatedDurationMinutes: number | null;
+      sortPriority: number;
+      isActive: boolean;
+      isFeatured: boolean;
+    }) =>
+      tourApi.create({
+        name: payload.name,
+        shortDescription: payload.shortDescription,
+        description: payload.description,
+        estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        sortPriority: payload.sortPriority,
+        isActive: payload.isActive,
+        isFeatured: payload.isFeatured,
+      }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
+      setCreateOpen(false);
+      setCreateName("");
+      setCreateShortDescription("");
+      setCreateDescription("");
+      setCreateEstimatedDurationMinutes("");
+      setCreateSortPriority("0");
+      setCreateIsFeatured(false);
+      toast.success("Tạo tour thành công");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Tạo tour thất bại");
+    },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (payload: {
+      id: number;
+      isActive: boolean;
+      estimatedDurationMinutes: number | null;
+      sortPriority: number;
+      isFeatured: boolean;
+    }) =>
+      tourApi.update(payload.id, {
+        estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        sortPriority: payload.sortPriority,
+        isActive: payload.isActive,
+        isFeatured: payload.isFeatured,
+      }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
+      if (selectedTourId !== null) {
+        await qc.invalidateQueries({ queryKey: ["admin", "tour", selectedTourId] });
+      }
+      toast.success("Cập nhật trạng thái tour thành công");
+      setConfirmTour(null);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Cập nhật trạng thái tour thất bại");
+    },
+  });
+
   const saveChangesMutation = useMutation({
     mutationFn: async (payload: {
       tourId: number;
       restaurantIds: string[];
       estimatedDurationMinutes: number | null;
       sortPriority: number;
+      isActive: boolean;
       isFeatured: boolean;
       hasOrderChanges: boolean;
       hasMetaChanges: boolean;
@@ -166,6 +246,7 @@ const ToursPage = () => {
         await tourApi.update(payload.tourId, {
           estimatedDurationMinutes: payload.estimatedDurationMinutes,
           sortPriority: payload.sortPriority,
+          isActive: payload.isActive,
           isFeatured: payload.isFeatured,
         });
       }
@@ -266,16 +347,55 @@ const ToursPage = () => {
       restaurantIds: draftStops.map((s) => s.restaurantId),
       estimatedDurationMinutes: estimatedDuration,
       sortPriority,
+      isActive: selectedTour?.isActive ?? true,
       isFeatured: draftIsFeatured,
       hasOrderChanges,
       hasMetaChanges,
     });
   };
 
+  const handleCreateTour = () => {
+    const name = createName.trim();
+    if (!name) {
+      toast.error("Vui lòng nhập tên tour");
+      return;
+    }
+
+    const estimatedDuration =
+      createEstimatedDurationMinutes.trim().length === 0
+        ? null
+        : Number(createEstimatedDurationMinutes);
+    const sortPriority = Number(createSortPriority);
+
+    if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
+      toast.error("Thời gian dự kiến phải là số nguyên lớn hơn hoặc bằng 0");
+      return;
+    }
+
+    if (!Number.isInteger(sortPriority) || sortPriority < 0) {
+      toast.error("Ưu tiên phải là số nguyên lớn hơn hoặc bằng 0");
+      return;
+    }
+
+    createTourMutation.mutate({
+      name,
+      shortDescription: createShortDescription.trim() || null,
+      description: createDescription.trim() || null,
+      estimatedDurationMinutes: estimatedDuration,
+      sortPriority,
+      isActive: true,
+      isFeatured: createIsFeatured,
+    });
+  };
+
   return (
     <AdminLayout>
-      <div className="page-header">
+      <div className="page-header flex items-center justify-between gap-3">
         <h1 className="page-title">Quản lý tour</h1>
+        <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Thêm tour
+        </Button>
       </div>
 
       <div className="mx-auto max-w-7xl px-8 py-6">
@@ -287,6 +407,7 @@ const ToursPage = () => {
                 <th className="w-36">Số điểm dừng</th>
                 <th className="w-40">Thời gian dự kiến</th>
                 <th className="w-28">Ưu tiên</th>
+                <th className="w-28">Trạng thái</th>
                 <th className="w-24">Nổi bật</th>
                 <th className="w-24">Hành động</th>
               </tr>
@@ -294,21 +415,21 @@ const ToursPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
                     Đang tải danh sách tour...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-destructive">
+                  <td colSpan={7} className="py-8 text-center text-destructive">
                     Không thể tải danh sách tour. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && tours.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
                     Chưa có tour nào.
                   </td>
                 </tr>
@@ -321,8 +442,13 @@ const ToursPage = () => {
                     <td>{tour.stopCount}</td>
                     <td>{tour.estimatedDurationMinutes ? `${tour.estimatedDurationMinutes} phút` : "-"}</td>
                     <td>{tour.sortPriority}</td>
-                    <td>{tour.isFeatured ? "Có" : "Không"}</td>
                     <td>
+                      <span className={tour.isActive ? "status-active" : "status-inactive"}>
+                        {tour.isActive ? "Hoạt động" : "Ngưng hoạt động"}
+                      </span>
+                    </td>
+                    <td>{tour.isFeatured ? "Có" : "Không"}</td>
+                    <td className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -331,6 +457,25 @@ const ToursPage = () => {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <button
+                        disabled={statusMutation.isPending}
+                        onClick={() =>
+                          setConfirmTour({
+                            id: tour.tourId,
+                            name: tour.name,
+                            lock: tour.isActive,
+                            estimatedDurationMinutes: tour.estimatedDurationMinutes,
+                            sortPriority: tour.sortPriority,
+                            isFeatured: tour.isFeatured,
+                          })
+                        }
+                        className={`rounded-md p-1.5 transition-colors hover:bg-muted ${
+                          !tour.isActive ? "text-destructive" : "text-muted-foreground"
+                        }`}
+                        title={tour.isActive ? "Ngưng hoạt động tour" : "Kích hoạt tour"}
+                      >
+                        {tour.isActive ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -361,7 +506,7 @@ const ToursPage = () => {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Tổng số điểm dừng: {selectedTour.stopCount}
                 </p>
-                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="mt-4 grid gap-5 md:grid-cols-3">
                   <div>
                     <Label className="text-xs">Thời gian dự kiến (phút)</Label>
                     <Input
@@ -505,6 +650,132 @@ const ToursPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Thêm tour mới</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="create-tour-name">Tên tour</Label>
+              <Input
+                id="create-tour-name"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="Nhập tên tour"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-tour-short-description">Mô tả ngắn</Label>
+              <Input
+                id="create-tour-short-description"
+                value={createShortDescription}
+                onChange={(e) => setCreateShortDescription(e.target.value)}
+                placeholder="Mô tả ngắn (không bắt buộc)"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-tour-description">Mô tả chi tiết</Label>
+              <Textarea
+                id="create-tour-description"
+                value={createDescription}
+                onChange={(e) => setCreateDescription(e.target.value)}
+                placeholder="Mô tả chi tiết (không bắt buộc)"
+                className="mt-1"
+                rows={4}
+              />
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div>
+                <Label htmlFor="create-tour-estimated-duration" className="whitespace-nowrap">
+                  Thời gian dự kiến (phút)
+                </Label>
+                <Input
+                  id="create-tour-estimated-duration"
+                  type="number"
+                  min={0}
+                  value={createEstimatedDurationMinutes}
+                  onChange={(e) => setCreateEstimatedDurationMinutes(e.target.value)}
+                  placeholder="Để trống nếu chưa đặt"
+                  className="mt-1 min-w-0"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="create-tour-priority" className="whitespace-nowrap">
+                  Ưu tiên
+                </Label>
+                <Input
+                  id="create-tour-priority"
+                  type="number"
+                  min={0}
+                  value={createSortPriority}
+                  onChange={(e) => setCreateSortPriority(e.target.value)}
+                  className="mt-1 min-w-0"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="create-tour-featured" className="whitespace-nowrap">
+                  Nổi bật
+                </Label>
+                <select
+                  id="create-tour-featured"
+                  value={createIsFeatured ? "true" : "false"}
+                  onChange={(e) => setCreateIsFeatured(e.target.value === "true")}
+                  className="mt-1 h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
+                >
+                  <option value="false">Không</option>
+                  <option value="true">Có</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCreateOpen(false)}
+                disabled={createTourMutation.isPending}
+              >
+                Hủy
+              </Button>
+              <Button onClick={handleCreateTour} disabled={createTourMutation.isPending}>
+                {createTourMutation.isPending ? "Đang tạo..." : "Tạo tour"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmTour}
+        onOpenChange={(open) => !open && setConfirmTour(null)}
+        title={confirmTour?.lock ? "Ngưng hoạt động tour" : "Kích hoạt tour"}
+        description={
+          confirmTour?.lock
+            ? "Tour sẽ bị ngưng hoạt động. Bạn có chắc không?"
+            : "Tour sẽ được kích hoạt hoạt động trở lại."
+        }
+        onConfirm={() => {
+          if (!confirmTour) return;
+          statusMutation.mutate({
+            id: confirmTour.id,
+            isActive: !confirmTour.lock,
+            estimatedDurationMinutes: confirmTour.estimatedDurationMinutes,
+            sortPriority: confirmTour.sortPriority,
+            isFeatured: confirmTour.isFeatured,
+          });
+        }}
+        variant={confirmTour?.lock ? "destructive" : "default"}
+      />
     </AdminLayout>
   );
 };

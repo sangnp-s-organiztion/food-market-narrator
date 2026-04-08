@@ -73,6 +73,31 @@ public class TourController : ControllerBase
         };
     }
 
+    [HttpPost]
+    public async Task<IActionResult> CreateTour([FromBody] CreateTourRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _tourService.CreateTourAsync(
+            request.Name,
+            request.ShortDescription,
+            request.Description,
+            request.EstimatedDurationMinutes,
+            request.IsActive,
+            request.IsFeatured,
+            request.SortPriority);
+
+        return result.Status switch
+        {
+            CreateTourStatus.Success => Ok(result.Data),
+            CreateTourStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to create tour." })
+        };
+    }
+
     [HttpPut("{id:int}/stops/order")]
     public async Task<IActionResult> ReorderStops(int id, [FromBody] ReorderTourStopsRequest request)
     {
@@ -98,6 +123,7 @@ public class TourController : ControllerBase
             id,
             request.EstimatedDurationMinutes,
             request.SortPriority,
+            request.IsActive,
             request.IsFeatured);
 
         return result.Status switch
