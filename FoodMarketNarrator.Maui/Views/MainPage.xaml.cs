@@ -11,10 +11,19 @@ namespace food_market_narrator.Views;
 
 public partial class MainPage : ContentPage
 {
+    private enum PoiCategoryFilter
+    {
+        All,
+        Nearby,
+        Favorite,
+        OpenNow
+    }
+
     private static bool _hasAutoStartedNarrationThisSession;
     private static bool _hasAppliedStartupTrackingDelay;
     private static bool? _lastFloatingButtonVisibility;
     private const int FeaturedPoiPageSize = 10;
+    private const double NearbyFilterRadiusMeters = 100;
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -22,6 +31,7 @@ public partial class MainPage : ContentPage
     private readonly ILocationService _locationService;
     private readonly IAudioLibraryService _audioLibraryService;
     private readonly IQrAccessService _qrAccessService;
+    private readonly IFavoriteService _favoriteService;
 
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
     private bool _isMapLoaded;
@@ -30,6 +40,8 @@ public partial class MainPage : ContentPage
     private int _currentPoiPageIndex;
     private Location? _lastKnownLocation;
     private bool _isInitializingMainPage;
+    private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All;
+    private List<POI> _filteredPois = new();
 
     // private static bool _hasShownLanguagePopupThisSession;
     // private bool _languageSelected = Preferences.Get("language_selected", false);
@@ -40,7 +52,8 @@ public partial class MainPage : ContentPage
         NarrationFlowService narrationFlowService,
         ILocationService locationService,
         IAudioLibraryService audioLibraryService,
-        IQrAccessService qrAccessService)
+        IQrAccessService qrAccessService,
+        IFavoriteService favoriteService)
 	{
 		InitializeComponent();
         _poiService = poiService;
@@ -48,6 +61,7 @@ public partial class MainPage : ContentPage
         _locationService = locationService;
         _audioLibraryService = audioLibraryService;
         _qrAccessService = qrAccessService;
+        _favoriteService = favoriteService;
     }
 
     protected override void OnAppearing()
@@ -102,6 +116,12 @@ public partial class MainPage : ContentPage
 
         // Cập nhật text/disabled state của nút, trạng thái visible đã được quyết định ở nhánh trên.
         UpdateFloatingButtonUI();
+
+        if (_isPoiListBound)
+        {
+            ApplyPoiFilterAndRefresh();
+        }
+
         LogPerf("OnAppearing: completed", sw);
     }
 
@@ -130,9 +150,9 @@ public partial class MainPage : ContentPage
             {
                 var poisData = await _poiService.GetAllPOIsAsync();
                 _allPois = poisData;
-                _currentPoiPageIndex = 0;
-                BindPoiPage();
                 _isPoiListBound = true;
+                _currentPoiPageIndex = 0;
+                ApplyPoiFilterAndRefresh();
                 LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
             }
 
@@ -375,16 +395,172 @@ public partial class MainPage : ContentPage
         BindPoiPage();
     }
 
-    private void BindPoiPage()
+    private void OnFilterAllTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.All);
+    }
+
+    private async void OnFilterNearTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.Nearby);
+        await RefreshNearbyFilterWithCurrentLocationAsync();
+    }
+
+    private void OnFilterFavoriteTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.Favorite);
+    }
+
+    private void OnFilterOpenTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.OpenNow);
+    }
+
+    private void SetPoiFilter(PoiCategoryFilter filter)
+    {
+        _activePoiFilter = filter;
+        _currentPoiPageIndex = 0;
+        ApplyPoiFilterAndRefresh();
+    }
+
+    private async Task RefreshNearbyFilterWithCurrentLocationAsync()
+    {
+        var location = _lastKnownLocation ?? _locationService.LastKnownLocation;
+        if (location == null)
+        {
+            location = await _locationService.GetCurrentLocationAsync();
+        }
+
+        if (location == null || _activePoiFilter != PoiCategoryFilter.Nearby)
+        {
+            return;
+        }
+
+        _lastKnownLocation = location;
+        ApplyPoiFilterAndRefresh(location);
+    }
+
+    private void ApplyPoiFilterAndRefresh(Location? referenceLocation = null)
+    {
+        var location = referenceLocation ?? _lastKnownLocation ?? _locationService.LastKnownLocation;
+        _filteredPois = GetFilteredPois(location);
+
+        var totalPages = GetTotalPoiPages();
+        if (_currentPoiPageIndex >= totalPages)
+        {
+            _currentPoiPageIndex = Math.Max(0, totalPages - 1);
+        }
+
+        BindPoiPage();
+        UpdateCategoryChipUi();
+        UpdateMapHighlightByCurrentFilter(location);
+    }
+
+    private List<POI> GetFilteredPois(Location? location)
     {
         if (_allPois.Count == 0)
         {
-            PoiList.ItemsSource = null;
+            return new List<POI>();
+        }
+
+        IEnumerable<POI> query = _allPois;
+        switch (_activePoiFilter)
+        {
+            case PoiCategoryFilter.Nearby:
+                if (location == null)
+                {
+                    return new List<POI>();
+                }
+
+                query = query.Where(p => _poiService.GetDistanceMeters(location, p) <= NearbyFilterRadiusMeters);
+                break;
+
+            case PoiCategoryFilter.Favorite:
+                var favoriteIds = _favoriteService
+                    .GetFavorites()
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                query = query.Where(p => !string.IsNullOrWhiteSpace(p.restaurantId) && favoriteIds.Contains(p.restaurantId));
+                break;
+
+            case PoiCategoryFilter.OpenNow:
+                query = query.Where(p => p.IsCurrentlyOpen);
+                break;
+
+            case PoiCategoryFilter.All:
+            default:
+                break;
+        }
+
+        return query.ToList();
+    }
+
+    private IEnumerable<string>? GetVisiblePoiIdsForCurrentFilter()
+    {
+        if (_activePoiFilter == PoiCategoryFilter.All)
+        {
+            return null;
+        }
+
+        return _filteredPois
+            .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId))
+            .Select(p => p.restaurantId)
+            .ToList();
+    }
+
+    private void UpdateMapHighlightByCurrentFilter(Location? location)
+    {
+        if (!_isMapLoaded)
+        {
+            return;
+        }
+
+        var highlightCandidates = _activePoiFilter == PoiCategoryFilter.All
+            ? _allPois
+            : _filteredPois;
+
+        var nearest = location == null
+            ? null
+            : _poiService.GetNearestPOI(location, highlightCandidates);
+
+        var shouldHighlight = location != null
+            && nearest != null
+            && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
+
+        MapHelper.HighlightPOI(
+            mapControl,
+            shouldHighlight ? nearest : null,
+            visiblePoiIds: GetVisiblePoiIdsForCurrentFilter());
+    }
+
+    private void UpdateCategoryChipUi()
+    {
+        SetChipState(MainFilterAllChip, MainFilterAllLabel, _activePoiFilter == PoiCategoryFilter.All);
+        SetChipState(MainFilterNearChip, MainFilterNearLabel, _activePoiFilter == PoiCategoryFilter.Nearby, MainFilterNearIcon);
+        SetChipState(MainFilterFavoriteChip, MainFilterFavoriteLabel, _activePoiFilter == PoiCategoryFilter.Favorite, MainFilterFavoriteIcon);
+        SetChipState(MainFilterOpenChip, MainFilterOpenLabel, _activePoiFilter == PoiCategoryFilter.OpenNow, MainFilterOpenIcon);
+    }
+
+    private static void SetChipState(Border border, Label textLabel, bool isActive, Label? iconLabel = null)
+    {
+        border.BackgroundColor = isActive ? Color.FromArgb("#F48C06") : Color.FromArgb("#F5F1EE");
+        textLabel.TextColor = isActive ? Colors.White : Color.FromArgb("#3E2723");
+        if (iconLabel != null)
+        {
+            iconLabel.TextColor = isActive ? Colors.White : Color.FromArgb("#3E2723");
+        }
+    }
+
+    private void BindPoiPage()
+    {
+        if (_filteredPois.Count == 0)
+        {
+            PoiList.ItemsSource = new List<POI>();
             UpdatePaginationUi();
             return;
         }
 
-        var pageItems = _allPois
+        var pageItems = _filteredPois
             .Skip(_currentPoiPageIndex * FeaturedPoiPageSize)
             .Take(FeaturedPoiPageSize)
             .ToList();
@@ -395,12 +571,12 @@ public partial class MainPage : ContentPage
 
     private int GetTotalPoiPages()
     {
-        if (_allPois.Count == 0)
+        if (_filteredPois.Count == 0)
         {
             return 1;
         }
 
-        return (int)Math.Ceiling((double)_allPois.Count / FeaturedPoiPageSize);
+        return (int)Math.Ceiling((double)_filteredPois.Count / FeaturedPoiPageSize);
     }
 
     private void UpdatePaginationUi()
@@ -408,7 +584,7 @@ public partial class MainPage : ContentPage
         var totalPages = GetTotalPoiPages();
         var currentPageDisplay = totalPages == 0 ? 0 : _currentPoiPageIndex + 1;
 
-        PaginationContainer.IsVisible = _allPois.Count > FeaturedPoiPageSize;
+        PaginationContainer.IsVisible = _filteredPois.Count > FeaturedPoiPageSize;
         PageIndicatorLabel.Text = $"Trang {currentPageDisplay}/{totalPages}";
 
         var canGoPrevious = _currentPoiPageIndex > 0;
@@ -452,9 +628,13 @@ public partial class MainPage : ContentPage
             }
         }
 
-        var shouldHighlight = nearest != null
-            && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
-        MapHelper.HighlightPOI(mapControl, shouldHighlight ? nearest : null);
+        if (_isPoiListBound && _activePoiFilter == PoiCategoryFilter.Nearby)
+        {
+            ApplyPoiFilterAndRefresh(location);
+            return;
+        }
+
+        UpdateMapHighlightByCurrentFilter(location);
     }
 
     // Cập nhật trạng thái của nút thuyết minh dựa trên trạng thái hiện tại của NarrationFlowService

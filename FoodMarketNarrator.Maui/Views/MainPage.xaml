@@ -102,29 +102,41 @@
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                     <HorizontalStackLayout Spacing="10" HeightRequest="40">
                         <!-- 'All' Button -->
-                        <Border BackgroundColor="#F48C06" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
-                            <Label Text="Tất cả" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                        <Border x:Name="MainFilterAllChip" BackgroundColor="#F48C06" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFilterAllTapped"/>
+                            </Border.GestureRecognizers>
+                            <Label x:Name="MainFilterAllLabel" Text="Tất cả" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
                         </Border>
 
                         <!-- Other Categories -->
-                        <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                        <Border x:Name="MainFilterNearChip" BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFilterNearTapped"/>
+                            </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label Text="Gần bạn" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterNearIcon" Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label x:Name="MainFilterNearLabel" Text="Gần bạn" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
-                         <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                         <Border x:Name="MainFilterFavoriteChip" BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFilterFavoriteTapped"/>
+                            </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label Text="Yêu thích" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterFavoriteIcon" Text="&#xf004;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label x:Name="MainFilterFavoriteLabel" Text="Yêu thích" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
-                         <Border BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                         <Border x:Name="MainFilterOpenChip" BackgroundColor="#F5F1EE" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFilterOpenTapped"/>
+                            </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                 <Label Text="&#xf017;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label Text="Đang mở" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterOpenIcon" Text="&#xf017;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
+                                 <Label x:Name="MainFilterOpenLabel" Text="Đang mở" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>

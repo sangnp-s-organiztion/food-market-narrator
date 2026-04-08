@@ -134,45 +134,57 @@
                 <ScrollView x:Name="CategoryFiltersScrollView" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                     <HorizontalStackLayout Spacing="10" HeightRequest="40" Padding="0,5">
                         <!-- All -->
-                        <Border BackgroundColor="#F48C06" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                        <Border x:Name="MapFilterAllChip" BackgroundColor="#F48C06" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                             <Border.GestureRecognizers>
+                                 <TapGestureRecognizer Tapped="OnMapFilterAllTapped"/>
+                             </Border.GestureRecognizers>
                              <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf00c;" FontFamily="FASolid" TextColor="White" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Tất cả" TextColor="White" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterAllIcon" Text="&#xf00c;" FontFamily="FASolid" TextColor="White" VerticalOptions="Center" FontSize="12"/>
+                                <Label x:Name="MapFilterAllLabel" Text="Tất cả" TextColor="White" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
                          <!-- Near You -->
-                        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                        <Border x:Name="MapFilterNearChip" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                             <Border.GestureRecognizers>
+                                 <TapGestureRecognizer Tapped="OnMapFilterNearTapped"/>
+                             </Border.GestureRecognizers>
                              <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Gần bạn" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterNearIcon" Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label x:Name="MapFilterNearLabel" Text="Gần bạn" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
 
                          <!-- Favorites -->
-                        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                        <Border x:Name="MapFilterFavoriteChip" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                             <Border.GestureRecognizers>
+                                 <TapGestureRecognizer Tapped="OnMapFilterFavoriteTapped"/>
+                             </Border.GestureRecognizers>
                              <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Yêu thích" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterFavoriteIcon" Text="&#xf004;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label x:Name="MapFilterFavoriteLabel" Text="Yêu thích" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
 
                         <!-- Open Now -->
-                        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                        <Border x:Name="MapFilterOpenChip" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMapFilterOpenTapped"/>
+                            </Border.GestureRecognizers>
                             <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf017;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Đang mở" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterOpenIcon" Text="&#xf017;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label x:Name="MapFilterOpenLabel" Text="Đang mở" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>
