@@ -63,6 +63,7 @@ type RestaurantForm = {
   description: string;
   phone: string;
   address: string;
+  googleMapsUrl: string;
   latitude: string;
   longitude: string;
   openTime: string;
@@ -74,6 +75,50 @@ function toNullableNumber(value: string): number | null {
   if (!trimmed) return null;
   const parsed = Number(trimmed);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isValidCoordinatePair(latitude: number, longitude: number): boolean {
+  return (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+}
+
+function extractCoordinatesFromGoogleMapsUrl(
+  rawUrl: string,
+): { latitude: number; longitude: number } | null {
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(rawUrl);
+    } catch {
+      return rawUrl;
+    }
+  })();
+
+  const candidates: RegExp[] = [
+    /@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i,
+    /[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+    /[?&]ll=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i,
+  ];
+
+  for (const pattern of candidates) {
+    const match = decoded.match(pattern);
+    if (!match) continue;
+
+    const latitude = Number(match[1]);
+    const longitude = Number(match[2]);
+
+    if (isValidCoordinatePair(latitude, longitude)) {
+      return { latitude, longitude };
+    }
+  }
+
+  return null;
 }
 
 const RestaurantsPage = () => {
@@ -95,6 +140,7 @@ const RestaurantsPage = () => {
     description: "",
     phone: "",
     address: "",
+    googleMapsUrl: "",
     latitude: "",
     longitude: "",
     openTime: "",
@@ -158,6 +204,7 @@ const RestaurantsPage = () => {
         description: "",
         phone: "",
         address: "",
+        googleMapsUrl: "",
         latitude: "",
         longitude: "",
         openTime: "",
@@ -210,6 +257,36 @@ const RestaurantsPage = () => {
       closeTime: createForm.closeTime || null,
       isActive: true,
     });
+  };
+
+  const handleGoogleMapsUrlChange = (value: string) => {
+    const coords = extractCoordinatesFromGoogleMapsUrl(value);
+
+    setCreateForm((prev) => ({
+      ...prev,
+      googleMapsUrl: value,
+      latitude: coords ? `${coords.latitude}` : prev.latitude,
+      longitude: coords ? `${coords.longitude}` : prev.longitude,
+    }));
+  };
+
+  const handleGoogleMapsUrlBlur = () => {
+    const raw = createForm.googleMapsUrl.trim();
+    if (!raw) return;
+
+    const coords = extractCoordinatesFromGoogleMapsUrl(raw);
+    if (!coords) {
+      toast.error(
+        "Không đọc được tọa độ từ link Google Maps. Bạn có thể nhập tay vĩ độ/kinh độ.",
+      );
+      return;
+    }
+
+    setCreateForm((prev) => ({
+      ...prev,
+      latitude: `${coords.latitude}`,
+      longitude: `${coords.longitude}`,
+    }));
   };
 
   const handleOpenDetail = (restaurantId: string) => {
@@ -433,6 +510,16 @@ const RestaurantsPage = () => {
                   placeholder="Địa chỉ"
                 />
               </div>
+            </div>
+            <div>
+              <Label className="text-xs">Link Google Maps (tự điền tọa độ)</Label>
+              <Input
+                value={createForm.googleMapsUrl}
+                onChange={(e) => handleGoogleMapsUrlChange(e.target.value)}
+                onBlur={handleGoogleMapsUrlBlur}
+                className="mt-1"
+                placeholder="Dán link Google Maps, ví dụ: https://www.google.com/maps/..."
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
