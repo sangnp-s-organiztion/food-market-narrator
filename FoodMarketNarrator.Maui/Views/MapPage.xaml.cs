@@ -16,6 +16,7 @@ namespace food_market_narrator.Views;
 [QueryProperty(nameof(LocationName), "name")]
 [QueryProperty(nameof(TourPoiIds), "tourPoiIds")]
 [QueryProperty(nameof(TourName), "tourName")]
+[QueryProperty(nameof(TourStopOrders), "tourStopOrders")]
 
 public partial class MapPage : ContentPage
 {
@@ -43,8 +44,10 @@ public partial class MapPage : ContentPage
     private POI? _selectedPoi;
     private HashSet<string> _searchHighlightedPoiIds = new(StringComparer.Ordinal);
     private HashSet<string> _tourPoiFilterIds = new(StringComparer.Ordinal);
+    private Dictionary<string, int> _tourStopOrdersByPoiId = new(StringComparer.Ordinal);
     private string? _activeTourName;
     private string? _tourPoiIdsRaw;
+    private string? _tourStopOrdersRaw;
     private Location? _lastKnownLocation;
     private bool _isMapLoaded;
     private bool _hasShownOfflineMapUnavailableNotice;
@@ -73,6 +76,17 @@ public partial class MapPage : ContentPage
         {
             _activeTourName = DecodeQueryValue(value);
             UpdateTourFilterBanner();
+        }
+    }
+
+    public string? TourStopOrders
+    {
+        get => _tourStopOrdersRaw;
+        set
+        {
+            _tourStopOrdersRaw = value;
+            _tourStopOrdersByPoiId = ParsePoiStopOrderMap(value);
+            ApplyPoiModeFromState(focusOnTour: false);
         }
     }
 
@@ -589,7 +603,12 @@ public partial class MapPage : ContentPage
 
         if (_searchHighlightedPoiIds.Count > 0)
         {
-            MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true, visiblePoiIds: visiblePoiIds);
+            MapHelper.HighlightPOIs(
+                mapControl,
+                _searchHighlightedPoiIds,
+                isSearchResult: true,
+                visiblePoiIds: visiblePoiIds,
+                tourStopOrdersByPoiId: GetTourStopOrdersForCurrentMode());
             return;
         }
 
@@ -615,7 +634,8 @@ public partial class MapPage : ContentPage
             MapHelper.HighlightPOIs(
                 mapControl,
                 shouldHighlightNearestTourPoi ? new[] { nearestTourPoi!.restaurantId } : null,
-                visiblePoiIds: visiblePoiIds);
+                visiblePoiIds: visiblePoiIds,
+                tourStopOrdersByPoiId: GetTourStopOrdersForCurrentMode());
             return;
         }
 
@@ -706,6 +726,53 @@ public partial class MapPage : ContentPage
             .ToHashSet(StringComparer.Ordinal);
     }
 
+    private static Dictionary<string, int> ParsePoiStopOrderMap(string? rawStopOrders)
+    {
+        var decoded = DecodeQueryValue(rawStopOrders);
+        if (string.IsNullOrWhiteSpace(decoded))
+        {
+            return new Dictionary<string, int>(StringComparer.Ordinal);
+        }
+
+        var result = new Dictionary<string, int>(StringComparer.Ordinal);
+        var pairs = decoded.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var pair in pairs)
+        {
+            var parts = pair.Split(':', 2, StringSplitOptions.TrimEntries);
+            if (parts.Length != 2)
+            {
+                continue;
+            }
+
+            var restaurantId = parts[0];
+            if (string.IsNullOrWhiteSpace(restaurantId))
+            {
+                continue;
+            }
+
+            if (!int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var stopOrder)
+                || stopOrder <= 0
+                || result.ContainsKey(restaurantId))
+            {
+                continue;
+            }
+
+            result[restaurantId] = stopOrder;
+        }
+
+        return result;
+    }
+
+    private IReadOnlyDictionary<string, int>? GetTourStopOrdersForCurrentMode()
+    {
+        if (_tourPoiFilterIds.Count == 0 || _tourStopOrdersByPoiId.Count == 0)
+        {
+            return null;
+        }
+
+        return _tourStopOrdersByPoiId;
+    }
+
     private static string? DecodeQueryValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -726,8 +793,10 @@ public partial class MapPage : ContentPage
     private void OnClearTourFilterClicked(object sender, EventArgs e)
     {
         _tourPoiIdsRaw = string.Empty;
+        _tourStopOrdersRaw = string.Empty;
         _activeTourName = null;
         _tourPoiFilterIds.Clear();
+        _tourStopOrdersByPoiId.Clear();
         _narrationFlowService.ClearAutoNarrationPoiScope();
         _searchHighlightedPoiIds.Clear();
         HideSelectedPoiCard();

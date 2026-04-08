@@ -102,17 +102,38 @@ public partial class TourPage : ContentPage
         {
             if (tour != null)
             {
-                var poiIds = (tour.Stops ?? new List<TourStopModel>())
+                var orderedStops = (tour.Stops ?? new List<TourStopModel>())
+                    .OrderBy(s => s.StopOrder)
+                    .ThenBy(s => s.RestaurantId, StringComparer.Ordinal)
+                    .ToList();
+
+                var poiIds = orderedStops
                     .Select(s => s.RestaurantId)
                     .Where(id => !string.IsNullOrWhiteSpace(id))
                     .Distinct(StringComparer.Ordinal)
                     .ToList();
 
+                var stopOrderByPoiId = new Dictionary<string, int>(StringComparer.Ordinal);
+                foreach (var stop in orderedStops)
+                {
+                    if (string.IsNullOrWhiteSpace(stop.RestaurantId)
+                        || stop.StopOrder <= 0
+                        || stopOrderByPoiId.ContainsKey(stop.RestaurantId))
+                    {
+                        continue;
+                    }
+
+                    stopOrderByPoiId[stop.RestaurantId] = stop.StopOrder;
+                }
+
                 if (poiIds.Count > 0)
                 {
                     var encodedPoiIds = Uri.EscapeDataString(string.Join(',', poiIds));
                     var encodedTourName = Uri.EscapeDataString(tour.Name ?? string.Empty);
-                    await Shell.Current.GoToAsync($"//MapPage?tourPoiIds={encodedPoiIds}&tourName={encodedTourName}");
+                    var encodedTourStopOrders = Uri.EscapeDataString(
+                        string.Join(',', stopOrderByPoiId.Select(x => $"{x.Key}:{x.Value}")));
+                    await Shell.Current.GoToAsync(
+                        $"//MapPage?tourPoiIds={encodedPoiIds}&tourName={encodedTourName}&tourStopOrders={encodedTourStopOrders}");
                     return;
                 }
             }
