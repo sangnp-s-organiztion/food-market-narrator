@@ -2,6 +2,7 @@
 import {
   AudioWaveform,
   CircleUser,
+  Compass,
   LayoutDashboard,
   LogOut,
   Receipt,
@@ -15,7 +16,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", label: "Tổng quan", icon: LayoutDashboard },
-  { path: "/tours", label: "Tour", icon: Route },
+  { path: "/trajectory", label: "Tuyến di chuyển", icon: Route },
+  { path: "/tours", label: "Tour", icon: Compass },
   { path: "/restaurants", label: "Nhà hàng", icon: Store },
   { path: "/users", label: "Người dùng", icon: Users },
   { path: "/logs", label: "Nhật ký", icon: ScrollText },
