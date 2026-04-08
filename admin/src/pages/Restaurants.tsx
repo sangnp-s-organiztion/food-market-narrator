@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import {
   restaurantApi,
+  mapsApi,
   userApi,
   type RestaurantResponse,
   type CreateRestaurantRequest,
@@ -281,23 +282,32 @@ const RestaurantsPage = () => {
     }));
   };
 
-  const handleGoogleMapsUrlBlur = () => {
+  const handleGoogleMapsUrlBlur = async () => {
     const raw = createForm.googleMapsUrl.trim();
     if (!raw) return;
 
     const coords = extractCoordinatesFromGoogleMapsUrl(raw);
-    if (!coords) {
-      toast.error(
-        "Không đọc được tọa độ từ link Google Maps. Bạn có thể nhập tay vĩ độ/kinh độ.",
-      );
+    if (coords) {
+      setCreateForm((prev) => ({
+        ...prev,
+        latitude: `${coords.latitude}`,
+        longitude: `${coords.longitude}`,
+      }));
       return;
     }
 
-    setCreateForm((prev) => ({
-      ...prev,
-      latitude: `${coords.latitude}`,
-      longitude: `${coords.longitude}`,
-    }));
+    try {
+      const resolved = await mapsApi.resolveCoordinates(raw);
+      setCreateForm((prev) => ({
+        ...prev,
+        latitude: `${resolved.latitude}`,
+        longitude: `${resolved.longitude}`,
+      }));
+    } catch {
+      toast.error(
+        "Không đọc được tọa độ từ link Google Maps. Bạn có thể nhập tay vĩ độ/kinh độ.",
+      );
+    }
   };
 
   const handleOpenDetail = (restaurantId: string) => {
@@ -523,7 +533,7 @@ const RestaurantsPage = () => {
               </div>
             </div>
             <div>
-              <Label className="text-xs">Link Google Maps (tự điền tọa độ)</Label>
+              <Label className="text-xs">Link Google Maps</Label>
               <Input
                 value={createForm.googleMapsUrl}
                 onChange={(e) => handleGoogleMapsUrlChange(e.target.value)}

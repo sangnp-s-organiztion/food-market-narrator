@@ -246,6 +246,11 @@ export interface TranslationUsageLedgerResponse {
   summary: TranslationUsageLedgerSummary;
 }
 
+export interface ResolvedMapCoordinatesResponse {
+  latitude: number;
+  longitude: number;
+}
+
 // ─── Restaurant API ──────────────────────────────────────────────────────────
 
 export const restaurantApi = {
@@ -404,5 +409,12 @@ export const translationBillingApi = {
       `/api/admin/translation-billing/usage?${query}`,
     );
   },
+};
+
+export const mapsApi = {
+  resolveCoordinates: (url: string) =>
+    adminFetch<ResolvedMapCoordinatesResponse>(
+      `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
+    ),
 };
 
