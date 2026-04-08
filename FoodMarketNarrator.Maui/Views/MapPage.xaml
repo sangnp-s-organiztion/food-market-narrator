@@ -115,19 +115,23 @@
                                    TextColor="#C2410C" />
                         </VerticalStackLayout>
                         <Button Text="Hiện tất cả"
+                            Grid.Column="1"
                                 Clicked="OnClearTourFilterClicked"
-                                BackgroundColor="#F48C06"
-                                TextColor="White"
-                                FontSize="11"
-                                Padding="12,4"
-                                CornerRadius="12"
-                                HeightRequest="30"
+                            BackgroundColor="White"
+                            TextColor="#C2410C"
+                            FontSize="10"
+                            Padding="10,0"
+                            BorderColor="#FED7AA"
+                            BorderWidth="1"
+                            CornerRadius="14"
+                            HeightRequest="28"
+                            HorizontalOptions="End"
                                 VerticalOptions="Center" />
                     </Grid>
                 </Border>
 
                 <!-- Filters -->
-                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <ScrollView x:Name="CategoryFiltersScrollView" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                     <HorizontalStackLayout Spacing="10" HeightRequest="40" Padding="0,5">
                         <!-- All -->
                         <Border BackgroundColor="#F48C06" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
@@ -139,32 +143,37 @@
                                 <Label Text="Tất cả" TextColor="White" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
-                         <!-- Seafood -->
+                         <!-- Near You -->
                         <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
                              <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf818;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Hải sản" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label Text="Gần bạn" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
-                         <!-- Snails -->
+
+                         <!-- Favorites -->
                         <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
                              <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Label Text="&#xf188;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label Text="Ốc" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label Text="&#xf004;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label Text="Yêu thích" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
-                         <!-- Icon Filter -->
-                        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" WidthRequest="40" HeightRequest="32">
+
+                        <!-- Open Now -->
+                        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="15,0" HeightRequest="32">
                             <Border.Shadow>
                                  <Shadow Brush="#000" Opacity="0.1" Radius="2"/>
                             </Border.Shadow>
-                             <Label Text="&#xf061;" FontFamily="FASolid" TextColor="#3C4043" HorizontalOptions="Center" VerticalOptions="Center" FontSize="12"/>
+                            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                <Label Text="&#xf017;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
+                                <Label Text="Đang mở" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>
                 </ScrollView>

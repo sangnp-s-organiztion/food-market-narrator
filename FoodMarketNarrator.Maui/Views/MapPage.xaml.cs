@@ -562,6 +562,11 @@ public partial class MapPage : ContentPage
 
         var isTourMode = _tourPoiFilterIds.Count > 0;
         TourFilterBanner.IsVisible = isTourMode;
+        if (CategoryFiltersScrollView != null)
+        {
+            CategoryFiltersScrollView.IsVisible = !isTourMode;
+        }
+
         if (!isTourMode)
         {
             return;
