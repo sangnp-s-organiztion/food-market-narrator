@@ -1,13 +1,11 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import TrajectorySection from "@/components/TrajectorySection";
 import { analyticsApi } from "@/lib/analyticsApi";
 
 const TrajectoryPage = () => {
-  const [sessionLimit, setSessionLimit] = useState<20 | 50 | 100 | 200 | "all">(
-    100,
-  );
+  const [sessionLimit] = useState<20 | 50 | 100 | 200 | "all">(100);
 
   const { data: movementPathsData } = useQuery({
     queryKey: ["analytics", "movement-paths", sessionLimit],
@@ -21,18 +19,13 @@ const TrajectoryPage = () => {
         <div>
           <h1 className="page-title">Tuyến di chuyển người dùng</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe
-            audio
+            Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe audio
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-8 py-6">
-        <TrajectorySection
-          movementPaths={movementPathsData?.sessions}
-          sessionLimit={sessionLimit}
-          onSessionLimitChange={setSessionLimit}
-        />
+        <TrajectorySection movementPaths={movementPathsData?.sessions} />
       </div>
     </AdminLayout>
   );

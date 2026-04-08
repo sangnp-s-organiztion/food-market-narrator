@@ -462,9 +462,16 @@ public partial class POIDetailPage : ContentPage
 		base.OnHandlerChanging(args);
 	}
 
-	// Hàm xử lý khi nhấn vào nút back để quay lại trang chính
+	// Hàm xử lý khi nhấn vào nút back để quay lại trang trước đó
 	private async void OnBackButtonTapped(object sender, EventArgs e)
 	{
+		var navigation = Shell.Current?.Navigation;
+		if (navigation?.NavigationStack != null && navigation.NavigationStack.Count > 1)
+		{
+			await navigation.PopAsync(false);
+			return;
+		}
+
 		await Shell.Current.GoToAsync("//MainPage");
 	}
 

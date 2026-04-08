@@ -56,5 +56,21 @@ namespace food_market_narrator_api.Services
                 Role = user.Role
             };
         }
+
+        public async Task<MeResponse?> GetMeByUserIdAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !user.IsActive)
+            {
+                return null;
+            }
+
+            return new MeResponse
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Role = user.Role
+            };
+        }
     }
 }

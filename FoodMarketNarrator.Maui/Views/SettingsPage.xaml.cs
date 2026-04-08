@@ -5,6 +5,7 @@ using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.Generic;
 using food_market_narrator.Helpers;
+using food_market_narrator.Settings;
 using IOPath = System.IO.Path;
 
 namespace food_market_narrator.Views;
@@ -13,7 +14,6 @@ public partial class SettingsPage : ContentPage
 {
     private const string OfflineCacheFolderName = "offline_cache";
     private const string ImageCacheFolderName = "image_cache";
-    private const string MapTileCacheFolderName = "osm_tiles";
 
     private readonly IAudioService? _audioService;
     private readonly ILanguageService? _languageService;
@@ -88,11 +88,10 @@ public partial class SettingsPage : ContentPage
     private async Task<StorageUsageSummary> ReadStorageUsageAsync()
     {
         var appData = FileSystem.AppDataDirectory;
-        var cacheData = FileSystem.CacheDirectory;
 
         var offlineCacheRoot = IOPath.Combine(appData, OfflineCacheFolderName);
         var imageCacheRoot = IOPath.Combine(appData, ImageCacheFolderName);
-        var mapCacheRoot = IOPath.Combine(cacheData, MapTileCacheFolderName);
+        var mapCacheRoot = AppSettings.MapTileCacheDirectory;
 
         var poiFilePath = IOPath.Combine(offlineCacheRoot, "pois.json");
         var languageFilePath = IOPath.Combine(offlineCacheRoot, "languages.json");
@@ -613,7 +612,7 @@ public partial class SettingsPage : ContentPage
 
         DeleteDirectorySafe(IOPath.Combine(FileSystem.AppDataDirectory, OfflineCacheFolderName));
         DeleteDirectorySafe(IOPath.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName));
-        DeleteDirectorySafe(IOPath.Combine(FileSystem.CacheDirectory, MapTileCacheFolderName));
+        DeleteDirectorySafe(AppSettings.MapTileCacheDirectory);
 
         await LoadOfflineDataUsageAsync();
 
@@ -658,7 +657,7 @@ public partial class SettingsPage : ContentPage
 
         var confirm = await DisplayAlert(
             "Xóa lịch sử",
-            "Bạn có chắc muốn xóa toàn bộ lịch sử đã xem?",
+            "Bạn có chắc muốn xóa toàn bộ lịch sử đã nghe?",
             "Xóa",
             "Hủy");
 
@@ -667,7 +666,12 @@ public partial class SettingsPage : ContentPage
 
         _historyService.ClearHistory();
 
-        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử xem", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử đã nghe", "OK");
+    }
+
+    private async void OnOpenHistoryTapped(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(HistoryPage));
     }
 
     private async void OnClearFavoritesClicked(object sender, EventArgs e)
