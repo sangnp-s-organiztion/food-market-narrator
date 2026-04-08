@@ -27,6 +27,7 @@ public partial class MapPage : ContentPage
 
     private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
+    private readonly NarrationFlowService _narrationFlowService;
     private List<POI> _pois = new();
     private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
@@ -66,11 +67,13 @@ public partial class MapPage : ContentPage
 
     public MapPage(
         IPOIService poiService,
-        ILocationService locationService)
+        ILocationService locationService,
+        NarrationFlowService narrationFlowService)
     {
         InitializeComponent();
         _poiService = poiService;
         _locationService = locationService;
+        _narrationFlowService = narrationFlowService;
     }
 
     // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
@@ -108,6 +111,7 @@ public partial class MapPage : ContentPage
         SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(SearchEntry.Text);
         SearchSuggestionsContainer.IsVisible = false;
         _lastKnownLocation = _locationService.LastKnownLocation;
+        ApplyNarrationScopeFromTourFilter();
 
         HideSelectedPoiCard();
         ApplyPoiModeFromState(focusOnTour: true);
@@ -119,6 +123,7 @@ public partial class MapPage : ContentPage
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _searchDebounceCts?.Cancel();
+        _narrationFlowService.ClearAutoNarrationPoiScope();
         base.OnDisappearing();
     }
 
@@ -603,9 +608,21 @@ public partial class MapPage : ContentPage
         _tourPoiIdsRaw = string.Empty;
         _activeTourName = null;
         _tourPoiFilterIds.Clear();
+        _narrationFlowService.ClearAutoNarrationPoiScope();
         _searchHighlightedPoiIds.Clear();
         HideSelectedPoiCard();
         ApplyPoiModeFromState(focusOnTour: false);
+    }
+
+    private void ApplyNarrationScopeFromTourFilter()
+    {
+        if (_tourPoiFilterIds.Count > 0)
+        {
+            _narrationFlowService.SetAutoNarrationPoiScope(_tourPoiFilterIds);
+            return;
+        }
+
+        _narrationFlowService.ClearAutoNarrationPoiScope();
     }
 
     private void ShowSelectedPoiCard(POI poi)

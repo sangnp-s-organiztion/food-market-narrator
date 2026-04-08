@@ -30,6 +30,8 @@ public class NarrationFlowService : INarrationFlowService
     private readonly Queue<NarrationQueueItem> _playQueue = new();
     private bool _isProcessingQueue = false;
     private string? _currentPlayingPoiId;
+    private readonly object _autoNarrationScopeLock = new();
+    private HashSet<string>? _autoNarrationScopedPoiIds;
     private CancellationTokenSource? _switchCutoffCts;
     private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3);
     private CancellationTokenSource? _qrGuardCts;
@@ -89,6 +91,40 @@ public class NarrationFlowService : INarrationFlowService
                 await CheckAndNarrateAsync(currentLocation);
             }
         });
+    }
+
+    public void SetAutoNarrationPoiScope(IEnumerable<string>? poiIds)
+    {
+        HashSet<string>? normalizedScope = null;
+        if (poiIds != null)
+        {
+            var normalized = poiIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.Ordinal);
+
+            if (normalized.Count > 0)
+            {
+                normalizedScope = normalized;
+            }
+        }
+
+        lock (_autoNarrationScopeLock)
+        {
+            _autoNarrationScopedPoiIds = normalizedScope;
+        }
+
+        // Scope narration cần reset geofence để tránh state POI trước đó làm lệch trigger.
+        _poiService.ResetGeofenceState();
+    }
+
+    public void ClearAutoNarrationPoiScope()
+    {
+        lock (_autoNarrationScopeLock)
+        {
+            _autoNarrationScopedPoiIds = null;
+        }
+
+        _poiService.ResetGeofenceState();
     }
 
     public void StopNarration()
@@ -162,18 +198,27 @@ public class NarrationFlowService : INarrationFlowService
             return;
         }
 
+        var scopedPois = ApplyAutoNarrationScope(pois, force);
+        if (scopedPois.Count == 0)
+        {
+            return;
+        }
+
         // SỬ DỤNG GEOFENCE TRANSITION từ POIService
         // UpdateNearestPOI trả về POI mới khi:
         // - Enter vào POI (lần đầu vào radius 30m)
         // - Chuyển từ POI này sang POI khác (cả hai trong radius 30m)
-        var newPoi = _poiService.UpdateNearestPOI(currentLocation.Latitude, currentLocation.Longitude);
+        var newPoi = _poiService.UpdateNearestPOI(
+            currentLocation.Latitude,
+            currentLocation.Longitude,
+            scopedPois);
 
         // Nếu có POI mới từ geofence transition HOẶC force trigger
         if (newPoi != null || force)
         {
             // Nếu force, dùng nearest POI
             var targetPoi = force
-                ? _poiService.GetNearestPOI(currentLocation, pois)
+                ? _poiService.GetNearestPOI(currentLocation, scopedPois)
                 : newPoi;
 
             if (targetPoi == null)
@@ -183,6 +228,42 @@ public class NarrationFlowService : INarrationFlowService
 
             await TryPlayAudioAsync(targetPoi, currentLocation, force);
         }
+    }
+
+    private List<POI> ApplyAutoNarrationScope(IEnumerable<POI> pois, bool force)
+    {
+        if (force)
+        {
+            return pois.ToList();
+        }
+
+        if (!IsMapPageRouteActive())
+        {
+            // Chỉ áp dụng scope trong lúc người dùng thực sự đang ở MapPage.
+            return pois.ToList();
+        }
+
+        HashSet<string>? activeScope;
+        lock (_autoNarrationScopeLock)
+        {
+            activeScope = _autoNarrationScopedPoiIds;
+        }
+
+        if (activeScope == null || activeScope.Count == 0)
+        {
+            return pois.ToList();
+        }
+
+        return pois
+            .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId) && activeScope.Contains(p.restaurantId))
+            .ToList();
+    }
+
+    private static bool IsMapPageRouteActive()
+    {
+        var route = Shell.Current?.CurrentState?.Location?.ToString();
+        return !string.IsNullOrWhiteSpace(route)
+            && route.Contains("MapPage", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task TryPlayAudioAsync(POI poi, Location currentLocation, bool force = false)
