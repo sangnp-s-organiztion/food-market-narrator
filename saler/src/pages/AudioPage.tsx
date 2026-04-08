@@ -28,6 +28,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -62,6 +72,9 @@ export default function AudioPage() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingDeleteAudio, setPendingDeleteAudio] = useState<Audio | null>(
+    null,
+  );
   const [selectedLang, setSelectedLang] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -191,12 +204,23 @@ export default function AudioPage() {
     };
   }, []);
 
-  const toggleActive = async (id: number) => {
+  const toggleActive = async (id: number, nextChecked: boolean) => {
     const current = audios.find((a) => a.audio_id === id);
     if (!current) return;
 
+    if (current.is_active && !nextChecked) {
+      const activeCountInLanguage = audios.filter(
+        (a) => a.language_id === current.language_id && a.is_active,
+      ).length;
+
+      if (activeCountInLanguage <= 1) {
+        toast.error("Mỗi ngôn ngữ phải có ít nhất 1 bản thuyết minh hoạt động");
+        return;
+      }
+    }
+
     try {
-      await updateAudioActiveApi(id, !current.is_active);
+      await updateAudioActiveApi(id, nextChecked);
       await fetchAudioData();
       toast.success("Đã cập nhật trạng thái âm thanh");
     } catch {
@@ -205,6 +229,18 @@ export default function AudioPage() {
   };
 
   const deleteAudio = async (id: number) => {
+    const current = audios.find((a) => a.audio_id === id);
+    if (!current) return;
+
+    const totalInLanguage = audios.filter(
+      (a) => a.language_id === current.language_id,
+    ).length;
+
+    if (totalInLanguage <= 1) {
+      toast.error("Mỗi ngôn ngữ phải có ít nhất 1 bản thuyết minh");
+      return;
+    }
+
     try {
       await deleteAudioApi(id);
       await fetchAudioData();
@@ -212,6 +248,12 @@ export default function AudioPage() {
     } catch {
       toast.error("Không thể xóa âm thanh");
     }
+  };
+
+  const confirmDeleteAudio = async () => {
+    if (!pendingDeleteAudio) return;
+    await deleteAudio(pendingDeleteAudio.audio_id);
+    setPendingDeleteAudio(null);
   };
 
   const openUploadDialog = (languageId?: number) => {
@@ -638,13 +680,17 @@ export default function AudioPage() {
                           </span>
                           <Switch
                             checked={audio.is_active}
-                            onCheckedChange={() => toggleActive(audio.audio_id)}
+                            disabled={audio.is_active && group.activeCount <= 1}
+                            onCheckedChange={(checked) =>
+                              toggleActive(audio.audio_id, checked)
+                            }
                           />
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => deleteAudio(audio.audio_id)}
+                          disabled={group.items.length <= 1}
+                          onClick={() => setPendingDeleteAudio(audio)}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
@@ -713,6 +759,39 @@ export default function AudioPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={pendingDeleteAudio !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteAudio(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa thuyết minh</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc muốn xóa{" "}
+              {pendingDeleteAudio
+                ? `Phiên bản ${
+                    versionByAudioId.get(pendingDeleteAudio.audio_id) ?? 1
+                  }`
+                : "thuyết minh này"}
+              ? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                void confirmDeleteAudio();
+              }}
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
