@@ -45,7 +45,9 @@ public partial class TourPage : ContentPage
             return;
         }
 
-        var tours = await _tourService.GetToursAsync();
+        var tours = (await _tourService.GetToursAsync())
+            .Where(t => t.IsActive)
+            .ToList();
         TourCollectionView.ItemsSource = tours;
 
         _tourMap.Clear();
@@ -93,6 +95,26 @@ public partial class TourPage : ContentPage
             return;
         }
 
+        await NavigateToTourDetailAsync(tour);
+    }
+
+    private async void OnViewDetailClicked(object sender, EventArgs e)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        if (button.BindingContext is not TourModel tour)
+        {
+            return;
+        }
+
+        await NavigateToTourDetailAsync(tour);
+    }
+
+    private static async Task NavigateToTourDetailAsync(TourModel tour)
+    {
         if (Shell.Current == null)
         {
             return;
