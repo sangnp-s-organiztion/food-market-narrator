@@ -369,6 +369,8 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         {
             username,
             password = string.Empty,
+            phone = "0912345678",
+            email = $"{username}@example.com",
             role = "saler"
         };
 
@@ -753,7 +755,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var createRequest = new CreateDishRequest
         {
             Name = "Món Mới",
-            Description = "Mô tả món ăn",
             Price = 100000m
         };
 
@@ -778,7 +779,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var createRequest = new CreateDishRequest
         {
             Name = "Món Test",
-            Description = "Test",
             Price = 50000m
         };
         var createResponse = await AuthorizedRequestAsync(
@@ -792,7 +792,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var updateRequest = new UpdateDishRequest
         {
             Name = "Món Đã Cập Nhật",
-            Description = "Mô tả mới",
             Price = 150000m
         };
 
