@@ -160,3 +160,10 @@ Server=mssql-fmn,1433;Database=food_market_narrator;User Id=sa;Password=YourStro
 ---
 
 END OF DOCUMENT
+
+---
+
+## 9. Dish schema update
+
+- B?ng `Dish` ð? b? c?t `description`.
+- Khi seed/import d? li?u Dish, dùng các c?t: `name`, `price`, `created_at`, `restaurant_id`, `image_id`, `is_active`.

@@ -103,7 +103,6 @@ CREATE TABLE food_market_narrator.dbo.Dish (
 	dish_id int IDENTITY(1,1) NOT NULL,
 	name nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	price decimal(10,2) NULL,
-	description nvarchar(1000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 	created_at datetime DEFAULT getdate() NULL,
 	restaurant_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	image_id int NULL,

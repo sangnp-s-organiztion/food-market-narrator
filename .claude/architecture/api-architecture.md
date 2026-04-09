@@ -57,6 +57,17 @@ Luu y:
 - PATCH /Images/{imageId:int}/primary
 - PATCH /Restaurant/{restaurantId}/images/reorder
 
+## Tour
+
+- GET /Tour
+- GET /Tour/{id:int}
+- POST /Tour
+- PATCH /Tour/{id:int}
+- POST /Tour/{id:int}/restaurants
+- PUT /Tour/{id:int}/stops/order
+- POST /Tour/upload-image
+- POST /Tour/{id:int}/upload-image
+
 ## Public Data
 
 - GET /public/Restaurant/{restaurantId}/dishes (public)

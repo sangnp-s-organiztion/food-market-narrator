@@ -18,6 +18,35 @@ public class ReorderTourStopsRequest
 public class UpdateTourRequest
 {
     public int? EstimatedDurationMinutes { get; set; }
+    [MaxLength(500)]
+    public string? UrlImage { get; set; }
     public int SortPriority { get; set; }
+    public bool IsActive { get; set; }
     public bool IsFeatured { get; set; }
+    /// <summary>Multipart file upload. If provided, overwrites UrlImage with the saved file path.</summary>
+    public IFormFile? File { get; set; }
+}
+
+public class CreateTourRequest
+{
+    [Required]
+    [MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string? ShortDescription { get; set; }
+
+    public string? Description { get; set; }
+    public int? EstimatedDurationMinutes { get; set; }
+    /// <summary>
+    /// Fallback image URL when no File is uploaded.
+    /// When File is provided, this field is ignored.
+    /// </summary>
+    [MaxLength(500)]
+    public string? UrlImage { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsFeatured { get; set; }
+    public int SortPriority { get; set; }
+    /// <summary>Multipart file upload. When provided, its saved path takes priority over UrlImage.</summary>
+    public IFormFile? File { get; set; }
 }

@@ -50,7 +50,6 @@ namespace food_market_narrator_api.Repositories
 
             existing.Name = dish.Name;
             existing.Price = dish.Price;
-            existing.Description = dish.Description;
             existing.ImageId = dish.ImageId;
 
             await _context.SaveChangesAsync();

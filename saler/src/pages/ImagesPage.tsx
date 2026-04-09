@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import {
   deleteImageApi,
   getRestaurantDishesApi,
@@ -28,13 +28,11 @@ export default function ImagesPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load all images on mount / restaurant change
   useEffect(() => {
     if (selectedRestaurant) {
       (async () => {
         try {
           const data = await getRestaurantImagesApi(selectedRestaurant.restaurant_id);
-          // Avatar page only uses is_primary = 1 images.
           setImages((data ?? []).filter((img) => img.is_primary));
         } catch {
           toast.error("Không thể tải hình ảnh");
@@ -43,7 +41,6 @@ export default function ImagesPage() {
     }
   }, [selectedRestaurant]);
 
-  // Avatar display: page state already contains only is_primary = 1 images.
   const avatarImage = [...images].sort((a, b) => a.sort_order - b.sort_order)[0] ?? null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +64,7 @@ export default function ImagesPage() {
       const created = await uploadRestaurantImageApi(
         selectedRestaurant.restaurant_id,
         selectedFile,
-        true, // Upload as primary; backend will demote old primary automatically.
+        true,
         1,
       );
 
@@ -77,13 +74,11 @@ export default function ImagesPage() {
           (dish) => dish.image_id !== null && oldPrimaryIds.includes(dish.image_id),
         );
 
-        // Clear dish references before deleting old avatar images to satisfy FK constraints.
         await Promise.all(
           affectedDishes.map((dish) =>
             updateDishApi(dish.dish_id, {
               name: dish.name,
               price: dish.price,
-              description: dish.description,
               image_id: null,
             }),
           ),
@@ -120,7 +115,6 @@ export default function ImagesPage() {
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
-      {/* Page header — matched from hub-restaurant */}
       <div className="page-header flex items-start justify-between">
         <div>
           <h1 className="page-title">Hình ảnh nhà hàng</h1>
@@ -131,15 +125,10 @@ export default function ImagesPage() {
         </Button>
       </div>
 
-      {/* Single avatar image display — matched from hub-restaurant */}
       <div className="form-section">
         {avatarImage ? (
           <div className="rounded-lg overflow-hidden border">
-            <img
-              src={avatarImage.image_url}
-              alt="Ảnh nhà hàng"
-              className="w-full aspect-video object-cover"
-            />
+            <img src={avatarImage.image_url} alt="Ảnh nhà hàng" className="w-full aspect-video object-cover" />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
@@ -149,7 +138,12 @@ export default function ImagesPage() {
         )}
       </div>
 
-      {/* Upload / Replace dialog — matched from hub-restaurant */}
+      {avatarImage && (
+        <div className="mt-4 flex justify-end">
+          <Button variant="outline" onClick={handleDelete}>Xóa ảnh hiện tại</Button>
+        </div>
+      )}
+
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
@@ -170,11 +164,7 @@ export default function ImagesPage() {
               onClick={() => fileInputRef.current?.click()}
             >
               {preview ? (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="max-h-48 mx-auto rounded-md object-contain"
-                />
+                <img src={preview} alt="Xem trước" className="max-h-48 mx-auto rounded-md object-contain" />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Upload className="w-8 h-8" />
@@ -192,12 +182,8 @@ export default function ImagesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={resetDialog}>
-              Hủy
-            </Button>
-            <Button onClick={handleUpload} disabled={!selectedFile}>
-              Tải lên
-            </Button>
+            <Button variant="outline" onClick={resetDialog}>Hủy</Button>
+            <Button onClick={handleUpload} disabled={!selectedFile}>Tải lên</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -15,7 +15,7 @@ public class TourService
 
     public async Task<List<TourResponse>> GetAllToursAsync(double? latitude = null, double? longitude = null, double radiusMeters = 30)
     {
-        var tours = await _tourRepository.GetAllAsync();
+        var tours = await _tourRepository.GetAllAsync(includeInactive: true);
 
         return tours
             .Select(t => MapTour(t, latitude, longitude, radiusMeters))
@@ -29,7 +29,7 @@ public class TourService
 
     public async Task<TourResponse?> GetTourByIdAsync(int id, double? latitude = null, double? longitude = null, double radiusMeters = 30)
     {
-        var tour = await _tourRepository.GetByIdAsync(id);
+        var tour = await _tourRepository.GetByIdAsync(id, includeInactive: true);
         if (tour == null)
         {
             return null;
@@ -118,7 +118,9 @@ public class TourService
     public async Task<UpdateTourResult> UpdateTourAsync(
         int tourId,
         int? estimatedDurationMinutes,
+        string? urlImage,
         int sortPriority,
+        bool isActive,
         bool isFeatured)
     {
         if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
@@ -134,7 +136,9 @@ public class TourService
         var updated = await _tourRepository.UpdateTourMetadataAsync(
             tourId,
             estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
             sortPriority,
+            isActive,
             isFeatured);
 
         if (!updated)
@@ -143,6 +147,68 @@ public class TourService
         }
 
         return UpdateTourResult.Success();
+    }
+
+    public async Task<UpdateTourResult> SetTourImageAsync(int tourId, string? urlImage)
+    {
+        var normalized = NormalizeUrlImageForStorage(urlImage);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return UpdateTourResult.Invalid("imageUrl is required.");
+        }
+
+        var updated = await _tourRepository.UpdateTourImageAsync(tourId, normalized);
+        if (!updated)
+        {
+            return UpdateTourResult.NotFound("Tour not found.");
+        }
+
+        return UpdateTourResult.Success();
+    }
+
+    public async Task<CreateTourResult> CreateTourAsync(
+        string name,
+        string? shortDescription,
+        string? description,
+        int? estimatedDurationMinutes,
+        string? urlImage,
+        bool isActive,
+        bool isFeatured,
+        int sortPriority)
+    {
+        var normalizedName = name.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return CreateTourResult.Invalid("name is required.");
+        }
+
+        if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
+        {
+            return CreateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
+        }
+
+        if (sortPriority < 0)
+        {
+            return CreateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
+        }
+
+        var created = await _tourRepository.CreateTourAsync(
+            normalizedName,
+            string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
+            string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+            estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
+            isActive,
+            isFeatured,
+            sortPriority);
+
+        var createdTour = await _tourRepository.GetByIdAsync(created.TourId, includeInactive: true);
+        if (createdTour == null)
+        {
+            return CreateTourResult.Invalid("Unable to load created tour.");
+        }
+
+        return CreateTourResult.Success(MapTour(createdTour, null, null, 30));
     }
 
     private static TourResponse MapTour(TourModel tour, double? latitude, double? longitude, double radiusMeters)
@@ -196,9 +262,7 @@ public class TourService
             }
         }
 
-        var imageUrl = !string.IsNullOrWhiteSpace(tour.Image?.ImageUrl)
-            ? tour.Image.ImageUrl
-            : stops.Select(s => s.PrimaryImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+        var imageUrl = NormalizeUrlImageForResponse(tour.UrlImage);
 
         return new TourResponse
         {
@@ -208,6 +272,7 @@ public class TourService
             Description = tour.Description,
             EstimatedDurationMinutes = tour.EstimatedDurationMinutes,
             ImageUrl = imageUrl,
+            IsActive = tour.IsActive,
             IsFeatured = tour.IsFeatured,
             SortPriority = tour.SortPriority,
             StopCount = stops.Count,
@@ -235,6 +300,49 @@ public class TourService
     private static double DegreesToRadians(double degrees)
     {
         return degrees * (Math.PI / 180);
+    }
+
+    private static string? NormalizeUrlImageForStorage(string? urlImage)
+    {
+        return string.IsNullOrWhiteSpace(urlImage) ? null : urlImage.Trim();
+    }
+
+    private static string? NormalizeUrlImageForResponse(string? urlImage)
+    {
+        if (string.IsNullOrWhiteSpace(urlImage))
+        {
+            return null;
+        }
+
+        var normalized = urlImage.Replace("\\", "/", StringComparison.Ordinal).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var absoluteUri)
+            && (absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("/", StringComparison.Ordinal))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("maui-images/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"/{normalized}";
+        }
+
+        if (!normalized.Contains('/', StringComparison.Ordinal))
+        {
+            return $"/maui-images/{normalized}";
+        }
+
+        return $"/{normalized.TrimStart('/')}";
     }
 }
 
@@ -303,4 +411,23 @@ public class UpdateTourResult
 
     public static UpdateTourResult Invalid(string message) =>
         new() { Status = UpdateTourStatus.Invalid, Message = message };
+}
+
+public enum CreateTourStatus
+{
+    Success,
+    Invalid
+}
+
+public class CreateTourResult
+{
+    public CreateTourStatus Status { get; private set; }
+    public string? Message { get; private set; }
+    public TourResponse? Data { get; private set; }
+
+    public static CreateTourResult Success(TourResponse data) =>
+        new() { Status = CreateTourStatus.Success, Data = data };
+
+    public static CreateTourResult Invalid(string message) =>
+        new() { Status = CreateTourStatus.Invalid, Message = message };
 }
