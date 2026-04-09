@@ -2,6 +2,7 @@ using System.Reflection;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
 using food_market_narrator.Settings;
+using Microsoft.Maui.Networking;
 
 namespace unit_test.Services;
 
@@ -10,6 +11,113 @@ namespace unit_test.Services;
 /// </summary>
 public class TourService_Tests
 {
+    [Fact]
+    public async Task GetToursAsync_WithInternetAndNoCache_CallsApiAndReturnsData()
+    {
+        // Arrange
+        var tempDir = CreateTempDir();
+        try
+        {
+            var handler = new TestHttpMessageHandler(request =>
+            {
+                var payload = "[{\"tourId\":11,\"name\":\"Tour API\",\"stops\":[]}]";
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(payload)
+                };
+            });
+
+            var service = CreateService(
+                handler: handler,
+                baseAddress: "http://api-primary:5044/",
+                networkAccess: NetworkAccess.Internet,
+                appDataDirectory: tempDir);
+
+            // Act
+            var tours = await service.GetToursAsync();
+
+            // Assert
+            Assert.Single(tours);
+            Assert.Equal(11, tours[0].TourId);
+            Assert.Equal("Tour API", tours[0].Name);
+            Assert.True(handler.CallCount >= 1);
+        }
+        finally
+        {
+            SafeDeleteDirectory(tempDir);
+        }
+    }
+
+    [Fact]
+    public async Task GetToursAsync_WithOfflineAndValidCache_ReturnsCacheWithoutApiCall()
+    {
+        // Arrange
+        var tempDir = CreateTempDir();
+        try
+        {
+            var cacheDir = Path.Combine(tempDir, "offline_cache");
+            Directory.CreateDirectory(cacheDir);
+            var cacheFile = Path.Combine(cacheDir, "tours.json");
+            await File.WriteAllTextAsync(cacheFile, "[{\"tourId\":22,\"name\":\"Tour Cache\",\"stops\":[]}]", CancellationToken.None);
+
+            var handler = new TestHttpMessageHandler(_ =>
+                throw new InvalidOperationException("Should not call API in offline mode when cache exists."));
+
+            var service = CreateService(
+                handler: handler,
+                baseAddress: "http://api-primary:5044/",
+                networkAccess: NetworkAccess.None,
+                appDataDirectory: tempDir);
+
+            // Act
+            var tours = await service.GetToursAsync();
+
+            // Assert
+            Assert.Single(tours);
+            Assert.Equal(22, tours[0].TourId);
+            Assert.Equal("Tour Cache", tours[0].Name);
+            Assert.Equal(0, handler.CallCount);
+        }
+        finally
+        {
+            SafeDeleteDirectory(tempDir);
+        }
+    }
+
+    [Fact]
+    public async Task GetToursAsync_WithOfflineAndCorruptedCache_ReturnsEmptyFallback()
+    {
+        // Arrange
+        var tempDir = CreateTempDir();
+        try
+        {
+            var cacheDir = Path.Combine(tempDir, "offline_cache");
+            Directory.CreateDirectory(cacheDir);
+            var cacheFile = Path.Combine(cacheDir, "tours.json");
+            await File.WriteAllTextAsync(cacheFile, "{ invalid json", CancellationToken.None);
+
+            var handler = new TestHttpMessageHandler(_ =>
+                throw new InvalidOperationException("Should not call API while offline."));
+
+            var service = CreateService(
+                handler: handler,
+                baseAddress: "http://api-primary:5044/",
+                networkAccess: NetworkAccess.None,
+                appDataDirectory: tempDir);
+
+            // Act
+            var tours = await service.GetToursAsync();
+
+            // Assert
+            Assert.Empty(tours);
+            Assert.Equal(0, handler.CallCount);
+        }
+        finally
+        {
+            SafeDeleteDirectory(tempDir);
+        }
+    }
+
     [Fact]
     public void BuildTourEndpoint_WithoutLocation_ReturnsBaseTourPath()
     {
@@ -154,15 +262,48 @@ public class TourService_Tests
         Assert.True(shouldRefresh);
     }
 
-    private static TourService CreateService(string? baseAddress = null)
+    private static TourService CreateService(
+        HttpMessageHandler? handler = null,
+        string? baseAddress = null,
+        NetworkAccess networkAccess = NetworkAccess.Internet,
+        string? appDataDirectory = null)
     {
-        var handler = new DummyHttpMessageHandler();
-        var client = new HttpClient(handler)
+        var effectiveHandler = handler ?? new DummyHttpMessageHandler();
+        var client = new HttpClient(effectiveHandler)
         {
             BaseAddress = baseAddress == null ? null : new Uri(baseAddress)
         };
 
-        return new TourService(client, new FakeLocationService());
+        var resolvedAppDataDir = appDataDirectory ?? Path.Combine(Path.GetTempPath(), "tourservice-tests", "shared");
+        Directory.CreateDirectory(resolvedAppDataDir);
+
+        return new TourService(
+            client,
+            new FakeLocationService(),
+            new FakeNetworkAccessService(networkAccess),
+            new FakeAppFileSystemService(resolvedAppDataDir));
+    }
+
+    private static string CreateTempDir()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "tourservice-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    private static void SafeDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup for test temp folders.
+        }
     }
 
     private static object InvokePrivateInstance(object target, string methodName, params object[] args)
@@ -197,6 +338,24 @@ public class TourService_Tests
         }
     }
 
+    private sealed class TestHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly Func<HttpRequestMessage, HttpResponseMessage> _handler;
+
+        public int CallCount { get; private set; }
+
+        public TestHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
+        {
+            _handler = handler;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return Task.FromResult(_handler(request));
+        }
+    }
+
     private sealed class FakeLocationService : ILocationService
     {
         public event EventHandler<Location> LocationChanged
@@ -222,5 +381,25 @@ public class TourService_Tests
         public Task<bool> HasBackgroundLocationPermissionAsync() => Task.FromResult(true);
 
         public void StopTracking() { }
+    }
+
+    private sealed class FakeNetworkAccessService : INetworkAccessService
+    {
+        public FakeNetworkAccessService(NetworkAccess currentNetworkAccess)
+        {
+            CurrentNetworkAccess = currentNetworkAccess;
+        }
+
+        public NetworkAccess CurrentNetworkAccess { get; }
+    }
+
+    private sealed class FakeAppFileSystemService : IAppFileSystemService
+    {
+        public FakeAppFileSystemService(string appDataDirectory)
+        {
+            AppDataDirectory = appDataDirectory;
+        }
+
+        public string AppDataDirectory { get; }
     }
 }

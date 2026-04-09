@@ -37,6 +37,8 @@
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IPOIService.cs" Link="Interfaces\IPOIService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\INarrationFlowService.cs" Link="Interfaces\INarrationFlowService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\ILocationService.cs" Link="Interfaces\ILocationService.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\INetworkAccessService.cs" Link="Interfaces\INetworkAccessService.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IAppFileSystemService.cs" Link="Interfaces\IAppFileSystemService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IAudioService.cs" Link="Interfaces\IAudioService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IAudioLogSyncService.cs" Link="Interfaces\IAudioLogSyncService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\ILanguageService.cs" Link="Interfaces\ILanguageService.cs" />

@@ -16,6 +16,8 @@ public class TourService : ITourService
 
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
+    private readonly INetworkAccessService _networkAccessService;
+    private readonly IAppFileSystemService _appFileSystemService;
     private readonly SemaphoreSlim _cacheFileLock = new(1, 1);
     private readonly SemaphoreSlim _networkRefreshLock = new(1, 1);
     private List<TourModel>? _cachedTours;
@@ -31,10 +33,16 @@ public class TourService : ITourService
         WriteIndented = false
     };
 
-    public TourService(HttpClient httpClient, ILocationService locationService)
+    public TourService(
+        HttpClient httpClient,
+        ILocationService locationService,
+        INetworkAccessService networkAccessService,
+        IAppFileSystemService appFileSystemService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
+        _networkAccessService = networkAccessService;
+        _appFileSystemService = appFileSystemService;
     }
 
     public async Task<List<TourModel>> GetToursAsync()
@@ -49,7 +57,7 @@ public class TourService : ITourService
         {
             SetMemoryCache(cachedTours);
 
-            if (Connectivity.Current.NetworkAccess == NetworkAccess.Internet && ShouldRefreshFromNetwork())
+            if (_networkAccessService.CurrentNetworkAccess == NetworkAccess.Internet && ShouldRefreshFromNetwork())
             {
                 _ = RefreshToursInBackgroundAsync();
             }
@@ -57,7 +65,7 @@ public class TourService : ITourService
             return _cachedTours!;
         }
 
-        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+        if (_networkAccessService.CurrentNetworkAccess != NetworkAccess.Internet)
         {
             return new List<TourModel>();
         }
@@ -78,7 +86,7 @@ public class TourService : ITourService
             }
         }
 
-        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+        if (_networkAccessService.CurrentNetworkAccess != NetworkAccess.Internet)
         {
             return cachedTour == null ? null : NormalizeTour(cachedTour);
         }
@@ -227,7 +235,7 @@ public class TourService : ITourService
 
         try
         {
-            if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+            if (_networkAccessService.CurrentNetworkAccess != NetworkAccess.Internet)
             {
                 return;
             }
@@ -337,9 +345,9 @@ public class TourService : ITourService
         return ResolveCachedImagePath(originalSource, resolved);
     }
 
-    private static string GetToursCacheFilePath()
+    private string GetToursCacheFilePath()
     {
-        var cacheDir = Path.Combine(FileSystem.AppDataDirectory, OfflineCacheFolderName);
+        var cacheDir = Path.Combine(_appFileSystemService.AppDataDirectory, OfflineCacheFolderName);
         Directory.CreateDirectory(cacheDir);
         return Path.Combine(cacheDir, "tours.json");
     }
@@ -457,7 +465,7 @@ public class TourService : ITourService
         return tours;
     }
 
-    private static string ResolveCachedImagePath(params string?[] sources)
+    private string ResolveCachedImagePath(params string?[] sources)
     {
         foreach (var source in sources)
         {
@@ -481,7 +489,7 @@ public class TourService : ITourService
         return sources.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))?.Trim() ?? "dotnet_bot.svg";
     }
 
-    private static string GetImageCachePath(string source)
+    private string GetImageCachePath(string source)
     {
         var normalized = source.Replace("\\", "/", StringComparison.Ordinal).Trim().ToLowerInvariant();
         var ext = Path.GetExtension(normalized);
@@ -494,9 +502,9 @@ public class TourService : ITourService
         return Path.Combine(GetImageCacheRootPath(), $"{hash}{ext}");
     }
 
-    private static string GetImageCacheRootPath()
+    private string GetImageCacheRootPath()
     {
-        var path = Path.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName);
+        var path = Path.Combine(_appFileSystemService.AppDataDirectory, ImageCacheFolderName);
         Directory.CreateDirectory(path);
         return path;
     }

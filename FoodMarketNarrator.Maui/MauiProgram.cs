@@ -49,6 +49,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<NarrationFlowService>(); // Must be singleton to track played POIs
         builder.Services.AddSingleton<IFavoriteService, FavoriteService>();
         builder.Services.AddSingleton<IHistoryService, HistoryService>();
+        builder.Services.AddSingleton<INetworkAccessService, MauiNetworkAccessService>();
+        builder.Services.AddSingleton<IAppFileSystemService, MauiAppFileSystemService>();
         builder.Services.AddSingleton<ITourService, TourService>();
         builder.Services.AddSingleton<TourImageWarmupService>();
         builder.Services.AddTransient<MainPage>();
