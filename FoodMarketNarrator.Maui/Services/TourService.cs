@@ -367,6 +367,7 @@ public class TourService : ITourService
         NormalizeStops(tours);
         foreach (var tour in tours)
         {
+            NormalizeStopImages(tour);
             tour.ResolvedImageUrl = ResolveImageUrl(tour.ImageUrl, tour.Stops);
         }
 
@@ -376,8 +377,17 @@ public class TourService : ITourService
     private TourModel NormalizeTour(TourModel tour)
     {
         tour.Stops ??= new List<TourStopModel>();
+        NormalizeStopImages(tour);
         tour.ResolvedImageUrl = ResolveImageUrl(tour.ImageUrl, tour.Stops);
         return tour;
+    }
+
+    private void NormalizeStopImages(TourModel tour)
+    {
+        foreach (var stop in tour.Stops)
+        {
+            stop.PrimaryImageUrl = ResolveImageUrl(stop.PrimaryImageUrl, null);
+        }
     }
 
     private static List<TourModel> NormalizeStops(List<TourModel> tours)

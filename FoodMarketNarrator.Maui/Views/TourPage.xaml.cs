@@ -88,7 +88,18 @@ public partial class TourPage : ContentPage
             return;
         }
 
-        await NavigateTourToMapAsync(border.BindingContext as TourModel);
+        if (border.BindingContext is not TourModel tour)
+        {
+            return;
+        }
+
+        if (Shell.Current == null)
+        {
+            return;
+        }
+
+        var encodedTourId = Uri.EscapeDataString(tour.TourId.ToString());
+        await Shell.Current.GoToAsync($"{nameof(TourDetailPage)}?tourId={encodedTourId}");
     }
 
     private static async Task NavigateTourToMapAsync(TourModel? tour)
