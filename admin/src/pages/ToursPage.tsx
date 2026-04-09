@@ -1,6 +1,6 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, GripVertical, Lock, Plus, Unlock } from "lucide-react";
+import { Eye, GripVertical, Lock, Plus, Unlock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -21,6 +21,52 @@ import {
   type TourStopResponse,
 } from "@/lib/adminApi";
 
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "http://localhost:5044";
+
+function normalizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const normalized = url.replace(/\\/g, "/").trim();
+  if (!normalized) return null;
+
+  if (normalized.startsWith("/")) {
+    return new URL(normalized, API_BASE).toString();
+  }
+
+  if (normalized.startsWith("maui-images/") || normalized.startsWith("uploads/")) {
+    return new URL(`/${normalized}`, API_BASE).toString();
+  }
+
+  return new URL(`/maui-images/${normalized}`, API_BASE).toString();
+}
+
+function normalizeImageInput(value: string): string | null {
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Không thể đọc file ảnh"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function getFallbackStopImage(tour: TourResponse | undefined): string | null {
+  if (!tour) return null;
+
+  return (
+    tour.stops
+      .map((stop) => stop.primaryImageUrl)
+      .find((url): url is string => !!url && url.trim().length > 0) ?? null
+  );
+}
+
 function getNextStopOrder(tour: TourResponse | undefined): number {
   if (!tour || tour.stops.length === 0) return 1;
   const maxStop = Math.max(...tour.stops.map((s) => s.stopOrder));
@@ -38,20 +84,29 @@ const ToursPage = () => {
     name: string;
     lock: boolean;
     estimatedDurationMinutes: number | null;
+    imageUrl: string | null;
     sortPriority: number;
     isFeatured: boolean;
   } | null>(null);
   const [draftStops, setDraftStops] = useState<TourStopResponse[]>([]);
   const [draggingRestaurantId, setDraggingRestaurantId] = useState<string | null>(null);
   const [draftEstimatedDurationMinutes, setDraftEstimatedDurationMinutes] = useState("");
+  const [draftImageUrl, setDraftImageUrl] = useState("");
+  const [draftImageFile, setDraftImageFile] = useState<File | null>(null);
+  const [draftImagePreview, setDraftImagePreview] = useState<string | null>(null);
   const [draftSortPriority, setDraftSortPriority] = useState("");
   const [draftIsFeatured, setDraftIsFeatured] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createShortDescription, setCreateShortDescription] = useState("");
   const [createDescription, setCreateDescription] = useState("");
   const [createEstimatedDurationMinutes, setCreateEstimatedDurationMinutes] = useState("");
+  const [createImageUrl, setCreateImageUrl] = useState("");
+  const [createImageFile, setCreateImageFile] = useState<File | null>(null);
+  const [createImagePreview, setCreateImagePreview] = useState<string | null>(null);
   const [createSortPriority, setCreateSortPriority] = useState("0");
   const [createIsFeatured, setCreateIsFeatured] = useState(false);
+  const detailImageInputRef = useRef<HTMLInputElement | null>(null);
+  const createImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     data: tours = [],
@@ -84,6 +139,9 @@ const ToursPage = () => {
     if (!selectedTour) {
       setDraftStops([]);
       setDraftEstimatedDurationMinutes("");
+      setDraftImageUrl("");
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
       setDraftSortPriority("");
       setDraftIsFeatured(false);
       return;
@@ -96,6 +154,12 @@ const ToursPage = () => {
         ? `${selectedTour.estimatedDurationMinutes}`
         : "",
     );
+    setDraftImageUrl(selectedTour.imageUrl ?? "");
+    setDraftImageFile(null);
+    setDraftImagePreview(null);
+    if (detailImageInputRef.current) {
+      detailImageInputRef.current.value = "";
+    }
     setDraftSortPriority(`${selectedTour.sortPriority}`);
     setDraftIsFeatured(selectedTour.isFeatured);
   }, [selectedTour]);
@@ -129,6 +193,8 @@ const ToursPage = () => {
 
     if (
       estimatedDuration !== selectedTour.estimatedDurationMinutes ||
+      normalizeImageInput(draftImageUrl) !== normalizeImageInput(selectedTour.imageUrl ?? "") ||
+      draftImageFile !== null ||
       sortPriority !== selectedTour.sortPriority ||
       draftIsFeatured !== selectedTour.isFeatured
     ) {
@@ -139,11 +205,18 @@ const ToursPage = () => {
   }, [
     selectedTour,
     draftEstimatedDurationMinutes,
+    draftImageUrl,
+    draftImageFile,
     draftSortPriority,
     draftIsFeatured,
   ]);
 
   const hasUnsavedChanges = hasOrderChanges || hasMetaChanges;
+  const detailPreviewImageUrl =
+    draftImagePreview ??
+    normalizeImageUrl(normalizeImageInput(draftImageUrl) ?? getFallbackStopImage(selectedTour));
+  const createPreviewImageUrl =
+    createImagePreview ?? normalizeImageUrl(normalizeImageInput(createImageUrl));
 
   const addRestaurantMutation = useMutation({
     mutationFn: (payload: { tourId: number; restaurantId: string }) =>
@@ -171,19 +244,34 @@ const ToursPage = () => {
       shortDescription: string | null;
       description: string | null;
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
+      imageFile: File | null;
       sortPriority: number;
       isActive: boolean;
       isFeatured: boolean;
     }) =>
-      tourApi.create({
+      (async () => {
+        const created = await tourApi.create({
         name: payload.name,
         shortDescription: payload.shortDescription,
         description: payload.description,
         estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        imageUrl: payload.imageUrl,
         sortPriority: payload.sortPriority,
         isActive: payload.isActive,
         isFeatured: payload.isFeatured,
-      }),
+        });
+
+        if (payload.imageFile) {
+          const upload = await tourApi.uploadImageForTour(created.tourId, payload.imageFile);
+          return {
+            ...created,
+            imageUrl: upload.imageUrl,
+          };
+        }
+
+        return created;
+      })(),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
       setCreateOpen(false);
@@ -191,6 +279,12 @@ const ToursPage = () => {
       setCreateShortDescription("");
       setCreateDescription("");
       setCreateEstimatedDurationMinutes("");
+      setCreateImageUrl("");
+      setCreateImageFile(null);
+      setCreateImagePreview(null);
+      if (createImageInputRef.current) {
+        createImageInputRef.current.value = "";
+      }
       setCreateSortPriority("0");
       setCreateIsFeatured(false);
       toast.success("Tạo tour thành công");
@@ -205,11 +299,13 @@ const ToursPage = () => {
       id: number;
       isActive: boolean;
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
       sortPriority: number;
       isFeatured: boolean;
     }) =>
       tourApi.update(payload.id, {
         estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        imageUrl: payload.imageUrl,
         sortPriority: payload.sortPriority,
         isActive: payload.isActive,
         isFeatured: payload.isFeatured,
@@ -232,12 +328,20 @@ const ToursPage = () => {
       tourId: number;
       restaurantIds: string[];
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
+      imageFile: File | null;
       sortPriority: number;
       isActive: boolean;
       isFeatured: boolean;
       hasOrderChanges: boolean;
       hasMetaChanges: boolean;
     }) => {
+      let imageUrl = payload.imageUrl;
+      if (payload.imageFile) {
+        const upload = await tourApi.uploadImageForTour(payload.tourId, payload.imageFile);
+        imageUrl = upload.imageUrl;
+      }
+
       if (payload.hasOrderChanges) {
         await tourApi.reorderStops(payload.tourId, { restaurantIds: payload.restaurantIds });
       }
@@ -245,6 +349,7 @@ const ToursPage = () => {
       if (payload.hasMetaChanges) {
         await tourApi.update(payload.tourId, {
           estimatedDurationMinutes: payload.estimatedDurationMinutes,
+          imageUrl,
           sortPriority: payload.sortPriority,
           isActive: payload.isActive,
           isFeatured: payload.isFeatured,
@@ -257,6 +362,11 @@ const ToursPage = () => {
         await qc.invalidateQueries({ queryKey: ["admin", "tour", selectedTourId] });
       }
 
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
       toast.success("Đã lưu cập nhật tour");
     },
     onError: (err: Error) => {
@@ -278,8 +388,58 @@ const ToursPage = () => {
       setDraftStops([]);
       setDraggingRestaurantId(null);
       setDraftEstimatedDurationMinutes("");
+      setDraftImageUrl("");
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
       setDraftSortPriority("");
       setDraftIsFeatured(false);
+    }
+  };
+
+  const handleDraftImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setDraftImageFile(file);
+
+    if (!file) {
+      setDraftImagePreview(null);
+      return;
+    }
+
+    try {
+      const preview = await readFileAsDataUrl(file);
+      setDraftImagePreview(preview);
+    } catch (error) {
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
+      toast.error((error as Error).message ?? "Không thể đọc file ảnh");
+    }
+  };
+
+  const handleCreateImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setCreateImageFile(file);
+
+    if (!file) {
+      setCreateImagePreview(null);
+      return;
+    }
+
+    try {
+      const preview = await readFileAsDataUrl(file);
+      setCreateImagePreview(preview);
+    } catch (error) {
+      setCreateImageFile(null);
+      setCreateImagePreview(null);
+      if (createImageInputRef.current) {
+        createImageInputRef.current.value = "";
+      }
+      toast.error((error as Error).message ?? "Không thể đọc file ảnh");
     }
   };
 
@@ -330,6 +490,7 @@ const ToursPage = () => {
       draftEstimatedDurationMinutes.trim().length === 0
         ? null
         : Number(draftEstimatedDurationMinutes);
+    const imageUrl = normalizeImageInput(draftImageUrl);
     const sortPriority = Number(draftSortPriority);
 
     if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
@@ -346,6 +507,8 @@ const ToursPage = () => {
       tourId: selectedTourId,
       restaurantIds: draftStops.map((s) => s.restaurantId),
       estimatedDurationMinutes: estimatedDuration,
+      imageUrl,
+      imageFile: draftImageFile,
       sortPriority,
       isActive: selectedTour?.isActive ?? true,
       isFeatured: draftIsFeatured,
@@ -365,6 +528,7 @@ const ToursPage = () => {
       createEstimatedDurationMinutes.trim().length === 0
         ? null
         : Number(createEstimatedDurationMinutes);
+    const imageUrl = normalizeImageInput(createImageUrl);
     const sortPriority = Number(createSortPriority);
 
     if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
@@ -382,6 +546,8 @@ const ToursPage = () => {
       shortDescription: createShortDescription.trim() || null,
       description: createDescription.trim() || null,
       estimatedDurationMinutes: estimatedDuration,
+      imageUrl,
+      imageFile: createImageFile,
       sortPriority,
       isActive: true,
       isFeatured: createIsFeatured,
@@ -404,6 +570,7 @@ const ToursPage = () => {
             <thead>
               <tr>
                 <th>Tên tour</th>
+                <th className="w-32">Ảnh tour</th>
                 <th className="w-36">Số điểm dừng</th>
                 <th className="w-40">Thời gian dự kiến</th>
                 <th className="w-28">Ưu tiên</th>
@@ -415,21 +582,21 @@ const ToursPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     Đang tải danh sách tour...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-destructive">
+                  <td colSpan={8} className="py-8 text-center text-destructive">
                     Không thể tải danh sách tour. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && tours.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     Chưa có tour nào.
                   </td>
                 </tr>
@@ -439,6 +606,24 @@ const ToursPage = () => {
                 tours.map((tour) => (
                   <tr key={tour.tourId}>
                     <td className="font-medium">{tour.name}</td>
+                    <td>
+                      {(() => {
+                        const previewUrl = normalizeImageUrl(
+                          tour.imageUrl ?? getFallbackStopImage(tour),
+                        );
+                        if (!previewUrl) {
+                          return <span className="text-xs text-muted-foreground">Chưa có ảnh</span>;
+                        }
+
+                        return (
+                          <img
+                            src={previewUrl}
+                            alt={`Ảnh tour ${tour.name}`}
+                            className="h-12 w-20 rounded-md border object-cover"
+                          />
+                        );
+                      })()}
+                    </td>
                     <td>{tour.stopCount}</td>
                     <td>{tour.estimatedDurationMinutes ? `${tour.estimatedDurationMinutes} phút` : "-"}</td>
                     <td>{tour.sortPriority}</td>
@@ -465,6 +650,7 @@ const ToursPage = () => {
                             name: tour.name,
                             lock: tour.isActive,
                             estimatedDurationMinutes: tour.estimatedDurationMinutes,
+                            imageUrl: tour.imageUrl,
                             sortPriority: tour.sortPriority,
                             isFeatured: tour.isFeatured,
                           })
@@ -500,6 +686,16 @@ const ToursPage = () => {
 
           {!isDetailLoading && !isDetailError && selectedTour && (
             <div className="space-y-5">
+              {detailPreviewImageUrl && (
+                <div className="overflow-hidden rounded-md border bg-muted/20">
+                  <img
+                    src={detailPreviewImageUrl}
+                    alt={`Ảnh tour ${selectedTour.name}`}
+                    className="h-52 w-full object-cover"
+                  />
+                </div>
+              )}
+
               <div className="rounded-md border p-4">
                 <p className="text-sm text-muted-foreground">Tên tour</p>
                 <p className="mt-1 text-base font-semibold">{selectedTour.name}</p>
@@ -539,6 +735,52 @@ const ToursPage = () => {
                       <option value="false">Không</option>
                     </select>
                   </div>
+                </div>
+                <div className="mt-4">
+                  <Label className="text-xs">Ảnh tour</Label>
+                  <div
+                    className="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-4 text-center transition-colors hover:border-primary"
+                    onClick={() => detailImageInputRef.current?.click()}
+                  >
+                    {detailPreviewImageUrl ? (
+                      <div className="space-y-2">
+                        <img
+                          src={detailPreviewImageUrl}
+                          alt={`Ảnh tour ${selectedTour.name}`}
+                          className="max-h-44 w-full rounded-md object-contain"
+                        />
+                        <p className="text-xs text-muted-foreground">Nhấn để chọn ảnh khác</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 py-2 text-muted-foreground">
+                        <Upload className="h-6 w-6" />
+                        <p className="text-sm">Nhấn để chọn ảnh</p>
+                        <p className="text-xs">JPG, PNG, WEBP</p>
+                      </div>
+                    )}
+                    <input
+                      ref={detailImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleDraftImageFileChange}
+                    />
+                  </div>
+                  {draftImageFile && (
+                    <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {draftImageFile.name}</p>
+                  )}
+                  <div className="mt-3">
+                    <Label className="text-xs">Hoặc nhập URL/tên file</Label>
+                    <Input
+                      value={draftImageUrl}
+                      onChange={(e) => setDraftImageUrl(e.target.value)}
+                      className="mt-1"
+                      placeholder="Ví dụ: tour_oc.jpg hoặc /maui-images/tour_oc.jpg"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Để trống nếu muốn tự dùng ảnh của điểm dừng đầu tiên có ảnh.
+                  </p>
                 </div>
               </div>
 
@@ -692,6 +934,51 @@ const ToursPage = () => {
               />
             </div>
 
+            <div>
+              <Label>Ảnh tour</Label>
+              <div
+                className="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-4 text-center transition-colors hover:border-primary"
+                onClick={() => createImageInputRef.current?.click()}
+              >
+                {createPreviewImageUrl ? (
+                  <div className="space-y-2">
+                    <img
+                      src={createPreviewImageUrl}
+                      alt="Xem trước ảnh tour"
+                      className="max-h-44 w-full rounded-md object-contain"
+                    />
+                    <p className="text-xs text-muted-foreground">Nhấn để chọn ảnh khác</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-2 text-muted-foreground">
+                    <Upload className="h-6 w-6" />
+                    <p className="text-sm">Nhấn để chọn ảnh</p>
+                    <p className="text-xs">JPG, PNG, WEBP</p>
+                  </div>
+                )}
+                <input
+                  ref={createImageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleCreateImageFileChange}
+                />
+              </div>
+              {createImageFile && (
+                <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {createImageFile.name}</p>
+              )}
+              <div className="mt-3">
+                <Label htmlFor="create-tour-image-url">Hoặc nhập URL/tên file</Label>
+                <Input
+                  id="create-tour-image-url"
+                  value={createImageUrl}
+                  onChange={(e) => setCreateImageUrl(e.target.value)}
+                  placeholder="Ví dụ: tour_oc.jpg hoặc /maui-images/tour_oc.jpg"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               <div>
                 <Label htmlFor="create-tour-estimated-duration" className="whitespace-nowrap">
@@ -770,6 +1057,7 @@ const ToursPage = () => {
             id: confirmTour.id,
             isActive: !confirmTour.lock,
             estimatedDurationMinutes: confirmTour.estimatedDurationMinutes,
+            imageUrl: confirmTour.imageUrl,
             sortPriority: confirmTour.sortPriority,
             isFeatured: confirmTour.isFeatured,
           });

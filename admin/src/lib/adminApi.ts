@@ -111,6 +111,10 @@ export interface TourResponse {
   stops: TourStopResponse[];
 }
 
+export interface TourImageUploadResponse {
+  imageUrl: string;
+}
+
 export interface AddTourRestaurantRequest {
   restaurantId: string;
 }
@@ -121,6 +125,7 @@ export interface ReorderTourStopsRequest {
 
 export interface UpdateTourRequest {
   estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
   sortPriority: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -131,6 +136,7 @@ export interface CreateTourRequest {
   shortDescription?: string | null;
   description?: string | null;
   estimatedDurationMinutes: number | null;
+  imageUrl?: string | null;
   sortPriority: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -310,6 +316,26 @@ export const tourApi = {
   getAll: () => adminFetch<TourResponse[]>("/Tour"),
 
   getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>("/Tour/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  uploadImageForTour: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>(`/Tour/${id}/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+  },
 
   create: (data: CreateTourRequest) =>
     adminFetch<TourResponse>("/Tour", {

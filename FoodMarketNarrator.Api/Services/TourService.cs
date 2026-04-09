@@ -118,6 +118,7 @@ public class TourService
     public async Task<UpdateTourResult> UpdateTourAsync(
         int tourId,
         int? estimatedDurationMinutes,
+        string? urlImage,
         int sortPriority,
         bool isActive,
         bool isFeatured)
@@ -135,10 +136,28 @@ public class TourService
         var updated = await _tourRepository.UpdateTourMetadataAsync(
             tourId,
             estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
             sortPriority,
             isActive,
             isFeatured);
 
+        if (!updated)
+        {
+            return UpdateTourResult.NotFound("Tour not found.");
+        }
+
+        return UpdateTourResult.Success();
+    }
+
+    public async Task<UpdateTourResult> SetTourImageAsync(int tourId, string? urlImage)
+    {
+        var normalized = NormalizeUrlImageForStorage(urlImage);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return UpdateTourResult.Invalid("imageUrl is required.");
+        }
+
+        var updated = await _tourRepository.UpdateTourImageAsync(tourId, normalized);
         if (!updated)
         {
             return UpdateTourResult.NotFound("Tour not found.");
@@ -152,6 +171,7 @@ public class TourService
         string? shortDescription,
         string? description,
         int? estimatedDurationMinutes,
+        string? urlImage,
         bool isActive,
         bool isFeatured,
         int sortPriority)
@@ -177,6 +197,7 @@ public class TourService
             string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
             string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
             isActive,
             isFeatured,
             sortPriority);
@@ -241,9 +262,7 @@ public class TourService
             }
         }
 
-        var imageUrl = !string.IsNullOrWhiteSpace(tour.Image?.ImageUrl)
-            ? tour.Image.ImageUrl
-            : stops.Select(s => s.PrimaryImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+        var imageUrl = NormalizeUrlImageForResponse(tour.UrlImage);
 
         return new TourResponse
         {
@@ -281,6 +300,49 @@ public class TourService
     private static double DegreesToRadians(double degrees)
     {
         return degrees * (Math.PI / 180);
+    }
+
+    private static string? NormalizeUrlImageForStorage(string? urlImage)
+    {
+        return string.IsNullOrWhiteSpace(urlImage) ? null : urlImage.Trim();
+    }
+
+    private static string? NormalizeUrlImageForResponse(string? urlImage)
+    {
+        if (string.IsNullOrWhiteSpace(urlImage))
+        {
+            return null;
+        }
+
+        var normalized = urlImage.Replace("\\", "/", StringComparison.Ordinal).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var absoluteUri)
+            && (absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("/", StringComparison.Ordinal))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("maui-images/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"/{normalized}";
+        }
+
+        if (!normalized.Contains('/', StringComparison.Ordinal))
+        {
+            return $"/maui-images/{normalized}";
+        }
+
+        return $"/{normalized.TrimStart('/')}";
     }
 }
 

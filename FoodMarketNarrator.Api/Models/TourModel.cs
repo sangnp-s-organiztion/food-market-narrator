@@ -25,8 +25,9 @@ public class TourModel
     [Column("estimated_duration_minutes")]
     public int? EstimatedDurationMinutes { get; set; }
 
-    [Column("image_id")]
-    public int? ImageId { get; set; }
+    [Column("url_image")]
+    [MaxLength(500)]
+    public string? UrlImage { get; set; }
 
     [Column("is_active")]
     public bool IsActive { get; set; }
@@ -48,9 +49,6 @@ public class TourModel
 
     [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
-
-    [ForeignKey(nameof(ImageId))]
-    public RestaurantImageModel? Image { get; set; }
 
     public ICollection<TourRestaurantModel> TourRestaurants { get; set; } = new List<TourRestaurantModel>();
 }
