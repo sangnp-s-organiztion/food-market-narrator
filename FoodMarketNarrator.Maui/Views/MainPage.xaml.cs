@@ -111,7 +111,7 @@ public partial class MainPage : ContentPage
 
         if (_audioLibraryService.ConsumeStartupOfflineNoticeFlag())
         {
-            _ = DisplayAlert("Thông báo", "Vui lòng kết nối Internet để tải dữ liệu audio.", "OK");
+            _ = DisplayAlert("Thông báo", "Vui lòng kết nối Internet để tải dữ liệu audio.", "Đóng");
         }
 
         // Cập nhật text/disabled state của nút, trạng thái visible đã được quyết định ở nhánh trên.
@@ -259,7 +259,7 @@ public partial class MainPage : ContentPage
             await DisplayAlertAsync(
                 "QR hết hạn",
                 "Mã QR đã hết thời gian. Vui lòng quét lại QR để tiếp tục thuyết minh.",
-                "OK");
+                "Đóng");
             UpdateFloatingButtonUI();
             return;
         }

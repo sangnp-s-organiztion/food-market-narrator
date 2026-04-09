@@ -27,8 +27,8 @@
                        VerticalOptions="Center"/>
             </Border>
 
-            <Label Grid.Column="1"
-                   Text="Chi tiết Tour"
+                        <Label Grid.Column="1"
+                                     Text="Chi tiết hành trình"
                    FontSize="19"
                    FontFamily="OpenSansSemibold"
                    TextColor="#242424"
@@ -57,7 +57,7 @@
                                         HorizontalOptions="Start"
                                         VerticalOptions="Start"
                                         IsVisible="{Binding IsFeatured}">
-                                    <Label Text="BEST SELLER"
+                                    <Label Text="NỔI BẬT"
                                            FontSize="11"
                                            FontAttributes="Bold"
                                            TextColor="White"/>
@@ -136,23 +136,13 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Padding="20,0" Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                        <Grid ColumnDefinitions="*" VerticalOptions="Center">
                             <Label Text="LỊCH TRÌNH CHI TIẾT"
                                    FontFamily="OpenSansSemibold"
                                    FontSize="17"
                                    TextColor="#B37846"
                                    CharacterSpacing="1.1"
                                    VerticalOptions="Center"/>
-
-                            <Label Grid.Column="1"
-                                   Text="Xem bản đồ"
-                                   FontSize="16"
-                                   TextColor="#F39C12"
-                                   VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnViewMapTapped"/>
-                                </Label.GestureRecognizers>
-                            </Label>
                         </Grid>
 
                         <CollectionView x:Name="StopsCollectionView"
@@ -165,7 +155,7 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.EmptyView>
-                                <Label Text="Tour này chưa có điểm dừng."
+                                <Label Text="Hành trình này chưa có điểm dừng."
                                        FontSize="14"
                                        TextColor="#929292"
                                        HorizontalOptions="Center"
@@ -243,7 +233,7 @@
                                  VerticalOptions="Center"
                                  Spacing="10">
                 <ActivityIndicator IsRunning="True" Color="#F39C12" WidthRequest="30" HeightRequest="30"/>
-                <Label Text="Đang tải chi tiết tour..." FontSize="14" TextColor="#777777"/>
+                <Label Text="Đang tải chi tiết hành trình..." FontSize="14" TextColor="#777777"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout x:Name="ErrorContainer"
@@ -252,7 +242,7 @@
                                  VerticalOptions="Center"
                                  Spacing="10"
                                  Padding="24">
-                <Label Text="Không thể tải chi tiết tour."
+                                <Label Text="Không thể tải chi tiết hành trình."
                        FontSize="16"
                        FontFamily="OpenSansSemibold"
                        TextColor="#3A3A3A"
