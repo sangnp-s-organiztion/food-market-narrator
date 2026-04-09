@@ -30,6 +30,7 @@ public class POIService : IPOIService
     private static readonly TimeSpan PoiTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan FetchFailureCooldown = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan RestaurantRequestTimeout = TimeSpan.FromSeconds(5);
+    private readonly SemaphoreSlim _networkRefreshLock = new(1, 1);
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly SemaphoreSlim _offlineWarmupLock = new(1, 1);
     private Task? _offlineWarmupTask;
@@ -120,57 +121,6 @@ public class POIService : IPOIService
 
         var cachedPois = await ReadPoisCacheAsync();
 
-        var baseCandidates = new List<string>();
-
-        if (_httpClient.BaseAddress != null)
-        {
-            baseCandidates.Add(_httpClient.BaseAddress.ToString());
-        }
-
-        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
-        var uniqueBaseCandidates = baseCandidates
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        Log($"[POIService] Candidate endpoints ({uniqueBaseCandidates.Count}): {string.Join(" | ", uniqueBaseCandidates)}");
-
-        foreach (var baseUrl in uniqueBaseCandidates)
-        {
-            try
-            {
-                var requestUrl = new Uri(new Uri(baseUrl), AppSettings.RestaurantEndpoint);
-                using var cts = new CancellationTokenSource(RestaurantRequestTimeout);
-                var sw = Stopwatch.StartNew();
-                Log($"[POIService] Trying URL = {requestUrl} | timeout={RestaurantRequestTimeout.TotalSeconds:F0}s");
-
-                var data = await _httpClient.GetFromJsonAsync<List<POI>>(requestUrl, cts.Token);
-
-                if (data == null)
-                {
-                    Log($"[POIService] Empty response from {requestUrl} | elapsedMs={sw.ElapsedMilliseconds}");
-                    continue;
-                }
-
-                _pois = data
-                    .Where(p => p.IsActive)
-                    .ToList();
-                ApplyCachedImagePaths(_pois);
-                await SavePoisCacheAsync(_pois);
-                StartOfflineAssetWarmup(_pois);
-                _lastLoadSucceededFromNetwork = true;
-                _consecutiveFetchFailures = 0;
-                _lastFetchFailureUtc = DateTime.MinValue;
-                var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
-                Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from {requestUrl} | elapsedMs={sw.ElapsedMilliseconds} | totalElapsedMs={swTotal.ElapsedMilliseconds}");
-                return _pois;
-            }
-            catch (Exception ex)
-            {
-                Log($"[POIService] Request failed: {baseUrl} -> {FormatException(ex)}");
-            }
-        }
-
         if (cachedPois.Count > 0)
         {
             _pois = cachedPois
@@ -179,18 +129,108 @@ public class POIService : IPOIService
             ApplyCachedImagePaths(_pois);
             StartOfflineAssetWarmup(_pois);
             _lastLoadSucceededFromNetwork = false;
-            _consecutiveFetchFailures++;
-            _lastFetchFailureUtc = DateTime.UtcNow;
+            _lastFetchUtc = DateTime.UtcNow;
+
             var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
-            Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from offline cache. | failures={_consecutiveFetchFailures} | elapsedMs={swTotal.ElapsedMilliseconds}");
+            Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from offline cache (fast path). | elapsedMs={swTotal.ElapsedMilliseconds}");
+
+            if (Connectivity.Current.NetworkAccess == NetworkAccess.Internet)
+            {
+                _ = TryRefreshPoisFromNetworkAsync(runInBackground: true);
+            }
+
             return _pois;
         }
 
-        _lastLoadSucceededFromNetwork = false;
-        _consecutiveFetchFailures++;
-        _lastFetchFailureUtc = DateTime.UtcNow;
-        Log($"[POIService] Error fetching POIs from all candidates. | failures={_consecutiveFetchFailures} | elapsedMs={swTotal.ElapsedMilliseconds}");
-        return new List<POI>();
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+        {
+            _lastLoadSucceededFromNetwork = false;
+            return new List<POI>();
+        }
+
+        return await TryRefreshPoisFromNetworkAsync(runInBackground: false);
+    }
+
+    private async Task<List<POI>> TryRefreshPoisFromNetworkAsync(bool runInBackground)
+    {
+        if (runInBackground)
+        {
+            if (!await _networkRefreshLock.WaitAsync(0))
+            {
+                return _pois ?? new List<POI>();
+            }
+        }
+        else
+        {
+            await _networkRefreshLock.WaitAsync();
+        }
+
+        try
+        {
+            var swTotal = Stopwatch.StartNew();
+            var baseCandidates = new List<string>();
+
+            if (_httpClient.BaseAddress != null)
+            {
+                baseCandidates.Add(_httpClient.BaseAddress.ToString());
+            }
+
+            baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+            var uniqueBaseCandidates = baseCandidates
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            Log($"[POIService] Candidate endpoints ({uniqueBaseCandidates.Count}): {string.Join(" | ", uniqueBaseCandidates)}");
+
+            foreach (var baseUrl in uniqueBaseCandidates)
+            {
+                try
+                {
+                    var requestUrl = new Uri(new Uri(baseUrl), AppSettings.RestaurantEndpoint);
+                    using var cts = new CancellationTokenSource(RestaurantRequestTimeout);
+                    var sw = Stopwatch.StartNew();
+                    Log($"[POIService] Trying URL = {requestUrl} | timeout={RestaurantRequestTimeout.TotalSeconds:F0}s");
+
+                    var data = await _httpClient.GetFromJsonAsync<List<POI>>(requestUrl, cts.Token);
+
+                    if (data == null)
+                    {
+                        Log($"[POIService] Empty response from {requestUrl} | elapsedMs={sw.ElapsedMilliseconds}");
+                        continue;
+                    }
+
+                    _pois = data
+                        .Where(p => p.IsActive)
+                        .ToList();
+                    ApplyCachedImagePaths(_pois);
+                    await SavePoisCacheAsync(_pois);
+                    StartOfflineAssetWarmup(_pois);
+                    _lastLoadSucceededFromNetwork = true;
+                    _consecutiveFetchFailures = 0;
+                    _lastFetchFailureUtc = DateTime.MinValue;
+                    _lastFetchUtc = DateTime.UtcNow;
+                    var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
+                    Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from {requestUrl} | elapsedMs={sw.ElapsedMilliseconds} | totalElapsedMs={swTotal.ElapsedMilliseconds}");
+                    return _pois;
+                }
+                catch (Exception ex)
+                {
+                    Log($"[POIService] Request failed: {baseUrl} -> {FormatException(ex)}");
+                }
+            }
+
+            _lastLoadSucceededFromNetwork = false;
+            _consecutiveFetchFailures++;
+            _lastFetchFailureUtc = DateTime.UtcNow;
+            Log($"[POIService] Error fetching POIs from all candidates. | failures={_consecutiveFetchFailures} | elapsedMs={swTotal.ElapsedMilliseconds}");
+
+            return _pois ?? new List<POI>();
+        }
+        finally
+        {
+            _networkRefreshLock.Release();
+        }
     }
 
     private static string GetPoiCacheFilePath()
