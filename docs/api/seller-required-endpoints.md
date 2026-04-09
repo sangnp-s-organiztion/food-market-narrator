@@ -27,6 +27,11 @@ Lưu ý:
 - PUT /Dishes/{dishId}
 - DELETE /Dishes/{dishId}
 
+Payload lưu ý:
+
+- `POST`/`PUT` dish không còn field `description`.
+- Các field hợp lệ: `name`, `price`, `imageId`.
+
 ## 4. Images
 
 - GET /Restaurant/{restaurantId}/images

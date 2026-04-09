@@ -119,7 +119,6 @@ type ApiDish = {
   dishId: number;
   name: string;
   price?: number | null;
-  description?: string | null;
   restaurantId: string;
   imageId?: number | null;
   imageFileName?: string | null;
@@ -139,7 +138,6 @@ function mapDish(item: ApiDish): Dish {
     dish_id: item.dishId,
     name: item.name ?? "",
     price: item.price ?? 0,
-    description: item.description ?? "",
     restaurant_id: item.restaurantId,
     image_id: item.imageId ?? null,
     image_url,
@@ -427,7 +425,6 @@ export async function createDishApi(
   const body = {
     name: payload.name,
     price: payload.price,
-    description: payload.description,
     imageId: payload.image_id,
   };
 
@@ -446,7 +443,6 @@ export async function updateDishApi(
   const body = {
     name: payload.name,
     price: payload.price,
-    description: payload.description,
     imageId: payload.image_id,
   };
 

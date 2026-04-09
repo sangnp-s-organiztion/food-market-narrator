@@ -51,6 +51,7 @@ npm test
 - Endpoint images đã dùng route canonical `/Restaurant/{id}/images`.
 - Mỗi ngôn ngữ chỉ nên có 1 audio active cho mỗi nhà hàng; backend đang enforce quy tắc này.
 - Khi upload/toggle/delete audio, UI cần refresh dữ liệu từ server để phản ánh trạng thái active mới nhất.
+- Dish API khong con field `description`; payload tao/sua dish gom `name`, `price`, `imageId`.
 
 ## Tài liệu liên quan
 

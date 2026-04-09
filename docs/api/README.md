@@ -59,6 +59,11 @@ Nguyên tắc:
 - PATCH /Audios/{audioId}/active
 - DELETE /Audios/{audioId}
 
+Lưu ý Dish payload hiện tại:
+
+- Không còn field `description` trong bảng `Dish` và DTO/API.
+- Body create/update dish dùng các field: `name`, `price`, `imageId`.
+
 ### Admin analytics và logs
 
 - GET /api/analytics/kpis

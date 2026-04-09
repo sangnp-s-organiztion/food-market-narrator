@@ -13,7 +13,6 @@ import type { Dish, RestaurantImage } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +27,6 @@ import { Plus, Pencil, Trash2, DollarSign, ImageIcon, Upload } from "lucide-reac
 const emptyForm = {
   name: "",
   price: 0,
-  description: "",
 };
 
 export default function DishesPage() {
@@ -82,7 +80,7 @@ export default function DishesPage() {
 
   const openEdit = (dish: Dish) => {
     setEditing(dish);
-    setForm({ name: dish.name, price: dish.price, description: dish.description });
+    setForm({ name: dish.name, price: dish.price });
     setImagePreview(getDishImageUrl(dish));
     setSelectedFile(null);
     setDialogOpen(true);
@@ -127,7 +125,6 @@ export default function DishesPage() {
           updated = await updateDishApi(editing.dish_id, {
             name: form.name,
             price: form.price,
-            description: form.description,
             image_id: nextImageId,
           });
         } catch {
@@ -174,7 +171,6 @@ export default function DishesPage() {
           created = await createDishApi(selectedRestaurant.restaurant_id, {
             name: form.name,
             price: form.price,
-            description: form.description,
             image_id: imageId,
           });
         } catch {
@@ -242,7 +238,6 @@ export default function DishesPage() {
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-foreground truncate">{dish.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{dish.description}</p>
                   <div className="flex items-center gap-1 text-primary font-semibold mt-1">
                     <DollarSign className="w-4 h-4" />
                     {dish.price.toFixed(2)}
@@ -293,10 +288,6 @@ export default function DishesPage() {
                 value={form.price}
                 onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Mô tả</Label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
             </div>
             <div className="space-y-2">
               <Label>Ảnh món ăn</Label>

@@ -79,7 +79,6 @@ export default function ImagesPage() {
             updateDishApi(dish.dish_id, {
               name: dish.name,
               price: dish.price,
-              description: dish.description,
               image_id: null,
             }),
           ),

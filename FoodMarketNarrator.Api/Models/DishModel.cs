@@ -18,10 +18,6 @@ namespace food_market_narrator_api.Models
         [Column("price", TypeName = "decimal(10,2)")]
         public decimal? Price { get; set; }
 
-        [Column("description")]
-        [MaxLength(1000)]
-        public string? Description { get; set; }
-
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
 

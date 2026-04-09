@@ -86,39 +86,39 @@ INSERT INTO food_market_narrator.dbo.Audio (restaurant_id,language_id,audio_url,
 	 (N'sot-lau-alo-quan',5,N'sot-lau-alo-quan.mp3',1,1,'2026-03-11 15:35:19.9733333'),
 	 (N'the-gioi-bo',5,N'the-gioi-bo.mp3',1,1,'2026-03-11 15:35:19.9733333'),
 	 (N'them-nuong-yakiniku',5,N'them-nuong-yakiniku.mp3',1,1,'2026-03-11 15:35:19.9733333');
-INSERT INTO food_market_narrator.dbo.Dish (name,price,description,created_at,restaurant_id,image_id,is_active) VALUES
-	 (N'Bò nướng BBQ',189000.00,N'Bò nướng sốt BBQ','2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',1,1),
-	 (N'Lẩu Thái cay',209000.00,N'Lẩu Thái hải sản','2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',2,1),
-	 (N'Hải sản nướng',229000.00,N'Hải sản nướng than hoa','2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',3,1),
-	 (N'Steak bò Mỹ',259000.00,N'Bò Mỹ áp chảo','2026-03-09 12:30:21.0',N'lang-restaurant',4,1),
-	 (N'Cá hồi áp chảo',239000.00,N'Cá hồi sốt bơ chanh','2026-03-09 12:30:21.0',N'lang-restaurant',5,1),
-	 (N'Lẩu kim chi',79000.00,N'Lẩu kim chi Hàn','2026-03-09 12:30:21.0',N'lau-met-nuong-79k',6,1),
-	 (N'Ba chỉ nướng',79000.00,N'Ba chỉ nướng sa tế','2026-03-09 12:30:21.0',N'lau-met-nuong-79k',7,1),
-	 (N'Lẩu riêu cua',199000.00,N'Lẩu riêu cua đồng','2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',8,1),
-	 (N'Sườn nướng mật ong',179000.00,N'Sườn nướng mật ong','2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',9,1),
-	 (N'Ốc hương rang muối',129000.00,N'Ốc hương rang muối ớt','2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',10,1);
-INSERT INTO food_market_narrator.dbo.Dish (name,price,description,created_at,restaurant_id,image_id,is_active) VALUES
-	 (N'Sò điệp nướng mỡ hành',99000.00,N'Sò điệp nướng mỡ hành','2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',11,1),
-	 (N'Ốc móng tay xào me',89000.00,N'Ốc móng tay xào me chua ngọt','2026-03-09 12:30:21.0',N'oc-hoa-kieu',12,1),
-	 (N'Ốc mỡ xào tỏi',79000.00,N'Ốc mỡ xào tỏi thơm','2026-03-09 12:30:21.0',N'oc-hoa-kieu',13,1),
-	 (N'Tôm nướng muối ớt',149000.00,N'Tôm tươi nướng muối ớt','2026-03-09 12:30:21.0',N'oc-hong-nhung',14,1),
-	 (N'Sò huyết cháy tỏi',119000.00,N'Sò huyết xào tỏi','2026-03-09 12:30:21.0',N'oc-hong-nhung',15,1),
-	 (N'Ốc giác xào sa tế',119000.00,N'Ốc giác xào cay','2026-03-09 12:30:21.0',N'oc-loan',16,1),
-	 (N'Bạch tuộc hấp gừng',139000.00,N'Bạch tuộc hấp gừng','2026-03-09 12:30:21.0',N'oc-loan',17,1),
-	 (N'Ốc bươu nướng tiêu',89000.00,N'Ốc bươu nướng tiêu xanh','2026-03-09 12:30:21.0',N'oc-oanh',18,1),
-	 (N'Hàu nướng phô mai',99000.00,N'Hàu nướng phô mai béo','2026-03-09 12:30:21.0',N'oc-oanh',19,1),
-	 (N'Ốc len xào dừa',99000.00,N'Ốc len xào dừa béo','2026-03-09 12:30:21.0',N'oc-phat',20,1);
-INSERT INTO food_market_narrator.dbo.Dish (name,price,description,created_at,restaurant_id,image_id,is_active) VALUES
-	 (N'Càng ghẹ rang muối',159000.00,N'Càng ghẹ rang muối','2026-03-09 12:30:21.0',N'oc-phat',21,1),
-	 (N'Tôm tích nướng',189000.00,N'Tôm tích nướng than','2026-03-09 12:30:21.0',N'oc-phat',22,1),
-	 (N'Ốc hương cháy tỏi',129000.00,N'Ốc hương xào tỏi','2026-03-09 12:30:21.0',N'quan-bo-oc',23,1),
-	 (N'Sò điệp nướng phô mai',109000.00,N'Sò điệp béo ngậy','2026-03-09 12:30:21.0',N'quan-bo-oc',24,1),
-	 (N'Ốc móng tay nướng mỡ hành',99000.00,N'Ốc nướng thơm','2026-03-09 12:30:21.0',N'quan-oc-thao',25,1),
-	 (N'Sò huyết nướng',109000.00,N'Sò huyết nướng than','2026-03-09 12:30:21.0',N'quan-oc-thao',26,1),
-	 (N'Ốc len xào dừa',99000.00,N'Ốc len béo thơm','2026-03-09 12:30:21.0',N'quan-oc-vu',27,1),
-	 (N'Hàu nướng mỡ hành',89000.00,N'Hàu nướng mỡ hành','2026-03-09 12:30:21.0',N'quan-oc-vu',28,1),
-	 (N'Lẩu hải sản',219000.00,N'Lẩu hải sản chua cay','2026-03-09 12:30:21.0',N'sot-lau-alo-quan',29,1),
-	 (N'Tôm nướng bơ tỏi',179000.00,N'Tôm nướng bơ tỏi','2026-03-09 12:30:21.0',N'sot-lau-alo-quan',30,1);
+INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
+	 (N'Bò nướng BBQ',189000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',1,1),
+	 (N'Lẩu Thái cay',209000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',2,1),
+	 (N'Hải sản nướng',229000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',3,1),
+	 (N'Steak bò Mỹ',259000.00,'2026-03-09 12:30:21.0',N'lang-restaurant',4,1),
+	 (N'Cá hồi áp chảo',239000.00,'2026-03-09 12:30:21.0',N'lang-restaurant',5,1),
+	 (N'Lẩu kim chi',79000.00,'2026-03-09 12:30:21.0',N'lau-met-nuong-79k',6,1),
+	 (N'Ba chỉ nướng',79000.00,'2026-03-09 12:30:21.0',N'lau-met-nuong-79k',7,1),
+	 (N'Lẩu riêu cua',199000.00,'2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',8,1),
+	 (N'Sườn nướng mật ong',179000.00,'2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',9,1),
+	 (N'Ốc hương rang muối',129000.00,'2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',10,1);
+INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
+	 (N'Sò điệp nướng mỡ hành',99000.00,'2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',11,1),
+	 (N'Ốc móng tay xào me',89000.00,'2026-03-09 12:30:21.0',N'oc-hoa-kieu',12,1),
+	 (N'Ốc mỡ xào tỏi',79000.00,'2026-03-09 12:30:21.0',N'oc-hoa-kieu',13,1),
+	 (N'Tôm nướng muối ớt',149000.00,'2026-03-09 12:30:21.0',N'oc-hong-nhung',14,1),
+	 (N'Sò huyết cháy tỏi',119000.00,'2026-03-09 12:30:21.0',N'oc-hong-nhung',15,1),
+	 (N'Ốc giác xào sa tế',119000.00,'2026-03-09 12:30:21.0',N'oc-loan',16,1),
+	 (N'Bạch tuộc hấp gừng',139000.00,'2026-03-09 12:30:21.0',N'oc-loan',17,1),
+	 (N'Ốc bươu nướng tiêu',89000.00,'2026-03-09 12:30:21.0',N'oc-oanh',18,1),
+	 (N'Hàu nướng phô mai',99000.00,'2026-03-09 12:30:21.0',N'oc-oanh',19,1),
+	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'oc-phat',20,1);
+INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
+	 (N'Càng ghẹ rang muối',159000.00,'2026-03-09 12:30:21.0',N'oc-phat',21,1),
+	 (N'Tôm tích nướng',189000.00,'2026-03-09 12:30:21.0',N'oc-phat',22,1),
+	 (N'Ốc hương cháy tỏi',129000.00,'2026-03-09 12:30:21.0',N'quan-bo-oc',23,1),
+	 (N'Sò điệp nướng phô mai',109000.00,'2026-03-09 12:30:21.0',N'quan-bo-oc',24,1),
+	 (N'Ốc móng tay nướng mỡ hành',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-thao',25,1),
+	 (N'Sò huyết nướng',109000.00,'2026-03-09 12:30:21.0',N'quan-oc-thao',26,1),
+	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-vu',27,1),
+	 (N'Hàu nướng mỡ hành',89000.00,'2026-03-09 12:30:21.0',N'quan-oc-vu',28,1),
+	 (N'Lẩu hải sản',219000.00,'2026-03-09 12:30:21.0',N'sot-lau-alo-quan',29,1),
+	 (N'Tôm nướng bơ tỏi',179000.00,'2026-03-09 12:30:21.0',N'sot-lau-alo-quan',30,1);
 INSERT INTO food_market_narrator.dbo.Languages (language_code,language_name) VALUES
 	 (N'vi-VN',N'Tiếng Việt'),
 	 (N'en-US',N'Tiếng Anh'),

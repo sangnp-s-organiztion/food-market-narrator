@@ -61,3 +61,4 @@ npm test
 
 - Frontend gui cookie auth qua `credentials: include`.
 - App chi chap nhan user role `saler` trong luong dang nhap.
+- Dish API khong con field `description`; payload tao/sua dish gom `name`, `price`, `imageId`.

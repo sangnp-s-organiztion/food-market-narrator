@@ -42,7 +42,6 @@ export interface Dish {
   dish_id: number;
   name: string;
   price: number;
-  description: string;
   restaurant_id: string;
   image_id: number | null;
   image_url?: string;
