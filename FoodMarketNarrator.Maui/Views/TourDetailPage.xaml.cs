@@ -86,15 +86,15 @@ public partial class TourDetailPage : ContentPage
             BindingContext = tour;
 
             DurationMetricValue.Text = tour.EstimatedDurationMinutes.HasValue
-                ? $"{tour.EstimatedDurationMinutes.Value} mins"
+                ? $"{tour.EstimatedDurationMinutes.Value} phút"
                 : "--";
-            StopMetricValue.Text = $"{Math.Max(tour.StopCount, tour.Stops.Count)} stops";
+            StopMetricValue.Text = $"{Math.Max(tour.StopCount, tour.Stops.Count)} điểm dừng";
 
             TourDescriptionLabel.Text = !string.IsNullOrWhiteSpace(tour.Description)
                 ? tour.Description
                 : !string.IsNullOrWhiteSpace(tour.ShortDescription)
                     ? tour.ShortDescription
-                    : "Tour này chưa có mô tả chi tiết.";
+                    : "Hành trình này chưa có mô tả chi tiết.";
 
             StartJourneyButton.IsEnabled = tour.Stops.Count > 0;
             StartJourneyButton.Opacity = tour.Stops.Count > 0 ? 1 : 0.6;

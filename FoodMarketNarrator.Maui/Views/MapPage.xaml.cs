@@ -708,8 +708,8 @@ public partial class MapPage : ContentPage
         }
 
         TourFilterTitle.Text = string.IsNullOrWhiteSpace(_activeTourName)
-            ? "Đang xem theo tour"
-            : $"Tour: {_activeTourName}";
+            ? "Đang xem theo hành trình"
+            : $"Hành trình: {_activeTourName}";
     }
 
     private static HashSet<string> ParsePoiIdSet(string? rawPoiIds)

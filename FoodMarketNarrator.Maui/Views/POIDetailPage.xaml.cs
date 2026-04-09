@@ -112,7 +112,7 @@ public partial class POIDetailPage : ContentPage
 			await DisplayAlertAsync(
 				"QR hết hạn",
 				"Mã QR đã hết thời gian. Vui lòng quét lại QR để tiếp tục thuyết minh.",
-				"OK");
+				"Đóng");
 			UpdateNarrationActionAvailability();
 			return;
 		}
@@ -504,7 +504,7 @@ public partial class POIDetailPage : ContentPage
 			catch
 			{
 				// Hiển thị thông báo lỗi nếu không mở được bất kỳ ứng dụng nào
-				await DisplayAlert("Lỗi", "Không thể mở ứng dụng bản đồ", "OK");
+				await DisplayAlert("Lỗi", "Không thể mở ứng dụng bản đồ", "Đóng");
 			}
 		}
 	}
@@ -520,7 +520,7 @@ public partial class POIDetailPage : ContentPage
 		// Kiểm tra có số điện thoại không
 		if (string.IsNullOrWhiteSpace(poi.Phone))
 		{
-			await DisplayAlert("Thông báo", "Quán chưa có số điện thoại", "OK");
+			await DisplayAlert("Thông báo", "Quán chưa có số điện thoại", "Đóng");
 			return;
 		}
 
@@ -532,7 +532,7 @@ public partial class POIDetailPage : ContentPage
 		}
 		catch (Exception)
 		{
-			await DisplayAlert("Lỗi", "Không thể mở ứng dụng gọi điện", "OK");
+			await DisplayAlert("Lỗi", "Không thể mở ứng dụng gọi điện", "Đóng");
 		}
 	}
 
@@ -587,7 +587,7 @@ public partial class POIDetailPage : ContentPage
 		}
 		catch (Exception)
 		{
-			await DisplayAlert("Lỗi", "Không thể chia sẻ thông tin quán lúc này", "OK");
+			await DisplayAlert("Lỗi", "Không thể chia sẻ thông tin quán lúc này", "Đóng");
 		}
 	}
 }

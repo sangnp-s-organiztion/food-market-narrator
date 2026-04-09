@@ -18,7 +18,7 @@
         Route="MapPage" />
 
     <ShellContent
-        Title="Tour"
+        Title="Hành trình"
         ContentTemplate="{DataTemplate views:TourPage}"
         Route="TourPage" />
 
