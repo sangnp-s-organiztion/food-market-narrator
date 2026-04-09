@@ -255,8 +255,8 @@ public partial class SettingsPage : ContentPage
         {
             "vi-vn" => "Tiếng Việt",
             // Redundant alternatives were removed because input is already normalized by ToLowerInvariant().
-            // "en-us" or "en-US" => "English",
-            "en-us" => "English",
+            // "en-us" or "en-US" => "Tiếng Anh",
+            "en-us" => "Tiếng Anh",
             // "zh-cn" or "zh-CN" => "中文",
             "zh-cn" => "中文",
             // "ko-kr" or "ko-KR" => "한국어",
@@ -574,7 +574,7 @@ public partial class SettingsPage : ContentPage
         await _audioService.ClearAudioCacheAsync();
         await LoadOfflineDataUsageAsync();
 
-        await DisplayAlert("Hoàn tất", "Đã xóa bộ nhớ audio", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa bộ nhớ audio", "Đóng");
     }
 
     private async void OnStorageDetailsClicked(object sender, EventArgs e)
@@ -591,7 +591,7 @@ public partial class SettingsPage : ContentPage
             $"Ngôn ngữ: {FormatBytesCompact(usage.LanguageBytes)}"
         });
 
-        await DisplayAlert("Chi tiết bộ nhớ", message, "OK");
+        await DisplayAlert("Chi tiết bộ nhớ", message, "Đóng");
     }
 
     private async void OnClearAllDataClicked(object sender, EventArgs e)
@@ -616,7 +616,7 @@ public partial class SettingsPage : ContentPage
 
         await LoadOfflineDataUsageAsync();
 
-        await DisplayAlert("Hoàn tất", "Đã xóa toàn bộ dữ liệu offline.", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa toàn bộ dữ liệu offline.", "Đóng");
     }
 
     private static void DeleteDirectorySafe(string path)
@@ -666,7 +666,7 @@ public partial class SettingsPage : ContentPage
 
         _historyService.ClearHistory();
 
-        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử đã nghe", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa lịch sử đã nghe", "Đóng");
     }
 
     private async void OnOpenHistoryTapped(object sender, EventArgs e)
@@ -711,7 +711,7 @@ public partial class SettingsPage : ContentPage
             _favoriteService.RemoveFavorite(id);
         }
 
-        await DisplayAlert("Hoàn tất", "Đã xóa tất cả yêu thích", "OK");
+        await DisplayAlert("Hoàn tất", "Đã xóa tất cả yêu thích", "Đóng");
     }
 
     private async void OnBackgroundLocationToggled(object sender, ToggledEventArgs e)
@@ -727,7 +727,7 @@ public partial class SettingsPage : ContentPage
             _isUpdatingBackgroundToggle = true;
             BackgroundPermissionSwitch.IsToggled = false;
             _isUpdatingBackgroundToggle = false;
-            await DisplayAlert("Thông báo", "Không thể yêu cầu quyền vị trí nền lúc này.", "OK");
+            await DisplayAlert("Thông báo", "Không thể yêu cầu quyền vị trí nền lúc này.", "Đóng");
             return;
         }
 
@@ -741,7 +741,7 @@ public partial class SettingsPage : ContentPage
 
             if (!granted)
             {
-                await DisplayAlert("Thông báo", "Bạn chưa cấp quyền vị trí nền.", "OK");
+                await DisplayAlert("Thông báo", "Bạn chưa cấp quyền vị trí nền.", "Đóng");
             }
 
             return;

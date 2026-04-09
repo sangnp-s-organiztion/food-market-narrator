@@ -15,7 +15,6 @@ public class TourRepository
     public async Task<List<TourModel>> GetAllAsync(bool includeInactive = false)
     {
         var query = _context.Tour
-            .Include(t => t.Image)
             .Include(t => t.TourRestaurants)
                 .ThenInclude(tr => tr.Restaurant)
                     .ThenInclude(r => r.ImageURL)
@@ -32,7 +31,6 @@ public class TourRepository
     public async Task<TourModel?> GetByIdAsync(int id, bool includeInactive = false)
     {
         var query = _context.Tour
-            .Include(t => t.Image)
             .Include(t => t.TourRestaurants)
                 .ThenInclude(tr => tr.Restaurant)
                     .ThenInclude(r => r.ImageURL)
@@ -138,6 +136,7 @@ public class TourRepository
     public async Task<bool> UpdateTourMetadataAsync(
         int tourId,
         int? estimatedDurationMinutes,
+        string? urlImage,
         int sortPriority,
         bool isActive,
         bool isFeatured)
@@ -149,9 +148,25 @@ public class TourRepository
         }
 
         tour.EstimatedDurationMinutes = estimatedDurationMinutes;
+        tour.UrlImage = urlImage;
         tour.SortPriority = sortPriority;
         tour.IsActive = isActive;
         tour.IsFeatured = isFeatured;
+        tour.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateTourImageAsync(int tourId, string? urlImage)
+    {
+        var tour = await _context.Tour.FirstOrDefaultAsync(t => t.TourId == tourId);
+        if (tour == null)
+        {
+            return false;
+        }
+
+        tour.UrlImage = urlImage;
         tour.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -163,6 +178,7 @@ public class TourRepository
         string? shortDescription,
         string? description,
         int? estimatedDurationMinutes,
+        string? urlImage,
         bool isActive,
         bool isFeatured,
         int sortPriority)
@@ -173,6 +189,7 @@ public class TourRepository
             ShortDescription = shortDescription,
             Description = description,
             EstimatedDurationMinutes = estimatedDurationMinutes,
+            UrlImage = urlImage,
             IsActive = isActive,
             IsFeatured = isFeatured,
             SortPriority = sortPriority,

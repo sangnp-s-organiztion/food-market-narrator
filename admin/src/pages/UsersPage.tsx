@@ -1,6 +1,6 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lock, Plus, Shield, Unlock } from "lucide-react";
+import { Eye, Lock, Plus, Shield, Unlock } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userApi, type CreateUserRequest, type UserResponse } from "@/lib/adminApi";
+import {
+  restaurantApi,
+  userApi,
+  type CreateUserRequest,
+  type UserResponse,
+} from "@/lib/adminApi";
 import { toast } from "sonner";
 
 const PHONE_REGEX = /^0\d{9,10}$/;
@@ -47,6 +52,8 @@ const emptyForm = {
   role: "saler" as const,
 };
 
+type PageUser = ReturnType<typeof toPageUser>;
+
 const UsersPage = () => {
   const qc = useQueryClient();
 
@@ -65,6 +72,7 @@ const UsersPage = () => {
     name: string;
     lock: boolean;
   } | null>(null);
+  const [detailUser, setDetailUser] = useState<PageUser | null>(null);
 
   const {
     data: apiUsers = [],
@@ -76,7 +84,24 @@ const UsersPage = () => {
     staleTime: 60_000,
   });
 
+  const {
+    data: restaurants = [],
+    isLoading: isRestaurantsLoading,
+    isError: isRestaurantsError,
+  } = useQuery({
+    queryKey: ["admin", "restaurants"],
+    queryFn: restaurantApi.getAll,
+    staleTime: 60_000,
+  });
+
   const pageUsers = apiUsers.map(toPageUser);
+  const detailUserRestaurants = useMemo(() => {
+    if (!detailUser) return [];
+
+    return restaurants
+      .filter((restaurant) => restaurant.userId === detailUser.user_id)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [restaurants, detailUser]);
 
   const createMutation = useMutation({
     mutationFn: (data: CreateUserRequest) => userApi.create(data),
@@ -166,7 +191,7 @@ const UsersPage = () => {
                 <th>Vai trò</th>
                 <th>Trạng thái</th>
                 <th>Ngày tạo</th>
-                <th className="w-32">Hành động</th>
+                <th className="w-40">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -220,6 +245,13 @@ const UsersPage = () => {
                     </td>
                     <td className="mono text-xs text-muted-foreground">{u.created_at}</td>
                     <td className="flex items-center gap-1">
+                      <button
+                        onClick={() => setDetailUser(u)}
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                        title="Xem chi tiết người dùng"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() =>
                           setConfirmUser({
@@ -320,6 +352,84 @@ const UsersPage = () => {
               {createMutation.isPending ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!detailUser} onOpenChange={(open) => !open && setDetailUser(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chi tiết người dùng</DialogTitle>
+          </DialogHeader>
+
+          {detailUser && (
+            <div className="space-y-4">
+              <div className="grid gap-3 rounded-md border p-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Tên đăng nhập</p>
+                  <p className="mt-1 font-medium">{detailUser.username}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Vai trò</p>
+                  <p className="mt-1">{detailUser.role === "admin" ? "Quản trị viên" : "Người bán"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Số điện thoại</p>
+                  <p className="mt-1">{detailUser.phone || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="mt-1">{detailUser.email || "-"}</p>
+                </div>
+              </div>
+
+              <div className="rounded-md border p-4">
+                <h3 className="text-sm font-semibold">Nhà hàng đang quản lý</h3>
+
+                {isRestaurantsLoading && (
+                  <p className="mt-3 text-sm text-muted-foreground">Đang tải danh sách nhà hàng...</p>
+                )}
+
+                {isRestaurantsError && (
+                  <p className="mt-3 text-sm text-destructive">
+                    Không thể tải danh sách nhà hàng của người dùng.
+                  </p>
+                )}
+
+                {!isRestaurantsLoading && !isRestaurantsError && detailUserRestaurants.length === 0 && (
+                  <p className="mt-3 text-sm text-muted-foreground">Người dùng này chưa quản lý nhà hàng nào.</p>
+                )}
+
+                {!isRestaurantsLoading && !isRestaurantsError && detailUserRestaurants.length > 0 && (
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="data-table min-w-[560px]">
+                      <thead>
+                        <tr>
+                          <th className="w-48">Mã nhà hàng</th>
+                          <th>Tên nhà hàng</th>
+                          <th className="w-28">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detailUserRestaurants.map((restaurant) => (
+                          <tr key={restaurant.restaurantId}>
+                            <td className="mono text-xs">{restaurant.restaurantId}</td>
+                            <td>{restaurant.name}</td>
+                            <td>
+                              <span
+                                className={restaurant.isActive ? "status-active" : "status-inactive"}
+                              >
+                                {restaurant.isActive ? "Hoạt động" : "Ngừng hoạt động"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

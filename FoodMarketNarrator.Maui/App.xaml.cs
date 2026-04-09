@@ -162,7 +162,7 @@ public partial class App : Application
                 await activePage.DisplayAlertAsync(
                     "QR hết hạn",
                     "Mã QR đã hết thời gian. Hệ thống đã dừng thuyết minh, vui lòng quét lại QR để tiếp tục.",
-                    "OK");
+                    "Đóng");
             }
         });
     }

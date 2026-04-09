@@ -21,6 +21,7 @@ public class TourService : ITourService
     private List<TourModel>? _cachedTours;
     private DateTime _memoryCachedAtUtc = DateTime.MinValue;
     private DateTime _lastNetworkFetchUtc = DateTime.MinValue;
+    private string? _lastSuccessfulBaseUrl;
 
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan TourRequestTimeout = TimeSpan.FromSeconds(5);
@@ -70,7 +71,11 @@ public class TourService : ITourService
         if (cachedTour == null)
         {
             var diskCache = await ReadToursCacheAsync();
-            cachedTour = diskCache.FirstOrDefault(x => x.TourId == tourId);
+            if (diskCache.Count > 0)
+            {
+                SetMemoryCache(diskCache);
+                cachedTour = _cachedTours?.FirstOrDefault(x => x.TourId == tourId);
+            }
         }
 
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
@@ -78,30 +83,19 @@ public class TourService : ITourService
             return cachedTour == null ? null : NormalizeTour(cachedTour);
         }
 
+        if (cachedTour != null)
+        {
+            _ = RefreshTourByIdInBackgroundAsync(tourId);
+            return NormalizeTour(cachedTour);
+        }
+
         try
         {
             var location = _locationService.LastKnownLocation;
-
-            foreach (var baseUrl in BuildBaseUrlCandidates())
+            var refreshedTour = await LoadTourByIdFromNetworkAsync(tourId, location);
+            if (refreshedTour != null)
             {
-                try
-                {
-                    var endpoint = BuildTourDetailEndpoint(baseUrl.TrimEnd('/'), tourId, location);
-                    using var cts = new CancellationTokenSource(TourRequestTimeout);
-                    var tour = await _httpClient.GetFromJsonAsync<TourModel>(endpoint, cts.Token);
-                    if (tour == null)
-                    {
-                        continue;
-                    }
-
-                    var normalizedTour = NormalizeTour(tour);
-                    await MergeTourIntoCacheAsync(normalizedTour);
-                    return normalizedTour;
-                }
-                catch
-                {
-                    // Fall through to try next candidate.
-                }
+                return refreshedTour;
             }
         }
         catch
@@ -172,7 +166,7 @@ public class TourService : ITourService
         {
             try
             {
-                var endpoint = BuildTourEndpoint(baseUrl.TrimEnd('/'), location);
+                var endpoint = BuildTourEndpoint(baseUrl, location);
 
                 using var cts = new CancellationTokenSource(TourRequestTimeout);
                 var tours = await _httpClient.GetFromJsonAsync<List<TourModel>>(endpoint, cts.Token);
@@ -181,6 +175,7 @@ public class TourService : ITourService
                     continue;
                 }
 
+                _lastSuccessfulBaseUrl = baseUrl;
                 SetMemoryCache(tours);
                 _lastNetworkFetchUtc = DateTime.UtcNow;
                 await SaveToursCacheAsync(_cachedTours!);
@@ -204,6 +199,12 @@ public class TourService : ITourService
     private IEnumerable<string> BuildBaseUrlCandidates()
     {
         var baseCandidates = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(_lastSuccessfulBaseUrl))
+        {
+            baseCandidates.Add(_lastSuccessfulBaseUrl);
+        }
+
         if (_httpClient.BaseAddress != null)
         {
             baseCandidates.Add(_httpClient.BaseAddress.ToString());
@@ -213,7 +214,63 @@ public class TourService : ITourService
 
         return baseCandidates
             .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim().TrimEnd('/'))
             .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task RefreshTourByIdInBackgroundAsync(int tourId)
+    {
+        if (!await _networkRefreshLock.WaitAsync(0))
+        {
+            return;
+        }
+
+        try
+        {
+            if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+            {
+                return;
+            }
+
+            var location = _locationService.LastKnownLocation;
+            await LoadTourByIdFromNetworkAsync(tourId, location);
+        }
+        catch
+        {
+            // Keep cached detail visible even if background refresh fails.
+        }
+        finally
+        {
+            _networkRefreshLock.Release();
+        }
+    }
+
+    private async Task<TourModel?> LoadTourByIdFromNetworkAsync(int tourId, Location? location)
+    {
+        foreach (var baseUrl in BuildBaseUrlCandidates())
+        {
+            try
+            {
+                var endpoint = BuildTourDetailEndpoint(baseUrl, tourId, location);
+                using var cts = new CancellationTokenSource(TourRequestTimeout);
+                var tour = await _httpClient.GetFromJsonAsync<TourModel>(endpoint, cts.Token);
+                if (tour == null)
+                {
+                    continue;
+                }
+
+                _lastSuccessfulBaseUrl = baseUrl;
+                var normalizedTour = NormalizeTour(tour);
+                await MergeTourIntoCacheAsync(normalizedTour);
+                return normalizedTour;
+            }
+            catch
+            {
+                // Fall through to try next candidate.
+            }
+        }
+
+        return null;
     }
 
     private static string BuildTourEndpoint(string baseUrl, Location? location)
@@ -367,6 +424,7 @@ public class TourService : ITourService
         NormalizeStops(tours);
         foreach (var tour in tours)
         {
+            NormalizeStopImages(tour);
             tour.ResolvedImageUrl = ResolveImageUrl(tour.ImageUrl, tour.Stops);
         }
 
@@ -376,8 +434,17 @@ public class TourService : ITourService
     private TourModel NormalizeTour(TourModel tour)
     {
         tour.Stops ??= new List<TourStopModel>();
+        NormalizeStopImages(tour);
         tour.ResolvedImageUrl = ResolveImageUrl(tour.ImageUrl, tour.Stops);
         return tour;
+    }
+
+    private void NormalizeStopImages(TourModel tour)
+    {
+        foreach (var stop in tour.Stops)
+        {
+            stop.PrimaryImageUrl = ResolveImageUrl(stop.PrimaryImageUrl, null);
+        }
     }
 
     private static List<TourModel> NormalizeStops(List<TourModel> tours)
