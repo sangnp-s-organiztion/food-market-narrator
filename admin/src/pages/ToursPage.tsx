@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, GripVertical, Lock, Plus, Unlock, Upload } from "lucide-react";
+import { Eye, GripVertical, Lock, Plus, Scissors, Unlock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -77,6 +77,7 @@ const ToursPage = () => {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [detailMode, setDetailMode] = useState<"view" | "edit">("view");
   const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
   const [addRestaurantId, setAddRestaurantId] = useState("");
   const [confirmTour, setConfirmTour] = useState<{
@@ -212,6 +213,7 @@ const ToursPage = () => {
   ]);
 
   const hasUnsavedChanges = hasOrderChanges || hasMetaChanges;
+  const isDetailEditMode = detailMode === "edit";
   const detailPreviewImageUrl =
     draftImagePreview ??
     normalizeImageUrl(normalizeImageInput(draftImageUrl) ?? getFallbackStopImage(selectedTour));
@@ -374,9 +376,10 @@ const ToursPage = () => {
     },
   });
 
-  const handleOpenDetail = (tourId: number) => {
+  const handleOpenDetail = (tourId: number, mode: "view" | "edit") => {
     setSelectedTourId(tourId);
     setAddRestaurantId("");
+    setDetailMode(mode);
     setDetailOpen(true);
   };
 
@@ -385,6 +388,7 @@ const ToursPage = () => {
     if (!open) {
       setSelectedTourId(null);
       setAddRestaurantId("");
+      setDetailMode("view");
       setDraftStops([]);
       setDraggingRestaurantId(null);
       setDraftEstimatedDurationMinutes("");
@@ -400,6 +404,8 @@ const ToursPage = () => {
   };
 
   const handleDraftImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!isDetailEditMode) return;
+
     const file = e.target.files?.[0] ?? null;
     setDraftImageFile(file);
 
@@ -444,6 +450,7 @@ const ToursPage = () => {
   };
 
   const handleAddRestaurant = () => {
+    if (!isDetailEditMode) return;
     if (selectedTourId === null) return;
 
     const restaurantId = addRestaurantId.trim();
@@ -464,6 +471,7 @@ const ToursPage = () => {
   };
 
   const handleDropOnStop = (targetRestaurantId: string) => {
+    if (!isDetailEditMode) return;
     if (!draggingRestaurantId || draggingRestaurantId === targetRestaurantId) return;
 
     const current = [...draftStops];
@@ -484,6 +492,7 @@ const ToursPage = () => {
   };
 
   const handleSaveChanges = () => {
+    if (!isDetailEditMode) return;
     if (selectedTourId === null || !hasUnsavedChanges) return;
 
     const estimatedDuration =
@@ -637,10 +646,18 @@ const ToursPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleOpenDetail(tour.tourId)}
+                        onClick={() => handleOpenDetail(tour.tourId, "view")}
                         title="Xem tour"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenDetail(tour.tourId, "edit")}
+                        title="Chỉnh sửa tour"
+                      >
+                        <Scissors className="h-4 w-4" />
                       </Button>
                       <button
                         disabled={statusMutation.isPending}
@@ -686,16 +703,6 @@ const ToursPage = () => {
 
           {!isDetailLoading && !isDetailError && selectedTour && (
             <div className="space-y-5">
-              {detailPreviewImageUrl && (
-                <div className="overflow-hidden rounded-md border bg-muted/20">
-                  <img
-                    src={detailPreviewImageUrl}
-                    alt={`Ảnh tour ${selectedTour.name}`}
-                    className="h-52 w-full object-cover"
-                  />
-                </div>
-              )}
-
               <div className="rounded-md border p-4">
                 <p className="text-sm text-muted-foreground">Tên tour</p>
                 <p className="mt-1 text-base font-semibold">{selectedTour.name}</p>
@@ -710,6 +717,7 @@ const ToursPage = () => {
                       min={0}
                       value={draftEstimatedDurationMinutes}
                       onChange={(e) => setDraftEstimatedDurationMinutes(e.target.value)}
+                      disabled={!isDetailEditMode}
                       className="mt-1"
                       placeholder="Để trống nếu không đặt"
                     />
@@ -721,6 +729,7 @@ const ToursPage = () => {
                       min={0}
                       value={draftSortPriority}
                       onChange={(e) => setDraftSortPriority(e.target.value)}
+                      disabled={!isDetailEditMode}
                       className="mt-1"
                     />
                   </div>
@@ -729,6 +738,7 @@ const ToursPage = () => {
                     <select
                       value={draftIsFeatured ? "true" : "false"}
                       onChange={(e) => setDraftIsFeatured(e.target.value === "true")}
+                      disabled={!isDetailEditMode}
                       className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
                       <option value="true">Có</option>
@@ -739,8 +749,14 @@ const ToursPage = () => {
                 <div className="mt-4">
                   <Label className="text-xs">Ảnh tour</Label>
                   <div
-                    className="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-4 text-center transition-colors hover:border-primary"
-                    onClick={() => detailImageInputRef.current?.click()}
+                    className={`mt-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
+                      isDetailEditMode ? "cursor-pointer hover:border-primary" : "cursor-default"
+                    }`}
+                    onClick={() => {
+                      if (isDetailEditMode) {
+                        detailImageInputRef.current?.click();
+                      }
+                    }}
                   >
                     {detailPreviewImageUrl ? (
                       <div className="space-y-2">
@@ -749,12 +765,16 @@ const ToursPage = () => {
                           alt={`Ảnh tour ${selectedTour.name}`}
                           className="max-h-44 w-full rounded-md object-contain"
                         />
-                        <p className="text-xs text-muted-foreground">Nhấn để chọn ảnh khác</p>
+                        <p className="text-xs text-muted-foreground">
+                          {isDetailEditMode ? "Nhấn để chọn ảnh khác" : "Ảnh tour"}
+                        </p>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 py-2 text-muted-foreground">
                         <Upload className="h-6 w-6" />
-                        <p className="text-sm">Nhấn để chọn ảnh</p>
+                        <p className="text-sm">
+                          {isDetailEditMode ? "Nhấn để chọn ảnh" : "Chưa có ảnh"}
+                        </p>
                         <p className="text-xs">JPG, PNG, WEBP</p>
                       </div>
                     )}
@@ -763,24 +783,13 @@ const ToursPage = () => {
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
+                      disabled={!isDetailEditMode}
                       onChange={handleDraftImageFileChange}
                     />
                   </div>
                   {draftImageFile && (
                     <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {draftImageFile.name}</p>
                   )}
-                  <div className="mt-3">
-                    <Label className="text-xs">Hoặc nhập URL/tên file</Label>
-                    <Input
-                      value={draftImageUrl}
-                      onChange={(e) => setDraftImageUrl(e.target.value)}
-                      className="mt-1"
-                      placeholder="Ví dụ: tour_oc.jpg hoặc /maui-images/tour_oc.jpg"
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Để trống nếu muốn tự dùng ảnh của điểm dừng đầu tiên có ảnh.
-                  </p>
                 </div>
               </div>
 
@@ -810,17 +819,27 @@ const ToursPage = () => {
                     {draftStops.map((stop) => (
                       <tr
                         key={stop.restaurantId}
-                        draggable
-                        onDragStart={() => setDraggingRestaurantId(stop.restaurantId)}
+                        draggable={isDetailEditMode}
+                        onDragStart={() => {
+                          if (isDetailEditMode) {
+                            setDraggingRestaurantId(stop.restaurantId);
+                          }
+                        }}
                         onDragEnd={() => setDraggingRestaurantId(null)}
-                        onDragOver={(e) => e.preventDefault()}
+                        onDragOver={(e) => {
+                          if (isDetailEditMode) {
+                            e.preventDefault();
+                          }
+                        }}
                         onDrop={() => handleDropOnStop(stop.restaurantId)}
                         className={draggingRestaurantId === stop.restaurantId ? "opacity-60" : ""}
                       >
                         <td>
                           <button
                             type="button"
-                            className="text-muted-foreground hover:text-foreground"
+                            className={`text-muted-foreground ${
+                              isDetailEditMode ? "hover:text-foreground" : "cursor-default"
+                            }`}
                             title="Kéo thả để sắp xếp thứ tự"
                           >
                             <GripVertical className="h-4 w-4" />
@@ -834,60 +853,64 @@ const ToursPage = () => {
                     ))}
                   </tbody>
                 </table>
-                <div className="mt-4 flex items-center justify-end">
-                  <Button
-                    onClick={handleSaveChanges}
-                    disabled={!hasUnsavedChanges || saveChangesMutation.isPending}
-                  >
-                    {saveChangesMutation.isPending ? "Đang lưu..." : "Lưu cập nhật"}
-                  </Button>
-                </div>
+                {isDetailEditMode && (
+                  <div className="mt-4 flex items-center justify-end">
+                    <Button
+                      onClick={handleSaveChanges}
+                      disabled={!hasUnsavedChanges || saveChangesMutation.isPending}
+                    >
+                      {saveChangesMutation.isPending ? "Đang lưu..." : "Lưu cập nhật"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              <div className="rounded-md border p-4">
-                <h3 className="mb-3 text-sm font-semibold">Thêm nhà hàng vào tour</h3>
+              {isDetailEditMode && (
+                <div className="rounded-md border p-4">
+                  <h3 className="mb-3 text-sm font-semibold">Thêm nhà hàng vào tour</h3>
 
-                <div className="grid gap-3">
-                  <div>
-                    <Label className="text-xs">Nhà hàng</Label>
-                    <select
-                      value={addRestaurantId}
-                      onChange={(e) => setAddRestaurantId(e.target.value)}
-                      className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  <div className="grid gap-3">
+                    <div>
+                      <Label className="text-xs">Nhà hàng</Label>
+                      <select
+                        value={addRestaurantId}
+                        onChange={(e) => setAddRestaurantId(e.target.value)}
+                        className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">Chọn nhà hàng</option>
+                        {availableRestaurants.map((restaurant) => (
+                          <option key={restaurant.restaurantId} value={restaurant.restaurantId}>
+                            {restaurant.name} ({restaurant.restaurantId})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Thứ tự điểm dừng sẽ tự động là: {getNextStopOrder(selectedTour)}
+                  </p>
+
+                  <div className="mt-4">
+                    <Button
+                      onClick={handleAddRestaurant}
+                      disabled={
+                        addRestaurantMutation.isPending ||
+                        availableRestaurants.length === 0 ||
+                        hasUnsavedChanges
+                      }
+                      className="gap-2"
                     >
-                      <option value="">Chọn nhà hàng</option>
-                      {availableRestaurants.map((restaurant) => (
-                        <option key={restaurant.restaurantId} value={restaurant.restaurantId}>
-                          {restaurant.name} ({restaurant.restaurantId})
-                        </option>
-                      ))}
-                    </select>
+                      <Plus className="h-4 w-4" />
+                      {addRestaurantMutation.isPending ? "Đang thêm..." : "Thêm nhà hàng"}
+                    </Button>
+                    {availableRestaurants.length === 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Không còn nhà hàng nào để thêm vào tour này.
+                      </p>
+                    )}
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Thứ tự điểm dừng sẽ tự động là: {getNextStopOrder(selectedTour)}
-                </p>
-
-                <div className="mt-4">
-                  <Button
-                    onClick={handleAddRestaurant}
-                    disabled={
-                      addRestaurantMutation.isPending ||
-                      availableRestaurants.length === 0 ||
-                      hasUnsavedChanges
-                    }
-                    className="gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {addRestaurantMutation.isPending ? "Đang thêm..." : "Thêm nhà hàng"}
-                  </Button>
-                  {availableRestaurants.length === 0 && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Không còn nhà hàng nào để thêm vào tour này.
-                    </p>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           )}
         </DialogContent>
@@ -967,16 +990,6 @@ const ToursPage = () => {
               {createImageFile && (
                 <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {createImageFile.name}</p>
               )}
-              <div className="mt-3">
-                <Label htmlFor="create-tour-image-url">Hoặc nhập URL/tên file</Label>
-                <Input
-                  id="create-tour-image-url"
-                  value={createImageUrl}
-                  onChange={(e) => setCreateImageUrl(e.target.value)}
-                  placeholder="Ví dụ: tour_oc.jpg hoặc /maui-images/tour_oc.jpg"
-                  className="mt-1"
-                />
-              </div>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
