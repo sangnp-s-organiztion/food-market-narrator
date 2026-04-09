@@ -703,6 +703,16 @@ const ToursPage = () => {
 
           {!isDetailLoading && !isDetailError && selectedTour && (
             <div className="space-y-5">
+              {detailPreviewImageUrl && (
+                <div className="overflow-hidden rounded-md border bg-muted/20">
+                  <img
+                    src={detailPreviewImageUrl}
+                    alt={`Ảnh tour ${selectedTour.name}`}
+                    className="h-52 w-full object-cover"
+                  />
+                </div>
+              )}
+
               <div className="rounded-md border p-4">
                 <p className="text-sm text-muted-foreground">Tên tour</p>
                 <p className="mt-1 text-base font-semibold">{selectedTour.name}</p>
