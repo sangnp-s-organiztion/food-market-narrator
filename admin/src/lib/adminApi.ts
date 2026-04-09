@@ -111,6 +111,10 @@ export interface TourResponse {
   stops: TourStopResponse[];
 }
 
+export interface TourImageUploadResponse {
+  imageUrl: string;
+}
+
 export interface AddTourRestaurantRequest {
   restaurantId: string;
 }
@@ -121,6 +125,7 @@ export interface ReorderTourStopsRequest {
 
 export interface UpdateTourRequest {
   estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
   sortPriority: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -131,9 +136,67 @@ export interface CreateTourRequest {
   shortDescription?: string | null;
   description?: string | null;
   estimatedDurationMinutes: number | null;
+  imageUrl?: string | null;
   sortPriority: number;
   isActive: boolean;
   isFeatured: boolean;
+}
+
+function buildCreateTourFormData(data: CreateTourRequest): FormData {
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+  if (data.shortDescription !== null && data.shortDescription !== undefined) {
+    formData.append("shortDescription", data.shortDescription);
+  }
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("sortPriority", `${data.sortPriority}`);
+  formData.append("isActive", `${data.isActive}`);
+  formData.append("isFeatured", `${data.isFeatured}`);
+
+  return formData;
+}
+
+function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
+  const formData = new FormData();
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("sortPriority", `${data.sortPriority}`);
+  formData.append("isActive", `${data.isActive}`);
+  formData.append("isFeatured", `${data.isFeatured}`);
+
+  return formData;
 }
 
 // ─── User types ──────────────────────────────────────────────────────────────
@@ -311,10 +374,30 @@ export const tourApi = {
 
   getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
 
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>("/Tour/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  uploadImageForTour: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>(`/Tour/${id}/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
   create: (data: CreateTourRequest) =>
     adminFetch<TourResponse>("/Tour", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: buildCreateTourFormData(data),
     }),
 
   addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
@@ -332,7 +415,7 @@ export const tourApi = {
   update: (id: number, data: UpdateTourRequest) =>
     adminFetch<{ message: string }>(`/Tour/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: buildUpdateTourFormData(data),
     }),
 };
 export const userApi = {
@@ -440,4 +523,3 @@ export const mapsApi = {
       `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
     ),
 };
-

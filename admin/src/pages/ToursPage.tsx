@@ -1,6 +1,6 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, GripVertical, Lock, Plus, Unlock } from "lucide-react";
+import { Eye, GripVertical, Lock, Plus, Scissors, Unlock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -21,6 +21,52 @@ import {
   type TourStopResponse,
 } from "@/lib/adminApi";
 
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "http://localhost:5044";
+
+function normalizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const normalized = url.replace(/\\/g, "/").trim();
+  if (!normalized) return null;
+
+  if (normalized.startsWith("/")) {
+    return new URL(normalized, API_BASE).toString();
+  }
+
+  if (normalized.startsWith("maui-images/") || normalized.startsWith("uploads/")) {
+    return new URL(`/${normalized}`, API_BASE).toString();
+  }
+
+  return new URL(`/maui-images/${normalized}`, API_BASE).toString();
+}
+
+function normalizeImageInput(value: string): string | null {
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Không thể đọc file ảnh"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function getFallbackStopImage(tour: TourResponse | undefined): string | null {
+  if (!tour) return null;
+
+  return (
+    tour.stops
+      .map((stop) => stop.primaryImageUrl)
+      .find((url): url is string => !!url && url.trim().length > 0) ?? null
+  );
+}
+
 function getNextStopOrder(tour: TourResponse | undefined): number {
   if (!tour || tour.stops.length === 0) return 1;
   const maxStop = Math.max(...tour.stops.map((s) => s.stopOrder));
@@ -31,6 +77,7 @@ const ToursPage = () => {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [detailMode, setDetailMode] = useState<"view" | "edit">("view");
   const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
   const [addRestaurantId, setAddRestaurantId] = useState("");
   const [confirmTour, setConfirmTour] = useState<{
@@ -38,20 +85,29 @@ const ToursPage = () => {
     name: string;
     lock: boolean;
     estimatedDurationMinutes: number | null;
+    imageUrl: string | null;
     sortPriority: number;
     isFeatured: boolean;
   } | null>(null);
   const [draftStops, setDraftStops] = useState<TourStopResponse[]>([]);
   const [draggingRestaurantId, setDraggingRestaurantId] = useState<string | null>(null);
   const [draftEstimatedDurationMinutes, setDraftEstimatedDurationMinutes] = useState("");
+  const [draftImageUrl, setDraftImageUrl] = useState("");
+  const [draftImageFile, setDraftImageFile] = useState<File | null>(null);
+  const [draftImagePreview, setDraftImagePreview] = useState<string | null>(null);
   const [draftSortPriority, setDraftSortPriority] = useState("");
   const [draftIsFeatured, setDraftIsFeatured] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createShortDescription, setCreateShortDescription] = useState("");
   const [createDescription, setCreateDescription] = useState("");
   const [createEstimatedDurationMinutes, setCreateEstimatedDurationMinutes] = useState("");
+  const [createImageUrl, setCreateImageUrl] = useState("");
+  const [createImageFile, setCreateImageFile] = useState<File | null>(null);
+  const [createImagePreview, setCreateImagePreview] = useState<string | null>(null);
   const [createSortPriority, setCreateSortPriority] = useState("0");
   const [createIsFeatured, setCreateIsFeatured] = useState(false);
+  const detailImageInputRef = useRef<HTMLInputElement | null>(null);
+  const createImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     data: tours = [],
@@ -84,6 +140,9 @@ const ToursPage = () => {
     if (!selectedTour) {
       setDraftStops([]);
       setDraftEstimatedDurationMinutes("");
+      setDraftImageUrl("");
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
       setDraftSortPriority("");
       setDraftIsFeatured(false);
       return;
@@ -96,6 +155,12 @@ const ToursPage = () => {
         ? `${selectedTour.estimatedDurationMinutes}`
         : "",
     );
+    setDraftImageUrl(selectedTour.imageUrl ?? "");
+    setDraftImageFile(null);
+    setDraftImagePreview(null);
+    if (detailImageInputRef.current) {
+      detailImageInputRef.current.value = "";
+    }
     setDraftSortPriority(`${selectedTour.sortPriority}`);
     setDraftIsFeatured(selectedTour.isFeatured);
   }, [selectedTour]);
@@ -129,6 +194,8 @@ const ToursPage = () => {
 
     if (
       estimatedDuration !== selectedTour.estimatedDurationMinutes ||
+      normalizeImageInput(draftImageUrl) !== normalizeImageInput(selectedTour.imageUrl ?? "") ||
+      draftImageFile !== null ||
       sortPriority !== selectedTour.sortPriority ||
       draftIsFeatured !== selectedTour.isFeatured
     ) {
@@ -139,11 +206,19 @@ const ToursPage = () => {
   }, [
     selectedTour,
     draftEstimatedDurationMinutes,
+    draftImageUrl,
+    draftImageFile,
     draftSortPriority,
     draftIsFeatured,
   ]);
 
   const hasUnsavedChanges = hasOrderChanges || hasMetaChanges;
+  const isDetailEditMode = detailMode === "edit";
+  const detailPreviewImageUrl =
+    draftImagePreview ??
+    normalizeImageUrl(normalizeImageInput(draftImageUrl) ?? getFallbackStopImage(selectedTour));
+  const createPreviewImageUrl =
+    createImagePreview ?? normalizeImageUrl(normalizeImageInput(createImageUrl));
 
   const addRestaurantMutation = useMutation({
     mutationFn: (payload: { tourId: number; restaurantId: string }) =>
@@ -171,19 +246,34 @@ const ToursPage = () => {
       shortDescription: string | null;
       description: string | null;
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
+      imageFile: File | null;
       sortPriority: number;
       isActive: boolean;
       isFeatured: boolean;
     }) =>
-      tourApi.create({
+      (async () => {
+        const created = await tourApi.create({
         name: payload.name,
         shortDescription: payload.shortDescription,
         description: payload.description,
         estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        imageUrl: payload.imageUrl,
         sortPriority: payload.sortPriority,
         isActive: payload.isActive,
         isFeatured: payload.isFeatured,
-      }),
+        });
+
+        if (payload.imageFile) {
+          const upload = await tourApi.uploadImageForTour(created.tourId, payload.imageFile);
+          return {
+            ...created,
+            imageUrl: upload.imageUrl,
+          };
+        }
+
+        return created;
+      })(),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
       setCreateOpen(false);
@@ -191,6 +281,12 @@ const ToursPage = () => {
       setCreateShortDescription("");
       setCreateDescription("");
       setCreateEstimatedDurationMinutes("");
+      setCreateImageUrl("");
+      setCreateImageFile(null);
+      setCreateImagePreview(null);
+      if (createImageInputRef.current) {
+        createImageInputRef.current.value = "";
+      }
       setCreateSortPriority("0");
       setCreateIsFeatured(false);
       toast.success("Tạo tour thành công");
@@ -205,11 +301,13 @@ const ToursPage = () => {
       id: number;
       isActive: boolean;
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
       sortPriority: number;
       isFeatured: boolean;
     }) =>
       tourApi.update(payload.id, {
         estimatedDurationMinutes: payload.estimatedDurationMinutes,
+        imageUrl: payload.imageUrl,
         sortPriority: payload.sortPriority,
         isActive: payload.isActive,
         isFeatured: payload.isFeatured,
@@ -232,12 +330,20 @@ const ToursPage = () => {
       tourId: number;
       restaurantIds: string[];
       estimatedDurationMinutes: number | null;
+      imageUrl: string | null;
+      imageFile: File | null;
       sortPriority: number;
       isActive: boolean;
       isFeatured: boolean;
       hasOrderChanges: boolean;
       hasMetaChanges: boolean;
     }) => {
+      let imageUrl = payload.imageUrl;
+      if (payload.imageFile) {
+        const upload = await tourApi.uploadImageForTour(payload.tourId, payload.imageFile);
+        imageUrl = upload.imageUrl;
+      }
+
       if (payload.hasOrderChanges) {
         await tourApi.reorderStops(payload.tourId, { restaurantIds: payload.restaurantIds });
       }
@@ -245,6 +351,7 @@ const ToursPage = () => {
       if (payload.hasMetaChanges) {
         await tourApi.update(payload.tourId, {
           estimatedDurationMinutes: payload.estimatedDurationMinutes,
+          imageUrl,
           sortPriority: payload.sortPriority,
           isActive: payload.isActive,
           isFeatured: payload.isFeatured,
@@ -257,6 +364,11 @@ const ToursPage = () => {
         await qc.invalidateQueries({ queryKey: ["admin", "tour", selectedTourId] });
       }
 
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
       toast.success("Đã lưu cập nhật tour");
     },
     onError: (err: Error) => {
@@ -264,9 +376,10 @@ const ToursPage = () => {
     },
   });
 
-  const handleOpenDetail = (tourId: number) => {
+  const handleOpenDetail = (tourId: number, mode: "view" | "edit") => {
     setSelectedTourId(tourId);
     setAddRestaurantId("");
+    setDetailMode(mode);
     setDetailOpen(true);
   };
 
@@ -275,15 +388,69 @@ const ToursPage = () => {
     if (!open) {
       setSelectedTourId(null);
       setAddRestaurantId("");
+      setDetailMode("view");
       setDraftStops([]);
       setDraggingRestaurantId(null);
       setDraftEstimatedDurationMinutes("");
+      setDraftImageUrl("");
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
       setDraftSortPriority("");
       setDraftIsFeatured(false);
     }
   };
 
+  const handleDraftImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!isDetailEditMode) return;
+
+    const file = e.target.files?.[0] ?? null;
+    setDraftImageFile(file);
+
+    if (!file) {
+      setDraftImagePreview(null);
+      return;
+    }
+
+    try {
+      const preview = await readFileAsDataUrl(file);
+      setDraftImagePreview(preview);
+    } catch (error) {
+      setDraftImageFile(null);
+      setDraftImagePreview(null);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = "";
+      }
+      toast.error((error as Error).message ?? "Không thể đọc file ảnh");
+    }
+  };
+
+  const handleCreateImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setCreateImageFile(file);
+
+    if (!file) {
+      setCreateImagePreview(null);
+      return;
+    }
+
+    try {
+      const preview = await readFileAsDataUrl(file);
+      setCreateImagePreview(preview);
+    } catch (error) {
+      setCreateImageFile(null);
+      setCreateImagePreview(null);
+      if (createImageInputRef.current) {
+        createImageInputRef.current.value = "";
+      }
+      toast.error((error as Error).message ?? "Không thể đọc file ảnh");
+    }
+  };
+
   const handleAddRestaurant = () => {
+    if (!isDetailEditMode) return;
     if (selectedTourId === null) return;
 
     const restaurantId = addRestaurantId.trim();
@@ -304,6 +471,7 @@ const ToursPage = () => {
   };
 
   const handleDropOnStop = (targetRestaurantId: string) => {
+    if (!isDetailEditMode) return;
     if (!draggingRestaurantId || draggingRestaurantId === targetRestaurantId) return;
 
     const current = [...draftStops];
@@ -324,12 +492,14 @@ const ToursPage = () => {
   };
 
   const handleSaveChanges = () => {
+    if (!isDetailEditMode) return;
     if (selectedTourId === null || !hasUnsavedChanges) return;
 
     const estimatedDuration =
       draftEstimatedDurationMinutes.trim().length === 0
         ? null
         : Number(draftEstimatedDurationMinutes);
+    const imageUrl = normalizeImageInput(draftImageUrl);
     const sortPriority = Number(draftSortPriority);
 
     if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
@@ -346,6 +516,8 @@ const ToursPage = () => {
       tourId: selectedTourId,
       restaurantIds: draftStops.map((s) => s.restaurantId),
       estimatedDurationMinutes: estimatedDuration,
+      imageUrl,
+      imageFile: draftImageFile,
       sortPriority,
       isActive: selectedTour?.isActive ?? true,
       isFeatured: draftIsFeatured,
@@ -365,6 +537,7 @@ const ToursPage = () => {
       createEstimatedDurationMinutes.trim().length === 0
         ? null
         : Number(createEstimatedDurationMinutes);
+    const imageUrl = normalizeImageInput(createImageUrl);
     const sortPriority = Number(createSortPriority);
 
     if (estimatedDuration !== null && (!Number.isInteger(estimatedDuration) || estimatedDuration < 0)) {
@@ -382,6 +555,8 @@ const ToursPage = () => {
       shortDescription: createShortDescription.trim() || null,
       description: createDescription.trim() || null,
       estimatedDurationMinutes: estimatedDuration,
+      imageUrl,
+      imageFile: createImageFile,
       sortPriority,
       isActive: true,
       isFeatured: createIsFeatured,
@@ -404,6 +579,7 @@ const ToursPage = () => {
             <thead>
               <tr>
                 <th>Tên tour</th>
+                <th className="w-32">Ảnh tour</th>
                 <th className="w-36">Số điểm dừng</th>
                 <th className="w-40">Thời gian dự kiến</th>
                 <th className="w-28">Ưu tiên</th>
@@ -415,21 +591,21 @@ const ToursPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     Đang tải danh sách tour...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-destructive">
+                  <td colSpan={8} className="py-8 text-center text-destructive">
                     Không thể tải danh sách tour. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && tours.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     Chưa có tour nào.
                   </td>
                 </tr>
@@ -439,6 +615,24 @@ const ToursPage = () => {
                 tours.map((tour) => (
                   <tr key={tour.tourId}>
                     <td className="font-medium">{tour.name}</td>
+                    <td>
+                      {(() => {
+                        const previewUrl = normalizeImageUrl(
+                          tour.imageUrl ?? getFallbackStopImage(tour),
+                        );
+                        if (!previewUrl) {
+                          return <span className="text-xs text-muted-foreground">Chưa có ảnh</span>;
+                        }
+
+                        return (
+                          <img
+                            src={previewUrl}
+                            alt={`Ảnh tour ${tour.name}`}
+                            className="h-12 w-20 rounded-md border object-cover"
+                          />
+                        );
+                      })()}
+                    </td>
                     <td>{tour.stopCount}</td>
                     <td>{tour.estimatedDurationMinutes ? `${tour.estimatedDurationMinutes} phút` : "-"}</td>
                     <td>{tour.sortPriority}</td>
@@ -452,10 +646,18 @@ const ToursPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleOpenDetail(tour.tourId)}
+                        onClick={() => handleOpenDetail(tour.tourId, "view")}
                         title="Xem tour"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenDetail(tour.tourId, "edit")}
+                        title="Chỉnh sửa tour"
+                      >
+                        <Scissors className="h-4 w-4" />
                       </Button>
                       <button
                         disabled={statusMutation.isPending}
@@ -465,6 +667,7 @@ const ToursPage = () => {
                             name: tour.name,
                             lock: tour.isActive,
                             estimatedDurationMinutes: tour.estimatedDurationMinutes,
+                            imageUrl: tour.imageUrl,
                             sortPriority: tour.sortPriority,
                             isFeatured: tour.isFeatured,
                           })
@@ -514,6 +717,7 @@ const ToursPage = () => {
                       min={0}
                       value={draftEstimatedDurationMinutes}
                       onChange={(e) => setDraftEstimatedDurationMinutes(e.target.value)}
+                      disabled={!isDetailEditMode}
                       className="mt-1"
                       placeholder="Để trống nếu không đặt"
                     />
@@ -525,6 +729,7 @@ const ToursPage = () => {
                       min={0}
                       value={draftSortPriority}
                       onChange={(e) => setDraftSortPriority(e.target.value)}
+                      disabled={!isDetailEditMode}
                       className="mt-1"
                     />
                   </div>
@@ -533,12 +738,58 @@ const ToursPage = () => {
                     <select
                       value={draftIsFeatured ? "true" : "false"}
                       onChange={(e) => setDraftIsFeatured(e.target.value === "true")}
+                      disabled={!isDetailEditMode}
                       className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
                       <option value="true">Có</option>
                       <option value="false">Không</option>
                     </select>
                   </div>
+                </div>
+                <div className="mt-4">
+                  <Label className="text-xs">Ảnh tour</Label>
+                  <div
+                    className={`mt-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
+                      isDetailEditMode ? "cursor-pointer hover:border-primary" : "cursor-default"
+                    }`}
+                    onClick={() => {
+                      if (isDetailEditMode) {
+                        detailImageInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    {detailPreviewImageUrl ? (
+                      <div className="space-y-2">
+                        <img
+                          src={detailPreviewImageUrl}
+                          alt={`Ảnh tour ${selectedTour.name}`}
+                          className="max-h-44 w-full rounded-md object-contain"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {isDetailEditMode ? "Nhấn để chọn ảnh khác" : "Ảnh tour"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 py-2 text-muted-foreground">
+                        <Upload className="h-6 w-6" />
+                        <p className="text-sm">
+                          {isDetailEditMode ? "Nhấn để chọn ảnh" : "Chưa có ảnh"}
+                        </p>
+                        <p className="text-xs">JPG, PNG, WEBP</p>
+                      </div>
+                    )}
+                    <input
+                      ref={detailImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      disabled={!isDetailEditMode}
+                      onChange={handleDraftImageFileChange}
+                    />
+                  </div>
+                  {draftImageFile && (
+                    <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {draftImageFile.name}</p>
+                  )}
                 </div>
               </div>
 
@@ -568,17 +819,27 @@ const ToursPage = () => {
                     {draftStops.map((stop) => (
                       <tr
                         key={stop.restaurantId}
-                        draggable
-                        onDragStart={() => setDraggingRestaurantId(stop.restaurantId)}
+                        draggable={isDetailEditMode}
+                        onDragStart={() => {
+                          if (isDetailEditMode) {
+                            setDraggingRestaurantId(stop.restaurantId);
+                          }
+                        }}
                         onDragEnd={() => setDraggingRestaurantId(null)}
-                        onDragOver={(e) => e.preventDefault()}
+                        onDragOver={(e) => {
+                          if (isDetailEditMode) {
+                            e.preventDefault();
+                          }
+                        }}
                         onDrop={() => handleDropOnStop(stop.restaurantId)}
                         className={draggingRestaurantId === stop.restaurantId ? "opacity-60" : ""}
                       >
                         <td>
                           <button
                             type="button"
-                            className="text-muted-foreground hover:text-foreground"
+                            className={`text-muted-foreground ${
+                              isDetailEditMode ? "hover:text-foreground" : "cursor-default"
+                            }`}
                             title="Kéo thả để sắp xếp thứ tự"
                           >
                             <GripVertical className="h-4 w-4" />
@@ -592,60 +853,64 @@ const ToursPage = () => {
                     ))}
                   </tbody>
                 </table>
-                <div className="mt-4 flex items-center justify-end">
-                  <Button
-                    onClick={handleSaveChanges}
-                    disabled={!hasUnsavedChanges || saveChangesMutation.isPending}
-                  >
-                    {saveChangesMutation.isPending ? "Đang lưu..." : "Lưu cập nhật"}
-                  </Button>
-                </div>
+                {isDetailEditMode && (
+                  <div className="mt-4 flex items-center justify-end">
+                    <Button
+                      onClick={handleSaveChanges}
+                      disabled={!hasUnsavedChanges || saveChangesMutation.isPending}
+                    >
+                      {saveChangesMutation.isPending ? "Đang lưu..." : "Lưu cập nhật"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              <div className="rounded-md border p-4">
-                <h3 className="mb-3 text-sm font-semibold">Thêm nhà hàng vào tour</h3>
+              {isDetailEditMode && (
+                <div className="rounded-md border p-4">
+                  <h3 className="mb-3 text-sm font-semibold">Thêm nhà hàng vào tour</h3>
 
-                <div className="grid gap-3">
-                  <div>
-                    <Label className="text-xs">Nhà hàng</Label>
-                    <select
-                      value={addRestaurantId}
-                      onChange={(e) => setAddRestaurantId(e.target.value)}
-                      className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  <div className="grid gap-3">
+                    <div>
+                      <Label className="text-xs">Nhà hàng</Label>
+                      <select
+                        value={addRestaurantId}
+                        onChange={(e) => setAddRestaurantId(e.target.value)}
+                        className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">Chọn nhà hàng</option>
+                        {availableRestaurants.map((restaurant) => (
+                          <option key={restaurant.restaurantId} value={restaurant.restaurantId}>
+                            {restaurant.name} ({restaurant.restaurantId})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Thứ tự điểm dừng sẽ tự động là: {getNextStopOrder(selectedTour)}
+                  </p>
+
+                  <div className="mt-4">
+                    <Button
+                      onClick={handleAddRestaurant}
+                      disabled={
+                        addRestaurantMutation.isPending ||
+                        availableRestaurants.length === 0 ||
+                        hasUnsavedChanges
+                      }
+                      className="gap-2"
                     >
-                      <option value="">Chọn nhà hàng</option>
-                      {availableRestaurants.map((restaurant) => (
-                        <option key={restaurant.restaurantId} value={restaurant.restaurantId}>
-                          {restaurant.name} ({restaurant.restaurantId})
-                        </option>
-                      ))}
-                    </select>
+                      <Plus className="h-4 w-4" />
+                      {addRestaurantMutation.isPending ? "Đang thêm..." : "Thêm nhà hàng"}
+                    </Button>
+                    {availableRestaurants.length === 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Không còn nhà hàng nào để thêm vào tour này.
+                      </p>
+                    )}
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Thứ tự điểm dừng sẽ tự động là: {getNextStopOrder(selectedTour)}
-                </p>
-
-                <div className="mt-4">
-                  <Button
-                    onClick={handleAddRestaurant}
-                    disabled={
-                      addRestaurantMutation.isPending ||
-                      availableRestaurants.length === 0 ||
-                      hasUnsavedChanges
-                    }
-                    className="gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {addRestaurantMutation.isPending ? "Đang thêm..." : "Thêm nhà hàng"}
-                  </Button>
-                  {availableRestaurants.length === 0 && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Không còn nhà hàng nào để thêm vào tour này.
-                    </p>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           )}
         </DialogContent>
@@ -690,6 +955,41 @@ const ToursPage = () => {
                 className="mt-1"
                 rows={4}
               />
+            </div>
+
+            <div>
+              <Label>Ảnh tour</Label>
+              <div
+                className="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-4 text-center transition-colors hover:border-primary"
+                onClick={() => createImageInputRef.current?.click()}
+              >
+                {createPreviewImageUrl ? (
+                  <div className="space-y-2">
+                    <img
+                      src={createPreviewImageUrl}
+                      alt="Xem trước ảnh tour"
+                      className="max-h-44 w-full rounded-md object-contain"
+                    />
+                    <p className="text-xs text-muted-foreground">Nhấn để chọn ảnh khác</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-2 text-muted-foreground">
+                    <Upload className="h-6 w-6" />
+                    <p className="text-sm">Nhấn để chọn ảnh</p>
+                    <p className="text-xs">JPG, PNG, WEBP</p>
+                  </div>
+                )}
+                <input
+                  ref={createImageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleCreateImageFileChange}
+                />
+              </div>
+              {createImageFile && (
+                <p className="mt-2 text-xs text-muted-foreground">Đã chọn: {createImageFile.name}</p>
+              )}
             </div>
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -770,6 +1070,7 @@ const ToursPage = () => {
             id: confirmTour.id,
             isActive: !confirmTour.lock,
             estimatedDurationMinutes: confirmTour.estimatedDurationMinutes,
+            imageUrl: confirmTour.imageUrl,
             sortPriority: confirmTour.sortPriority,
             isFeatured: confirmTour.isFeatured,
           });
