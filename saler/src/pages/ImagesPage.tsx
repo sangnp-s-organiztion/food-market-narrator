@@ -95,17 +95,6 @@ export default function ImagesPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!avatarImage) return;
-    try {
-      await deleteImageApi(avatarImage.image_id);
-      setImages([]);
-      toast.success("Đã xóa ảnh");
-    } catch {
-      toast.error("Không thể xóa ảnh");
-    }
-  };
-
   const resetDialog = () => {
     setDialogOpen(false);
     setPreview(null);
@@ -137,12 +126,6 @@ export default function ImagesPage() {
           </div>
         )}
       </div>
-
-      {avatarImage && (
-        <div className="mt-4 flex justify-end">
-          <Button variant="outline" onClick={handleDelete}>Xóa ảnh hiện tại</Button>
-        </div>
-      )}
 
       <Dialog
         open={dialogOpen}
