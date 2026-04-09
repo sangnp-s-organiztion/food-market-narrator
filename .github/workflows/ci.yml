@@ -119,7 +119,7 @@ jobs:
 
       - name: Run admin tests
         working-directory: admin
-        run: npm test
+        run: npm test -- --run
 
   # ─────────────────────────────────────────────────────────────
   # 4. Test saler – vitest
@@ -145,4 +145,4 @@ jobs:
 
       - name: Run saler tests
         working-directory: saler
-        run: npm test
+        run: npm test -- --run

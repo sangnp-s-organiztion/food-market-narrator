@@ -6,6 +6,7 @@ using food_market_narrator_api.DTOs.Auth;
 using food_market_narrator_api.DTOs.Dish;
 using food_market_narrator_api.DTOs.Language;
 using food_market_narrator_api.DTOs.Restaurant;
+using food_market_narrator_api.DTOs.Tour;
 using food_market_narrator_api.DTOs.User;
 using food_market_narrator_api.Helpers;
 using food_market_narrator_api.Models;
@@ -128,6 +129,51 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             Phone = "0987654321",
             IsActive = false,
             UserId = 2
+        });
+
+        // Seed Tour + stop mapping
+        context.Tour.Add(new TourModel
+        {
+            TourId = 1,
+            Name = "Hành trình ẩm thực cơ bản",
+            ShortDescription = "Tour mẫu",
+            Description = "Tour cho integration tests",
+            EstimatedDurationMinutes = 45,
+            UrlImage = "/maui-images/tour-sample.jpg",
+            IsActive = true,
+            IsFeatured = true,
+            SortPriority = 1,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        context.TourRestaurant.Add(new TourRestaurantModel
+        {
+            TourId = 1,
+            RestaurantId = "rest-001",
+            StopOrder = 1,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        // Seed one dish + one audio for admin-stats related checks
+        context.Dish.Add(new DishModel
+        {
+            DishId = 1,
+            Name = "Bún mắm",
+            Price = 45000,
+            RestaurantId = "rest-001",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        context.Audio.Add(new AudioModel
+        {
+            AudioId = 1,
+            RestaurantId = "rest-001",
+            LanguageId = 1,
+            AudioUrl = "/uploads/audios/rest-001-vi.mp3",
+            Version = 1,
+            IsActive = true,
+            DateGeneration = DateTime.UtcNow
         });
 
         context.SaveChanges();
@@ -883,6 +929,329 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    #endregion
+
+    #region Tour Tests
+
+    [Fact]
+    public async Task GetAllTours_WithAuth_ReturnsOk()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Tour", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.True(doc.RootElement.ValueKind == JsonValueKind.Array);
+    }
+
+    [Fact]
+    public async Task GetAllTours_WithInvalidRadius_ReturnsBadRequest()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Tour?radiusMeters=0", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetTourById_WithValidId_ReturnsOk()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Tour/1", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.Equal("Hành trình ẩm thực cơ bản", doc.RootElement.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task GetTourById_WithInvalidId_ReturnsNotFound()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/Tour/999", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AddRestaurantToTour_WithExistingRestaurant_ReturnsConflict()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var request = new AddTourRestaurantRequest
+        {
+            RestaurantId = "rest-001"
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Post, "/Tour/1/restaurants", body: request, cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AddRestaurantToTour_WithInvalidRestaurant_ReturnsNotFound()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var request = new AddTourRestaurantRequest
+        {
+            RestaurantId = "restaurant-not-found"
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Post, "/Tour/1/restaurants", body: request, cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateTour_WithValidFormData_ReturnsOk()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var form = new MultipartFormDataContent
+        {
+            { new StringContent("Tour mới integration"), "name" },
+            { new StringContent("Tour mô tả ngắn"), "shortDescription" },
+            { new StringContent("Tour mô tả dài"), "description" },
+            { new StringContent("30"), "estimatedDurationMinutes" },
+            { new StringContent("/maui-images/tour-created.jpg"), "urlImage" },
+            { new StringContent("true"), "isActive" },
+            { new StringContent("false"), "isFeatured" },
+            { new StringContent("2"), "sortPriority" }
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/Tour")
+        {
+            Content = form
+        };
+        request.Headers.Add("Cookie", cookie);
+
+        // Act
+        var response = await _client.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.Equal("Tour mới integration", doc.RootElement.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task UpdateTour_WithNegativeSortPriority_ReturnsBadRequest()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var form = new MultipartFormDataContent
+        {
+            { new StringContent("-1"), "sortPriority" },
+            { new StringContent("true"), "isActive" },
+            { new StringContent("false"), "isFeatured" }
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, "/Tour/1")
+        {
+            Content = form
+        };
+        request.Headers.Add("Cookie", cookie);
+
+        // Act
+        var response = await _client.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
+
+    #region Admin Stats Tests
+
+    [Fact]
+    public async Task GetAdminRestaurantCount_WithAuth_ReturnsOk()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/api/admin/stats/restaurants/count", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.True(doc.RootElement.GetProperty("count").GetInt32() >= 2);
+    }
+
+    [Fact]
+    public async Task GetAdminUserCount_WithAuth_ReturnsOk()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/api/admin/stats/users/count", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.True(doc.RootElement.GetProperty("count").GetInt32() >= 2);
+    }
+
+    #endregion
+
+    #region Billing And Protected Endpoint Tests
+
+    [Fact]
+    public async Task TranslationBillingMyUsage_WithoutAuth_ReturnsUnauthorized()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/translation-billing/my-usage");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminTranslationBillingMonthly_WithSellerRole_ReturnsForbidden()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("seller1", "seller123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/api/admin/translation-billing/monthly", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AnalyticsKpis_WithoutAuth_ReturnsUnauthorized()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/analytics/kpis");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResolveCoordinates_WithoutAuth_ReturnsUnauthorized()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/maps/resolve-coordinates?url=https%3A%2F%2Fwww.google.com%2Fmaps%2F%4015.88%2C108.36");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResolveCoordinates_WithInvalidUrl_ReturnsBadRequest()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Get, "/api/maps/resolve-coordinates?url=not-a-url", cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task StartUserSession_PublicEndpoint_ReturnsOk()
+    {
+        // Arrange
+        var request = new
+        {
+            sessionId = "session-integration",
+            deviceId = "android-device"
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Post, "/api/user-sessions/start", body: request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task IngestLocationBatch_PublicEndpoint_ReturnsOk()
+    {
+        // Arrange
+        var request = new
+        {
+            items = new[]
+            {
+                new
+                {
+                    sessionId = "session-integration",
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        type = "Point",
+                        coordinates = new double?[] { 108.3614, 15.8801 }
+                    }
+                }
+            }
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Post, "/api/location-logs/batch", body: request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateAudioLog_PublicEndpoint_ReturnsExpectedStatus()
+    {
+        // Arrange
+        var request = new
+        {
+            sessionId = "session-integration",
+            restaurantId = "rest-001",
+            audioId = 1,
+            startTime = DateTime.UtcNow.AddSeconds(-12),
+            endTime = DateTime.UtcNow,
+            duration = 12
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(HttpMethod.Post, "/api/audio-logs", body: request);
+
+        // Assert
+        Assert.True(
+            response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.NotFound,
+            $"Unexpected status code: {response.StatusCode}");
     }
 
     #endregion
