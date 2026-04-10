@@ -25,3 +25,8 @@ File này đóng vai trò index trong `docs/` để gom cấu trúc theo nhóm t
 - `GET /api/user-sessions/{sessionId}/qr-access`
 - `POST /api/location-logs/batch`
 - `POST /api/audio-logs`
+
+Ghi chú:
+
+- Luồng QR hiện tại trên MAUI chỉ mở app qua `foodmarketnarrator://open` và không gọi endpoint `GET /api/user-sessions/{sessionId}/qr-access`.
+- Endpoint `qr-access` vẫn được liệt kê tại đây vì thuộc API backend hiện có.
