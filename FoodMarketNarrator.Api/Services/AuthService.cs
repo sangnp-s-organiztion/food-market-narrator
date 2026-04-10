@@ -27,6 +27,23 @@ namespace food_market_narrator_api.Services
         public int ExpiresInSeconds { get; set; }
     }
 
+    public enum ForgotPasswordVerifyOtpStatus
+    {
+        Success,
+        InvalidInput,
+        UsernameNotFound,
+        EmailMismatch,
+        NotFoundBoth,
+        EmailNotFound,
+        InvalidOtp,
+        OtpExpired
+    }
+
+    public sealed class ForgotPasswordVerifyOtpResult
+    {
+        public ForgotPasswordVerifyOtpStatus Status { get; set; }
+    }
+
     public enum ForgotPasswordResetStatus
     {
         Success,
@@ -178,6 +195,62 @@ namespace food_market_narrator_api.Services
                 Status = ForgotPasswordSendOtpStatus.Success,
                 ExpiresInSeconds = OtpLifetimeSeconds
             };
+        }
+
+        public async Task<ForgotPasswordVerifyOtpResult> VerifyForgotPasswordOtpAsync(string username, string email, string otp)
+        {
+            var normalizedUsername = NormalizeValue(username);
+            var normalizedEmail = NormalizeValue(email);
+            var normalizedOtp = NormalizeValue(otp);
+
+            if (string.IsNullOrWhiteSpace(normalizedUsername)
+                || string.IsNullOrWhiteSpace(normalizedEmail)
+                || string.IsNullOrWhiteSpace(normalizedOtp))
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.InvalidInput };
+            }
+
+            var user = await _userRepository.GetByUsernameAsync(normalizedUsername);
+            var emailExists = await _userRepository.ExistsByEmailAsync(normalizedEmail);
+
+            if (user == null && !emailExists)
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.NotFoundBoth };
+            }
+
+            if (user == null)
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.UsernameNotFound };
+            }
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.EmailNotFound };
+            }
+
+            if (!IsSameEmail(user.Email, normalizedEmail))
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.EmailMismatch };
+            }
+
+            var cacheKey = BuildOtpCacheKey(normalizedUsername, normalizedEmail);
+            if (!_memoryCache.TryGetValue(cacheKey, out PasswordOtpEntry? otpEntry) || otpEntry == null)
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.OtpExpired };
+            }
+
+            if (DateTimeOffset.UtcNow > otpEntry.ExpiresAt)
+            {
+                _memoryCache.Remove(cacheKey);
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.OtpExpired };
+            }
+
+            if (!string.Equals(otpEntry.Code, normalizedOtp, StringComparison.Ordinal))
+            {
+                return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.InvalidOtp };
+            }
+
+            return new ForgotPasswordVerifyOtpResult { Status = ForgotPasswordVerifyOtpStatus.Success };
         }
 
         public async Task<ForgotPasswordResetResult> ResetForgotPasswordAsync(

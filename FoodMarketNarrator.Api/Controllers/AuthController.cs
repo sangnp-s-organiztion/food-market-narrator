@@ -185,6 +185,28 @@ namespace food_market_narrator_api.Controllers
             };
         }
 
+        [HttpPost("forgot-password/verify-otp")]
+        public async Task<IActionResult> VerifyForgotPasswordOtp([FromBody] ForgotPasswordVerifyOtpRequest request)
+        {
+            var result = await _authService.VerifyForgotPasswordOtpAsync(
+                request.Username,
+                request.Email,
+                request.Otp);
+
+            return result.Status switch
+            {
+                ForgotPasswordVerifyOtpStatus.Success => Ok(new { message = "OTP hop le." }),
+                ForgotPasswordVerifyOtpStatus.InvalidInput => BadRequest(new { message = "Vui long nhap day du thong tin." }),
+                ForgotPasswordVerifyOtpStatus.InvalidOtp => BadRequest(new { message = "OTP khong dung." }),
+                ForgotPasswordVerifyOtpStatus.OtpExpired => BadRequest(new { message = "Het han OTP, vui long gui lai." }),
+                ForgotPasswordVerifyOtpStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
+                ForgotPasswordVerifyOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
+                ForgotPasswordVerifyOtpStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
+                ForgotPasswordVerifyOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the xac minh OTP." })
+            };
+        }
+
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()

@@ -346,6 +346,17 @@ export async function forgotPasswordResetApi(
   });
 }
 
+export async function forgotPasswordVerifyOtpApi(
+  username: string,
+  email: string,
+  otp: string,
+): Promise<void> {
+  await request<{ message: string }>("/Auth/forgot-password/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ username, email, otp }),
+  });
+}
+
 export async function getMyAccountApi(userId: number): Promise<User> {
   const response = await request<ApiUserProfile>(`/api/users/${userId}`, {
     method: "GET",

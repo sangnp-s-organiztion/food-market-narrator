@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   forgotPasswordResetApi,
   forgotPasswordSendOtpApi,
+  forgotPasswordVerifyOtpApi,
 } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { UtensilsCrossed, Eye, EyeOff } from "lucide-react";
 
 function parseErrorMessage(error: unknown, fallback: string): string {
@@ -57,8 +59,10 @@ export default function LoginPage() {
   const [forgotError, setForgotError] = useState("");
   const [forgotSuccess, setForgotSuccess] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const otpExpired = otpSent && remainingSeconds <= 0;
@@ -100,8 +104,10 @@ export default function LoginPage() {
     setForgotError("");
     setForgotSuccess("");
     setSendingOtp(false);
+    setVerifyingOtp(false);
     setResettingPassword(false);
     setOtpSent(false);
+    setOtpVerified(false);
     setRemainingSeconds(0);
   };
 
@@ -128,6 +134,10 @@ export default function LoginPage() {
     try {
       const response = await forgotPasswordSendOtpApi(normalizedUsername, normalizedEmail);
       setOtpSent(true);
+      setOtpVerified(false);
+      setForgotOtp("");
+      setForgotNewPassword("");
+      setForgotConfirmPassword("");
       setRemainingSeconds(Math.max(0, response.expiresInSeconds || 120));
       setForgotSuccess(response.message || "Đã gửi OTP qua gmail.");
       setForgotError("");
@@ -135,6 +145,41 @@ export default function LoginPage() {
       setForgotError(parseErrorMessage(err, "Không thể gửi OTP."));
     } finally {
       setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setForgotError("");
+    setForgotSuccess("");
+
+    const normalizedUsername = forgotUsername.trim();
+    const normalizedEmail = forgotEmail.trim();
+    const normalizedOtp = forgotOtp.trim();
+
+    if (!otpSent) {
+      setForgotError("Vui lòng gửi OTP trước.");
+      return;
+    }
+
+    if (otpExpired) {
+      setForgotError("Hết hạn OTP vui lòng gửi lại.");
+      return;
+    }
+
+    if (!normalizedUsername || !normalizedEmail || !normalizedOtp) {
+      setForgotError("Vui lòng nhập đầy đủ username, gmail và OTP.");
+      return;
+    }
+
+    setVerifyingOtp(true);
+    try {
+      await forgotPasswordVerifyOtpApi(normalizedUsername, normalizedEmail, normalizedOtp);
+      setOtpVerified(true);
+      setForgotSuccess("OTP hợp lệ. Vui lòng nhập mật khẩu mới.");
+    } catch (err) {
+      setForgotError(parseErrorMessage(err, "Không thể xác minh OTP."));
+    } finally {
+      setVerifyingOtp(false);
     }
   };
 
@@ -146,8 +191,8 @@ export default function LoginPage() {
     const normalizedEmail = forgotEmail.trim();
     const normalizedOtp = forgotOtp.trim();
 
-    if (!otpSent) {
-      setForgotError("Vui lòng gửi OTP trước.");
+    if (!otpVerified) {
+      setForgotError("Vui lòng nhập OTP và xác minh trước.");
       return;
     }
 
@@ -179,12 +224,8 @@ export default function LoginPage() {
         normalizedOtp,
         forgotNewPassword,
       );
-      setForgotSuccess("Đặt lại mật khẩu thành công. Bạn có thể đăng nhập lại.");
-      setForgotOtp("");
-      setForgotNewPassword("");
-      setForgotConfirmPassword("");
-      setOtpSent(false);
-      setRemainingSeconds(0);
+      handleForgotDialogChange(false);
+      toast.success("Đặt lại mật khẩu thành công.");
     } catch (err) {
       setForgotError(parseErrorMessage(err, "Không thể đặt lại mật khẩu."));
     } finally {
@@ -253,9 +294,6 @@ export default function LoginPage() {
             </Button>
           </div>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Demo: Nhập bất kỳ tên đăng nhập và mật khẩu để đăng nhập
-          </p>
         </form>
       </div>
 
@@ -276,7 +314,7 @@ export default function LoginPage() {
                 value={forgotUsername}
                 onChange={(e) => setForgotUsername(e.target.value)}
                 placeholder="Nhập username"
-                disabled={resettingPassword}
+                disabled={resettingPassword || verifyingOtp || otpVerified}
               />
             </div>
 
@@ -287,7 +325,7 @@ export default function LoginPage() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="Nhập gmail"
-                disabled={resettingPassword}
+                disabled={resettingPassword || verifyingOtp || otpVerified}
               />
             </div>
 
@@ -296,7 +334,7 @@ export default function LoginPage() {
                 type="button"
                 variant="secondary"
                 onClick={handleSendOtp}
-                disabled={sendingOtp || resettingPassword}
+                disabled={sendingOtp || resettingPassword || verifyingOtp}
               >
                 {sendingOtp ? "Đang gửi OTP..." : otpSent ? "Gửi lại OTP" : "Gửi OTP"}
               </Button>
@@ -312,7 +350,7 @@ export default function LoginPage() {
               )}
             </div>
 
-            {otpSent && (
+            {otpSent && !otpVerified && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="forgot-otp">Mã OTP</Label>
@@ -321,8 +359,27 @@ export default function LoginPage() {
                     value={forgotOtp}
                     onChange={(e) => setForgotOtp(e.target.value)}
                     placeholder="Nhập mã OTP"
-                    disabled={resettingPassword}
+                    disabled={resettingPassword || verifyingOtp}
                   />
+                </div>
+
+                <div className="flex justify-start">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleVerifyOtp}
+                    disabled={verifyingOtp || resettingPassword}
+                  >
+                    {verifyingOtp ? "Đang xác minh OTP..." : "Nhập OTP"}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {otpVerified && (
+              <>
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                  OTP đã xác minh thành công. Vui lòng nhập mật khẩu mới.
                 </div>
 
                 <div className="space-y-2">
@@ -362,7 +419,7 @@ export default function LoginPage() {
             <Button
               type="button"
               onClick={handleResetPassword}
-              disabled={!otpSent || resettingPassword}
+              disabled={!otpVerified || resettingPassword}
             >
               {resettingPassword ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
             </Button>
