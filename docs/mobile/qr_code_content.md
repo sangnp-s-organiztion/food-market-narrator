@@ -9,19 +9,7 @@ QR code được sử dụng để mở ứng dụng **Food Market Narrator** th
 Nội dung được mã hóa trong QR code:
 
 ```
-foodmarketnarrator://open?durationSeconds=10
-```
-
-Hoặc dùng giới hạn theo phút:
-
-```
-foodmarketnarrator://open?durationMinutes=30
-```
-
-Hoặc dùng mốc thời gian UTC cố định:
-
-```
-foodmarketnarrator://open?expiresAtUtc=2026-04-04T17:30:00Z
+foodmarketnarrator://open
 ```
 
 ## Required Application
@@ -36,14 +24,10 @@ Quy trình hoạt động:
 2. Hướng camera vào mã QR được đặt tại địa điểm.
 3. Ứng dụng scanner đọc nội dung QR code.
 4. Hệ thống nhận diện URL scheme `foodmarketnarrator://`.
-5. Nếu QR có `durationSeconds`, `durationMinutes` hoặc `expiresAtUtc`, app bật chế độ giới hạn thời gian truy cập.
-6. App đồng bộ thời gian hết hạn lên server theo session.
-7. Trong thời gian còn hiệu lực, narration hoạt động bình thường.
-8. Khi hết hạn, server trả trạng thái `expired`, app tự dừng thuyết minh và yêu cầu quét lại QR để tiếp tục.
-9. Nếu ứng dụng **Food Market Narrator** đã được cài đặt trên thiết bị:
+5. Nếu ứng dụng **Food Market Narrator** đã được cài đặt trên thiết bị:
    - Hệ điều hành sẽ mở ứng dụng tự động.
 
-10. Nếu ứng dụng chưa được cài đặt:
+6. Nếu ứng dụng chưa được cài đặt:
 
 - Liên kết sẽ không thể được xử lý.
 
@@ -62,8 +46,8 @@ QR code được đặt tại các vị trí trong khu chợ để người dùn
 3. Điện thoại hiển thị liên kết:
 
 ```
-foodmarketnarrator://open?durationSeconds=10
+foodmarketnarrator://open
 ```
 
 4. Người dùng nhấn vào liên kết.
-5. Ứng dụng **Food Market Narrator** được mở và chỉ hoạt động trong khoảng thời gian đã cấu hình trong QR.
+5. Ứng dụng **Food Market Narrator** được mở.

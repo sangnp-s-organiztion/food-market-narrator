@@ -43,14 +43,14 @@
                 <Label Text="Yêu thích" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
             </VerticalStackLayout>
 
-            <!-- Tour -->
+            <!-- Hành trình -->
             <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OpenTour"/>
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf4d7;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="TourIcon"/>
-                <Label Text="Tour" FontSize="10" HorizontalOptions="Center" x:Name="TourText"/>
+                <Label Text="Hành trình" FontSize="10" HorizontalOptions="Center" x:Name="TourText"/>
             </VerticalStackLayout>
 
             <!-- Cài đặt -->

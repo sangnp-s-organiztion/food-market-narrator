@@ -14,7 +14,6 @@ public partial class POIDetailPage : ContentPage
 	private readonly IFavoriteService? _favoriteService;
 	private readonly IHistoryService? _historyService;
 	private readonly IAudioLogSyncService? _audioLogSyncService;
-	private readonly IQrAccessService? _qrAccessService;
 	private IDispatcherTimer? _progressTimer;
 	private string _restaurantId = string.Empty;
 	private POI? _currentPoi;
@@ -46,7 +45,6 @@ public partial class POIDetailPage : ContentPage
 		_favoriteService = services?.GetService<IFavoriteService>();
 		_historyService = services?.GetService<IHistoryService>();
 		_audioLogSyncService = services?.GetService<IAudioLogSyncService>();
-		_qrAccessService = services?.GetService<IQrAccessService>();
 
 		if (_audioService != null)
 		{
@@ -107,16 +105,6 @@ public partial class POIDetailPage : ContentPage
 
 	private async void OnPlayAudioTapped(object sender, EventArgs e)
 	{
-		if (IsNarrationBlockedByQr())
-		{
-			await DisplayAlertAsync(
-				"QR hết hạn",
-				"Mã QR đã hết thời gian. Vui lòng quét lại QR để tiếp tục thuyết minh.",
-				"OK");
-			UpdateNarrationActionAvailability();
-			return;
-		}
-
 		if (_audioService is null)
 		{
 			return;
@@ -359,21 +347,8 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		var blocked = IsNarrationBlockedByQr();
-		PlayAudioButton.IsEnabled = !blocked;
-		PlayAudioButton.Opacity = blocked ? 0.55 : 1;
-	}
-
-	private bool IsNarrationBlockedByQr()
-	{
-		if (_qrAccessService == null || !_qrAccessService.IsQrTimeRestricted)
-		{
-			return false;
-		}
-
-		var expiry = _qrAccessService.QrAccessExpiresAtUtc;
-		return (expiry.HasValue && DateTime.UtcNow > expiry.Value)
-			|| string.Equals(_qrAccessService.LastBlockReason, "expired", StringComparison.OrdinalIgnoreCase);
+		PlayAudioButton.IsEnabled = true;
+		PlayAudioButton.Opacity = 1;
 	}
 
 	private void OnPlaybackEnded(object? sender, EventArgs e)
@@ -504,7 +479,7 @@ public partial class POIDetailPage : ContentPage
 			catch
 			{
 				// Hiển thị thông báo lỗi nếu không mở được bất kỳ ứng dụng nào
-				await DisplayAlert("Lỗi", "Không thể mở ứng dụng bản đồ", "OK");
+				await DisplayAlert("Lỗi", "Không thể mở ứng dụng bản đồ", "Đóng");
 			}
 		}
 	}
@@ -520,7 +495,7 @@ public partial class POIDetailPage : ContentPage
 		// Kiểm tra có số điện thoại không
 		if (string.IsNullOrWhiteSpace(poi.Phone))
 		{
-			await DisplayAlert("Thông báo", "Quán chưa có số điện thoại", "OK");
+			await DisplayAlert("Thông báo", "Quán chưa có số điện thoại", "Đóng");
 			return;
 		}
 
@@ -532,7 +507,7 @@ public partial class POIDetailPage : ContentPage
 		}
 		catch (Exception)
 		{
-			await DisplayAlert("Lỗi", "Không thể mở ứng dụng gọi điện", "OK");
+			await DisplayAlert("Lỗi", "Không thể mở ứng dụng gọi điện", "Đóng");
 		}
 	}
 
@@ -587,7 +562,7 @@ public partial class POIDetailPage : ContentPage
 		}
 		catch (Exception)
 		{
-			await DisplayAlert("Lỗi", "Không thể chia sẻ thông tin quán lúc này", "OK");
+			await DisplayAlert("Lỗi", "Không thể chia sẻ thông tin quán lúc này", "Đóng");
 		}
 	}
 }

@@ -1,9 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5044";
 
 async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...options?.headers,
+    },
     ...options,
   });
 
@@ -81,6 +85,119 @@ export interface CreateRestaurantRequest {
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
+export interface TourStopResponse {
+  stopOrder: number;
+  restaurantId: string;
+  restaurantName: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  primaryImageUrl: string | null;
+}
+
+export interface TourResponse {
+  tourId: number;
+  name: string;
+  shortDescription: string | null;
+  description: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  isFeatured: boolean;
+  sortPriority: number;
+  stopCount: number;
+  nearbyStopCount: number;
+  nearestDistanceMeters: number | null;
+  stops: TourStopResponse[];
+}
+
+export interface TourImageUploadResponse {
+  imageUrl: string;
+}
+
+export interface AddTourRestaurantRequest {
+  restaurantId: string;
+}
+
+export interface ReorderTourStopsRequest {
+  restaurantIds: string[];
+}
+
+export interface UpdateTourRequest {
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  sortPriority: number;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+export interface CreateTourRequest {
+  name: string;
+  shortDescription?: string | null;
+  description?: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl?: string | null;
+  sortPriority: number;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+function buildCreateTourFormData(data: CreateTourRequest): FormData {
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+  if (data.shortDescription !== null && data.shortDescription !== undefined) {
+    formData.append("shortDescription", data.shortDescription);
+  }
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("sortPriority", `${data.sortPriority}`);
+  formData.append("isActive", `${data.isActive}`);
+  formData.append("isFeatured", `${data.isFeatured}`);
+
+  return formData;
+}
+
+function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
+  const formData = new FormData();
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("sortPriority", `${data.sortPriority}`);
+  formData.append("isActive", `${data.isActive}`);
+  formData.append("isFeatured", `${data.isFeatured}`);
+
+  return formData;
+}
 
 // ─── User types ──────────────────────────────────────────────────────────────
 
@@ -113,6 +230,12 @@ export interface UpdateUserStatusRequest {
 export interface UpdateUserPasswordRequest {
   oldPassword: string;
   newPassword: string;
+}
+
+export interface UpdateMyProfileRequest {
+  username: string;
+  phone: string;
+  email: string;
 }
 
 export interface CountResponse {
@@ -190,6 +313,11 @@ export interface TranslationUsageLedgerResponse {
   summary: TranslationUsageLedgerSummary;
 }
 
+export interface ResolvedMapCoordinatesResponse {
+  latitude: number;
+  longitude: number;
+}
+
 // ─── Restaurant API ──────────────────────────────────────────────────────────
 
 export const restaurantApi = {
@@ -218,10 +346,78 @@ export const restaurantApi = {
         body: JSON.stringify(data),
       },
     ),
+
+  uploadImage: (
+    id: string,
+    file: File,
+    options?: { isPrimary?: boolean; sortOrder?: number },
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("is_primary", `${options?.isPrimary ?? true}`);
+    formData.append("sort_order", `${options?.sortOrder ?? 1}`);
+
+    return adminFetch<RestaurantImageResponse>(
+      `/Restaurant/${encodeURIComponent(id)}/images`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+  },
 };
 
 // ─── User API ────────────────────────────────────────────────────────────────
 
+export const tourApi = {
+  getAll: () => adminFetch<TourResponse[]>("/Tour"),
+
+  getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>("/Tour/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  uploadImageForTour: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>(`/Tour/${id}/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  create: (data: CreateTourRequest) =>
+    adminFetch<TourResponse>("/Tour", {
+      method: "POST",
+      body: buildCreateTourFormData(data),
+    }),
+
+  addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  reorderStops: (id: number, data: ReorderTourStopsRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: UpdateTourRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}`, {
+      method: "PATCH",
+      body: buildUpdateTourFormData(data),
+    }),
+};
 export const userApi = {
   getAll: () => adminFetch<UserResponse[]>("/api/users"),
 
@@ -247,6 +443,12 @@ export const userApi = {
 
   updateMyPassword: (data: UpdateUserPasswordRequest) =>
     adminFetch<{ message: string }>("/Auth/password", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  updateMyProfile: (data: UpdateMyProfileRequest) =>
+    adminFetch<UserResponse>("/Auth/profile", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
@@ -313,4 +515,11 @@ export const translationBillingApi = {
       `/api/admin/translation-billing/usage?${query}`,
     );
   },
+};
+
+export const mapsApi = {
+  resolveCoordinates: (url: string) =>
+    adminFetch<ResolvedMapCoordinatesResponse>(
+      `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
+    ),
 };

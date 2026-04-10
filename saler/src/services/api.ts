@@ -1,10 +1,12 @@
 import type {
   Audio,
+  AnalyticsKpi,
   CreateAudioFromTextResult,
   Dish,
   Language,
   Restaurant,
   RestaurantImage,
+  TranslationUsageLedgerResponse,
   TranslateTextResult,
   User,
 } from "@/types";
@@ -117,7 +119,6 @@ type ApiDish = {
   dishId: number;
   name: string;
   price?: number | null;
-  description?: string | null;
   restaurantId: string;
   imageId?: number | null;
   imageFileName?: string | null;
@@ -137,7 +138,6 @@ function mapDish(item: ApiDish): Dish {
     dish_id: item.dishId,
     name: item.name ?? "",
     price: item.price ?? 0,
-    description: item.description ?? "",
     restaurant_id: item.restaurantId,
     image_id: item.imageId ?? null,
     image_url,
@@ -193,6 +193,57 @@ type ApiCreateAudioFromTextResponse = {
   createdAt: string;
 };
 
+type ApiTranslationUsageLedgerItem = {
+  usageEventId: string;
+  requestId: string;
+  sellerUserId: number;
+  sellerUsername: string;
+  restaurantId: string;
+  audioId: number | null;
+  provider: string;
+  actionType: string;
+  unitType: string;
+  inputChars: number;
+  outputChars: number;
+  billableUnits: number;
+  costAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  billingMonth: string;
+  createdAtUtc: string;
+};
+
+type ApiTranslationUsageLedgerSummary = {
+  billingMonth: string;
+  status: string;
+  eventCount: number;
+  totalBillableUnits: number;
+  totalAmount: number;
+  currency: string;
+};
+
+type ApiTranslationUsageLedgerResponse = {
+  items: ApiTranslationUsageLedgerItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: ApiTranslationUsageLedgerSummary;
+};
+
+type ApiAnalyticsKpi = {
+  totalUsers: number;
+  averageListeningTimeSeconds: number;
+  averageListeningTimeFormatted: string;
+  totalPoiPlays: number;
+};
+
+type ApiResolvedMapCoordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 function mapAudio(item: ApiAudio): Audio {
   return {
     audio_id: item.audioId,
@@ -227,6 +278,11 @@ type LoginResponse = {
   role: string;
 };
 
+type ForgotPasswordSendOtpResponse = {
+  message: string;
+  expiresInSeconds: number;
+};
+
 type ApiUserProfile = {
   userId: number;
   username: string;
@@ -235,6 +291,12 @@ type ApiUserProfile = {
   createdAt?: string;
   phone?: string | null;
   email?: string | null;
+};
+
+type UpdateProfilePayload = {
+  username: string;
+  phone: string;
+  email: string;
 };
 
 export async function loginApi(
@@ -260,6 +322,39 @@ export async function getMeApi(): Promise<User> {
     username: response.username,
     role: response.role,
   };
+}
+
+export async function forgotPasswordSendOtpApi(
+  username: string,
+  email: string,
+): Promise<ForgotPasswordSendOtpResponse> {
+  return await request<ForgotPasswordSendOtpResponse>("/Auth/forgot-password/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ username, email }),
+  });
+}
+
+export async function forgotPasswordResetApi(
+  username: string,
+  email: string,
+  otp: string,
+  newPassword: string,
+): Promise<void> {
+  await request<{ message: string }>("/Auth/forgot-password/reset", {
+    method: "POST",
+    body: JSON.stringify({ username, email, otp, newPassword }),
+  });
+}
+
+export async function forgotPasswordVerifyOtpApi(
+  username: string,
+  email: string,
+  otp: string,
+): Promise<void> {
+  await request<{ message: string }>("/Auth/forgot-password/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ username, email, otp }),
+  });
 }
 
 export async function getMyAccountApi(userId: number): Promise<User> {
@@ -290,6 +385,23 @@ export async function updateMyPasswordApi(
       newPassword,
     }),
   });
+}
+
+export async function updateMyProfileApi(payload: UpdateProfilePayload): Promise<User> {
+  const response = await request<ApiUserProfile>(`/Auth/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+  return {
+    user_id: response.userId,
+    username: response.username,
+    role: response.role,
+    is_active: response.isActive,
+    created_at: response.createdAt,
+    phone: response.phone ?? "",
+    email: response.email ?? "",
+  };
 }
 
 export async function logoutApi(): Promise<void> {
@@ -351,7 +463,6 @@ export async function createDishApi(
   const body = {
     name: payload.name,
     price: payload.price,
-    description: payload.description,
     imageId: payload.image_id,
   };
 
@@ -370,7 +481,6 @@ export async function updateDishApi(
   const body = {
     name: payload.name,
     price: payload.price,
-    description: payload.description,
     imageId: payload.image_id,
   };
 
@@ -584,4 +694,94 @@ export async function createAudioFromTextApi(
     voice: data.voice,
     created_at: data.createdAt,
   };
+}
+
+function toQueryString(params: Record<string, string | number | undefined>) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && `${value}`.trim().length > 0) {
+      query.set(key, `${value}`);
+    }
+  });
+  return query.toString();
+}
+
+export async function getMyTranslationUsageApi(filter: {
+  billingMonth?: string;
+  status?: "billable" | "failed";
+  page?: number;
+  pageSize?: number;
+}): Promise<TranslationUsageLedgerResponse> {
+  const query = toQueryString({
+    billingMonth: filter.billingMonth,
+    status: filter.status,
+    page: filter.page ?? 1,
+    pageSize: filter.pageSize ?? 20,
+  });
+
+  const data = await request<ApiTranslationUsageLedgerResponse>(
+    `/api/translation-billing/my-usage?${query}`,
+    { method: "GET" },
+  );
+
+  return {
+    items: data.items.map((x) => ({
+      usage_event_id: x.usageEventId,
+      request_id: x.requestId,
+      seller_user_id: x.sellerUserId,
+      seller_username: x.sellerUsername,
+      restaurant_id: x.restaurantId,
+      audio_id: x.audioId,
+      provider: x.provider,
+      action_type: x.actionType,
+      unit_type: x.unitType,
+      input_chars: x.inputChars,
+      output_chars: x.outputChars,
+      billable_units: x.billableUnits,
+      cost_amount: x.costAmount,
+      tax_amount: x.taxAmount,
+      total_amount: x.totalAmount,
+      currency: x.currency,
+      status: x.status,
+      billing_month: x.billingMonth,
+      created_at_utc: x.createdAtUtc,
+    })),
+    total_count: data.totalCount,
+    page: data.page,
+    page_size: data.pageSize,
+    summary: {
+      billing_month: data.summary.billingMonth,
+      status: data.summary.status,
+      event_count: data.summary.eventCount,
+      total_billable_units: data.summary.totalBillableUnits,
+      total_amount: data.summary.totalAmount,
+      currency: data.summary.currency,
+    },
+  };
+}
+
+export async function getRestaurantKpisApi(
+  restaurantId: string,
+): Promise<AnalyticsKpi> {
+  const data = await request<ApiAnalyticsKpi>(
+    `/api/analytics/restaurants/${encodeURIComponent(restaurantId)}/kpis`,
+    { method: "GET" },
+  );
+
+  return {
+    total_users: data.totalUsers,
+    average_listening_time_seconds: data.averageListeningTimeSeconds,
+    average_listening_time_formatted: data.averageListeningTimeFormatted,
+    total_poi_plays: data.totalPoiPlays,
+  };
+}
+
+export async function resolveMapCoordinatesApi(url: string): Promise<{
+  latitude: number;
+  longitude: number;
+}> {
+  return request<ApiResolvedMapCoordinates>(
+    `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
+    { method: "GET" },
+  );
 }

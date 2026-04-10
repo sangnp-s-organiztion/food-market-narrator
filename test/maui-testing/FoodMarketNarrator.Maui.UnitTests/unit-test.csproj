@@ -31,6 +31,7 @@
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\HistoryService.cs" Link="Services\HistoryService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\POIService.cs" Link="Services\POIService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\NarrationFlowService.cs" Link="Services\NarrationFlowService.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\QrAccessService.cs" Link="Services\QrAccessService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IPOIService.cs" Link="Interfaces\IPOIService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\INarrationFlowService.cs" Link="Interfaces\INarrationFlowService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\ILocationService.cs" Link="Interfaces\ILocationService.cs" />

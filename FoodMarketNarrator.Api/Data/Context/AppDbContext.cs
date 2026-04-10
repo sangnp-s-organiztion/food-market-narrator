@@ -42,10 +42,5 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(tr => tr.RestaurantId);
 
-        modelBuilder.Entity<TourModel>()
-            .HasOne(t => t.Image)
-            .WithMany()
-            .HasForeignKey(t => t.ImageId)
-            .IsRequired(false);
     }
 }

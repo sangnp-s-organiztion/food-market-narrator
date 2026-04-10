@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import {
   createDishApi,
   deleteImageApi,
@@ -13,7 +13,6 @@ import type { Dish, RestaurantImage } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +27,6 @@ import { Plus, Pencil, Trash2, DollarSign, ImageIcon, Upload } from "lucide-reac
 const emptyForm = {
   name: "",
   price: 0,
-  description: "",
 };
 
 export default function DishesPage() {
@@ -38,7 +36,6 @@ export default function DishesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Dish | null>(null);
   const [form, setForm] = useState(emptyForm);
-  // UI-only image preview — image_id stored in backend but not uploaded via dish form
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +50,6 @@ export default function DishesPage() {
           ]);
 
           setDishes(dishesData ?? []);
-          // Dishes page only uses images with is_primary = 0.
           setDishImages((imagesData ?? []).filter((img) => !img.is_primary));
         } catch {
           toast.error("Không thể tải danh sách món ăn");
@@ -84,7 +80,7 @@ export default function DishesPage() {
 
   const openEdit = (dish: Dish) => {
     setEditing(dish);
-    setForm({ name: dish.name, price: dish.price, description: dish.description });
+    setForm({ name: dish.name, price: dish.price });
     setImagePreview(getDishImageUrl(dish));
     setSelectedFile(null);
     setDialogOpen(true);
@@ -129,7 +125,6 @@ export default function DishesPage() {
           updated = await updateDishApi(editing.dish_id, {
             name: form.name,
             price: form.price,
-            description: form.description,
             image_id: nextImageId,
           });
         } catch {
@@ -139,7 +134,7 @@ export default function DishesPage() {
               await deleteImageApi(uploadedImageId);
               setDishImages((prev) => prev.filter((img) => img.image_id !== uploadedImageId));
             } catch {
-              // Keep original update error as primary failure.
+              // Giữ lỗi cập nhật làm lỗi chính.
             }
           }
           throw new Error("UPDATE_DISH_FAILED");
@@ -154,9 +149,7 @@ export default function DishesPage() {
           }
         }
 
-        setDishes((prev) =>
-          prev.map((d) => (d.dish_id === editing.dish_id ? updated : d)),
-        );
+        setDishes((prev) => prev.map((d) => (d.dish_id === editing.dish_id ? updated : d)));
         toast.success("Cập nhật món ăn thành công");
       } else {
         let uploadedImage: RestaurantImage | null = null;
@@ -178,7 +171,6 @@ export default function DishesPage() {
           created = await createDishApi(selectedRestaurant.restaurant_id, {
             name: form.name,
             price: form.price,
-            description: form.description,
             image_id: imageId,
           });
         } catch {
@@ -188,7 +180,7 @@ export default function DishesPage() {
               await deleteImageApi(uploadedImageId);
               setDishImages((prev) => prev.filter((img) => img.image_id !== uploadedImageId));
             } catch {
-              // Keep original create error as primary failure.
+              // Giữ lỗi tạo làm lỗi chính.
             }
           }
           throw new Error("CREATE_DISH_FAILED");
@@ -236,14 +228,9 @@ export default function DishesPage() {
 
             return (
               <div key={dish.dish_id} className="dashboard-card flex gap-4 items-start">
-                {/* Dish image thumbnail — only render non-primary restaurant images (is_primary = 0). */}
                 <div className="w-24 h-24 rounded-lg overflow-hidden border shrink-0 bg-muted flex items-center justify-center">
                   {dishImageUrl ? (
-                    <img
-                      src={dishImageUrl}
-                      alt={dish.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={dishImageUrl} alt={dish.name} className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-muted-foreground opacity-40" />
                   )}
@@ -251,7 +238,6 @@ export default function DishesPage() {
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-foreground truncate">{dish.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{dish.description}</p>
                   <div className="flex items-center gap-1 text-primary font-semibold mt-1">
                     <DollarSign className="w-4 h-4" />
                     {dish.price.toFixed(2)}
@@ -272,7 +258,13 @@ export default function DishesPage() {
         </div>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setDialogOpen(true); }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) resetDialog();
+          else setDialogOpen(true);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? "Chỉnh sửa món ăn" : "Thêm món ăn mới"}</DialogTitle>
@@ -289,22 +281,23 @@ export default function DishesPage() {
             </div>
             <div className="space-y-2">
               <Label>Giá</Label>
-              <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Mô tả</Label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.price}
+                onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>Ảnh món ăn</Label>
-              {/* UI-only: displays local preview; backend dish upload does not include image */}
               <div
                 className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {imagePreview ? (
                   <div className="space-y-2">
-                    <img src={imagePreview} alt="Preview" className="max-h-36 mx-auto rounded-md object-contain" />
+                    <img src={imagePreview} alt="Xem trước" className="max-h-36 mx-auto rounded-md object-contain" />
                     <p className="text-xs text-muted-foreground">Nhấn để chọn ảnh khác</p>
                   </div>
                 ) : (

@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+﻿import { useRef, type ChangeEvent } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -9,10 +9,6 @@ interface UploadButtonProps {
   disabled?: boolean;
 }
 
-/**
- * Generic upload button that triggers a hidden file input.
- * POI: upload action — fires when user selects a file.
- */
 export function UploadButton({
   onFileSelect,
   accept = "image/*",
@@ -30,17 +26,12 @@ export function UploadButton({
     if (file) {
       onFileSelect(file);
     }
-    // Reset so same file can be re-selected
     e.target.value = "";
   };
 
   return (
     <>
-      <Button
-        type="button"
-        onClick={handleClick}
-        disabled={disabled}
-      >
+      <Button type="button" onClick={handleClick} disabled={disabled}>
         <Upload className="w-4 h-4 mr-2" />
         {children ?? "Tải ảnh lên"}
       </Button>
