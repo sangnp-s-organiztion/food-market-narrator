@@ -140,6 +140,73 @@ namespace food_market_narrator_api.Controllers
             });
         }
 
+        [HttpPost("forgot-password/send-otp")]
+        public async Task<IActionResult> SendForgotPasswordOtp([FromBody] ForgotPasswordSendOtpRequest request)
+        {
+            var result = await _authService.SendForgotPasswordOtpAsync(request.Username, request.Email);
+            return result.Status switch
+            {
+                ForgotPasswordSendOtpStatus.Success => Ok(new ForgotPasswordSendOtpResponse
+                {
+                    Message = "Đã gửi OTP qua Gmail.",
+                    ExpiresInSeconds = result.ExpiresInSeconds
+                }),
+                ForgotPasswordSendOtpStatus.InvalidInput => BadRequest(new { message = "Tên đăng nhập và Gmail là bắt buộc." }),
+                ForgotPasswordSendOtpStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordSendOtpStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailDeliveryFailed => BadRequest(new { message = "Không thể gửi OTP. Vui lòng kiểm tra cấu hình Gmail SMTP." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể gửi OTP." })
+            };
+        }
+
+        [HttpPost("forgot-password/reset")]
+        public async Task<IActionResult> ResetForgotPassword([FromBody] ForgotPasswordResetRequest request)
+        {
+            var result = await _authService.ResetForgotPasswordAsync(
+                request.Username,
+                request.Email,
+                request.Otp,
+                request.NewPassword);
+
+            return result.Status switch
+            {
+                ForgotPasswordResetStatus.Success => Ok(new { message = "Đặt lại mật khẩu thành công." }),
+                ForgotPasswordResetStatus.InvalidInput => BadRequest(new { message = "Vui lòng nhập đầy đủ thông tin." }),
+                ForgotPasswordResetStatus.InvalidNewPassword => BadRequest(new { message = "Mật khẩu mới phải có ít nhất 6 ký tự." }),
+                ForgotPasswordResetStatus.InvalidOtp => BadRequest(new { message = "OTP không đúng." }),
+                ForgotPasswordResetStatus.OtpExpired => BadRequest(new { message = "Hết hạn OTP, vui lòng gửi lại." }),
+                ForgotPasswordResetStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordResetStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordResetStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordResetStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể đặt lại mật khẩu." })
+            };
+        }
+
+        [HttpPost("forgot-password/verify-otp")]
+        public async Task<IActionResult> VerifyForgotPasswordOtp([FromBody] ForgotPasswordVerifyOtpRequest request)
+        {
+            var result = await _authService.VerifyForgotPasswordOtpAsync(
+                request.Username,
+                request.Email,
+                request.Otp);
+
+            return result.Status switch
+            {
+                ForgotPasswordVerifyOtpStatus.Success => Ok(new { message = "OTP hợp lệ." }),
+                ForgotPasswordVerifyOtpStatus.InvalidInput => BadRequest(new { message = "Vui lòng nhập đầy đủ thông tin." }),
+                ForgotPasswordVerifyOtpStatus.InvalidOtp => BadRequest(new { message = "OTP không đúng." }),
+                ForgotPasswordVerifyOtpStatus.OtpExpired => BadRequest(new { message = "Hết hạn OTP, vui lòng gửi lại." }),
+                ForgotPasswordVerifyOtpStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordVerifyOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordVerifyOtpStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordVerifyOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể xác minh OTP." })
+            };
+        }
+
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()

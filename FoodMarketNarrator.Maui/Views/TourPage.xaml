@@ -52,11 +52,11 @@
                            FontSize="48"
                            TextColor="#E0E0E0"
                            HorizontalOptions="Center"/>
-                    <Label Text="Chưa có tour khả dụng"
+                      <Label Text="Chưa có hành trình khả dụng"
                            FontSize="16"
                            TextColor="#9E9E9E"
                            HorizontalOptions="Center"/>
-                    <Label Text="Vui lòng kiểm tra lại kết nối hoặc dữ liệu tour từ server"
+                      <Label Text="Vui lòng kiểm tra lại kết nối hoặc dữ liệu hành trình từ máy chủ"
                            FontSize="13"
                            TextColor="#BDBDBD"
                            HorizontalOptions="Center"
@@ -98,6 +98,16 @@
                                            TextColor="#B6895B"
                                            VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
+
+                                <Button Text="Xem chi tiết"
+                                        Clicked="OnViewDetailClicked"
+                                        FontSize="12"
+                                        Padding="12,6"
+                                        CornerRadius="12"
+                                        BackgroundColor="#FFF3E3"
+                                        TextColor="#B6895B"
+                                        HorizontalOptions="Fill"
+                                        Margin="0,2,0,0"/>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
 

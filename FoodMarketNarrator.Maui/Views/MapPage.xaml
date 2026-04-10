@@ -106,11 +106,11 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <VerticalStackLayout Spacing="0">
                             <Label x:Name="TourFilterTitle"
-                                   Text="Đang xem theo tour"
+                                Text="Đang xem theo hành trình"
                                    FontSize="12"
                                    FontAttributes="Bold"
                                    TextColor="#9A3412" />
-                            <Label Text="Chỉ hiển thị các POI thuộc tour đã chọn"
+                            <Label Text="Chỉ hiển thị các POI thuộc hành trình đã chọn"
                                    FontSize="11"
                                    TextColor="#C2410C" />
                         </VerticalStackLayout>

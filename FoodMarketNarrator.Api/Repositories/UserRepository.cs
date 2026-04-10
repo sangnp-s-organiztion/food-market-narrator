@@ -54,6 +54,12 @@ namespace food_market_narrator_api.Repositories
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.User
+                .AnyAsync(u => u.Email != null && u.Email == email);
+        }
+
         public async Task<bool> ValidateCredentialsAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);

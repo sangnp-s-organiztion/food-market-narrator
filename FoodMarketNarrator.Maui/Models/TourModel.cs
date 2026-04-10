@@ -10,6 +10,7 @@ public class TourModel
     public string? Description { get; set; }
     public int? EstimatedDurationMinutes { get; set; }
     public string? ImageUrl { get; set; }
+    public bool IsActive { get; set; } = true;
     public bool IsFeatured { get; set; }
     public int SortPriority { get; set; }
     public int StopCount { get; set; }
