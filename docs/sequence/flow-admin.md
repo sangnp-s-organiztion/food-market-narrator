@@ -392,8 +392,8 @@ sequenceDiagram
     participant FE as Tour Detail Dialog
     participant TOUR as Tour API
 
-    U->>FE: Kéo-thả stop order, sửa estimatedDuration/sortPriority/isFeatured
-    FE->>FE: Validate estimatedDuration và sortPriority là số nguyên >= 0
+    U->>FE: Kéo-thả stop order, sửa estimatedDuration/isActive/name/description
+    FE->>FE: Validate estimatedDuration là số nguyên >= 0
     alt Không hợp lệ
         FE-->>U: Toast lỗi
     else Hợp lệ

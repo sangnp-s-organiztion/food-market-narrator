@@ -17,11 +17,11 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { path: "/", label: "Tổng quan", icon: LayoutDashboard },
   { path: "/trajectory", label: "Tuyến di chuyển", icon: Route },
-  { path: "/tours", label: "Tour", icon: Compass },
+  { path: "/tours", label: "Hành trình", icon: Compass },
   { path: "/restaurants", label: "Nhà hàng", icon: Store },
   { path: "/users", label: "Người dùng", icon: Users },
   { path: "/logs", label: "Lịch sử", icon: ScrollText },
-  { path: "/translation-billing", label: "Chi phí dịch token", icon: Receipt },
+  { path: "/translation-billing", label: "Dịch vụ", icon: Receipt },
   { path: "/account", label: "Tài khoản", icon: CircleUser },
 ];
 
@@ -51,7 +51,10 @@ const AdminSidebar = () => {
         className="flex items-center gap-2.5 border-b px-5 py-5"
         style={{ borderColor: "rgba(255,255,255,0.08)" }}
       >
-        <AudioWaveform className="h-7 w-7" style={{ color: "hsl(221, 83%, 53%)" }} />
+        <AudioWaveform
+          className="h-7 w-7"
+          style={{ color: "hsl(221, 83%, 53%)" }}
+        />
         <span
           className="truncate text-base font-semibold tracking-tight"
           style={{ color: "white" }}
@@ -80,7 +83,10 @@ const AdminSidebar = () => {
         })}
       </nav>
 
-      <div className="border-t px-4 py-4" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+      <div
+        className="border-t px-4 py-4"
+        style={{ borderColor: "rgba(255,255,255,0.08)" }}
+      >
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
@@ -89,10 +95,16 @@ const AdminSidebar = () => {
             {user?.username?.charAt(0).toUpperCase() ?? "A"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium" style={{ color: "white" }}>
+            <p
+              className="truncate text-sm font-medium"
+              style={{ color: "white" }}
+            >
               {user?.username ?? "Admin"}
             </p>
-            <p className="truncate text-xs" style={{ color: "hsl(215, 20%, 65%)" }}>
+            <p
+              className="truncate text-xs"
+              style={{ color: "hsl(215, 20%, 65%)" }}
+            >
               {roleLabel}
             </p>
           </div>
@@ -101,7 +113,10 @@ const AdminSidebar = () => {
             className="rounded-md p-1.5 transition-colors hover:bg-white/10"
             title="Đăng xuất"
           >
-            <LogOut className="h-4 w-4" style={{ color: "hsl(215, 20%, 65%)" }} />
+            <LogOut
+              className="h-4 w-4"
+              style={{ color: "hsl(215, 20%, 65%)" }}
+            />
           </button>
         </div>
       </div>

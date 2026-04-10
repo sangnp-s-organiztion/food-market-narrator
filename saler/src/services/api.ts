@@ -210,14 +210,12 @@ type ApiTranslationUsageLedgerItem = {
   taxAmount: number;
   totalAmount: number;
   currency: string;
-  status: string;
   billingMonth: string;
   createdAtUtc: string;
 };
 
 type ApiTranslationUsageLedgerSummary = {
   billingMonth: string;
-  status: string;
   eventCount: number;
   totalBillableUnits: number;
   totalAmount: number;
@@ -289,6 +287,7 @@ type ApiUserProfile = {
   role: string;
   isActive?: boolean;
   createdAt?: string;
+  fullName?: string | null;
   phone?: string | null;
   email?: string | null;
 };
@@ -312,6 +311,7 @@ export async function loginApi(
     user_id: response.userId,
     username: response.username,
     role: response.role,
+    full_name: undefined,
   };
 }
 
@@ -321,6 +321,7 @@ export async function getMeApi(): Promise<User> {
     user_id: response.userId,
     username: response.username,
     role: response.role,
+    full_name: undefined,
   };
 }
 
@@ -328,10 +329,13 @@ export async function forgotPasswordSendOtpApi(
   username: string,
   email: string,
 ): Promise<ForgotPasswordSendOtpResponse> {
-  return await request<ForgotPasswordSendOtpResponse>("/Auth/forgot-password/send-otp", {
-    method: "POST",
-    body: JSON.stringify({ username, email }),
-  });
+  return await request<ForgotPasswordSendOtpResponse>(
+    "/Auth/forgot-password/send-otp",
+    {
+      method: "POST",
+      body: JSON.stringify({ username, email }),
+    },
+  );
 }
 
 export async function forgotPasswordResetApi(
@@ -368,6 +372,7 @@ export async function getMyAccountApi(userId: number): Promise<User> {
     role: response.role,
     is_active: response.isActive,
     created_at: response.createdAt,
+    full_name: response.fullName ?? undefined,
     phone: response.phone ?? "",
     email: response.email ?? "",
   };
@@ -387,7 +392,9 @@ export async function updateMyPasswordApi(
   });
 }
 
-export async function updateMyProfileApi(payload: UpdateProfilePayload): Promise<User> {
+export async function updateMyProfileApi(
+  payload: UpdateProfilePayload,
+): Promise<User> {
   const response = await request<ApiUserProfile>(`/Auth/profile`, {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -399,6 +406,7 @@ export async function updateMyProfileApi(payload: UpdateProfilePayload): Promise
     role: response.role,
     is_active: response.isActive,
     created_at: response.createdAt,
+    full_name: response.fullName ?? undefined,
     phone: response.phone ?? "",
     email: response.email ?? "",
   };
@@ -708,13 +716,11 @@ function toQueryString(params: Record<string, string | number | undefined>) {
 
 export async function getMyTranslationUsageApi(filter: {
   billingMonth?: string;
-  status?: "billable" | "failed";
   page?: number;
   pageSize?: number;
 }): Promise<TranslationUsageLedgerResponse> {
   const query = toQueryString({
     billingMonth: filter.billingMonth,
-    status: filter.status,
     page: filter.page ?? 1,
     pageSize: filter.pageSize ?? 20,
   });
@@ -742,7 +748,6 @@ export async function getMyTranslationUsageApi(filter: {
       tax_amount: x.taxAmount,
       total_amount: x.totalAmount,
       currency: x.currency,
-      status: x.status,
       billing_month: x.billingMonth,
       created_at_utc: x.createdAtUtc,
     })),
@@ -751,7 +756,6 @@ export async function getMyTranslationUsageApi(filter: {
     page_size: data.pageSize,
     summary: {
       billing_month: data.summary.billingMonth,
-      status: data.summary.status,
       event_count: data.summary.eventCount,
       total_billable_units: data.summary.totalBillableUnits,
       total_amount: data.summary.totalAmount,

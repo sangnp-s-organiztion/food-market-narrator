@@ -2,7 +2,6 @@ using food_market_narrator_api.Services;
 using food_market_narrator_api.DTOs.Tour;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using System.Globalization;
 using System.Text;
 
@@ -78,6 +77,20 @@ public class TourController : ControllerBase
         };
     }
 
+    [HttpDelete("{id:int}/restaurants/{restaurantId}")]
+    public async Task<IActionResult> RemoveRestaurantFromTour(int id, string restaurantId)
+    {
+        var result = await _tourService.RemoveRestaurantFromTourAsync(id, restaurantId);
+
+        return result.Status switch
+        {
+            RemoveTourRestaurantStatus.Success => Ok(new { message = "Restaurant removed from tour." }),
+            RemoveTourRestaurantStatus.NotFound => NotFound(new { message = result.Message }),
+            RemoveTourRestaurantStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to remove restaurant from tour." })
+        };
+    }
+
     [HttpPost]
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> CreateTour([FromForm] CreateTourRequest request)
@@ -85,13 +98,6 @@ public class TourController : ControllerBase
         if (!ModelState.IsValid || string.IsNullOrWhiteSpace(request.Name))
         {
             return ValidationProblem(ModelState);
-        }
-
-        int? createdBy = null;
-        var createdByRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (int.TryParse(createdByRaw, out var parsedCreatedBy))
-        {
-            createdBy = parsedCreatedBy;
         }
 
         string? urlImage = null;
@@ -102,12 +108,10 @@ public class TourController : ControllerBase
 
         var result = await _tourService.CreateTourAsync(
             request.Name,
-            request.ShortDescription,
             request.Description,
             request.EstimatedDurationMinutes,
             urlImage ?? request.UrlImage,
-            request.IsActive,
-            createdBy);
+            request.IsActive);
 
         return result.Status switch
         {

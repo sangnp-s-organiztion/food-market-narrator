@@ -90,6 +90,32 @@ public class TourRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<bool> RemoveRestaurantFromTourAsync(int tourId, string restaurantId)
+    {
+        var entity = await _context.TourRestaurant
+            .FirstOrDefaultAsync(tr => tr.TourId == tourId && tr.RestaurantId == restaurantId);
+        if (entity == null)
+        {
+            return false;
+        }
+
+        _context.TourRestaurant.Remove(entity);
+        await _context.SaveChangesAsync();
+
+        var remainingStops = await _context.TourRestaurant
+            .Where(tr => tr.TourId == tourId)
+            .OrderBy(tr => tr.StopOrder)
+            .ToListAsync();
+
+        for (var i = 0; i < remainingStops.Count; i++)
+        {
+            remainingStops[i].StopOrder = i + 1;
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     public Task<List<string>> GetTourRestaurantIdsAsync(int tourId)
     {
         return _context.TourRestaurant
@@ -177,22 +203,18 @@ public class TourRepository
 
     public async Task<TourModel> CreateTourAsync(
         string name,
-        string? shortDescription,
         string? description,
         int? estimatedDurationMinutes,
         string? urlImage,
-        bool isActive,
-        int? createdBy = null)
+        bool isActive)
     {
         var entity = new TourModel
         {
             Name = name,
-            ShortDescription = shortDescription,
             Description = description,
             EstimatedDurationMinutes = estimatedDurationMinutes,
             UrlImage = urlImage,
             IsActive = isActive,
-            CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
         };
 

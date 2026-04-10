@@ -6,6 +6,7 @@ import {
   Lock,
   Plus,
   Scissors,
+  Trash2,
   Unlock,
   Upload,
 } from "lucide-react";
@@ -261,10 +262,29 @@ const ToursPage = () => {
       }
 
       setAddRestaurantId("");
-      toast.success("Thêm nhà hàng vào tour thành công");
+      toast.success("Thêm nhà hàng vào hành trình thành công");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Thêm nhà hàng vào tour thất bại");
+      toast.error(err.message ?? "Thêm nhà hàng vào hành trình thất bại");
+    },
+  });
+
+  const removeRestaurantMutation = useMutation({
+    mutationFn: (payload: { tourId: number; restaurantId: string }) =>
+      tourApi.removeRestaurant(payload.tourId, payload.restaurantId),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin", "tours"] });
+
+      if (selectedTourId !== null) {
+        await qc.invalidateQueries({
+          queryKey: ["admin", "tour", selectedTourId],
+        });
+      }
+
+      toast.success("Đã xóa nhà hàng khỏi hành trình");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Xóa nhà hàng khỏi hành trình thất bại");
     },
   });
 
@@ -311,10 +331,10 @@ const ToursPage = () => {
       if (createImageInputRef.current) {
         createImageInputRef.current.value = "";
       }
-      toast.success("Tạo tour thành công");
+      toast.success("Tạo hành trình thành công");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Tạo tour thất bại");
+      toast.error(err.message ?? "Tạo hành trình thất bại");
     },
   });
 
@@ -337,11 +357,11 @@ const ToursPage = () => {
           queryKey: ["admin", "tour", selectedTourId],
         });
       }
-      toast.success("Cập nhật trạng thái tour thành công");
+      toast.success("Cập nhật trạng thái hành trình thành công");
       setConfirmTour(null);
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Cập nhật trạng thái tour thất bại");
+      toast.error(err.message ?? "Cập nhật trạng thái hành trình thất bại");
     },
   });
 
@@ -396,7 +416,7 @@ const ToursPage = () => {
       if (detailImageInputRef.current) {
         detailImageInputRef.current.value = "";
       }
-      toast.success("Đã lưu cập nhật tour");
+      toast.success("Đã lưu cập nhật hành trình");
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Lưu cập nhật thất bại");
@@ -528,6 +548,24 @@ const ToursPage = () => {
     setDraggingRestaurantId(null);
   };
 
+  const handleRemoveStop = (restaurantId: string) => {
+    if (!isDetailEditMode) return;
+    if (selectedTourId === null) return;
+
+    if (hasUnsavedChanges) {
+      toast.error("Vui lòng lưu cập nhật hiện tại trước khi xóa nhà hàng");
+      return;
+    }
+
+    const confirmed = confirm("Bạn có chắc muốn xóa nhà hàng này khỏi hành trình?");
+    if (!confirmed) return;
+
+    removeRestaurantMutation.mutate({
+      tourId: selectedTourId,
+      restaurantId,
+    });
+  };
+
   const handleSaveChanges = () => {
     if (!isDetailEditMode) return;
     if (selectedTourId === null || !hasUnsavedChanges) return;
@@ -541,7 +579,7 @@ const ToursPage = () => {
     const imageUrl = normalizeImageInput(draftImageUrl);
 
     if (!name) {
-      toast.error("Tên tour không được để trống");
+      toast.error("Tên hành trình không được để trống");
       return;
     }
 
@@ -570,7 +608,7 @@ const ToursPage = () => {
   const handleCreateTour = () => {
     const name = createName.trim();
     if (!name) {
-      toast.error("Vui lòng nhập tên tour");
+      toast.error("Vui lòng nhập tên hành trình");
       return;
     }
 
@@ -601,10 +639,10 @@ const ToursPage = () => {
   return (
     <AdminLayout>
       <div className="page-header flex items-center justify-between gap-3">
-        <h1 className="page-title">Quản lý tour</h1>
+        <h1 className="page-title">Quản lý hành trình</h1>
         <Button onClick={() => setCreateOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          Thêm tour
+          Thêm hành trình
         </Button>
       </div>
 
@@ -613,8 +651,8 @@ const ToursPage = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Tên tour</th>
-                <th className="w-32">Ảnh tour</th>
+                <th>Tên hành trình</th>
+                <th className="w-32">Ảnh hành trình</th>
                 <th className="w-36">Số điểm dừng</th>
                 <th className="w-40">Thời gian dự kiến</th>
                 <th className="w-28">Trạng thái</th>
@@ -628,14 +666,14 @@ const ToursPage = () => {
                     colSpan={6}
                     className="py-8 text-center text-muted-foreground"
                   >
-                    Đang tải danh sách tour...
+                    Đang tải danh sách hành trình...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-destructive">
-                    Không thể tải danh sách tour. Vui lòng thử lại.
+                    Không thể tải danh sách hành trình. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
@@ -645,7 +683,7 @@ const ToursPage = () => {
                     colSpan={6}
                     className="py-8 text-center text-muted-foreground"
                   >
-                    Chưa có tour nào.
+                    Chưa có hành trình nào.
                   </td>
                 </tr>
               )}
@@ -670,7 +708,7 @@ const ToursPage = () => {
                         return (
                           <img
                             src={previewUrl}
-                            alt={`Ảnh tour ${tour.name}`}
+                            alt={`Ảnh hành trình ${tour.name}`}
                             className="h-12 w-20 rounded-md border object-cover"
                           />
                         );
@@ -696,7 +734,7 @@ const ToursPage = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleOpenDetail(tour.tourId, "view")}
-                        title="Xem tour"
+                        title="Xem hành trình"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -704,7 +742,7 @@ const ToursPage = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleOpenDetail(tour.tourId, "edit")}
-                        title="Chỉnh sửa tour"
+                        title="Chỉnh sửa hành trình"
                       >
                         <Scissors className="h-4 w-4" />
                       </Button>
@@ -727,8 +765,8 @@ const ToursPage = () => {
                         }`}
                         title={
                           tour.isActive
-                            ? "Ngưng hoạt động tour"
-                            : "Kích hoạt tour"
+                            ? "Ngưng hoạt động hành trình"
+                            : "Kích hoạt hành trình"
                         }
                       >
                         {tour.isActive ? (
@@ -748,18 +786,18 @@ const ToursPage = () => {
       <Dialog open={detailOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Chi tiết tour</DialogTitle>
+            <DialogTitle>Chi tiết hành trình</DialogTitle>
           </DialogHeader>
 
           {isDetailLoading && (
             <p className="text-sm text-muted-foreground">
-              Đang tải chi tiết tour...
+              Đang tải chi tiết hành trình...
             </p>
           )}
 
           {isDetailError && (
             <p className="text-sm text-destructive">
-              Không thể tải chi tiết tour. Vui lòng thử lại.
+              Không thể tải chi tiết hành trình. Vui lòng thử lại.
             </p>
           )}
 
@@ -769,26 +807,41 @@ const ToursPage = () => {
                 <div className="overflow-hidden rounded-md border bg-muted/20">
                   <img
                     src={detailPreviewImageUrl}
-                    alt={`Ảnh tour ${selectedTour.name}`}
+                    alt={`Ảnh hành trình ${selectedTour.name}`}
                     className="h-52 w-full object-cover"
                   />
                 </div>
               )}
 
               <div className="rounded-md border p-4">
-                <p className="text-sm text-muted-foreground">Tên tour</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Tên hành trình
+                </p>
                 <Input
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
                   disabled={!isDetailEditMode}
                   className="mt-1"
-                  placeholder="Nhập tên tour"
+                  placeholder="Nhập tên hành trình"
                 />
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-sm font-semibold text-foreground">
                   Tổng số điểm dừng: {selectedTour.stopCount}
                 </p>
+                <div className="mt-3 text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    Tạo lúc:{" "}
+                  </span>
+                  {selectedTour.createdAt
+                    ? new Date(selectedTour.createdAt).toLocaleString("vi-VN", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
+                    : "Không rõ"}
+                </div>
                 <div className="mt-4">
-                  <Label className="text-xs">Mô tả chi tiết</Label>
+                  <Label className="text-xs font-semibold text-foreground">
+                    Mô tả chi tiết
+                  </Label>
                   <Textarea
                     value={draftDescription}
                     onChange={(e) => setDraftDescription(e.target.value)}
@@ -800,7 +853,9 @@ const ToursPage = () => {
                 </div>
                 <div className="mt-4 grid gap-5 md:grid-cols-3">
                   <div>
-                    <Label className="text-xs">Thời gian dự kiến (phút)</Label>
+                    <Label className="text-xs font-semibold text-foreground">
+                      Thời gian dự kiến (phút)
+                    </Label>
                     <Input
                       type="number"
                       min={0}
@@ -814,7 +869,9 @@ const ToursPage = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Trạng thái</Label>
+                    <Label className="text-xs font-semibold text-foreground">
+                      Trạng thái
+                    </Label>
                     <select
                       value={draftIsActive ? "true" : "false"}
                       onChange={(e) =>
@@ -829,7 +886,9 @@ const ToursPage = () => {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <Label className="text-xs">Ảnh tour</Label>
+                  <Label className="text-xs font-semibold text-foreground">
+                    Ảnh hành trình
+                  </Label>
                   <div
                     className={`mt-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
                       isDetailEditMode
@@ -846,13 +905,13 @@ const ToursPage = () => {
                       <div className="space-y-2">
                         <img
                           src={detailPreviewImageUrl}
-                          alt={`Ảnh tour ${selectedTour.name}`}
+                          alt={`Ảnh hành trình ${selectedTour.name}`}
                           className="max-h-44 w-full rounded-md object-contain"
                         />
                         <p className="text-xs text-muted-foreground">
                           {isDetailEditMode
                             ? "Nhấn để chọn ảnh khác"
-                            : "Ảnh tour"}
+                            : "Ảnh hành trình"}
                         </p>
                       </div>
                     ) : (
@@ -907,7 +966,7 @@ const ToursPage = () => {
                           colSpan={5}
                           className="py-6 text-center text-muted-foreground"
                         >
-                          Tour này chưa có nhà hàng nào.
+                          Hành trình này chưa có nhà hàng nào.
                         </td>
                       </tr>
                     )}
@@ -934,17 +993,32 @@ const ToursPage = () => {
                         }
                       >
                         <td>
-                          <button
-                            type="button"
-                            className={`text-muted-foreground ${
-                              isDetailEditMode
-                                ? "hover:text-foreground"
-                                : "cursor-default"
-                            }`}
-                            title="Kéo thả để sắp xếp thứ tự"
-                          >
-                            <GripVertical className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              className={`text-muted-foreground ${
+                                isDetailEditMode
+                                  ? "hover:text-foreground"
+                                  : "cursor-default"
+                              }`}
+                              title="Kéo thả để sắp xếp thứ tự"
+                            >
+                              <GripVertical className="h-4 w-4" />
+                            </button>
+                            {isDetailEditMode && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveStop(stop.restaurantId)
+                                }
+                                disabled={removeRestaurantMutation.isPending}
+                                className="text-muted-foreground transition-colors hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
+                                title="Xóa nhà hàng khỏi hành trình"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
                         </td>
                         <td>{stop.stopOrder}</td>
                         <td className="mono text-xs">{stop.restaurantId}</td>
@@ -975,7 +1049,7 @@ const ToursPage = () => {
               {isDetailEditMode && (
                 <div className="rounded-md border p-4">
                   <h3 className="mb-3 text-sm font-semibold">
-                    Thêm nhà hàng vào tour
+                    Thêm nhà hàng vào hành trình
                   </h3>
 
                   <div className="grid gap-3">
@@ -1020,7 +1094,7 @@ const ToursPage = () => {
                     </Button>
                     {availableRestaurants.length === 0 && (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Không còn nhà hàng nào để thêm vào tour này.
+                        Không còn nhà hàng nào để thêm vào hành trình này.
                       </p>
                     )}
                   </div>
@@ -1034,17 +1108,17 @@ const ToursPage = () => {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Thêm tour mới</DialogTitle>
+            <DialogTitle>Thêm hành trình mới</DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-4">
             <div>
-              <Label htmlFor="create-tour-name">Tên tour</Label>
+              <Label htmlFor="create-tour-name">Tên hành trình</Label>
               <Input
                 id="create-tour-name"
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
-                placeholder="Nhập tên tour"
+                placeholder="Nhập tên hành trình"
                 className="mt-1"
               />
             </div>
@@ -1062,7 +1136,7 @@ const ToursPage = () => {
             </div>
 
             <div>
-              <Label>Ảnh tour</Label>
+              <Label>Ảnh hành trình</Label>
               <div
                 className="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-4 text-center transition-colors hover:border-primary"
                 onClick={() => createImageInputRef.current?.click()}
@@ -1071,7 +1145,7 @@ const ToursPage = () => {
                   <div className="space-y-2">
                     <img
                       src={createPreviewImageUrl}
-                      alt="Xem trước ảnh tour"
+                      alt="Xem trước ảnh hành trình"
                       className="max-h-44 w-full rounded-md object-contain"
                     />
                     <p className="text-xs text-muted-foreground">
@@ -1131,7 +1205,7 @@ const ToursPage = () => {
                 onClick={handleCreateTour}
                 disabled={createTourMutation.isPending}
               >
-                {createTourMutation.isPending ? "Đang tạo..." : "Tạo tour"}
+                {createTourMutation.isPending ? "Đang tạo..." : "Tạo hành trình"}
               </Button>
             </div>
           </div>
@@ -1141,11 +1215,11 @@ const ToursPage = () => {
       <ConfirmDialog
         open={!!confirmTour}
         onOpenChange={(open) => !open && setConfirmTour(null)}
-        title={confirmTour?.lock ? "Ngưng hoạt động tour" : "Kích hoạt tour"}
+        title={confirmTour?.lock ? "Ngưng hoạt động hành trình" : "Kích hoạt hành trình"}
         description={
           confirmTour?.lock
-            ? "Tour sẽ bị ngưng hoạt động. Bạn có chắc không?"
-            : "Tour sẽ được kích hoạt hoạt động trở lại."
+            ? "Hành trình sẽ bị ngưng hoạt động. Bạn có chắc không?"
+            : "Hành trình sẽ được kích hoạt hoạt động trở lại."
         }
         onConfirm={() => {
           if (!confirmTour) return;
@@ -1163,3 +1237,4 @@ const ToursPage = () => {
 };
 
 export default ToursPage;
+

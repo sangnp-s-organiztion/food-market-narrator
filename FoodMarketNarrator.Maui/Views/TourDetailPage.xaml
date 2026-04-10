@@ -48,20 +48,6 @@
                             <Grid>
                                 <Image Source="{Binding DisplayImageSource}"
                                        Aspect="AspectFill"/>
-
-                                <Border Margin="14,14,0,0"
-                                        Padding="10,5"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 13"
-                                        BackgroundColor="#F39C12"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="Start"
-                                        IsVisible="{Binding IsFeatured}">
-                                    <Label Text="NỔI BẬT"
-                                           FontSize="11"
-                                           FontAttributes="Bold"
-                                           TextColor="White"/>
-                                </Border>
                             </Grid>
                         </Border>
 

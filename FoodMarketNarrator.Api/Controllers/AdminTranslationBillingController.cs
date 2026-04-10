@@ -50,7 +50,6 @@ public class AdminTranslationBillingController : ControllerBase
     public async Task<IActionResult> GetUsageLedger(
         [FromQuery] string? billingMonth = null,
         [FromQuery] int? sellerUserId = null,
-        [FromQuery] string? status = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -64,7 +63,34 @@ public class AdminTranslationBillingController : ControllerBase
             var result = await _adminTranslationBillingService.GetUsageLedgerAsync(
                 billingMonth,
                 sellerUserId,
-                status,
+                page,
+                pageSize);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("audio-usage")]
+    public async Task<IActionResult> GetAudioUsageLedger(
+        [FromQuery] string? billingMonth = null,
+        [FromQuery] int? sellerUserId = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        if (!IsCurrentUserAdmin())
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            var result = await _adminTranslationBillingService.GetAudioUsageLedgerAsync(
+                billingMonth,
+                sellerUserId,
                 page,
                 pageSize);
 

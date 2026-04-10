@@ -184,6 +184,7 @@ public class UserService
             Username = u.Username,
             Phone = u.Phone,
             Email = u.Email,
+            FullName = u.FullName,
             Role = normalizedRole,
             IsActive = u.IsActive,
             CreatedAt = u.CreatedAt

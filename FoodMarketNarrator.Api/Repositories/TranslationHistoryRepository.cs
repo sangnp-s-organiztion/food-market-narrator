@@ -8,6 +8,7 @@ public class TranslationHistoryRepository
 {
     private readonly IMongoCollection<BsonDocument> _translationJobs;
     private readonly IMongoCollection<BsonDocument> _usageLedger;
+    private readonly IMongoCollection<BsonDocument> _audioUsageLedger;
     private readonly IMongoCollection<BsonDocument> _translationVersions;
     private readonly IMongoCollection<BsonDocument> _monthlyBilling;
 
@@ -15,6 +16,7 @@ public class TranslationHistoryRepository
     {
         _translationJobs = mongoDatabase.GetCollection<BsonDocument>("TranslationJobs");
         _usageLedger = mongoDatabase.GetCollection<BsonDocument>("TranslationUsageLedger");
+        _audioUsageLedger = mongoDatabase.GetCollection<BsonDocument>("AudioUsageLedger");
         _translationVersions = mongoDatabase.GetCollection<BsonDocument>("AudioTranslationVersions");
         _monthlyBilling = mongoDatabase.GetCollection<BsonDocument>("TranslationBillingMonthly");
     }
@@ -71,12 +73,34 @@ public class TranslationHistoryRepository
             { "cost_amount", record.CostAmount },
             { "tax_amount", record.TaxAmount },
             { "total_amount", record.TotalAmount },
-            { "status", record.Status },
             { "billing_month", record.BillingMonth },
             { "created_at", record.CreatedAtUtc }
         };
 
         await _usageLedger.InsertOneAsync(doc);
+    }
+
+    public async Task InsertAudioUsageLedgerAsync(AudioUsageLedgerRecord record)
+    {
+        var doc = new BsonDocument
+        {
+            { "usage_event_id", record.UsageEventId },
+            { "request_id", record.RequestId },
+            { "job_id", string.IsNullOrWhiteSpace(record.JobId) ? BsonNull.Value : record.JobId },
+            { "seller_user_id", record.SellerUserId },
+            { "restaurant_id", record.RestaurantId },
+            { "audio_id", record.AudioId.HasValue ? (BsonValue)record.AudioId.Value : BsonNull.Value },
+            { "provider", record.Provider },
+            { "action_type", record.ActionType },
+            { "unit_type", record.UnitType },
+            { "input_chars", record.InputChars },
+            { "output_chars", record.OutputChars },
+            { "billable_units", record.BillableUnits },
+            { "billing_month", record.BillingMonth },
+            { "created_at", record.CreatedAtUtc }
+        };
+
+        await _audioUsageLedger.InsertOneAsync(doc);
     }
 
     public async Task InsertTranslationVersionAsync(AudioTranslationVersionRecord record)
@@ -195,11 +219,10 @@ public class TranslationHistoryRepository
     public async Task<(List<TranslationUsageLedgerDocument> Items, long TotalCount)> GetUsageLedgerAsync(
         string? billingMonth,
         int? sellerUserId,
-        string? status,
         int page,
         int pageSize)
     {
-        var filter = BuildUsageLedgerFilter(billingMonth, sellerUserId, status);
+        var filter = BuildUsageLedgerFilter(billingMonth, sellerUserId);
         var totalCount = await _usageLedger.CountDocumentsAsync(filter);
 
         var docs = await _usageLedger
@@ -225,7 +248,6 @@ public class TranslationHistoryRepository
             CostAmount = ReadDecimal(doc, "cost_amount"),
             TaxAmount = ReadDecimal(doc, "tax_amount"),
             TotalAmount = ReadDecimal(doc, "total_amount"),
-            Status = ReadString(doc, "status"),
             BillingMonth = ReadString(doc, "billing_month"),
             Currency = ReadNestedString(doc, "pricing_snapshot", "currency", "USD"),
             CreatedAtUtc = ReadDateTime(doc, "created_at")
@@ -234,9 +256,75 @@ public class TranslationHistoryRepository
         return (items, totalCount);
     }
 
-    public async Task<UsageLedgerAggregateSummary> GetUsageLedgerSummaryAsync(string? billingMonth, int? sellerUserId, string? status)
+    public async Task<(List<AudioUsageLedgerDocument> Items, long TotalCount)> GetAudioUsageLedgerAsync(
+        string? billingMonth,
+        int? sellerUserId,
+        int page,
+        int pageSize)
     {
-        var filter = BuildUsageLedgerFilter(billingMonth, sellerUserId, status);
+        var filter = BuildAudioUsageLedgerFilter(billingMonth, sellerUserId);
+        var totalCount = await _audioUsageLedger.CountDocumentsAsync(filter);
+
+        var docs = await _audioUsageLedger
+            .Find(filter)
+            .Sort(Builders<BsonDocument>.Sort
+                .Descending("created_at")
+                .Descending("usage_event_id"))
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+
+        var items = docs.Select(doc => new AudioUsageLedgerDocument
+        {
+            UsageEventId = ReadString(doc, "usage_event_id"),
+            RequestId = ReadString(doc, "request_id"),
+            SellerUserId = ReadInt32(doc, "seller_user_id"),
+            RestaurantId = ReadString(doc, "restaurant_id"),
+            AudioId = ReadNullableInt32(doc, "audio_id"),
+            Provider = ReadString(doc, "provider"),
+            ActionType = ReadString(doc, "action_type"),
+            UnitType = ReadString(doc, "unit_type", "chars"),
+            InputChars = ReadInt32(doc, "input_chars"),
+            OutputChars = ReadInt32(doc, "output_chars"),
+            BillableUnits = ReadDecimal(doc, "billable_units"),
+            BillingMonth = ReadString(doc, "billing_month"),
+            CreatedAtUtc = ReadDateTime(doc, "created_at")
+        }).ToList();
+
+        return (items, totalCount);
+    }
+
+    public async Task<AudioUsageLedgerAggregateSummary> GetAudioUsageLedgerSummaryAsync(
+        string? billingMonth,
+        int? sellerUserId)
+    {
+        var filter = BuildAudioUsageLedgerFilter(billingMonth, sellerUserId);
+
+        var summaryDoc = await _audioUsageLedger.Aggregate()
+            .Match(filter)
+            .Group(new BsonDocument
+            {
+                { "_id", BsonNull.Value },
+                { "event_count", new BsonDocument("$sum", 1) },
+                { "total_billable_units", new BsonDocument("$sum", "$billable_units") }
+            })
+            .FirstOrDefaultAsync();
+
+        if (summaryDoc == null)
+        {
+            return new AudioUsageLedgerAggregateSummary();
+        }
+
+        return new AudioUsageLedgerAggregateSummary
+        {
+            EventCount = ReadInt32(summaryDoc, "event_count"),
+            TotalBillableUnits = ReadDecimal(summaryDoc, "total_billable_units")
+        };
+    }
+
+    public async Task<UsageLedgerAggregateSummary> GetUsageLedgerSummaryAsync(string? billingMonth, int? sellerUserId)
+    {
+        var filter = BuildUsageLedgerFilter(billingMonth, sellerUserId);
 
         var summaryDoc = await _usageLedger.Aggregate()
             .Match(filter)
@@ -281,7 +369,26 @@ public class TranslationHistoryRepository
             : Builders<BsonDocument>.Filter.And(filters);
     }
 
-    private static FilterDefinition<BsonDocument> BuildUsageLedgerFilter(string? billingMonth, int? sellerUserId, string? status)
+    private static FilterDefinition<BsonDocument> BuildAudioUsageLedgerFilter(string? billingMonth, int? sellerUserId)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>>();
+
+        if (!string.IsNullOrWhiteSpace(billingMonth))
+        {
+            filters.Add(Builders<BsonDocument>.Filter.Eq("billing_month", billingMonth));
+        }
+
+        if (sellerUserId.HasValue)
+        {
+            filters.Add(Builders<BsonDocument>.Filter.Eq("seller_user_id", sellerUserId.Value));
+        }
+
+        return filters.Count == 0
+            ? Builders<BsonDocument>.Filter.Empty
+            : Builders<BsonDocument>.Filter.And(filters);
+    }
+
+    private static FilterDefinition<BsonDocument> BuildUsageLedgerFilter(string? billingMonth, int? sellerUserId)
     {
         var filters = new List<FilterDefinition<BsonDocument>>();
 
@@ -293,11 +400,6 @@ public class TranslationHistoryRepository
         if (sellerUserId.HasValue)
         {
             filters.Add(Builders<BsonDocument>.Filter.Eq("seller_user_id", sellerUserId.Value));
-        }
-
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            filters.Add(Builders<BsonDocument>.Filter.Eq("status", status.Trim().ToLowerInvariant()));
         }
 
         return filters.Count == 0
@@ -427,7 +529,24 @@ public class TranslationUsageLedgerRecord
     public decimal CostAmount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }
-    public string Status { get; set; } = "billable";
+    public string BillingMonth { get; set; } = string.Empty;
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public class AudioUsageLedgerRecord
+{
+    public string UsageEventId { get; set; } = string.Empty;
+    public string RequestId { get; set; } = string.Empty;
+    public string? JobId { get; set; }
+    public int SellerUserId { get; set; }
+    public string RestaurantId { get; set; } = string.Empty;
+    public int? AudioId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ActionType { get; set; } = string.Empty;
+    public string UnitType { get; set; } = "chars";
+    public int InputChars { get; set; }
+    public int OutputChars { get; set; }
+    public decimal BillableUnits { get; set; }
     public string BillingMonth { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
 }
@@ -503,10 +622,32 @@ public class TranslationUsageLedgerDocument
     public decimal CostAmount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }
-    public string Status { get; set; } = string.Empty;
     public string BillingMonth { get; set; } = string.Empty;
     public string Currency { get; set; } = "USD";
     public DateTime CreatedAtUtc { get; set; }
+}
+
+public class AudioUsageLedgerDocument
+{
+    public string UsageEventId { get; set; } = string.Empty;
+    public string RequestId { get; set; } = string.Empty;
+    public int SellerUserId { get; set; }
+    public string RestaurantId { get; set; } = string.Empty;
+    public int? AudioId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ActionType { get; set; } = string.Empty;
+    public string UnitType { get; set; } = "chars";
+    public int InputChars { get; set; }
+    public int OutputChars { get; set; }
+    public decimal BillableUnits { get; set; }
+    public string BillingMonth { get; set; } = string.Empty;
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public class AudioUsageLedgerAggregateSummary
+{
+    public int EventCount { get; set; }
+    public decimal TotalBillableUnits { get; set; }
 }
 
 public class UsageLedgerAggregateSummary

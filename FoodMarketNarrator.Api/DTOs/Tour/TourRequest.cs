@@ -34,9 +34,6 @@ public class CreateTourRequest
     [MaxLength(200)]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(500)]
-    public string? ShortDescription { get; set; }
-
     public string? Description { get; set; }
     public int? EstimatedDurationMinutes { get; set; }
     /// <summary>

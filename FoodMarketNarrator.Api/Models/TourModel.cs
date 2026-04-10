@@ -15,10 +15,6 @@ public class TourModel
     [MaxLength(200)]
     public string Name { get; set; } = string.Empty;
 
-    [Column("short_description")]
-    [MaxLength(500)]
-    public string? ShortDescription { get; set; }
-
     [Column("description")]
     public string? Description { get; set; }
 
@@ -31,9 +27,6 @@ public class TourModel
 
     [Column("is_active")]
     public bool IsActive { get; set; }
-
-    [Column("created_by")]
-    public int? CreatedBy { get; set; }
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

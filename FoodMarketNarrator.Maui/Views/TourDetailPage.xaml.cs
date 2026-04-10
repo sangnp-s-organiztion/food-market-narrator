@@ -129,9 +129,7 @@ public partial class TourDetailPage : ContentPage
 
             TourDescriptionLabel.Text = !string.IsNullOrWhiteSpace(tour.Description)
                 ? tour.Description
-                : !string.IsNullOrWhiteSpace(tour.ShortDescription)
-                    ? tour.ShortDescription
-                    : "Hành trình này chưa có mô tả chi tiết.";
+                : "Hành trình này chưa có mô tả chi tiết.";
 
             StartJourneyButton.IsEnabled = tour.Stops.Count > 0;
             StartJourneyButton.Opacity = tour.Stops.Count > 0 ? 1 : 0.6;

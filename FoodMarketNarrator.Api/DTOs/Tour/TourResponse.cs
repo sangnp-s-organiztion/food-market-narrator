@@ -4,12 +4,10 @@ public class TourResponse
 {
     public int TourId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? ShortDescription { get; set; }
     public string? Description { get; set; }
     public int? EstimatedDurationMinutes { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
-    public int? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public int StopCount { get; set; }
     public int NearbyStopCount { get; set; }
