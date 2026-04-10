@@ -158,7 +158,7 @@ const Dashboard = () => {
   }, [allRestaurantsData, topRestaurantsData]);
 
   const avgTime = kpis?.averageListeningTimeSeconds ?? 0;
-  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
+  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "0.0";
 
   return (
     <AdminLayout>

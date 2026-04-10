@@ -4,12 +4,19 @@ Luu y:
 
 - API hien tai khong dung prefix /api.
 - He thong dung cookie auth voi fallback policy: mac dinh endpoint yeu cau dang nhap, tru cac endpoint duoc danh dau public.
+- Auth da tach 2 cookie rieng cho saler va admin de co the dang nhap dong thoi trong cung browser.
 
 ## Auth
 
 - POST /Auth/login (public)
+- POST /Auth/admin/login (public)
+- POST /Auth/forgot-password/send-otp (public)
+- POST /Auth/forgot-password/verify-otp (public)
+- POST /Auth/forgot-password/reset (public)
 - POST /Auth/logout
+- POST /Auth/admin/logout
 - GET /Auth/me
+- GET /Auth/admin/me
 
 ## Language
 
