@@ -7,6 +7,9 @@ public static class PublicEndpoints
     [
         new("POST", "/Auth/login"),
         new("POST", "/Auth/admin/login"),
+        new("POST", "/Auth/forgot-password/send-otp"),
+        new("POST", "/Auth/forgot-password/verify-otp"),
+        new("POST", "/Auth/forgot-password/reset"),
         new("GET", "/Language"),
         new("GET", "/Language/{languageCode}"),
         new("GET", "/Restaurant"),

@@ -8,6 +8,9 @@ Luu y:
 ## Auth
 
 - POST /Auth/login (public)
+- POST /Auth/forgot-password/send-otp (public)
+- POST /Auth/forgot-password/verify-otp (public)
+- POST /Auth/forgot-password/reset (public)
 - POST /Auth/logout
 - GET /Auth/me
 
