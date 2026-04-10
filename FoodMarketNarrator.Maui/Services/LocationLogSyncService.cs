@@ -3,6 +3,7 @@ using Microsoft.Maui.Devices;
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Storage;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace food_market_narrator.Services;
 
@@ -11,13 +12,17 @@ public class LocationLogSyncService : ILocationLogSyncService
     private static readonly TimeSpan FlushInterval = TimeSpan.FromSeconds(10);
     private const int MaxBufferSize = 2000;
     private const string DeviceIdPreferenceKey = "tracking_device_id";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     private readonly object _bufferLock = new();
     private readonly List<LocationLogItem> _buffer = [];
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
-    private readonly IQrAccessService _qrAccessService;
     private readonly string _sessionId = Guid.NewGuid().ToString("N");
+    private readonly SemaphoreSlim _bufferFileLock = new(1, 1);
     public string CurrentSessionId => _sessionId;
 
     private CancellationTokenSource? _flushCts;
@@ -25,11 +30,10 @@ public class LocationLogSyncService : ILocationLogSyncService
     private bool _started;
     private bool _sessionStartedSynced;
 
-    public LocationLogSyncService(HttpClient httpClient, ILocationService locationService, IQrAccessService qrAccessService)
+    public LocationLogSyncService(HttpClient httpClient, ILocationService locationService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
-        _qrAccessService = qrAccessService;
     }
 
     public void Start()
@@ -38,6 +42,8 @@ public class LocationLogSyncService : ILocationLogSyncService
         {
             return;
         }
+
+        LoadBufferFromDisk();
 
         _started = true;
         _locationService.LocationSampled += OnLocationSampled;
@@ -78,6 +84,8 @@ public class LocationLogSyncService : ILocationLogSyncService
                 _buffer.RemoveRange(0, removeCount);
             }
         }
+
+        _ = PersistBufferSnapshotAsync();
     }
 
     private async Task RunFlushLoopAsync(CancellationToken cancellationToken)
@@ -144,6 +152,7 @@ public class LocationLogSyncService : ILocationLogSyncService
             {
                 Console.WriteLine(
                     $"Sync log to server: sent {batch.Count} location points successfully | firstPoiCapturedAtUtc={firstPoiCapturedAtUtc:O} | sendLatLngAtUtc={sendLatLngAtUtc:O}");
+                _ = PersistBufferSnapshotAsync();
                 return;
             }
 
@@ -166,6 +175,8 @@ public class LocationLogSyncService : ILocationLogSyncService
                 _buffer.RemoveRange(0, removeCount);
             }
         }
+
+        _ = PersistBufferSnapshotAsync();
     }
 
     private async Task EnsureSessionStartedAsync(CancellationToken cancellationToken)
@@ -179,10 +190,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         {
             SessionId = _sessionId,
             DeviceId = GetOrCreateDeviceId(),
-            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}",
-            QrAccessExpiresAtUtc = _qrAccessService.IsQrTimeRestricted
-                ? _qrAccessService.QrAccessExpiresAtUtc
-                : null
+            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}"
         };
 
         try
@@ -218,6 +226,96 @@ public class LocationLogSyncService : ILocationLogSyncService
         Preferences.Set(DeviceIdPreferenceKey, generated);
         return generated;
     }
+
+    private static string GetLocationLogsBufferFilePath()
+    {
+        var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
+        Directory.CreateDirectory(cacheDir);
+        return Path.Combine(cacheDir, "location_logs_buffer.json");
+    }
+
+    private void LoadBufferFromDisk()
+    {
+        try
+        {
+            var filePath = GetLocationLogsBufferFilePath();
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            var json = File.ReadAllText(filePath);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return;
+            }
+
+            var persisted = JsonSerializer.Deserialize<List<LocationLogItem>>(json, JsonOptions);
+            if (persisted == null || persisted.Count == 0)
+            {
+                return;
+            }
+
+            // Re-bind unsent logs to current runtime session to keep backend contract consistent.
+            foreach (var item in persisted)
+            {
+                item.SessionId = _sessionId;
+            }
+
+            lock (_bufferLock)
+            {
+                _buffer.Clear();
+                _buffer.AddRange(persisted);
+                if (_buffer.Count > MaxBufferSize)
+                {
+                    var removeCount = _buffer.Count - MaxBufferSize;
+                    _buffer.RemoveRange(0, removeCount);
+                }
+            }
+
+            Console.WriteLine($"Sync log to server: restored {_buffer.Count} unsent location points from disk");
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Sync log to server: failed to restore persisted location buffer");
+        }
+    }
+
+    private async Task PersistBufferSnapshotAsync()
+    {
+        List<LocationLogItem> snapshot;
+        lock (_bufferLock)
+        {
+            snapshot = [.. _buffer];
+        }
+
+        var filePath = GetLocationLogsBufferFilePath();
+
+        await _bufferFileLock.WaitAsync();
+        try
+        {
+            if (snapshot.Count == 0)
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(snapshot, JsonOptions);
+            await File.WriteAllTextAsync(filePath, json);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Sync log to server: failed to persist location buffer to disk");
+        }
+        finally
+        {
+            _bufferFileLock.Release();
+        }
+    }
 }
 
 public class LocationLogBatchRequest
@@ -243,5 +341,4 @@ public class UserSessionStartRequest
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
-    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }

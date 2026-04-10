@@ -138,11 +138,6 @@ namespace food_market_narrator_api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("description");
-
                     b.Property<int?>("ImageId")
                         .HasColumnType("int")
                         .HasColumnName("image_id");

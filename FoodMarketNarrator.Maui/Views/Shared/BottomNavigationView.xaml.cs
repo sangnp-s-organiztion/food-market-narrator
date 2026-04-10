@@ -1,9 +1,12 @@
 using food_market_narrator.Enums;
+using food_market_narrator.Views;
 
 namespace food_market_narrator.Views.Shared;
 
 public partial class BottomNavigationView : ContentView
 {
+    private static readonly SemaphoreSlim NavigationLock = new(1, 1);
+
     public static readonly BindableProperty ActiveTabProperty =
        BindableProperty.Create(
            nameof(ActiveTab),
@@ -46,12 +49,12 @@ public partial class BottomNavigationView : ContentView
                 SetActive(MapIcon, MapText);
                 break;
 
-            case BottomTab.Favorite:
-                SetActive(FavoriteIcon, FavoriteText);
+            case BottomTab.Tour:
+                SetActive(TourIcon, TourText);
                 break;
 
-            case BottomTab.History:
-                SetActive(HistoryIcon, HistoryText);
+            case BottomTab.Favorite:
+                SetActive(FavoriteIcon, FavoriteText);
                 break;
 
             case BottomTab.Setting:
@@ -74,11 +77,11 @@ public partial class BottomNavigationView : ContentView
         FavoriteIcon.TextColor = InactiveColor;
         FavoriteText.TextColor = InactiveColor;
 
-        // Set màu cho HistoryIcon
-        if (HistoryIcon != null)
-            HistoryIcon.TextColor = InactiveColor;
-        if (HistoryText != null)
-            HistoryText.TextColor = InactiveColor;
+        // Set màu cho TourIcon
+        if (TourIcon != null)
+            TourIcon.TextColor = InactiveColor;
+        if (TourText != null)
+            TourText.TextColor = InactiveColor;
 
         // Set màu cho SettingIcon
         if (SettingIcon != null)
@@ -97,31 +100,79 @@ public partial class BottomNavigationView : ContentView
     // Mở bản đồ khi nhấn vào MapIcon hoặc MapText
     private async void OpenMap(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//MapPage");
+        await NavigateSafelyAsync("//MapPage?tourPoiIds=&tourName=");
     }
 
     // Mở trang OpenMainPage khi nhấn vào HomeIcon hoặc HomeText
     private async void OpenMainPage(object sender, EventArgs e)
     {
-        // Use absolute route to reset to the main tab/page
-        await Shell.Current.GoToAsync("//MainPage");
+        try
+        {
+            if (Shell.Current?.CurrentPage is MainPage)
+            {
+                return;
+            }
+
+            var navigation = Shell.Current?.Navigation;
+            if (navigation?.NavigationStack != null && navigation.NavigationStack.Any(p => p is MainPage))
+            {
+                while (navigation.NavigationStack.Count > 1 && navigation.NavigationStack[^1] is not MainPage)
+                {
+                    await navigation.PopAsync(false);
+                }
+
+                return;
+            }
+
+            // Fallback to absolute route when MainPage is not in current stack.
+            await NavigateSafelyAsync("//MainPage");
+        }
+        catch
+        {
+            // Ignore navigation race errors to prevent app crash.
+        }
     }
 
     // Mở trang Yêu thích
     private async void OpenFavorite(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//FavoritePage");
+        await NavigateSafelyAsync("//FavoritePage");
     }
 
-    // Mở trang Lịch sử
-    private async void OpenHistory(object sender, EventArgs e)
+    private async void OpenTour(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//HistoryPage");
+        await NavigateSafelyAsync("//TourPage");
     }
 
     private async void OpenSettings(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//SettingsPage");
+        await NavigateSafelyAsync("//SettingsPage");
+    }
+
+    private static async Task NavigateSafelyAsync(string route)
+    {
+        if (Shell.Current == null)
+        {
+            return;
+        }
+
+        if (!await NavigationLock.WaitAsync(0))
+        {
+            return;
+        }
+
+        try
+        {
+            await Shell.Current.GoToAsync(route);
+        }
+        catch
+        {
+            // Prevent async-void navigation handlers from crashing the app.
+        }
+        finally
+        {
+            NavigationLock.Release();
+        }
     }
 
     private static string FormatBytes(long bytes)

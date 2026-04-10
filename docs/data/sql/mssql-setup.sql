@@ -103,7 +103,6 @@ CREATE TABLE food_market_narrator.dbo.Dish (
 	dish_id int IDENTITY(1,1) NOT NULL,
 	name nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	price decimal(10,2) NULL,
-	description nvarchar(1000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 	created_at datetime DEFAULT getdate() NULL,
 	restaurant_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	image_id int NULL,
@@ -112,3 +111,43 @@ CREATE TABLE food_market_narrator.dbo.Dish (
 	CONSTRAINT FK__Dish__image_id__5070F446 FOREIGN KEY (image_id) REFERENCES food_market_narrator.dbo.Restaurant_Image(image_id),
 	CONSTRAINT FK__Dish__restaurant__4F7CD00D FOREIGN KEY (restaurant_id) REFERENCES food_market_narrator.dbo.Restaurant(restaurant_id)
 );
+
+CREATE TABLE dbo.Tour (
+    tour_id INT IDENTITY(1,1) PRIMARY KEY,
+    -- tour_code VARCHAR(50) NOT NULL UNIQUE,
+    name NVARCHAR(200) NOT NULL,
+    short_description NVARCHAR(500) NULL,
+    description NVARCHAR(MAX) NULL,
+    estimated_duration_minutes INT NULL,
+	image_id INT NOT NULL,
+    is_active BIT NOT NULL DEFAULT 1,
+    is_featured BIT NOT NULL DEFAULT 0,
+    sort_priority INT NOT NULL DEFAULT 0,
+    created_by INT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    updated_by INT NULL,
+    updated_at DATETIME2 NULL,
+    CONSTRAINT FK_Tour_CreatedBy FOREIGN KEY (created_by) REFERENCES dbo.Users(user_id),
+    CONSTRAINT FK_Tour_UpdatedBy FOREIGN KEY (updated_by) REFERENCES dbo.Users(user_id),
+	CONSTRAINT FK_Tour_Image FOREIGN KEY (image_id) REFERENCES dbo.Restaurant_Image(image_id),
+    CONSTRAINT CK_Tour_Duration CHECK (estimated_duration_minutes IS NULL OR estimated_duration_minutes > 0)
+);
+
+CREATE TABLE dbo.Tour_Restaurant (
+    tour_id INT NOT NULL,
+    restaurant_id VARCHAR(100) NOT NULL,
+    stop_order INT NOT NULL,
+    -- stay_minutes INT NULL,
+    -- is_must_visit BIT NOT NULL DEFAULT 1,
+    -- custom_radius_meters INT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    PRIMARY KEY (tour_id, restaurant_id),
+    CONSTRAINT UQ_Tour_Restaurant_Order UNIQUE (tour_id, stop_order),
+    CONSTRAINT FK_Tour_Restaurant_Tour FOREIGN KEY (tour_id) REFERENCES dbo.Tour(tour_id) ON DELETE CASCADE,
+    CONSTRAINT FK_Tour_Restaurant_Restaurant FOREIGN KEY (restaurant_id) REFERENCES dbo.Restaurant(restaurant_id),
+    -- CONSTRAINT CK_Tour_Restaurant_Stay CHECK (stay_minutes IS NULL OR stay_minutes > 0),
+    -- CONSTRAINT CK_Tour_Restaurant_Radius CHECK (custom_radius_meters IS NULL OR custom_radius_meters > 0)
+);
+
+CREATE INDEX IX_Tour_Active_Priority ON dbo.Tour(is_active, is_featured, sort_priority);
+CREATE INDEX IX_Tour_Restaurant_Restaurant ON dbo.Tour_Restaurant(restaurant_id);

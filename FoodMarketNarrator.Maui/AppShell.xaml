@@ -18,6 +18,11 @@
         Route="MapPage" />
 
     <ShellContent
+        Title="Hành trình"
+        ContentTemplate="{DataTemplate views:TourPage}"
+        Route="TourPage" />
+
+    <ShellContent
         Title="Yêu thích"
         ContentTemplate="{DataTemplate views:FavoritePage}"
         Route="FavoritePage" />

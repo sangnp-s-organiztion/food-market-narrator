@@ -285,23 +285,22 @@ export function HeatmapSection({
       const fillColor =
         poi.gpsPointCount > 0 ? "hsl(12, 92%, 56%)" : "hsl(199, 89%, 48%)";
 
-      L.circleMarker([poi.latitude, poi.longitude], {
+      const marker = L.circleMarker([poi.latitude, poi.longitude], {
         radius,
         fillColor,
         color: "#ffffff",
         weight: 1.5,
         fillOpacity: poi.gpsPointCount > 0 ? 0.85 : 0.45,
-      })
-        .bindPopup(
-          [
-            `<strong>${poi.restaurantName ?? "(Không tên)"}</strong>`,
-            `<span style="color:#666">Điểm GPS gán: ${poi.gpsPointCount}</span>`,
-            typeof poi.playCount === "number"
-              ? `<br/><span style="color:#666">Lượt nghe: ${poi.playCount}</span>`
-              : "",
-          ].join(""),
-        )
-        .addTo(poiLayer);
+      }).addTo(poiLayer);
+
+      marker.bindPopup(
+        [
+          `<strong>${poi.restaurantName ?? "(Không tên)"}</strong>`,
+          typeof poi.playCount === "number"
+            ? `<br/><span style="color:#666">Lượt nghe: ${poi.playCount}</span>`
+            : "",
+        ].join(""),
+      );
     });
 
     if (weightedHeatPoints.length > 0) {

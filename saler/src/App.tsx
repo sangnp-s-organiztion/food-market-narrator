@@ -1,10 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
-  Navigate,
   useLocation,
 } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,24 +19,23 @@ import RestaurantPage from "@/pages/RestaurantPage";
 import DishesPage from "@/pages/DishesPage";
 import ImagesPage from "@/pages/ImagesPage";
 import AudioPage from "@/pages/AudioPage";
+import AudioHistoryPage from "@/pages/AudioHistoryPage";
+import AccountPage from "@/pages/AccountPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
-
 const TITLE_SUFFIX = "Food Market Narrator Saler";
 
 function getTitleByPath(pathname: string): string {
   if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
-  if (pathname === "/select-restaurant")
-    return `Chọn nhà hàng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/restaurant"))
-    return `Thông tin nhà hàng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/dishes"))
-    return `Quản lý món ăn | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/images"))
-    return `Quản lý hình ảnh | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/dashboard/audio"))
-    return `Quản lý audio | ${TITLE_SUFFIX}`;
+  if (pathname === "/select-restaurant") return `Chọn nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/restaurant")) return `Thông tin nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/dishes")) return `Quản lý món ăn | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/images")) return `Quản lý hình ảnh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/audio/description")) return `Mô tả âm thanh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/audio/history")) return `Lịch sử thuyết minh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/audio")) return `Quản lý âm thanh | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/dashboard/account")) return `Tài khoản | ${TITLE_SUFFIX}`;
   if (pathname === "/") return TITLE_SUFFIX;
   return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 }
@@ -64,13 +63,7 @@ function AppRoutes() {
     <Routes>
       <Route
         path="/login"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/select-restaurant" replace />
-          ) : (
-            <LoginPage />
-          )
-        }
+        element={isAuthenticated ? <Navigate to="/select-restaurant" replace /> : <LoginPage />}
       />
       <Route
         path="/select-restaurant"
@@ -92,16 +85,14 @@ function AppRoutes() {
         <Route path="restaurant" element={<RestaurantPage />} />
         <Route path="dishes" element={<DishesPage />} />
         <Route path="images" element={<ImagesPage />} />
-        <Route path="audio" element={<AudioPage />} />
+        <Route path="audio" element={<Navigate to="description" replace />} />
+        <Route path="audio/description" element={<AudioPage />} />
+        <Route path="audio/history" element={<AudioHistoryPage />} />
+        <Route path="account" element={<AccountPage />} />
       </Route>
       <Route
         path="/"
-        element={
-          <Navigate
-            to={isAuthenticated ? "/select-restaurant" : "/login"}
-            replace
-          />
-        }
+        element={<Navigate to={isAuthenticated ? "/select-restaurant" : "/login"} replace />}
       />
       <Route path="*" element={<NotFound />} />
     </Routes>

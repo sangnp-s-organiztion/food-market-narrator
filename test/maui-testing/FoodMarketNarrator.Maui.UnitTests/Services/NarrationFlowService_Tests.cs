@@ -17,8 +17,6 @@ public class NarrationFlowService_Tests
     private readonly Mock<IAudioLogSyncService> _mockAudioLogSyncService;
     private readonly Mock<ILanguageService> _mockLanguageService;
     private readonly Mock<IHistoryService> _mockHistoryService;
-    private readonly Mock<ILocationLogSyncService> _mockLocationLogSyncService;
-    private readonly Mock<IQrAccessService> _mockQrAccessService;
     private readonly NarrationFlowService _narrationService;
 
     public NarrationFlowService_Tests()
@@ -29,14 +27,10 @@ public class NarrationFlowService_Tests
         _mockAudioLogSyncService = new Mock<IAudioLogSyncService>();
         _mockLanguageService = new Mock<ILanguageService>();
         _mockHistoryService = new Mock<IHistoryService>();
-        _mockLocationLogSyncService = new Mock<ILocationLogSyncService>();
-        _mockQrAccessService = new Mock<IQrAccessService>();
 
         // Setup default behaviors
         _mockLanguageService.Setup(x => x.CurrentLanguage).Returns("vi-VN");
         _mockAudioService.Setup(x => x.IsPlaying).Returns(false);
-        _mockLocationLogSyncService.Setup(x => x.CurrentSessionId).Returns("test-session");
-        _mockQrAccessService.Setup(x => x.IsQrTimeRestricted).Returns(false);
 
         _narrationService = new NarrationFlowService(
             _mockPoiService.Object,
@@ -44,9 +38,7 @@ public class NarrationFlowService_Tests
             _mockAudioService.Object,
             _mockAudioLogSyncService.Object,
             _mockLanguageService.Object,
-            _mockHistoryService.Object,
-            _mockLocationLogSyncService.Object,
-            _mockQrAccessService.Object
+            _mockHistoryService.Object
         );
     }
 

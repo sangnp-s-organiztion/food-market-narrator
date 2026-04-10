@@ -43,6 +43,28 @@ namespace food_market_narrator_api.Repositories
         {
             _context.Audio.Add(audio);
             await _context.SaveChangesAsync();
+
+            if (audio.IsActive)
+            {
+                var others = await _context.Audio
+                    .Where(a =>
+                        a.RestaurantId == audio.RestaurantId
+                        && a.LanguageId == audio.LanguageId
+                        && a.AudioId != audio.AudioId
+                        && a.IsActive)
+                    .ToListAsync();
+
+                if (others.Count > 0)
+                {
+                    foreach (var other in others)
+                    {
+                        other.IsActive = false;
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             return audio;
         }
 
@@ -52,6 +74,22 @@ namespace food_market_narrator_api.Repositories
             if (existing == null)
             {
                 return false;
+            }
+
+            if (isActive)
+            {
+                var others = await _context.Audio
+                    .Where(a =>
+                        a.RestaurantId == existing.RestaurantId
+                        && a.LanguageId == existing.LanguageId
+                        && a.AudioId != existing.AudioId
+                        && a.IsActive)
+                    .ToListAsync();
+
+                foreach (var other in others)
+                {
+                    other.IsActive = false;
+                }
             }
 
             existing.IsActive = isActive;

@@ -12,8 +12,6 @@ public class NarrationFlowService : INarrationFlowService
     private readonly IAudioLogSyncService _audioLogSyncService;
     private readonly ILanguageService _languageService;
     private readonly IHistoryService _historyService;
-    private readonly ILocationLogSyncService _locationLogSyncService;
-    private readonly IQrAccessService _qrAccessService;
 
     // Track POI đã phát audio trong phiên
     private readonly HashSet<string> _playedPOIs = new();
@@ -29,7 +27,11 @@ public class NarrationFlowService : INarrationFlowService
 
     private readonly Queue<NarrationQueueItem> _playQueue = new();
     private bool _isProcessingQueue = false;
-    private CancellationTokenSource? _qrGuardCts;
+    private string? _currentPlayingPoiId;
+    private readonly object _autoNarrationScopeLock = new();
+    private HashSet<string>? _autoNarrationScopedPoiIds;
+    private CancellationTokenSource? _switchCutoffCts;
+    private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3);
     public bool IsNarrating => _isNarrationEnabled;
 
     public NarrationFlowService(
@@ -38,9 +40,7 @@ public class NarrationFlowService : INarrationFlowService
         IAudioService audioService,
         IAudioLogSyncService audioLogSyncService,
         ILanguageService languageService,
-        IHistoryService historyService,
-        ILocationLogSyncService locationLogSyncService,
-        IQrAccessService qrAccessService)
+        IHistoryService historyService)
     {
         _poiService = poiService;
         _locationService = locationService;
@@ -48,8 +48,6 @@ public class NarrationFlowService : INarrationFlowService
         _audioLogSyncService = audioLogSyncService;
         _languageService = languageService;
         _historyService = historyService;
-        _locationLogSyncService = locationLogSyncService;
-        _qrAccessService = qrAccessService;
     }
 
     public void StartNarration()
@@ -66,7 +64,6 @@ public class NarrationFlowService : INarrationFlowService
 
         _locationService.LocationChanged += OnLocationChanged;
         _ = _locationService.StartTrackingAsync();
-        StartQrGuardLoopIfNeeded();
 
         var cachedLocation = _locationService.LastKnownLocation;
         if (cachedLocation != null)
@@ -88,6 +85,40 @@ public class NarrationFlowService : INarrationFlowService
         });
     }
 
+    public void SetAutoNarrationPoiScope(IEnumerable<string>? poiIds)
+    {
+        HashSet<string>? normalizedScope = null;
+        if (poiIds != null)
+        {
+            var normalized = poiIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.Ordinal);
+
+            if (normalized.Count > 0)
+            {
+                normalizedScope = normalized;
+            }
+        }
+
+        lock (_autoNarrationScopeLock)
+        {
+            _autoNarrationScopedPoiIds = normalizedScope;
+        }
+
+        // Scope narration cần reset geofence để tránh state POI trước đó làm lệch trigger.
+        _poiService.ResetGeofenceState();
+    }
+
+    public void ClearAutoNarrationPoiScope()
+    {
+        lock (_autoNarrationScopeLock)
+        {
+            _autoNarrationScopedPoiIds = null;
+        }
+
+        _poiService.ResetGeofenceState();
+    }
+
     public void StopNarration()
     {
         if (!_isNarrationEnabled) return;
@@ -99,8 +130,9 @@ public class NarrationFlowService : INarrationFlowService
 
         // stop audio
         _audioService.StopSound();
-        _qrGuardCts?.Cancel();
-        _qrGuardCts = null;
+        _switchCutoffCts?.Cancel();
+        _switchCutoffCts = null;
+        _currentPlayingPoiId = null;
 
         // clear queue
         _playQueue.Clear();
@@ -136,12 +168,6 @@ public class NarrationFlowService : INarrationFlowService
 
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
-        if (_isNarrationEnabled && !await EnsureQrAccessAsync())
-        {
-            StopNarration();
-            return;
-        }
-
         if (currentLocation == null)
             currentLocation = await _locationService.GetCurrentLocationAsync();
 
@@ -156,18 +182,27 @@ public class NarrationFlowService : INarrationFlowService
             return;
         }
 
+        var scopedPois = ApplyAutoNarrationScope(pois, force);
+        if (scopedPois.Count == 0)
+        {
+            return;
+        }
+
         // SỬ DỤNG GEOFENCE TRANSITION từ POIService
         // UpdateNearestPOI trả về POI mới khi:
         // - Enter vào POI (lần đầu vào radius 30m)
         // - Chuyển từ POI này sang POI khác (cả hai trong radius 30m)
-        var newPoi = _poiService.UpdateNearestPOI(currentLocation.Latitude, currentLocation.Longitude);
+        var newPoi = _poiService.UpdateNearestPOI(
+            currentLocation.Latitude,
+            currentLocation.Longitude,
+            scopedPois);
 
         // Nếu có POI mới từ geofence transition HOẶC force trigger
         if (newPoi != null || force)
         {
             // Nếu force, dùng nearest POI
             var targetPoi = force
-                ? _poiService.GetNearestPOI(currentLocation, pois)
+                ? _poiService.GetNearestPOI(currentLocation, scopedPois)
                 : newPoi;
 
             if (targetPoi == null)
@@ -177,6 +212,42 @@ public class NarrationFlowService : INarrationFlowService
 
             await TryPlayAudioAsync(targetPoi, currentLocation, force);
         }
+    }
+
+    private List<POI> ApplyAutoNarrationScope(IEnumerable<POI> pois, bool force)
+    {
+        if (force)
+        {
+            return pois.ToList();
+        }
+
+        if (!IsMapPageRouteActive())
+        {
+            // Chỉ áp dụng scope trong lúc người dùng thực sự đang ở MapPage.
+            return pois.ToList();
+        }
+
+        HashSet<string>? activeScope;
+        lock (_autoNarrationScopeLock)
+        {
+            activeScope = _autoNarrationScopedPoiIds;
+        }
+
+        if (activeScope == null || activeScope.Count == 0)
+        {
+            return pois.ToList();
+        }
+
+        return pois
+            .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId) && activeScope.Contains(p.restaurantId))
+            .ToList();
+    }
+
+    private static bool IsMapPageRouteActive()
+    {
+        var route = Shell.Current?.CurrentState?.Location?.ToString();
+        return !string.IsNullOrWhiteSpace(route)
+            && route.Contains("MapPage", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task TryPlayAudioAsync(POI poi, Location currentLocation, bool force = false)
@@ -212,6 +283,19 @@ public class NarrationFlowService : INarrationFlowService
         // Force luôn cho phép phát lại POI hiện tại
         if (force || !alreadyPlayed)
         {
+            var shouldInterruptForPoiSwitch = !force
+                && _audioService.IsPlaying
+                && _isProcessingQueue
+                && !string.IsNullOrWhiteSpace(_currentPlayingPoiId)
+                && !string.Equals(_currentPlayingPoiId, poiId, StringComparison.OrdinalIgnoreCase);
+
+            if (shouldInterruptForPoiSwitch)
+            {
+                // Khi chuyển sang POI mới trong lúc audio cũ đang phát,
+                // chỉ giữ lại POI mới trong queue để phát ngay sau khi cắt audio cũ.
+                _playQueue.Clear();
+            }
+
             // Thêm vào queue để phát
             _playQueue.Enqueue(new NarrationQueueItem
             {
@@ -227,6 +311,11 @@ public class NarrationFlowService : INarrationFlowService
 
             // Cập nhật thời gian phát gần nhất
             _poiLastPlayedTime[poiId] = DateTime.Now;
+
+            if (shouldInterruptForPoiSwitch)
+            {
+                ScheduleCutoffForPoiSwitch(_currentPlayingPoiId!, poiId);
+            }
 
             await ProcessQueueAsync();
         }
@@ -249,6 +338,7 @@ public class NarrationFlowService : INarrationFlowService
 
             var queueItem = _playQueue.Dequeue();
             var poi = queueItem.Poi;
+            _currentPlayingPoiId = poi.restaurantId;
             DateTime? startedAtUtc = null;
             await _audioService.PlaySound(queueItem.AudioId);
 
@@ -278,9 +368,50 @@ public class NarrationFlowService : INarrationFlowService
                     startedAtUtc.Value,
                     endedAtUtc);
             }
+
+            _currentPlayingPoiId = null;
         }
 
         _isProcessingQueue = false;
+    }
+
+    private void ScheduleCutoffForPoiSwitch(string fromPoiId, string toPoiId)
+    {
+        _switchCutoffCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _switchCutoffCts = cts;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(PoiSwitchCutoffDelay, cts.Token);
+
+                if (cts.IsCancellationRequested || !_isNarrationEnabled)
+                {
+                    return;
+                }
+
+                if (_audioService.IsPlaying
+                    && string.Equals(_currentPlayingPoiId, fromPoiId, StringComparison.OrdinalIgnoreCase))
+                {
+                    _audioService.StopSound();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            finally
+            {
+                if (ReferenceEquals(_switchCutoffCts, cts))
+                {
+                    _switchCutoffCts = null;
+                }
+
+                cts.Dispose();
+            }
+        });
     }
 
     private async Task<bool> WaitForPlaybackStartAsync(int timeoutMs = 2000)
@@ -306,50 +437,6 @@ public class NarrationFlowService : INarrationFlowService
     {
         _playedPOIs.Clear();
         _poiLastPlayedTime.Clear();
-    }
-
-    private void StartQrGuardLoopIfNeeded()
-    {
-        if (!_qrAccessService.IsQrTimeRestricted)
-        {
-            return;
-        }
-
-        _qrGuardCts?.Cancel();
-        _qrGuardCts = new CancellationTokenSource();
-        var token = _qrGuardCts.Token;
-
-        _ = Task.Run(async () =>
-        {
-            while (!token.IsCancellationRequested && _isNarrationEnabled)
-            {
-                if (!await EnsureQrAccessAsync())
-                {
-                    StopNarration();
-                    break;
-                }
-
-                try
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(5), token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-            }
-        }, token);
-    }
-
-    private async Task<bool> EnsureQrAccessAsync()
-    {
-        if (!_qrAccessService.IsQrTimeRestricted)
-        {
-            return true;
-        }
-
-        var sessionId = _locationLogSyncService.CurrentSessionId;
-        return await _qrAccessService.CanContinueNarrationAsync(sessionId);
     }
 
     private static AudioModel? ResolveSelectedAudio(POI poi, string languageCode)

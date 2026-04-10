@@ -14,4 +14,10 @@ namespace food_market_narrator_api.DTOs.Auth
         public string Username { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
     }
+
+    public class ForgotPasswordSendOtpResponse
+    {
+        public string Message { get; set; } = string.Empty;
+        public int ExpiresInSeconds { get; set; }
+    }
 }

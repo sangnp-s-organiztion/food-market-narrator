@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:food_market_narrator.Models"
+             xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
+             x:Class="food_market_narrator.Views.TourPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#FFFCF8">
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
+        <Grid Grid.Row="0" Padding="14,14,14,10" ColumnDefinitions="3,*" ColumnSpacing="12">
+            <Border BackgroundColor="#F2B36E"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 4"
+                    WidthRequest="3"
+                    HeightRequest="44"
+                    VerticalOptions="Center"/>
+
+            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                <Label Text="Khám phá gì hôm nay?"
+                       FontSize="34"
+                       FontFamily="OpenSansSemibold"
+                       TextColor="#2C2C2C"
+                       LineBreakMode="WordWrap" />
+                <Label Text="HÀNH TRÌNH ẨM THỰC PHỐ VĨNH KHÁNH"
+                       FontSize="11"
+                       FontAttributes="Bold"
+                       TextColor="#C09163"
+                       LineBreakMode="TailTruncation" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <CollectionView x:Name="TourCollectionView"
+                        Grid.Row="1"
+                        Margin="12,0,12,0"
+                        SelectionMode="None"
+                        VerticalOptions="FillAndExpand"
+                        VerticalScrollBarVisibility="Never">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                 Span="2"
+                                 HorizontalItemSpacing="10"
+                                 VerticalItemSpacing="12"/>
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="20,50"
+                                     Spacing="10"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Label Text="&#xf5a0;"
+                           FontFamily="FASolid"
+                           FontSize="48"
+                           TextColor="#E0E0E0"
+                           HorizontalOptions="Center"/>
+                      <Label Text="Chưa có hành trình khả dụng"
+                           FontSize="16"
+                           TextColor="#9E9E9E"
+                           HorizontalOptions="Center"/>
+                      <Label Text="Vui lòng kiểm tra lại kết nối hoặc dữ liệu hành trình từ máy chủ"
+                           FontSize="13"
+                           TextColor="#BDBDBD"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:TourModel">
+                    <Border Margin="0,0,0,0"
+                            BackgroundColor="White"
+                            Stroke="#EDE7E1"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 20"
+                            Padding="0">
+                        <VerticalStackLayout Spacing="0">
+                            <Border StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 20,20,0,0"
+                                    HeightRequest="118">
+                                <Image Source="{Binding DisplayImageSource}" Aspect="AspectFill"/>
+                            </Border>
+
+                            <VerticalStackLayout Padding="10,10,10,10" Spacing="6">
+                                <Label Text="{Binding Name}"
+                                       FontSize="15"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="#2C2C2C"
+                                       LineBreakMode="TailTruncation"/>
+
+                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                    <Label Text="&#xf3c5;"
+                                           FontFamily="FASolid"
+                                           FontSize="10"
+                                           TextColor="#B6895B"
+                                           VerticalOptions="Center"/>
+                                    <Label Text="{Binding DurationCompactDisplay}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#B6895B"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+
+                                <Button Text="Xem chi tiết"
+                                        Clicked="OnViewDetailClicked"
+                                        FontSize="12"
+                                        Padding="12,6"
+                                        CornerRadius="12"
+                                        BackgroundColor="#FFF3E3"
+                                        TextColor="#B6895B"
+                                        HorizontalOptions="Fill"
+                                        Margin="0,2,0,0"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnTourCardTapped"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+        <shared:BottomNavigationView Grid.Row="2" ActiveTab="Tour"/>
+    </Grid>
+</ContentPage>

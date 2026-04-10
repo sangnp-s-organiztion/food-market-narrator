@@ -2,6 +2,7 @@
 using BruTile.Web;
 using food_market_narrator.Models;
 using food_market_narrator.Services;
+using food_market_narrator.Settings;
 using Mapsui;
 using Mapsui.Extensions;
 using Mapsui.Layers;
@@ -10,6 +11,7 @@ using Mapsui.Styles;
 using Mapsui.Tiling.Layers;
 using Mapsui.UI.Maui;
 using Microsoft.Maui.Devices.Sensors;
+using System.Runtime.CompilerServices;
 
 namespace food_market_narrator.Helpers
 {
@@ -17,10 +19,35 @@ namespace food_market_narrator.Helpers
     {
         private const string PoiLayerName = "POIs";
         private const string PoiLabelLayerName = "POILabels";
+        private const string PoiOrderLayerName = "POIOrders";
         private const string UserLocationLayerName = "UserLocation";
         private const string OsmLayerName = "OpenStreetMap";
         private const double PoiLabelOffsetMeters = 8;
         private const double PoiLabelVisibleRadiusMeters = 40;
+        private static readonly ConditionalWeakTable<MapControl, List<PointFeature>> AllPoiFeaturesByMap = new();
+
+        public static string GetTileCacheDirectory()
+        {
+            return AppSettings.MapTileCacheDirectory;
+        }
+
+        public static bool HasCachedMapTiles()
+        {
+            try
+            {
+                var cacheDir = GetTileCacheDirectory();
+                if (!Directory.Exists(cacheDir))
+                {
+                    return false;
+                }
+
+                return Directory.EnumerateFiles(cacheDir, "*.png", SearchOption.AllDirectories).Any();
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public static async Task LoadMapAsync(
             MapControl mapControl,
@@ -35,7 +62,7 @@ namespace food_market_narrator.Helpers
 
                 if (!mapControl.Map.Layers.Any(l => l.Name == OsmLayerName))
                 {
-                    var cacheDir = Path.Combine(FileSystem.CacheDirectory, "osm_tiles");
+                    var cacheDir = GetTileCacheDirectory();
                     Directory.CreateDirectory(cacheDir);
 
                     var tileSource = new HttpTileSource(
@@ -66,6 +93,10 @@ namespace food_market_narrator.Helpers
                 if (existingLabelLayer != null)
                     mapControl.Map.Layers.Remove(existingLabelLayer);
 
+                var existingOrderLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiOrderLayerName);
+                if (existingOrderLayer != null)
+                    mapControl.Map.Layers.Remove(existingOrderLayer);
+
                 var features = new List<PointFeature>();
                 foreach (var poi in pois)
                 {
@@ -87,6 +118,9 @@ namespace food_market_narrator.Helpers
                 };
                 mapControl.Map.Layers.Add(poiLayer);
 
+                AllPoiFeaturesByMap.Remove(mapControl);
+                AllPoiFeaturesByMap.Add(mapControl, features.ToList());
+
                 var poiLabelLayer = new MemoryLayer
                 {
                     Name = PoiLabelLayerName,
@@ -94,6 +128,14 @@ namespace food_market_narrator.Helpers
                     Style = CreatePoiLabelStyle()
                 };
                 mapControl.Map.Layers.Add(poiLabelLayer);
+
+                var poiOrderLayer = new MemoryLayer
+                {
+                    Name = PoiOrderLayerName,
+                    Features = new List<IFeature>(),
+                    Style = CreatePoiOrderLabelStyle()
+                };
+                mapControl.Map.Layers.Add(poiOrderLayer);
 
                 if (focusLocation != null)
                 {
@@ -115,18 +157,38 @@ namespace food_market_narrator.Helpers
         /// <summary>
         /// Highlight the nearest POI on map without moving camera.
         /// </summary>
-        public static void HighlightPOI(MapControl mapControl, POI? nearest, bool isSearchResult = false)
+        public static void HighlightPOI(
+            MapControl mapControl,
+            POI? nearest,
+            bool isSearchResult = false,
+            IEnumerable<string>? visiblePoiIds = null,
+            IReadOnlyDictionary<string, int>? tourStopOrdersByPoiId = null)
         {
             var ids = nearest?.restaurantId == null
                 ? null
                 : new[] { nearest.restaurantId };
-            HighlightPOIs(mapControl, ids, isSearchResult);
+            HighlightPOIs(mapControl, ids, isSearchResult, visiblePoiIds, tourStopOrdersByPoiId);
         }
 
-        public static void HighlightPOIs(MapControl mapControl, IEnumerable<string>? highlightedPoiIds, bool isSearchResult = false)
+        public static void HighlightPOIs(
+            MapControl mapControl,
+            IEnumerable<string>? highlightedPoiIds,
+            bool isSearchResult = false,
+            IEnumerable<string>? visiblePoiIds = null,
+            IReadOnlyDictionary<string, int>? tourStopOrdersByPoiId = null)
         {
             var poiLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiLayerName) as MemoryLayer;
             if (poiLayer == null) return;
+
+            var allFeatures = AllPoiFeaturesByMap.TryGetValue(mapControl, out var cachedFeatures)
+                ? cachedFeatures
+                : poiLayer.Features.OfType<PointFeature>().ToList();
+
+            if (!AllPoiFeaturesByMap.TryGetValue(mapControl, out _))
+            {
+                AllPoiFeaturesByMap.Remove(mapControl);
+                AllPoiFeaturesByMap.Add(mapControl, allFeatures);
+            }
 
             var idSet = highlightedPoiIds == null
                 ? new HashSet<string>()
@@ -134,14 +196,46 @@ namespace food_market_narrator.Helpers
                     .Where(id => !string.IsNullOrWhiteSpace(id))
                     .ToHashSet(StringComparer.Ordinal);
 
-            var highlightedFeatures = new List<PointFeature>();
+            var visibleSet = visiblePoiIds == null
+                ? null
+                : visiblePoiIds
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToHashSet(StringComparer.Ordinal);
 
-            foreach (var feature in poiLayer.Features.OfType<PointFeature>())
+            var highlightedFeatures = new List<PointFeature>();
+            var visibleFeatures = new List<PointFeature>();
+
+            foreach (var feature in allFeatures)
             {
                 feature.Styles.Clear();
                 var featureId = feature["id"]?.ToString();
+                var isVisible = visibleSet == null || (featureId != null && visibleSet.Contains(featureId));
+
+                if (!isVisible)
+                {
+                    continue;
+                }
+
+                visibleFeatures.Add(feature);
+
                 bool isHighlighted = featureId != null && idSet.Contains(featureId);
-                feature.Styles.Add(CreateMarkerStyle(isHighlighted, isSearchResult && isHighlighted));
+                var stopOrder = 0;
+                var hasTourOrder = featureId != null
+                    && tourStopOrdersByPoiId != null
+                    && tourStopOrdersByPoiId.TryGetValue(featureId, out stopOrder)
+                    && stopOrder > 0;
+
+                feature.Styles.Add(CreateMarkerStyle(isHighlighted, isSearchResult && isHighlighted, hasTourOrder));
+
+                if (hasTourOrder)
+                {
+                    feature["stopOrder"] = stopOrder.ToString();
+                }
+                else
+                {
+                    feature["stopOrder"] = string.Empty;
+                }
+
                 if (isHighlighted)
                 {
                     highlightedFeatures.Add(feature);
@@ -150,8 +244,7 @@ namespace food_market_narrator.Helpers
 
             if (highlightedFeatures.Count > 0)
             {
-                var reordered = poiLayer.Features
-                    .OfType<PointFeature>()
+                var reordered = visibleFeatures
                     .Where(f => !highlightedFeatures.Contains(f))
                     .Cast<IFeature>()
                     .ToList();
@@ -159,6 +252,15 @@ namespace food_market_narrator.Helpers
                 reordered.AddRange(highlightedFeatures);
                 poiLayer.Features = reordered;
             }
+            else
+            {
+                poiLayer.Features = visibleFeatures.Cast<IFeature>().ToList();
+            }
+
+            UpdatePoiOrderLabels(mapControl, visibleFeatures, tourStopOrdersByPoiId);
+
+            // Keep label layer in sync with currently visible POIs (tour/search modes).
+            RefreshPoiLabelsFromCurrentUserLocation(mapControl);
 
             // FIX: Invalidate layer data cache trước, sau đó force re-render graphics.
             // RefreshData() đơn độc không đủ khi 2 POI gần nhau vì Mapsui
@@ -166,6 +268,44 @@ namespace food_market_narrator.Helpers
             poiLayer.DataHasChanged();
             mapControl.Map.RefreshData();
             mapControl.Map.RefreshGraphics();
+        }
+
+        private static void UpdatePoiOrderLabels(
+            MapControl mapControl,
+            IEnumerable<PointFeature> visiblePoiFeatures,
+            IReadOnlyDictionary<string, int>? tourStopOrdersByPoiId)
+        {
+            var poiOrderLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == PoiOrderLayerName) as MemoryLayer;
+            if (poiOrderLayer == null)
+            {
+                return;
+            }
+
+            if (tourStopOrdersByPoiId == null || tourStopOrdersByPoiId.Count == 0)
+            {
+                poiOrderLayer.Features = new List<IFeature>();
+                poiOrderLayer.DataHasChanged();
+                return;
+            }
+
+            var orderFeatures = new List<IFeature>();
+            foreach (var poiFeature in visiblePoiFeatures)
+            {
+                var featureId = poiFeature["id"]?.ToString();
+                if (featureId == null
+                    || !tourStopOrdersByPoiId.TryGetValue(featureId, out var stopOrder)
+                    || stopOrder <= 0)
+                {
+                    continue;
+                }
+
+                var orderFeature = new PointFeature(poiFeature.Point.X, poiFeature.Point.Y);
+                orderFeature["stopOrder"] = stopOrder.ToString();
+                orderFeatures.Add(orderFeature);
+            }
+
+            poiOrderLayer.Features = orderFeatures;
+            poiOrderLayer.DataHasChanged();
         }
 
         /// <summary>
@@ -257,6 +397,19 @@ namespace food_market_narrator.Helpers
             poiLabelLayer.DataHasChanged();
         }
 
+        private static void RefreshPoiLabelsFromCurrentUserLocation(MapControl mapControl)
+        {
+            var userLayer = mapControl.Map.Layers.FirstOrDefault(l => l.Name == UserLocationLayerName) as MemoryLayer;
+            var userFeature = userLayer?.Features?.OfType<PointFeature>().FirstOrDefault();
+            if (userFeature == null)
+            {
+                return;
+            }
+
+            var lonLat = SphericalMercator.ToLonLat(userFeature.Point.X, userFeature.Point.Y);
+            RefreshPoiLabelsByUserLocation(mapControl, lonLat.lat, lonLat.lon);
+        }
+
         private static bool TryGetCoordinate(object? value, out double coordinate)
         {
             coordinate = 0;
@@ -321,19 +474,31 @@ namespace food_market_narrator.Helpers
             mapControl.Map.Navigator.CenterOnAndZoomTo(new MPoint(spherical.x, spherical.y), resolution);
         }
 
-        private static SymbolStyle CreateMarkerStyle(bool isHighlighted, bool isSearchHighlight = false)
+        private static SymbolStyle CreateMarkerStyle(bool isHighlighted, bool isSearchHighlight = false, bool isTourPoi = false)
         {
-            var highlightColor = isSearchHighlight
+            var defaultHighlightColor = isSearchHighlight
                 ? new Mapsui.Styles.Color(0, 170, 145)
                 : new Mapsui.Styles.Color(255, 0, 0);
 
+            var tourNormalColor = new Mapsui.Styles.Color(245, 158, 11);
+            var tourHighlightColor = new Mapsui.Styles.Color(234, 88, 12);
+            var normalColor = new Mapsui.Styles.Color(244, 140, 6);
+
+            var fillColor = isTourPoi
+                ? (isHighlighted ? tourHighlightColor : tourNormalColor)
+                : (isHighlighted ? defaultHighlightColor : normalColor);
+
+            var outlineWidth = isTourPoi ? 3.2 : 2;
+            var baseScale = isTourPoi ? 0.62 : 0.35;
+            var highlightScale = isSearchHighlight
+                ? 0.54
+                : (isTourPoi ? 0.7 : 0.45);
+
             return new SymbolStyle
             {
-                SymbolScale = isHighlighted ? (isSearchHighlight ? 0.5 : 0.45) : 0.35,
-                Fill = new Mapsui.Styles.Brush(isHighlighted
-                    ? highlightColor
-                    : new Mapsui.Styles.Color(244, 140, 6)),
-                Outline = new Pen(new Mapsui.Styles.Color(255, 255, 255), 2),
+                SymbolScale = isHighlighted ? highlightScale : baseScale,
+                Fill = new Mapsui.Styles.Brush(fillColor),
+                Outline = new Pen(new Mapsui.Styles.Color(255, 255, 255), outlineWidth),
                 SymbolType = SymbolType.Ellipse
             };
         }
@@ -346,6 +511,19 @@ namespace food_market_narrator.Helpers
                 ForeColor = new Mapsui.Styles.Color(47, 54, 64),
                 BackColor = new Mapsui.Styles.Brush(new Mapsui.Styles.Color(255, 255, 255, 232)),
                 CollisionDetection = true
+            };
+        }
+
+        private static LabelStyle CreatePoiOrderLabelStyle()
+        {
+            return new LabelStyle
+            {
+                LabelColumn = "stopOrder",
+                ForeColor = new Mapsui.Styles.Color(255, 255, 255),
+                BackColor = new Mapsui.Styles.Brush(new Mapsui.Styles.Color(255, 255, 255, 0)),
+                HorizontalAlignment = LabelStyle.HorizontalAlignmentEnum.Center,
+                VerticalAlignment = LabelStyle.VerticalAlignmentEnum.Center,
+                CollisionDetection = false
             };
         }
     }

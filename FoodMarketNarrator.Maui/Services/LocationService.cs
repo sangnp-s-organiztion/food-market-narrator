@@ -10,6 +10,8 @@ public class LocationService : ILocationService
     private Task? _trackingTask;
     private Location? _lastKnownLocation;
     private Location? _lastPublishedLocation;
+    private readonly SemaphoreSlim _trackingInitLock = new(1, 1);
+    private readonly SemaphoreSlim _permissionLock = new(1, 1);
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
     private const double MinPublishDistanceMeters = 6;
@@ -48,12 +50,20 @@ public class LocationService : ILocationService
 
     public async Task StartTrackingAsync()
     {
-        if (_isTracking) return;
+        if (_isTracking)
+        {
+            return;
+        }
 
-        var granted = await EnsureForegroundTrackingPermissionAsync();
-
+        await _trackingInitLock.WaitAsync();
         try
         {
+            if (_isTracking)
+            {
+                return;
+            }
+
+            var granted = await EnsureForegroundTrackingPermissionAsync();
             if (granted)
             {
                 StartForegroundTrackingServiceIfNeeded();
@@ -68,6 +78,10 @@ public class LocationService : ILocationService
         {
             _isTracking = false;
             // Console.WriteLine($"Error starting tracking: {ex.Message}");
+        }
+        finally
+        {
+            _trackingInitLock.Release();
         }
     }
 
@@ -95,8 +109,8 @@ public class LocationService : ILocationService
         {
             _backgroundPermissionExplained = true;
             await ShowInfoAsync(
-                "Bat tracking nen",
-                "De theo doi vi tri khi app chay nen, hay chon phep vi tri \"Always allow\".");
+                "Bật theo dõi nền",
+                "Để theo dõi vị trí khi ứng dụng chạy nền, hãy chọn quyền vị trí \"Luôn cho phép\".");
         }
 
         alwaysStatus = await Permissions.RequestAsync<Permissions.LocationAlways>();
@@ -106,10 +120,10 @@ public class LocationService : ILocationService
         }
 
         var shouldOpenSettings = await ShowConfirmAsync(
-            "Thieu quyen vi tri nen",
-            "Android can quyen vi tri nen de tracking on dinh. Ban co muon mo Settings de cap quyen ngay khong?",
-            "Mo Settings",
-            "De sau");
+            "Thiếu quyền vị trí nền",
+            "Android cần quyền vị trí nền để theo dõi ổn định. Bạn có muốn mở Cài đặt để cấp quyền ngay không?",
+            "Mở cài đặt",
+            "Để sau");
 
         if (shouldOpenSettings)
         {
@@ -222,38 +236,46 @@ public class LocationService : ILocationService
 
     private async Task<bool> EnsureForegroundTrackingPermissionAsync()
     {
-        var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-        if (whileInUseStatus != PermissionStatus.Granted)
+        await _permissionLock.WaitAsync();
+        try
         {
-            if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+            var whileInUseStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (whileInUseStatus != PermissionStatus.Granted)
             {
-                await ShowInfoAsync(
-                    "Can quyen vi tri",
-                    "Ung dung can quyen truy cap vi tri de phat hien POI gan ban.");
+                if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+                {
+                    await ShowInfoAsync(
+                        "Cần quyền vị trí",
+                        "Ứng dụng cần quyền truy cập vị trí để phát hiện POI gần bạn.");
+                }
+
+                whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
             }
 
-            whileInUseStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-        }
-
-        if (whileInUseStatus != PermissionStatus.Granted)
-        {
-            return false;
-        }
+            if (whileInUseStatus != PermissionStatus.Granted)
+            {
+                return false;
+            }
 
 #if ANDROID
-        if (OperatingSystem.IsAndroidVersionAtLeast(33))
-        {
-            // Notification permission is optional for location data, but requested so foreground
-            // notification can be shown reliably on Android 13+.
-            var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-            if (notificationStatus != PermissionStatus.Granted)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
-                _ = await Permissions.RequestAsync<Permissions.PostNotifications>();
+                // Notification permission is optional for location data, but requested so foreground
+                // notification can be shown reliably on Android 13+.
+                var notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+                if (notificationStatus != PermissionStatus.Granted)
+                {
+                    _ = await Permissions.RequestAsync<Permissions.PostNotifications>();
+                }
             }
-        }
 #endif
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            _permissionLock.Release();
+        }
     }
 
     private static Task ShowInfoAsync(string title, string message)
@@ -263,7 +285,7 @@ public class LocationService : ILocationService
             var page = Application.Current?.Windows.FirstOrDefault()?.Page;
             if (page != null)
             {
-                await page.DisplayAlertAsync(title, message, "OK");
+                await page.DisplayAlertAsync(title, message, "Đóng");
             }
         });
     }

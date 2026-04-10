@@ -11,6 +11,7 @@ import { getMeApi, loginApi, logoutApi } from "@/services/api";
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  refreshMe: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -21,23 +22,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
   });
 
+  const refreshMe = useCallback(async () => {
+    const me = await getMeApi();
+    if (me.role !== "saler") {
+      await logoutApi().catch(() => undefined);
+      setAuthState({ user: null, isAuthenticated: false });
+      throw new Error("Unauthorized role");
+    }
+    setAuthState({ user: me, isAuthenticated: true });
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
     async function bootstrapAuth() {
       try {
-        const me = await getMeApi();
-        if (me.role !== "saler") {
-          await logoutApi().catch(() => undefined);
-          if (mounted) {
-            setAuthState({ user: null, isAuthenticated: false });
-          }
-          return;
-        }
-
-        if (mounted) {
-          setAuthState({ user: me, isAuthenticated: true });
-        }
+        await refreshMe();
       } catch {
         if (mounted) {
           setAuthState({ user: null, isAuthenticated: false });
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [refreshMe]);
 
   const login = useCallback(async (username: string, password: string) => {
     try {
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
+    <AuthContext.Provider value={{ ...authState, login, logout, refreshMe }}>
       {children}
     </AuthContext.Provider>
   );

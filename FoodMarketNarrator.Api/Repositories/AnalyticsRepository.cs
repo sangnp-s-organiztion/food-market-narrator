@@ -50,6 +50,66 @@ public class AnalyticsRepository
         return await _db.GetCollection<BsonDocument>("AudioLogs").CountDocumentsAsync(filter);
     }
 
+    public async Task<long> GetTotalPlayCountByRestaurantAsync(string restaurantId)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("restaurant_id", restaurantId),
+            Builders<BsonDocument>.Filter.Gte("duration", 5)
+        );
+        return await _db.GetCollection<BsonDocument>("AudioLogs").CountDocumentsAsync(filter);
+    }
+
+    public async Task<double> GetAverageListeningTimeByRestaurantAsync(string restaurantId)
+    {
+        var pipeline = new[]
+        {
+            new BsonDocument("$match",
+                new BsonDocument
+                {
+                    { "restaurant_id", restaurantId },
+                    { "duration", new BsonDocument("$gte", 5) }
+                }),
+            new BsonDocument("$group",
+                new BsonDocument
+                {
+                    { "_id", BsonNull.Value },
+                    { "avgDuration", new BsonDocument("$avg", "$duration") }
+                })
+        };
+
+        var result = await _db.GetCollection<BsonDocument>("AudioLogs")
+            .Aggregate<BsonDocument>(pipeline)
+            .FirstOrDefaultAsync();
+
+        return result != null ? result["avgDuration"].ToDouble() : 0;
+    }
+
+    public async Task<long> GetTotalSessionCountByRestaurantAsync(string restaurantId)
+    {
+        var pipeline = new[]
+        {
+            new BsonDocument("$match",
+                new BsonDocument
+                {
+                    { "restaurant_id", restaurantId },
+                    { "duration", new BsonDocument("$gte", 5) },
+                    { "session_id", new BsonDocument("$ne", BsonNull.Value) }
+                }),
+            new BsonDocument("$group",
+                new BsonDocument
+                {
+                    { "_id", "$session_id" }
+                }),
+            new BsonDocument("$count", "count")
+        };
+
+        var result = await _db.GetCollection<BsonDocument>("AudioLogs")
+            .Aggregate<BsonDocument>(pipeline)
+            .FirstOrDefaultAsync();
+
+        return result != null && result.Contains("count") ? result["count"].ToInt64() : 0;
+    }
+
     // ─── Heatmap: GeoJSON points from LocationLogs (hours window or all-time) ─
     public async Task<List<GeoJsonPoint>> GetHeatmapPointsAsync(int? hours = 24)
     {
@@ -483,17 +543,38 @@ public class AnalyticsRepository
 
         var pipeline = new[]
         {
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time_raw",
+                    new BsonDocument("$ifNull", new BsonArray
+                    {
+                        "$start_time",
+                        new BsonDocument("$ifNull", new BsonArray
+                        {
+                            "$timestamp",
+                            "$created_at"
+                        })
+                    }))),
+            new BsonDocument("$addFields",
+                new BsonDocument("event_time",
+                    new BsonDocument("$convert", new BsonDocument
+                    {
+                        { "input", "$event_time_raw" },
+                        { "to", "date" },
+                        { "onError", BsonNull.Value },
+                        { "onNull", BsonNull.Value }
+                    }))),
             new BsonDocument("$match",
                 new BsonDocument
                 {
-                    { "timestamp", new BsonDocument("$gte", since) },
+                    { "event_time", new BsonDocument("$ne", BsonNull.Value) },
+                    { "event_time", new BsonDocument("$gte", since) },
                     { "duration", new BsonDocument("$gte", 5) }
                 }),
             new BsonDocument("$group",
                 new BsonDocument
                 {
                     { "_id", new BsonDocument("$dateToString",
-                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$timestamp" } }) },
+                        new BsonDocument { { "format", "%Y-%m-%d" }, { "date", "$event_time" } }) },
                     { "count", new BsonDocument("$sum", 1) }
                 }),
             new BsonDocument("$sort",

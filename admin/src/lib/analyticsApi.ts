@@ -6,6 +6,7 @@ import type {
   MovementPathsResponse,
   RecentActivityResponse,
   TopAudio,
+  ListensTimeseriesResponse,
 } from "@/types/analytics";
 
 // ─── Base ───────────────────────────────────────────────────────────────────
@@ -101,5 +102,15 @@ export const analyticsApi = {
    */
   async getAudioStats(): Promise<TopAudio[]> {
     return analyticsFetch<TopAudio[]>("/api/analytics/audio-stats");
+  },
+
+  /**
+   * GET /api/analytics/listens-timeseries?days=14
+   * Returns daily listen counts (valid plays only).
+   */
+  async getListensTimeseries(days = 14): Promise<ListensTimeseriesResponse> {
+    return analyticsFetch<ListensTimeseriesResponse>(
+      `/api/analytics/listens-timeseries?days=${days}`,
+    );
   },
 };

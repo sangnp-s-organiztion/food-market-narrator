@@ -111,6 +111,9 @@ AudioLogCreateRequest:
 - Flush định kỳ 10 giây.
 - Nếu gửi batch fail: insert lại batch vào đầu buffer để retry.
 - Buffer tối đa 2000 item, overflow thì drop item cũ nhất.
+- Buffer được persist xuống file local: offline_cache/location_logs_buffer.json.
+- Khi app start, LocationLogSyncService nạp lại buffer từ file để retry tiếp các log chưa gửi.
+- Khi buffer rỗng sau khi sync thành công, file buffer sẽ bị xóa.
 
 ### 5.2 Audio logs
 

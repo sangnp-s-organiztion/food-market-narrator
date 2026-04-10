@@ -201,7 +201,7 @@ const LogsPage = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1 className="page-title">Nhật ký hoạt động</h1>
+        <h1 className="page-title">Lịch sử hoạt động</h1>
         <span className="text-xs text-muted-foreground mono">
           Tự động cập nhật mỗi 30 giây
         </span>
@@ -210,11 +210,8 @@ const LogsPage = () => {
       <div className="max-w-7xl mx-auto px-8 py-6">
         <div className="stat-card">
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold">Nhật ký hệ thống</h2>
-              <span className="text-xs text-muted-foreground mono">
-                Nguồn: MongoDB AuditLogs
-              </span>
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold">Lịch sử hệ thống</h2>
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -261,7 +258,7 @@ const LogsPage = () => {
                       colSpan={4}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      Đang tải nhật ký hệ thống...
+                      Đang tải lịch sử hệ thống...
                     </td>
                   </tr>
                 )}
@@ -271,7 +268,7 @@ const LogsPage = () => {
                       colSpan={4}
                       className="text-center py-8 text-destructive"
                     >
-                      Không thể tải nhật ký hệ thống.
+                      Không thể tải lịch sử hệ thống.
                     </td>
                   </tr>
                 )}
@@ -283,7 +280,7 @@ const LogsPage = () => {
                         colSpan={4}
                         className="text-center py-8 text-muted-foreground"
                       >
-                        Chưa có nhật ký hệ thống nào.
+                        Chưa có lịch sử hệ thống nào.
                       </td>
                     </tr>
                   )}
@@ -321,8 +318,8 @@ const LogsPage = () => {
             {!isAuditLoading && !isAuditError && auditItems.length > 0 && (
               <div className="mt-3 px-1 flex flex-col gap-3">
                 <p className="text-xs text-muted-foreground">
-                  Hiển thị {auditItems.length} / {auditTotalCount} bản ghi nhật
-                  ký hệ thống.
+                  Hiển thị {auditItems.length} / {auditTotalCount} bản ghi lịch
+                  sử hệ thống.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -370,11 +367,8 @@ const LogsPage = () => {
 
           <div className="h-px bg-border mb-6" />
 
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Nhật ký nghe audio</h2>
-            <span className="text-xs text-muted-foreground mono">
-              Nguồn: MongoDB AudioLogs
-            </span>
+          <div className="mb-3">
+            <h2 className="text-lg font-semibold">Lịch sử nghe audio</h2>
           </div>
 
           {/* Subtle hint for action types */}
@@ -430,7 +424,7 @@ const LogsPage = () => {
               {isAudioError && (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-destructive">
-                    Không thể tải nhật ký. Vui lòng thử lại.
+                    Không thể tải lịch sử. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
@@ -440,7 +434,7 @@ const LogsPage = () => {
                     colSpan={5}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Chưa có nhật ký nào.
+                    Chưa có lịch sử nào.
                   </td>
                 </tr>
               )}
@@ -482,7 +476,7 @@ const LogsPage = () => {
             <div className="mt-3 px-1 flex flex-col gap-3">
               <p className="text-xs text-muted-foreground">
                 Hiển thị {activity.length} / {audioTotalCount} bản ghi nghe
-                audio. Nhật ký tự động cập nhật mỗi 30 giây.
+                audio. Lịch sử tự động cập nhật mỗi 30 giây.
               </p>
 
               <div className="flex flex-wrap items-center gap-2">

@@ -47,7 +47,7 @@ export const authApi = {
   },
 
   async logout(): Promise<void> {
-    await fetch(`${API_BASE}/Auth/logout`, {
+    await fetch(`${API_BASE}/Auth/admin/logout`, {
       method: "POST",
       credentials: "include",
     });

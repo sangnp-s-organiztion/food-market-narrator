@@ -5,6 +5,7 @@ using food_market_narrator.Services;
 using Mapsui;
 using Mapsui.Projections;
 using Mapsui.UI.Maui;
+using Microsoft.Maui.Networking;
 using System.Globalization;
 using System.Text;
 
@@ -13,10 +14,22 @@ namespace food_market_narrator.Views;
 [QueryProperty(nameof(Latitude), "lat")]
 [QueryProperty(nameof(Longitude), "lng")]
 [QueryProperty(nameof(LocationName), "name")]
+[QueryProperty(nameof(TourPoiIds), "tourPoiIds")]
+[QueryProperty(nameof(TourName), "tourName")]
+[QueryProperty(nameof(TourStopOrders), "tourStopOrders")]
 
 public partial class MapPage : ContentPage
 {
+    private enum PoiCategoryFilter
+    {
+        All,
+        Nearby,
+        Favorite,
+        OpenNow
+    }
+
     private const double MarkerTapPixelRadius = 28;
+    private const double NearbyFilterRadiusMeters = 100;
     private const int DefaultZoomLevel = 16;
     private const int MinZoomLevel = 3;
     private const int MaxZoomLevel = 20;
@@ -24,24 +37,70 @@ public partial class MapPage : ContentPage
 
     private readonly IPOIService _poiService;
     private readonly ILocationService _locationService;
+    private readonly NarrationFlowService _narrationFlowService;
+    private readonly IFavoriteService _favoriteService;
     private List<POI> _pois = new();
     private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
     private HashSet<string> _searchHighlightedPoiIds = new(StringComparer.Ordinal);
+    private HashSet<string> _tourPoiFilterIds = new(StringComparer.Ordinal);
+    private Dictionary<string, int> _tourStopOrdersByPoiId = new(StringComparer.Ordinal);
+    private string? _activeTourName;
+    private string? _tourPoiIdsRaw;
+    private string? _tourStopOrdersRaw;
+    private Location? _lastKnownLocation;
     private bool _isMapLoaded;
+    private bool _hasShownOfflineMapUnavailableNotice;
     private CancellationTokenSource? _searchDebounceCts;
+    private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string? LocationName { get; set; }
 
+    public string? TourPoiIds
+    {
+        get => _tourPoiIdsRaw;
+        set
+        {
+            _tourPoiIdsRaw = value;
+            _tourPoiFilterIds = ParsePoiIdSet(value);
+            ApplyPoiModeFromState(focusOnTour: false);
+        }
+    }
+
+    public string? TourName
+    {
+        get => _activeTourName;
+        set
+        {
+            _activeTourName = DecodeQueryValue(value);
+            UpdateTourFilterBanner();
+        }
+    }
+
+    public string? TourStopOrders
+    {
+        get => _tourStopOrdersRaw;
+        set
+        {
+            _tourStopOrdersRaw = value;
+            _tourStopOrdersByPoiId = ParsePoiStopOrderMap(value);
+            ApplyPoiModeFromState(focusOnTour: false);
+        }
+    }
+
     public MapPage(
         IPOIService poiService,
-        ILocationService locationService)
+        ILocationService locationService,
+        NarrationFlowService narrationFlowService,
+        IFavoriteService favoriteService)
     {
         InitializeComponent();
         _poiService = poiService;
         _locationService = locationService;
+        _narrationFlowService = narrationFlowService;
+        _favoriteService = favoriteService;
     }
 
     // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
@@ -66,6 +125,8 @@ public partial class MapPage : ContentPage
             _isMapLoaded = true;
         }
 
+        await ShowOfflineMapNoticeIfNeededAsync();
+
         if (_pois.Count == 0)
         {
             _pois = await _poiService.GetAllPOIsAsync();
@@ -76,8 +137,12 @@ public partial class MapPage : ContentPage
 
         SearchClearButton.IsVisible = !string.IsNullOrWhiteSpace(SearchEntry.Text);
         SearchSuggestionsContainer.IsVisible = false;
+        _lastKnownLocation = _locationService.LastKnownLocation;
+        UpdateCategoryFilterUi();
+        ApplyNarrationScopeFromTourFilter();
 
         HideSelectedPoiCard();
+        ApplyPoiModeFromState(focusOnTour: true);
     }
 
     protected override void OnDisappearing()
@@ -86,6 +151,7 @@ public partial class MapPage : ContentPage
 
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _searchDebounceCts?.Cancel();
+        _narrationFlowService.ClearAutoNarrationPoiScope();
         base.OnDisappearing();
     }
 
@@ -95,11 +161,14 @@ public partial class MapPage : ContentPage
         // Cập nhật vị trí người dùng trên bản đồ và kiểm tra POI gần nhất
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            _lastKnownLocation = location;
             MapHelper.UpdateUserLocation(mapControl, location.Latitude, location.Longitude);
 
-            if (_searchHighlightedPoiIds.Count > 0)
+            if (_searchHighlightedPoiIds.Count > 0
+                || _tourPoiFilterIds.Count > 0
+                || _activePoiFilter != PoiCategoryFilter.All)
             {
-                MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+                ApplyPoiModeFromState(focusOnTour: false);
                 return;
             }
 
@@ -129,8 +198,10 @@ public partial class MapPage : ContentPage
             return;
         }
 
+    _lastKnownLocation = currentLocation;
         CenterMapOn(currentLocation.Latitude, currentLocation.Longitude, MyLocationZoomLevel);
         MapHelper.UpdateUserLocation(mapControl, currentLocation.Latitude, currentLocation.Longitude);
+    ApplyPoiModeFromState(focusOnTour: false);
     }
 
     private void AdjustZoom(double factor)
@@ -176,25 +247,30 @@ public partial class MapPage : ContentPage
         _searchHighlightedPoiIds.Clear();
         SearchSuggestionsContainer.IsVisible = false;
 
-        if (_pois.Count == 0)
+        var interactivePois = GetInteractivePois();
+
+        if (interactivePois.Count == 0)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
         if (e.WorldPosition == null)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
         var tapLonLat = SphericalMercator.ToLonLat(e.WorldPosition.X, e.WorldPosition.Y);
         var tappedLocation = new Location(tapLonLat.lat, tapLonLat.lon);
-        var nearestPoi = _poiService.GetNearestPOI(tappedLocation, _pois);
+        var nearestPoi = _poiService.GetNearestPOI(tappedLocation, interactivePois);
 
         if (nearestPoi == null)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
@@ -205,10 +281,18 @@ public partial class MapPage : ContentPage
         if (distanceMeters > tapThresholdMeters)
         {
             HideSelectedPoiCard();
+            ApplyPoiModeFromState(focusOnTour: false);
             return;
         }
 
         ShowSelectedPoiCard(nearestPoi);
+
+        if (_tourPoiFilterIds.Count > 0)
+        {
+            ApplyPoiModeFromState(focusOnTour: false);
+            return;
+        }
+
         MapHelper.HighlightPOI(mapControl, nearestPoi);
     }
 
@@ -228,7 +312,9 @@ public partial class MapPage : ContentPage
             _pois = await _poiService.GetAllPOIsAsync();
         }
 
-        var matchedPois = FindMatchingPois(keyword, maxResults: _pois.Count);
+        var searchablePois = GetInteractivePois();
+
+        var matchedPois = FindMatchingPois(keyword, maxResults: searchablePois.Count, sourcePois: searchablePois);
         if (matchedPois.Count == 0)
         {
             ClearSearchState();
@@ -277,18 +363,20 @@ public partial class MapPage : ContentPage
             _pois = await _poiService.GetAllPOIsAsync();
         }
 
-        _searchSuggestions = FindMatchingPois(keyword, maxResults: 6);
+        var searchablePois = GetInteractivePois();
+
+        _searchSuggestions = FindMatchingPois(keyword, maxResults: 6, sourcePois: searchablePois);
         SearchSuggestionsView.ItemsSource = _searchSuggestions;
         SearchSuggestionsContainer.IsVisible = _searchSuggestions.Count > 0;
 
-        var highlightedMatches = FindMatchingPois(keyword, maxResults: _pois.Count);
+        var highlightedMatches = FindMatchingPois(keyword, maxResults: searchablePois.Count, sourcePois: searchablePois);
         if (highlightedMatches.Count > 0)
         {
             _searchHighlightedPoiIds = highlightedMatches
                 .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId))
                 .Select(p => p.restaurantId)
                 .ToHashSet(StringComparer.Ordinal);
-            MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+            ApplyPoiModeFromState(focusOnTour: false);
         }
         else
         {
@@ -339,17 +427,17 @@ public partial class MapPage : ContentPage
             HideSelectedPoiCard();
         }
 
-        MapHelper.HighlightPOIs(mapControl, _searchHighlightedPoiIds, isSearchResult: true);
+        ApplyPoiModeFromState(focusOnTour: false);
     }
 
     private void ClearSearchState()
     {
         _searchHighlightedPoiIds.Clear();
         HideSelectedPoiCard();
-        MapHelper.HighlightPOIs(mapControl, null);
+        ApplyPoiModeFromState(focusOnTour: false);
     }
 
-    private List<POI> FindMatchingPois(string keyword, int maxResults)
+    private List<POI> FindMatchingPois(string keyword, int maxResults, IEnumerable<POI>? sourcePois = null)
     {
         var normalizedKeyword = NormalizeSearchText(keyword);
         if (string.IsNullOrWhiteSpace(normalizedKeyword))
@@ -357,7 +445,10 @@ public partial class MapPage : ContentPage
             return new List<POI>();
         }
 
-        var matches = _pois
+        var candidates = sourcePois?.ToList() ?? _pois;
+        var safeMaxResults = Math.Max(1, Math.Min(maxResults, candidates.Count == 0 ? 1 : candidates.Count));
+
+        var matches = candidates
             .Select(poi => new
             {
                 Poi = poi,
@@ -366,7 +457,7 @@ public partial class MapPage : ContentPage
             .Where(x => x.Score > 0)
             .OrderByDescending(x => x.Score)
             .ThenBy(x => x.Poi.Name?.Length ?? int.MaxValue)
-            .Take(Math.Max(1, maxResults))
+            .Take(safeMaxResults)
             .Select(x => x.Poi)
             .ToList();
 
@@ -412,6 +503,317 @@ public partial class MapPage : ContentPage
             .Normalize(NormalizationForm.FormC);
     }
 
+    private void OnMapFilterAllTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.All);
+    }
+
+    private void OnMapFilterNearTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.Nearby);
+    }
+
+    private void OnMapFilterFavoriteTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.Favorite);
+    }
+
+    private void OnMapFilterOpenTapped(object sender, TappedEventArgs e)
+    {
+        SetPoiFilter(PoiCategoryFilter.OpenNow);
+    }
+
+    private void SetPoiFilter(PoiCategoryFilter filter)
+    {
+        _activePoiFilter = filter;
+        _searchHighlightedPoiIds.Clear();
+        SearchSuggestionsContainer.IsVisible = false;
+        SearchSuggestionsView.ItemsSource = null;
+        HideSelectedPoiCard();
+        UpdateCategoryFilterUi();
+        ApplyPoiModeFromState(focusOnTour: false);
+    }
+
+    private void UpdateCategoryFilterUi()
+    {
+        SetMapChipState(MapFilterAllChip, MapFilterAllLabel, _activePoiFilter == PoiCategoryFilter.All, MapFilterAllIcon);
+        SetMapChipState(MapFilterNearChip, MapFilterNearLabel, _activePoiFilter == PoiCategoryFilter.Nearby, MapFilterNearIcon);
+        SetMapChipState(MapFilterFavoriteChip, MapFilterFavoriteLabel, _activePoiFilter == PoiCategoryFilter.Favorite, MapFilterFavoriteIcon);
+        SetMapChipState(MapFilterOpenChip, MapFilterOpenLabel, _activePoiFilter == PoiCategoryFilter.OpenNow, MapFilterOpenIcon);
+    }
+
+    private static void SetMapChipState(Border border, Label textLabel, bool isActive, Label? iconLabel = null)
+    {
+        border.BackgroundColor = isActive ? Color.FromArgb("#F48C06") : Colors.White;
+        textLabel.TextColor = isActive ? Colors.White : Color.FromArgb("#3C4043");
+        if (iconLabel != null)
+        {
+            iconLabel.TextColor = isActive ? Colors.White : Color.FromArgb("#3C4043");
+        }
+    }
+
+    private List<POI> ApplyCategoryFilter(IEnumerable<POI> source)
+    {
+        var candidates = source.ToList();
+        if (candidates.Count == 0)
+        {
+            return candidates;
+        }
+
+        switch (_activePoiFilter)
+        {
+            case PoiCategoryFilter.Nearby:
+                var location = _lastKnownLocation ?? _locationService.LastKnownLocation;
+                if (location == null)
+                {
+                    return new List<POI>();
+                }
+
+                return candidates
+                    .Where(p => _poiService.GetDistanceMeters(location, p) <= NearbyFilterRadiusMeters)
+                    .ToList();
+
+            case PoiCategoryFilter.Favorite:
+                var favoriteIds = _favoriteService
+                    .GetFavorites()
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                return candidates
+                    .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId) && favoriteIds.Contains(p.restaurantId))
+                    .ToList();
+
+            case PoiCategoryFilter.OpenNow:
+                return candidates.Where(p => p.IsCurrentlyOpen).ToList();
+
+            case PoiCategoryFilter.All:
+            default:
+                return candidates;
+        }
+    }
+
+    private void ApplyPoiModeFromState(bool focusOnTour)
+    {
+        if (!_isMapLoaded || mapControl?.Map == null)
+        {
+            return;
+        }
+
+        UpdateTourFilterBanner();
+        var visiblePoiIds = GetVisiblePoiIds();
+
+        if (_searchHighlightedPoiIds.Count > 0)
+        {
+            MapHelper.HighlightPOIs(
+                mapControl,
+                _searchHighlightedPoiIds,
+                isSearchResult: true,
+                visiblePoiIds: visiblePoiIds,
+                tourStopOrdersByPoiId: GetTourStopOrdersForCurrentMode());
+            return;
+        }
+
+        if (_tourPoiFilterIds.Count > 0)
+        {
+            var tourPois = GetInteractivePois();
+            var tourLocation = _lastKnownLocation ?? _locationService.LastKnownLocation;
+            var nearestTourPoi = tourLocation == null
+                ? null
+                : _poiService.GetNearestPOI(tourLocation, tourPois);
+
+            var shouldHighlightNearestTourPoi = tourLocation != null
+                && nearestTourPoi != null
+                && _poiService.GetDistanceMeters(tourLocation, nearestTourPoi) < AppSettings.MapHighlightDistanceMeters;
+
+            if (focusOnTour && tourPois.Count > 0)
+            {
+                var focusPoi = nearestTourPoi ?? tourPois[0];
+                CenterMapOn(focusPoi.Latitude, focusPoi.Longitude, MyLocationZoomLevel);
+                ShowSelectedPoiCard(focusPoi);
+            }
+
+            MapHelper.HighlightPOIs(
+                mapControl,
+                shouldHighlightNearestTourPoi ? new[] { nearestTourPoi!.restaurantId } : null,
+                visiblePoiIds: visiblePoiIds,
+                tourStopOrdersByPoiId: GetTourStopOrdersForCurrentMode());
+            return;
+        }
+
+        if (_selectedPoi != null)
+        {
+            MapHelper.HighlightPOI(mapControl, _selectedPoi, visiblePoiIds: visiblePoiIds);
+            return;
+        }
+
+        var location = _lastKnownLocation ?? _locationService.LastKnownLocation;
+        var interactivePois = GetInteractivePois();
+        var nearest = location == null
+            ? null
+            : _poiService.GetNearestPOI(location, interactivePois);
+
+        var shouldHighlightNearest = location != null
+            && nearest != null
+            && _poiService.GetDistanceMeters(location, nearest) < AppSettings.MapHighlightDistanceMeters;
+
+        MapHelper.HighlightPOI(
+            mapControl,
+            shouldHighlightNearest ? nearest : null,
+            visiblePoiIds: visiblePoiIds);
+    }
+
+    private List<POI> GetInteractivePois()
+    {
+        var scopedPois = _tourPoiFilterIds.Count == 0
+            ? _pois
+            : _pois
+                .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId) && _tourPoiFilterIds.Contains(p.restaurantId))
+                .ToList();
+
+        return ApplyCategoryFilter(scopedPois);
+    }
+
+    private IEnumerable<string>? GetVisiblePoiIds()
+    {
+        var hasTourFilter = _tourPoiFilterIds.Count > 0;
+        var hasCategoryFilter = _activePoiFilter != PoiCategoryFilter.All;
+
+        if (!hasTourFilter && !hasCategoryFilter)
+        {
+            return null;
+        }
+
+        return GetInteractivePois()
+            .Where(p => !string.IsNullOrWhiteSpace(p.restaurantId))
+            .Select(p => p.restaurantId)
+            .ToList();
+    }
+
+    private void UpdateTourFilterBanner()
+    {
+        if (TourFilterBanner == null || TourFilterTitle == null)
+        {
+            return;
+        }
+
+        var isTourMode = _tourPoiFilterIds.Count > 0;
+        TourFilterBanner.IsVisible = isTourMode;
+        if (CategoryFiltersScrollView != null)
+        {
+            CategoryFiltersScrollView.IsVisible = !isTourMode;
+        }
+
+        if (!isTourMode)
+        {
+            return;
+        }
+
+        TourFilterTitle.Text = string.IsNullOrWhiteSpace(_activeTourName)
+            ? "Đang xem theo hành trình"
+            : $"Hành trình: {_activeTourName}";
+    }
+
+    private static HashSet<string> ParsePoiIdSet(string? rawPoiIds)
+    {
+        var decoded = DecodeQueryValue(rawPoiIds);
+        if (string.IsNullOrWhiteSpace(decoded))
+        {
+            return new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        return decoded
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    private static Dictionary<string, int> ParsePoiStopOrderMap(string? rawStopOrders)
+    {
+        var decoded = DecodeQueryValue(rawStopOrders);
+        if (string.IsNullOrWhiteSpace(decoded))
+        {
+            return new Dictionary<string, int>(StringComparer.Ordinal);
+        }
+
+        var result = new Dictionary<string, int>(StringComparer.Ordinal);
+        var pairs = decoded.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var pair in pairs)
+        {
+            var parts = pair.Split(':', 2, StringSplitOptions.TrimEntries);
+            if (parts.Length != 2)
+            {
+                continue;
+            }
+
+            var restaurantId = parts[0];
+            if (string.IsNullOrWhiteSpace(restaurantId))
+            {
+                continue;
+            }
+
+            if (!int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var stopOrder)
+                || stopOrder <= 0
+                || result.ContainsKey(restaurantId))
+            {
+                continue;
+            }
+
+            result[restaurantId] = stopOrder;
+        }
+
+        return result;
+    }
+
+    private IReadOnlyDictionary<string, int>? GetTourStopOrdersForCurrentMode()
+    {
+        if (_tourPoiFilterIds.Count == 0 || _tourStopOrdersByPoiId.Count == 0)
+        {
+            return null;
+        }
+
+        return _tourStopOrdersByPoiId;
+    }
+
+    private static string? DecodeQueryValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        try
+        {
+            return Uri.UnescapeDataString(value);
+        }
+        catch
+        {
+            return value;
+        }
+    }
+
+    private void OnClearTourFilterClicked(object sender, EventArgs e)
+    {
+        _tourPoiIdsRaw = string.Empty;
+        _tourStopOrdersRaw = string.Empty;
+        _activeTourName = null;
+        _tourPoiFilterIds.Clear();
+        _tourStopOrdersByPoiId.Clear();
+        _narrationFlowService.ClearAutoNarrationPoiScope();
+        _searchHighlightedPoiIds.Clear();
+        HideSelectedPoiCard();
+        ApplyPoiModeFromState(focusOnTour: false);
+    }
+
+    private void ApplyNarrationScopeFromTourFilter()
+    {
+        if (_tourPoiFilterIds.Count > 0)
+        {
+            _narrationFlowService.SetAutoNarrationPoiScope(_tourPoiFilterIds);
+            return;
+        }
+
+        _narrationFlowService.ClearAutoNarrationPoiScope();
+    }
+
     private void ShowSelectedPoiCard(POI poi)
     {
         _selectedPoi = poi;
@@ -425,6 +827,30 @@ public partial class MapPage : ContentPage
     {
         _selectedPoi = null;
         SelectedPoiCard.IsVisible = false;
+    }
+
+    private async Task ShowOfflineMapNoticeIfNeededAsync()
+    {
+        if (_hasShownOfflineMapUnavailableNotice)
+        {
+            return;
+        }
+
+        if (Connectivity.NetworkAccess == NetworkAccess.Internet)
+        {
+            return;
+        }
+
+        if (MapHelper.HasCachedMapTiles())
+        {
+            return;
+        }
+
+        _hasShownOfflineMapUnavailableNotice = true;
+        await DisplayAlertAsync(
+            "Bản đồ offline",
+            "Hiện không có Internet và chưa có dữ liệu nền bản đồ đã lưu. Bạn vẫn xem và tương tác được các địa điểm, nhưng nền bản đồ có thể chưa hiển thị.",
+            "Đóng");
     }
 
     private async void OnViewDetailClicked(object sender, EventArgs e)
