@@ -135,11 +135,11 @@ public class TourRepository
 
     public async Task<bool> UpdateTourMetadataAsync(
         int tourId,
+        string? name,
+        string? description,
         int? estimatedDurationMinutes,
         string? urlImage,
-        int sortPriority,
-        bool isActive,
-        bool isFeatured)
+        bool isActive)
     {
         var tour = await _context.Tour.FirstOrDefaultAsync(t => t.TourId == tourId);
         if (tour == null)
@@ -147,12 +147,15 @@ public class TourRepository
             return false;
         }
 
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            tour.Name = name;
+        }
+
+        tour.Description = description;
         tour.EstimatedDurationMinutes = estimatedDurationMinutes;
         tour.UrlImage = urlImage;
-        tour.SortPriority = sortPriority;
         tour.IsActive = isActive;
-        tour.IsFeatured = isFeatured;
-        tour.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         return true;
@@ -167,7 +170,6 @@ public class TourRepository
         }
 
         tour.UrlImage = urlImage;
-        tour.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         return true;
@@ -180,8 +182,7 @@ public class TourRepository
         int? estimatedDurationMinutes,
         string? urlImage,
         bool isActive,
-        bool isFeatured,
-        int sortPriority)
+        int? createdBy = null)
     {
         var entity = new TourModel
         {
@@ -191,8 +192,7 @@ public class TourRepository
             EstimatedDurationMinutes = estimatedDurationMinutes,
             UrlImage = urlImage,
             IsActive = isActive,
-            IsFeatured = isFeatured,
-            SortPriority = sortPriority,
+            CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
         };
 

@@ -32,23 +32,11 @@ public class TourModel
     [Column("is_active")]
     public bool IsActive { get; set; }
 
-    [Column("is_featured")]
-    public bool IsFeatured { get; set; }
-
-    [Column("sort_priority")]
-    public int SortPriority { get; set; }
-
     [Column("created_by")]
     public int? CreatedBy { get; set; }
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
-
-    [Column("updated_by")]
-    public int? UpdatedBy { get; set; }
-
-    [Column("updated_at")]
-    public DateTime? UpdatedAt { get; set; }
 
     public ICollection<TourRestaurantModel> TourRestaurants { get; set; } = new List<TourRestaurantModel>();
 }

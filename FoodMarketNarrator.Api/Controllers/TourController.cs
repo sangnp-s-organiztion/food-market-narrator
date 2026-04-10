@@ -2,6 +2,7 @@ using food_market_narrator_api.Services;
 using food_market_narrator_api.DTOs.Tour;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Globalization;
 using System.Text;
 
@@ -86,6 +87,13 @@ public class TourController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
+        int? createdBy = null;
+        var createdByRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (int.TryParse(createdByRaw, out var parsedCreatedBy))
+        {
+            createdBy = parsedCreatedBy;
+        }
+
         string? urlImage = null;
         if (request.File != null && request.File.Length > 0)
         {
@@ -99,8 +107,7 @@ public class TourController : ControllerBase
             request.EstimatedDurationMinutes,
             urlImage ?? request.UrlImage,
             request.IsActive,
-            request.IsFeatured,
-            request.SortPriority);
+            createdBy);
 
         return result.Status switch
         {
@@ -179,11 +186,11 @@ public class TourController : ControllerBase
 
         var result = await _tourService.UpdateTourAsync(
             id,
+            request.Name,
+            request.Description,
             request.EstimatedDurationMinutes,
             urlImageToSave,
-            request.SortPriority,
-            request.IsActive,
-            request.IsFeatured);
+            request.IsActive);
 
         return result.Status switch
         {

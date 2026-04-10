@@ -103,8 +103,6 @@ export interface TourResponse {
   estimatedDurationMinutes: number | null;
   imageUrl: string | null;
   isActive: boolean;
-  isFeatured: boolean;
-  sortPriority: number;
   stopCount: number;
   nearbyStopCount: number;
   nearestDistanceMeters: number | null;
@@ -124,30 +122,54 @@ export interface ReorderTourStopsRequest {
 }
 
 export interface UpdateTourRequest {
+  name?: string | null;
+  description?: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl: string | null;
-  sortPriority: number;
   isActive: boolean;
-  isFeatured: boolean;
 }
 
 export interface CreateTourRequest {
   name: string;
-  shortDescription?: string | null;
   description?: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl?: string | null;
-  sortPriority: number;
   isActive: boolean;
-  isFeatured: boolean;
 }
 
 function buildCreateTourFormData(data: CreateTourRequest): FormData {
   const formData = new FormData();
 
   formData.append("name", data.name);
-  if (data.shortDescription !== null && data.shortDescription !== undefined) {
-    formData.append("shortDescription", data.shortDescription);
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("isActive", `${data.isActive}`);
+
+  return formData;
+}
+
+function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
+  const formData = new FormData();
+
+  if (data.name !== null && data.name !== undefined) {
+    formData.append("name", data.name);
   }
 
   if (data.description !== null && data.description !== undefined) {
@@ -168,33 +190,7 @@ function buildCreateTourFormData(data: CreateTourRequest): FormData {
     formData.append("urlImage", data.imageUrl);
   }
 
-  formData.append("sortPriority", `${data.sortPriority}`);
   formData.append("isActive", `${data.isActive}`);
-  formData.append("isFeatured", `${data.isFeatured}`);
-
-  return formData;
-}
-
-function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
-  const formData = new FormData();
-
-  if (
-    data.estimatedDurationMinutes !== null &&
-    data.estimatedDurationMinutes !== undefined
-  ) {
-    formData.append(
-      "estimatedDurationMinutes",
-      `${data.estimatedDurationMinutes}`,
-    );
-  }
-
-  if (data.imageUrl !== null && data.imageUrl !== undefined) {
-    formData.append("urlImage", data.imageUrl);
-  }
-
-  formData.append("sortPriority", `${data.sortPriority}`);
-  formData.append("isActive", `${data.isActive}`);
-  formData.append("isFeatured", `${data.isFeatured}`);
 
   return formData;
 }

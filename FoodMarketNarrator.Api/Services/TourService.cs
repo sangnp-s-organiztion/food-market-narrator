@@ -21,8 +21,6 @@ public class TourService
             .Select(t => MapTour(t, latitude, longitude, radiusMeters))
             .OrderByDescending(t => t.NearbyStopCount)
             .ThenBy(t => t.NearestDistanceMeters ?? double.MaxValue)
-            .ThenByDescending(t => t.IsFeatured)
-            .ThenByDescending(t => t.SortPriority)
             .ThenBy(t => t.Name)
             .ToList();
     }
@@ -117,29 +115,34 @@ public class TourService
 
     public async Task<UpdateTourResult> UpdateTourAsync(
         int tourId,
+        string? name,
+        string? description,
         int? estimatedDurationMinutes,
         string? urlImage,
-        int sortPriority,
-        bool isActive,
-        bool isFeatured)
+        bool isActive)
     {
+        var normalizedName = name?.Trim();
+        if (normalizedName != null && string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return UpdateTourResult.Invalid("name is required.");
+        }
+
+        var normalizedDescription = string.IsNullOrWhiteSpace(description)
+            ? null
+            : description.Trim();
+
         if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
         {
             return UpdateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
         }
 
-        if (sortPriority < 0)
-        {
-            return UpdateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
-        }
-
         var updated = await _tourRepository.UpdateTourMetadataAsync(
             tourId,
+            normalizedName,
+            normalizedDescription,
             estimatedDurationMinutes,
             NormalizeUrlImageForStorage(urlImage),
-            sortPriority,
-            isActive,
-            isFeatured);
+            isActive);
 
         if (!updated)
         {
@@ -173,8 +176,7 @@ public class TourService
         int? estimatedDurationMinutes,
         string? urlImage,
         bool isActive,
-        bool isFeatured,
-        int sortPriority)
+        int? createdBy = null)
     {
         var normalizedName = name.Trim();
         if (string.IsNullOrWhiteSpace(normalizedName))
@@ -187,11 +189,6 @@ public class TourService
             return CreateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
         }
 
-        if (sortPriority < 0)
-        {
-            return CreateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
-        }
-
         var created = await _tourRepository.CreateTourAsync(
             normalizedName,
             string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
@@ -199,8 +196,7 @@ public class TourService
             estimatedDurationMinutes,
             NormalizeUrlImageForStorage(urlImage),
             isActive,
-            isFeatured,
-            sortPriority);
+            createdBy);
 
         var createdTour = await _tourRepository.GetByIdAsync(created.TourId, includeInactive: true);
         if (createdTour == null)
@@ -273,8 +269,8 @@ public class TourService
             EstimatedDurationMinutes = tour.EstimatedDurationMinutes,
             ImageUrl = imageUrl,
             IsActive = tour.IsActive,
-            IsFeatured = tour.IsFeatured,
-            SortPriority = tour.SortPriority,
+            CreatedBy = tour.CreatedBy,
+            CreatedAt = tour.CreatedAt,
             StopCount = stops.Count,
             NearbyStopCount = nearbyStopCount,
             NearestDistanceMeters = nearestDistanceMeters,
