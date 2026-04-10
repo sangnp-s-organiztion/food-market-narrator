@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.DTOs.Auth;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
@@ -49,11 +50,11 @@ namespace food_market_narrator_api.Controllers
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(claims, AuthSchemes.Saler);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthSchemes.Saler,
                 principal,
                 new AuthenticationProperties
                 {
@@ -107,11 +108,11 @@ namespace food_market_narrator_api.Controllers
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(claims, AuthSchemes.Admin);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthSchemes.Admin,
                 principal,
                 new AuthenticationProperties
                 {
@@ -208,11 +209,12 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Saler)]
         public async Task<IActionResult> Logout()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.Identity?.Name ?? "unknown";
+            var principal = await GetAuthenticatedPrincipalAsync(AuthSchemes.Saler);
+            var userIdClaim = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var username = principal?.Identity?.Name ?? "unknown";
 
             if (int.TryParse(userIdClaim, out var uid))
             {
@@ -228,15 +230,43 @@ namespace food_market_narrator_api.Controllers
                 });
             }
 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(AuthSchemes.Saler);
             return Ok(new { message = "Logged out successfully." });
         }
 
+        [HttpPost("admin/logout")]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
+        public async Task<IActionResult> AdminLogout()
+        {
+            var principal = await GetAuthenticatedPrincipalAsync(AuthSchemes.Admin);
+            var userIdClaim = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var username = principal?.Identity?.Name ?? "unknown";
+
+            if (int.TryParse(userIdClaim, out var uid))
+            {
+                await _auditLogService.WriteLogAsync(new AuditLog
+                {
+                    UserId = uid,
+                    Username = username,
+                    Action = "LOGOUT",
+                    TargetType = "User",
+                    TargetId = uid.ToString(),
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    CreatedAt = DateTime.UtcNow,
+                    Details = "Admin portal logout"
+                });
+            }
+
+            await HttpContext.SignOutAsync(AuthSchemes.Admin);
+            return Ok(new { message = "Admin logged out successfully." });
+        }
+
         [HttpGet("me")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Saler)]
         public async Task<IActionResult> Me()
         {
-            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var principal = await GetAuthenticatedPrincipalAsync(AuthSchemes.Saler);
+            var currentUserIdRaw = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(currentUserIdRaw, out var currentUserId))
             {
                 return Unauthorized(new { message = "Unauthorized." });
@@ -252,10 +282,11 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpGet("admin/me")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
         public async Task<IActionResult> AdminMe()
         {
-            var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var principal = await GetAuthenticatedPrincipalAsync(AuthSchemes.Admin);
+            var currentUserIdRaw = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(currentUserIdRaw, out var currentUserId))
             {
                 return Unauthorized(new { message = "Unauthorized." });
@@ -342,11 +373,14 @@ namespace food_market_narrator_api.Controllers
                 new Claim(ClaimTypes.Role, updated.Role)
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var targetScheme = string.Equals(updated.Role, AdminRole, StringComparison.OrdinalIgnoreCase)
+                ? AuthSchemes.Admin
+                : AuthSchemes.Saler;
+            var identity = new ClaimsIdentity(claims, targetScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                targetScheme,
                 principal,
                 new AuthenticationProperties
                 {
@@ -364,6 +398,17 @@ namespace food_market_narrator_api.Controllers
                 updated.IsActive,
                 updated.CreatedAt
             });
+        }
+
+        private async Task<ClaimsPrincipal?> GetAuthenticatedPrincipalAsync(string scheme)
+        {
+            var authResult = await HttpContext.AuthenticateAsync(scheme);
+            if (!authResult.Succeeded)
+            {
+                return null;
+            }
+
+            return authResult.Principal;
         }
     }
 }

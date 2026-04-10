@@ -34,4 +34,28 @@ describe("admin api clients", () => {
       authApi.login({ username: "admin", password: "wrong" }),
     ).rejects.toThrow("Thông tin đăng nhập không hợp lệ");
   });
+
+  it('getHeatmap sends all=true when hoursOrAll is "all"', async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ points: [] }),
+    } as Response);
+
+    await analyticsApi.getHeatmap("all");
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, options] = fetchSpy.mock.calls[0];
+    expect(String(url)).toContain("/api/analytics/heatmap?all=true");
+    expect(options).toMatchObject({ credentials: "include" });
+  });
+
+  it("getMe throws Unauthorized on non-ok response", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+    } as Response);
+
+    await expect(authApi.getMe()).rejects.toThrow("Unauthorized");
+  });
 });

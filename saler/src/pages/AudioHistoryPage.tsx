@@ -41,15 +41,13 @@ function formatMinutesSeconds(seconds: number): string {
 export default function AudioHistoryPage() {
   const { selectedRestaurant } = useRestaurant();
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
-  const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">("all");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["saler", "translation-usage", billingMonth, usageStatus, page],
+    queryKey: ["saler", "translation-usage", billingMonth, page],
     queryFn: () =>
       getMyTranslationUsageApi({
         billingMonth,
-        status: usageStatus === "all" ? undefined : usageStatus,
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -69,7 +67,7 @@ export default function AudioHistoryPage() {
   );
 
   const avgTime = restaurantKpis?.average_listening_time_seconds ?? 0;
-  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
+  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "0.0";
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
@@ -113,7 +111,7 @@ export default function AudioHistoryPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground">Tháng</label>
             <Input
@@ -125,21 +123,6 @@ export default function AudioHistoryPage() {
               }}
               className="mt-1"
             />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground">Trạng thái</label>
-            <select
-              className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              value={usageStatus}
-              onChange={(e) => {
-                setUsageStatus(e.target.value as "all" | "billable" | "failed");
-                setPage(1);
-              }}
-            >
-              <option value="all">Tất cả</option>
-              <option value="billable">Tính phí</option>
-              <option value="failed">Thất bại</option>
-            </select>
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground">Tổng đơn vị tính phí</label>
@@ -157,31 +140,28 @@ export default function AudioHistoryPage() {
                 <th>Người bán</th>
                 <th>ID người bán</th>
                 <th>Hành động</th>
-                <th>Trạng thái</th>
                 <th>Ký tự đầu vào</th>
                 <th>Đơn vị tính phí</th>
-                <th>Tổng tiền</th>
-                <th>Nhà cung cấp</th>
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={6} className="text-center py-8 text-muted-foreground">
                     Đang tải lịch sử sử dụng...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-destructive">
+                  <td colSpan={6} className="text-center py-8 text-destructive">
                     Không thể tải lịch sử sử dụng token.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && (data?.items.length ?? 0) === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={6} className="text-center py-8 text-muted-foreground">
                     Chưa có lịch sử sử dụng token theo bộ lọc.
                   </td>
                 </tr>
@@ -193,13 +173,8 @@ export default function AudioHistoryPage() {
                     <td className="font-medium">{item.seller_username || "(không rõ)"}</td>
                     <td className="mono text-xs text-muted-foreground">{item.seller_user_id}</td>
                     <td className="mono text-xs">{item.action_type}</td>
-                    <td className="mono text-xs">{item.status}</td>
                     <td className="mono text-xs">{formatNumber(item.input_chars)}</td>
                     <td className="mono text-xs">{formatNumber(item.billable_units)}</td>
-                    <td className="mono text-xs font-medium">
-                      {formatNumber(item.total_amount)} {item.currency}
-                    </td>
-                    <td className="mono text-xs text-muted-foreground">{item.provider}</td>
                   </tr>
                 ))}
             </tbody>

@@ -30,7 +30,6 @@ public partial class MainPage : ContentPage
     private readonly NarrationFlowService _narrationFlowService;
     private readonly ILocationService _locationService;
     private readonly IAudioLibraryService _audioLibraryService;
-    private readonly IQrAccessService _qrAccessService;
     private readonly IFavoriteService _favoriteService;
 
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
@@ -52,7 +51,6 @@ public partial class MainPage : ContentPage
         NarrationFlowService narrationFlowService,
         ILocationService locationService,
         IAudioLibraryService audioLibraryService,
-        IQrAccessService qrAccessService,
         IFavoriteService favoriteService)
 	{
 		InitializeComponent();
@@ -60,7 +58,6 @@ public partial class MainPage : ContentPage
         _narrationFlowService = narrationFlowService;
         _locationService = locationService;
         _audioLibraryService = audioLibraryService;
-        _qrAccessService = qrAccessService;
         _favoriteService = favoriteService;
     }
 
@@ -254,16 +251,6 @@ public partial class MainPage : ContentPage
     // Hàm xử lý khi nhấn nút bắt đầu thuyết minh
     private async void OnNarratorTapped(object sender, EventArgs e)
     {
-        if (IsNarrationBlockedByQr())
-        {
-            await DisplayAlertAsync(
-                "QR hết hạn",
-                "Mã QR đã hết thời gian. Vui lòng quét lại QR để tiếp tục thuyết minh.",
-                "Đóng");
-            UpdateFloatingButtonUI();
-            return;
-        }
-
         var animateTapTask = AnimateNarratorButtonTapAsync();
 
         if (!_narrationFlowService.IsNarrating)
@@ -640,15 +627,8 @@ public partial class MainPage : ContentPage
     // Cập nhật trạng thái của nút thuyết minh dựa trên trạng thái hiện tại của NarrationFlowService
     private void UpdateFloatingButtonUI()
     {
-        var isBlocked = IsNarrationBlockedByQr();
-        NarratorButton.IsEnabled = !isBlocked;
-        FloatingButton.Opacity = isBlocked ? 0.55 : 1;
-
-        if (isBlocked)
-        {
-            NarratorText.Text = "QR đã hết hạn - quét lại để thuyết minh";
-            return;
-        }
+        NarratorButton.IsEnabled = true;
+        FloatingButton.Opacity = 1;
 
         if (_narrationFlowService.IsNarrating)
         {
@@ -658,17 +638,5 @@ public partial class MainPage : ContentPage
         {
             NarratorText.Text = "Bắt đầu thuyết minh tự động";
         }
-    }
-
-    private bool IsNarrationBlockedByQr()
-    {
-        if (!_qrAccessService.IsQrTimeRestricted)
-        {
-            return false;
-        }
-
-        var expiry = _qrAccessService.QrAccessExpiresAtUtc;
-        return (expiry.HasValue && DateTime.UtcNow > expiry.Value)
-            || string.Equals(_qrAccessService.LastBlockReason, "expired", StringComparison.OrdinalIgnoreCase);
     }
 }

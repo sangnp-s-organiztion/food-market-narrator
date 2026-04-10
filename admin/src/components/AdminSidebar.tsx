@@ -20,7 +20,7 @@ const navItems = [
   { path: "/tours", label: "Tour", icon: Compass },
   { path: "/restaurants", label: "Nhà hàng", icon: Store },
   { path: "/users", label: "Người dùng", icon: Users },
-  { path: "/logs", label: "Nhật ký", icon: ScrollText },
+  { path: "/logs", label: "Lịch sử", icon: ScrollText },
   { path: "/translation-billing", label: "Chi phí dịch token", icon: Receipt },
   { path: "/account", label: "Tài khoản", icon: CircleUser },
 ];
