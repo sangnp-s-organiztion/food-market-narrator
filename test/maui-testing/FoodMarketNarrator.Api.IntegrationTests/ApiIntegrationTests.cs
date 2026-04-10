@@ -398,6 +398,33 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task CreateUser_WithInvalidPhoneOrEmail_ReturnsBadRequest()
+    {
+        // Arrange
+        var cookie = await LoginAndGetCookie("admin", "admin123");
+        var username = $"invalid_contact_{Guid.NewGuid():N}";
+
+        var createRequest = new
+        {
+            username,
+            password = "123456",
+            phone = "12345",
+            email = "not-an-email",
+            role = "saler"
+        };
+
+        // Act
+        var response = await AuthorizedRequestAsync(
+            HttpMethod.Post,
+            "/api/users",
+            body: createRequest,
+            cookie: cookie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateStatus_LockingCurrentAdmin_ReturnsBadRequest()
     {
         // Arrange
