@@ -1,6 +1,7 @@
 using Microsoft.Maui.Devices.Sensors;
 using food_market_narrator.Models;
 using food_market_narrator.Settings;
+using System.Diagnostics;
 
 namespace food_market_narrator.Services;
 
@@ -354,19 +355,35 @@ public class NarrationFlowService : INarrationFlowService
             }
 
             // Chờ audio phát xong
+            var playbackStopwatch = Stopwatch.StartNew();
+            int? knownTrackDurationSeconds = null;
             while (_audioService.IsPlaying)
             {
+                var durationSeconds = (int)Math.Round(_audioService.Duration.TotalSeconds);
+                if (durationSeconds > 0)
+                {
+                    knownTrackDurationSeconds = durationSeconds;
+                }
+
                 await Task.Delay(300);
             }
+            playbackStopwatch.Stop();
 
             if (startedAtUtc.HasValue && queueItem.AudioId > 0 && !string.IsNullOrWhiteSpace(poi.restaurantId))
             {
                 var endedAtUtc = DateTime.UtcNow;
+                var currentPositionSeconds = (int)Math.Round(_audioService.CurrentPosition.TotalSeconds);
+                var playedDurationSeconds = currentPositionSeconds > 0
+                    ? currentPositionSeconds
+                    : (int)Math.Round(playbackStopwatch.Elapsed.TotalSeconds);
+
                 await _audioLogSyncService.LogPlaybackAsync(
                     poi.restaurantId,
                     queueItem.AudioId,
                     startedAtUtc.Value,
-                    endedAtUtc);
+                    endedAtUtc,
+                    playedDurationSeconds,
+                    knownTrackDurationSeconds);
             }
 
             _currentPlayingPoiId = null;
