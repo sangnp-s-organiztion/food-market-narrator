@@ -374,8 +374,8 @@ namespace food_market_narrator_api.Services
                 using var message = new MailMessage
                 {
                     From = new MailAddress(smtpFromEmail, _smtpSettings.FromName),
-                    Subject = "[Food Market Narrator] Ma OTP dat lai mat khau",
-                    Body = $"Xin chao {username},\n\nMa OTP cua ban la: {otpCode}\nMa co hieu luc trong 2 phut.\n\nNeu ban khong yeu cau, vui long bo qua email nay.",
+                    Subject = "[Food Market Narrator] Mã OTP đặt lại mật khẩu",
+                    Body = $"Xin chào {username},\n\nMã OTP của bạn là: {otpCode}.\nMã có hiệu lực trong 2 phút.\n\nNếu bạn không yêu cầu, vui lòng bỏ qua email này.",
                     IsBodyHtml = false
                 };
                 message.To.Add(new MailAddress(toEmail));

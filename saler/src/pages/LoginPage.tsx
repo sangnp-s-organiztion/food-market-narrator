@@ -126,7 +126,7 @@ export default function LoginPage() {
     const normalizedEmail = forgotEmail.trim();
 
     if (!normalizedUsername || !normalizedEmail) {
-      setForgotError("Vui lòng nhập username và gmail.");
+      setForgotError("Vui lòng nhập tên đăng nhập và Gmail.");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
       setForgotNewPassword("");
       setForgotConfirmPassword("");
       setRemainingSeconds(Math.max(0, response.expiresInSeconds || 120));
-      setForgotSuccess(response.message || "Đã gửi OTP qua gmail.");
+      setForgotSuccess(response.message || "Đã gửi OTP qua Gmail.");
       setForgotError("");
     } catch (err) {
       setForgotError(parseErrorMessage(err, "Không thể gửi OTP."));
@@ -167,7 +167,7 @@ export default function LoginPage() {
     }
 
     if (!normalizedUsername || !normalizedEmail || !normalizedOtp) {
-      setForgotError("Vui lòng nhập đầy đủ username, gmail và OTP.");
+      setForgotError("Vui lòng nhập đầy đủ tên đăng nhập, Gmail và OTP.");
       return;
     }
 
@@ -302,18 +302,18 @@ export default function LoginPage() {
           <DialogHeader>
             <DialogTitle>Quên mật khẩu</DialogTitle>
             <DialogDescription>
-              Nhập username và gmail để nhận mã OTP đặt lại mật khẩu.
+              Nhập tên đăng nhập và Gmail để nhận mã OTP đặt lại mật khẩu.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="forgot-username">Username</Label>
+              <Label htmlFor="forgot-username">Tên đăng nhập</Label>
               <Input
                 id="forgot-username"
                 value={forgotUsername}
                 onChange={(e) => setForgotUsername(e.target.value)}
-                placeholder="Nhập username"
+                placeholder="Nhập tên đăng nhập"
                 disabled={resettingPassword || verifyingOtp || otpVerified}
               />
             </div>
@@ -324,7 +324,7 @@ export default function LoginPage() {
                 id="forgot-email"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
-                placeholder="Nhập gmail"
+                placeholder="Nhập Gmail"
                 disabled={resettingPassword || verifyingOtp || otpVerified}
               />
             </div>

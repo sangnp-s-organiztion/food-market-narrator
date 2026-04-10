@@ -148,16 +148,16 @@ namespace food_market_narrator_api.Controllers
             {
                 ForgotPasswordSendOtpStatus.Success => Ok(new ForgotPasswordSendOtpResponse
                 {
-                    Message = "Da gui OTP qua gmail.",
+                    Message = "Đã gửi OTP qua Gmail.",
                     ExpiresInSeconds = result.ExpiresInSeconds
                 }),
-                ForgotPasswordSendOtpStatus.InvalidInput => BadRequest(new { message = "Username va gmail la bat buoc." }),
-                ForgotPasswordSendOtpStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
-                ForgotPasswordSendOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
-                ForgotPasswordSendOtpStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
-                ForgotPasswordSendOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
-                ForgotPasswordSendOtpStatus.EmailDeliveryFailed => BadRequest(new { message = "Khong the gui OTP. Vui long kiem tra cau hinh Gmail SMTP." }),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the gui OTP." })
+                ForgotPasswordSendOtpStatus.InvalidInput => BadRequest(new { message = "Tên đăng nhập và Gmail là bắt buộc." }),
+                ForgotPasswordSendOtpStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordSendOtpStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                ForgotPasswordSendOtpStatus.EmailDeliveryFailed => BadRequest(new { message = "Không thể gửi OTP. Vui lòng kiểm tra cấu hình Gmail SMTP." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể gửi OTP." })
             };
         }
 
@@ -172,16 +172,16 @@ namespace food_market_narrator_api.Controllers
 
             return result.Status switch
             {
-                ForgotPasswordResetStatus.Success => Ok(new { message = "Dat lai mat khau thanh cong." }),
-                ForgotPasswordResetStatus.InvalidInput => BadRequest(new { message = "Vui long nhap day du thong tin." }),
-                ForgotPasswordResetStatus.InvalidNewPassword => BadRequest(new { message = "Mat khau moi phai co it nhat 6 ky tu." }),
-                ForgotPasswordResetStatus.InvalidOtp => BadRequest(new { message = "OTP khong dung." }),
-                ForgotPasswordResetStatus.OtpExpired => BadRequest(new { message = "Het han OTP, vui long gui lai." }),
-                ForgotPasswordResetStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
-                ForgotPasswordResetStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
-                ForgotPasswordResetStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
-                ForgotPasswordResetStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the dat lai mat khau." })
+                ForgotPasswordResetStatus.Success => Ok(new { message = "Đặt lại mật khẩu thành công." }),
+                ForgotPasswordResetStatus.InvalidInput => BadRequest(new { message = "Vui lòng nhập đầy đủ thông tin." }),
+                ForgotPasswordResetStatus.InvalidNewPassword => BadRequest(new { message = "Mật khẩu mới phải có ít nhất 6 ký tự." }),
+                ForgotPasswordResetStatus.InvalidOtp => BadRequest(new { message = "OTP không đúng." }),
+                ForgotPasswordResetStatus.OtpExpired => BadRequest(new { message = "Hết hạn OTP, vui lòng gửi lại." }),
+                ForgotPasswordResetStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordResetStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordResetStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordResetStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể đặt lại mật khẩu." })
             };
         }
 
@@ -195,15 +195,15 @@ namespace food_market_narrator_api.Controllers
 
             return result.Status switch
             {
-                ForgotPasswordVerifyOtpStatus.Success => Ok(new { message = "OTP hop le." }),
-                ForgotPasswordVerifyOtpStatus.InvalidInput => BadRequest(new { message = "Vui long nhap day du thong tin." }),
-                ForgotPasswordVerifyOtpStatus.InvalidOtp => BadRequest(new { message = "OTP khong dung." }),
-                ForgotPasswordVerifyOtpStatus.OtpExpired => BadRequest(new { message = "Het han OTP, vui long gui lai." }),
-                ForgotPasswordVerifyOtpStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
-                ForgotPasswordVerifyOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
-                ForgotPasswordVerifyOtpStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
-                ForgotPasswordVerifyOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the xac minh OTP." })
+                ForgotPasswordVerifyOtpStatus.Success => Ok(new { message = "OTP hợp lệ." }),
+                ForgotPasswordVerifyOtpStatus.InvalidInput => BadRequest(new { message = "Vui lòng nhập đầy đủ thông tin." }),
+                ForgotPasswordVerifyOtpStatus.InvalidOtp => BadRequest(new { message = "OTP không đúng." }),
+                ForgotPasswordVerifyOtpStatus.OtpExpired => BadRequest(new { message = "Hết hạn OTP, vui lòng gửi lại." }),
+                ForgotPasswordVerifyOtpStatus.UsernameNotFound => NotFound(new { message = "Tên đăng nhập không tồn tại." }),
+                ForgotPasswordVerifyOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bị sai." }),
+                ForgotPasswordVerifyOtpStatus.NotFoundBoth => NotFound(new { message = "Thông tin không tồn tại." }),
+                ForgotPasswordVerifyOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail không tồn tại." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể xác minh OTP." })
             };
         }
 
