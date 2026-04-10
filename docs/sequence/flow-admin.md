@@ -5,8 +5,8 @@ Tài liệu mô tả flow thực tế của trang Admin trong thư mục `admin/
 ## Phạm vi và ghi chú
 
 - Các route đang được bảo vệ: `/`, `/restaurants`, `/users`, `/logs`, `/trajectory`, `/tours`, `/translation-billing`, `/account`.
-- Menu sidebar hiện hiển thị: Tổng quan, Tour, Nhà hàng, Người dùng, Nhật ký, Chi phí dịch token, Tài khoản.
-- Route `/trajectory` vẫn hoạt động nhưng hiện không hiển thị trên sidebar.
+- Menu sidebar hiện hiển thị: Tổng quan, Tuyến di chuyển, Tour, Nhà hàng, Người dùng, Lịch sử, Chi phí dịch token, Tài khoản.
+- Route `/trajectory` hoạt động và hiển thị trên sidebar.
 - Trang trajectory đang dùng `sessionLimit = 100` cố định trong UI (không có control đổi 20/50/100/200/all).
 
 ## 1. Kiểm tra phiên đăng nhập
@@ -140,7 +140,7 @@ sequenceDiagram
     participant FE as Trajectory Page
     participant ANA as Analytics API
 
-    U->>FE: Truy cập trực tiếp /trajectory
+    U->>FE: Mở /trajectory (qua sidebar hoặc truy cập trực tiếp URL)
     FE->>ANA: GET /api/analytics/movement-paths?sessionLimit=100
     ANA-->>FE: Danh sách session + tọa độ di chuyển
     FE-->>U: Hiển thị bản đồ trajectory
@@ -210,6 +210,31 @@ sequenceDiagram
         else Thất bại
             RES-->>FE: Error
             FE-->>U: Toast thất bại
+        end
+    end
+```
+
+## 10a. Tự điền tọa độ từ link Google Maps khi tạo nhà hàng
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Restaurants Page
+    participant MAP as Maps API
+
+    U->>FE: Dán link Google Maps vào form tạo nhà hàng
+    FE->>FE: Parse tọa độ bằng regex (@lat,lng hoặc !3dlat!4dlng)
+    alt Parse được tại client
+        FE-->>U: Tự điền vĩ độ/kinh độ
+    else Không parse được tại client
+        FE->>MAP: GET /api/maps/resolve-coordinates?url=...
+        alt Thành công
+            MAP-->>FE: latitude + longitude
+            FE-->>U: Tự điền vĩ độ/kinh độ
+        else Thất bại
+            MAP-->>FE: Error
+            FE-->>U: Toast báo không đọc được tọa độ, cho phép nhập tay
         end
     end
 ```
@@ -284,6 +309,8 @@ sequenceDiagram
     end
 ```
 
+Ghi chú: Vai trò được chọn khi tạo mới. Sau khi tạo, màn hình chi tiết chỉ hiển thị role (read-only), không có thao tác đổi role.
+
 ## 14. Khóa hoặc mở khóa người dùng
 
 ```mermaid
@@ -305,6 +332,22 @@ sequenceDiagram
         USER-->>FE: Error
         FE-->>U: Toast lỗi
     end
+```
+
+## 14a. Xem chi tiết người dùng và nhà hàng đang quản lý
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Users Page
+    participant USER as User API
+    participant RES as Restaurant API
+
+    U->>FE: Bấm xem chi tiết user
+    FE->>USER: Dùng dữ liệu user đã load để render dialog
+    FE->>RES: Dùng dữ liệu /restaurant đã load, lọc theo userId
+    FE-->>U: Hiển thị profile user + danh sách nhà hàng user đang quản lý
 ```
 
 ## 15. Xem nhật ký hệ thống và nhật ký nghe audio
@@ -383,6 +426,29 @@ sequenceDiagram
     FE-->>U: Hiển thị dialog chi tiết
 ```
 
+## 18a. Tạo tour mới
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Tours Page
+    participant TOUR as Tour API
+
+    U->>FE: Bấm Thêm tour và nhập tên/mô tả/thời gian/ảnh
+    FE->>FE: Validate tên tour và estimatedDuration là số nguyên >= 0
+    alt Không hợp lệ
+        FE-->>U: Toast lỗi
+    else Hợp lệ
+        FE->>TOUR: POST /Tour
+        alt Có ảnh file
+            FE->>TOUR: POST /Tour/{id}/upload-image
+        end
+        FE->>FE: Invalidate query tours
+        FE-->>U: Đóng dialog + toast tạo tour thành công
+    end
+```
+
 ## 19. Lưu cập nhật tour (thứ tự stop + metadata)
 
 ```mermaid
@@ -433,6 +499,29 @@ sequenceDiagram
             TOUR-->>FE: Error
             FE-->>U: Toast thất bại
         end
+    end
+```
+
+## 20a. Khóa hoặc mở khóa tour
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Tours Page
+    participant TOUR as Tour API
+
+    U->>FE: Bấm ngưng hoạt động/kích hoạt tour
+    FE-->>U: Hiện confirm dialog
+    U->>FE: Xác nhận
+    FE->>TOUR: PATCH /Tour/{id} (isActive=true/false)
+    alt Thành công
+        TOUR-->>FE: message
+        FE->>FE: Invalidate tours (+ tour detail nếu đang mở)
+        FE-->>U: Cập nhật trạng thái + toast thành công
+    else Thất bại
+        TOUR-->>FE: Error
+        FE-->>U: Toast lỗi
     end
 ```
 
@@ -506,7 +595,7 @@ sequenceDiagram
 
     U->>FE: Truy cập /translation-billing
     FE->>BILL: GET /api/admin/translation-billing/monthly?billingMonth&sellerUserId&page&pageSize
-    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUserId&status&page&pageSize
+    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUserId&page&pageSize
     BILL-->>FE: Summary + monthly items + usage items
     FE-->>U: Hiển thị KPI tổng hợp, bảng monthly, bảng usage
 ```
@@ -520,7 +609,7 @@ sequenceDiagram
     participant FE as Translation Billing Page
     participant BILL as Translation Billing API
 
-    U->>FE: Đổi filter tháng / sellerUserId / usageStatus
+    U->>FE: Đổi filter tháng / sellerUserId
     FE->>FE: Reset page về 1 cho bảng liên quan
     FE->>BILL: Tải lại monthly
     FE->>BILL: Tải lại usage
@@ -541,6 +630,5 @@ sequenceDiagram
 
 ## Các flow đã bỏ hoặc đã đổi so với bản cũ
 
-- Đã bỏ flow đổi vai trò người dùng trong UI admin (hiện chỉ còn tạo user và khóa/mở khóa).
+- Đã bỏ flow đổi vai trò người dùng trong UI admin (role chỉ chọn lúc tạo mới, không đổi được ở màn hình chi tiết).
 - Đã bỏ flow đổi `sessionLimit` trên trang trajectory (UI hiện dùng cố định 100).
-- Sidebar không còn mục trajectory, nhưng route `/trajectory` vẫn có thể truy cập trực tiếp khi đã đăng nhập admin.
