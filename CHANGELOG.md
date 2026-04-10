@@ -3,6 +3,39 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-10
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Cập nhật QR code theo hướng chỉ mở app qua deep link, không còn mục tiêu giới hạn thời gian khi quét.
+  - Cập nhật bộ API integration tests để đồng bộ với DTO/request hiện tại.
+  - Bổ sung thêm các test còn thiếu cho MAUI, API, admin và saler.
+  - Cải thiện tốc độ tải chi tiết POI và cập nhật nội dung hiển thị tiếng Việt.
+  - Cập nhật giao diện quên mật khẩu, điều chỉnh dấu câu cho email và bỏ chức năng xóa avatar.
+- Merged:
+  - Merge pull request #186 từ nhánh `admin/billing`.
+  - Merge pull request #184 từ nhánh `visitor/tour-detail`.
+
+### Nguyen Phuoc Sang (2 commits)
+
+- [69aaa27] Merge pull request #186 from sangnp-s-organiztion/admin/billing
+- [aff560b] Merge pull request #184 from sangnp-s-organiztion/visitor/tour-detail
+
+### sangnpdev (4 commits)
+
+- [36e5f29] cập nhật thêm các test còn thiếu
+- [7c6532f] cập nhật lại test api integretion
+- [541a822] cập nhật lại QR code, chỉ quét để mở app
+- [ce84b07] cải thiện tốc độ load chi tiết poi
+
+### giathieu0311 (4 commits)
+
+- [e9b541f] Cập nhật dấu câu cho gmail
+- [2f50002] cập nhật lại giao diện mật khẩu ver2
+- [ee0efef] quên mật khẩu
+- [3fb059c] bỏ chức năng xóa avt
+
 ## 2026-04-06
 
 ### Tóm tắt trong ngày
