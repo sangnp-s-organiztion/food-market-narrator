@@ -36,6 +36,138 @@ Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo
 - [ee0efef] quên mật khẩu
 - [3fb059c] bỏ chức năng xóa avt
 
+## 2026-04-09
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Triển khai và hoàn thiện tour detail page, bổ sung nút xem chi tiết từ Tour page.
+  - Cải thiện hiệu năng và tốc độ load chi tiết POI.
+  - Bổ sung/điều chỉnh logic xác thực `is_active` cho tour model.
+  - Cập nhật dữ liệu tour, dish và chỉnh sửa các luồng ảnh khi tạo/cập nhật tour.
+  - Dịch text giao diện sang tiếng Việt.
+- Merged:
+  - Merge pull request #182 từ nhánh `visitor/tour-detail`.
+  - Merge pull request #181 từ nhánh `admin/billing`.
+  - Merge pull request #180 từ nhánh `admin/billing`.
+  - Merge pull request #178 từ nhánh `visitor/setting-page-ui`.
+
+### sangnpdev (7 commits)
+
+- [4c771f8] dịch text thành tiếng Việt
+- [cb0a885] cải thiện hiệu năng
+- [be9c282] thêm nút xem chi tiết ở tour page, thêm xác thực is_active = true ở tour model
+- [1357e5e] thêm trang chi tiết tour và các logic trong trang chi tiết tour
+- [4fb10bc] Merge branch 'admin/billing' of https://github.com/sangnp-s-organiztion/food-market-narrator into visitor/tour-detail
+- [9d860b9] fix lỗi không nhận ảnh khi tạo và cập nhật tour
+- [74693d2] hiện số (stop_order) của poi khi đang xem các poi thuộc tour
+
+### Nguyen Phuoc Sang (5 commits)
+
+- [4c89ce4] Merge pull request #182 from sangnp-s-organiztion/visitor/tour-detail
+- [db5bf79] Merge branch 'develop' into visitor/tour-detail
+- [fb0ca59] Merge pull request #181 from sangnp-s-organiztion/admin/billing
+- [e3e56a1] Merge pull request #180 from sangnp-s-organiztion/admin/billing
+- [4d32719] Merge pull request #178 from sangnp-s-organiztion/visitor/setting-page-ui
+
+### giathieu0311 (3 commits)
+
+- [52ba28e] cập nhật lại tour và người dùng
+- [27e57bb] tour sửa thêm
+- [eb8d0ab] cập nhật lại dish
+
+## 2026-04-08
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Bổ sung/cập nhật luồng tour và route map ở cả admin, saler và mobile.
+  - Cập nhật giao diện map/main page: lọc POI, hiển thị danh sách POI theo tour, điều hướng từ setting sang tour.
+  - Hoàn thiện dữ liệu bản đồ: link Google Maps, tọa độ, route/logo tour.
+  - Mở rộng tính năng saler: thống kê, lịch sử token, dịch lại nội dung UI.
+  - Triển khai offline tour và xử lý phụ thuộc TourImageWarmupService để tránh lỗi không load TourPage.
+- Merged:
+  - Merge pull request #176 từ nhánh `admin/billing`.
+  - Merge pull request #172 từ nhánh `admin/route-map`.
+  - Merge pull request #171 từ nhánh `visitor/offline-tour-v2`.
+  - Merge pull request #168 từ nhánh `visitor/offline-tour-v2`.
+  - Merge pull request #167 từ nhánh `saler/manage-translate`.
+
+### giathieu0311 (12 commits)
+
+- [6953d93] image-admin
+- [de267fa] thêm limk bản đồ saler
+- [bcee318] dán link share gg map
+- [6b30f9c] upgrade thêm gg link map
+- [56ebe68] cập nhật tọa độ theo ggmap
+- [05a565a] thống kê bên saler
+- [b49be48] lịch sử xem token ở saler
+- [a4f6451] dịch lại các trang bên saler và admin
+- [6d00baa] thêm tour và thêm trạng tháo
+- [256563f] audio
+- [c6a2ddb] cập nhật route và logo tour
+- [d2a41bf] cập nhật flow-admin
+
+### sangnpdev (8 commits)
+
+- [e17c07e] thêm chức năng lọc cho main page và map page
+- [1076b25] thiết kế lại giao diên của nút hiện tất cả ở map page khi hiển thị list poi của tour
+- [d6c4e9a] xóa phân loại bị thừa bên main page
+- [aa9be68] xóa Tự tùy chỉnh hành trình và đánh giá ở tour
+- [2e84691] thêm tính năng khi bấm vào nút khám phá ngay ở settingPage thì sẽ nhảy qua tour
+- [9e13fbe] sửa banner bên setting, xóa nút đăng nhập sửa thành banner
+- [d0c2074] thêm logic khi nhấn vào xem chi tiết tour, khi xem chi tiết tour thì đi tới các poi kh thuộc tour cũng ko phát audio của poi đó
+- [67fa6fa] triển khai offline cho tour, đồng thời xử lí phụ thuộc của tourPage vào TourImageWarmupService qua contructor - bug tourPage ko load được
+
+### Nguyen Phuoc Sang (5 commits)
+
+- [5751c15] Merge pull request #176 from sangnp-s-organiztion/admin/billing
+- [0c180e0] Merge pull request #172 from sangnp-s-organiztion/admin/route-map
+- [85d9222] Merge pull request #171 from sangnp-s-organiztion/visitor/offline-tour-v2
+- [55d6cc1] Merge pull request #168 from sangnp-s-organiztion/visitor/offline-tour-v2
+- [14518f8] Merge pull request #167 from sangnp-s-organiztion/saler/manage-translate
+
+## 2026-04-07
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Bổ sung/cập nhật tính năng tour: stop_order, trạng thái nổi bật/ưu tiên, và dữ liệu tour cho MSSQL.
+  - Cập nhật UI/UX mobile: làm nổi bật POI trong tour, highlight POI gần nhất, điều chỉnh tổng thể giao diện app và điều hướng lịch sử.
+  - Cập nhật tài khoản admin/saler: chỉnh sửa thông tin tài khoản, bổ sung email/sđt, cập nhật luồng đổi mật khẩu.
+  - Điều chỉnh luồng hiển thị tour để đảm bảo vẫn trả kết quả rỗng khi dữ liệu đầu vào lỗi.
+- Merged:
+  - Merge pull request #165 từ nhánh `saler/manage-translate`.
+
+### giathieu0311 (12 commits)
+
+- [453550a] chỉnh sửa thời gian dự kiến, ưu tiên, nổi bật
+- [bab7d44] cập nhật dấu câu và tiếng việt cho admin
+- [8af76eb] Cập nhật thứ tự stop_order
+- [b76fdb4] thêm chức năng tour
+- [a4cffb7] thêm chỉnh sửa cho tài khoản ở admin và saler
+- [ffe280d] Merge branch 'visitor/add-tour' of https://github.com/sangnp-s-organiztion/food-market-narrator into saler/manage-translate
+- [63823df] cập nhật mật tài khoản ở admin và saler
+- [d18def8] thêm email và sđt
+- [2fe181b] sửa chỉnh sửa người dùng, nhập lại mật khẩu
+- [3b0eee0] Merge branch 'visitor/add-tour' of https://github.com/sangnp-s-organiztion/food-market-narrator into saler/manage-translate
+- [61ce324] lọc theo tháng
+- [509dc69] Chỉnh admin trang tuyến đường đi theo ngày giờ
+
+### sangnpdev (7 commits)
+
+- [3c0c93e] fix lỗi không hiện tour nếu sai bất cư sthonog tin nào, -> nếu sai thì vẫn trả về nhưng rỗng
+- [405c4e1] ẩn luôn tên của mấy quán gần mình mà ko có trong tour
+- [8c8add4] hightlight poi gần nhất bên mappage
+- [9b6755e] hiển thị nổi bật các poi của tour
+- [e2c782a] xóa image urlr ở tour và sửa thành image id
+- [a94fee3] sửa lại giao diện tổng của app, bỏ nút lịch sử ở bottom navigation. đưa lịch sử vào cài đặt
+- [fe8be23] setup tour cho database mssql
+
+### Nguyen Phuoc Sang (1 commit)
+
+- [b288ffe] Merge pull request #165 from sangnp-s-organiztion/saler/manage-translate
+
 ## 2026-04-06
 
 ### Tóm tắt trong ngày
