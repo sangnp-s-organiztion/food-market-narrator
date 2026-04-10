@@ -34,6 +34,17 @@ const formatDateTime = (iso: string) => {
   });
 };
 
+const formatActionType = (actionType: string) => {
+  switch ((actionType ?? "").toLowerCase()) {
+    case "translate":
+      return "dịch";
+    case "create_audio":
+      return "tạo tệp thuyết minh";
+    default:
+      return actionType;
+  }
+};
+
 const MonthlyBillingTable = ({
   items,
 }: {
@@ -94,7 +105,7 @@ const UsageLedgerTable = ({
             {formatDateTime(item.createdAtUtc)}
           </td>
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
-          <td className="mono text-xs">{item.actionType}</td>
+          <td className="mono text-xs">{formatActionType(item.actionType)}</td>
           <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
           <td className="mono text-xs">{formatNumber(item.billableUnits)}</td>
         </tr>
@@ -128,7 +139,7 @@ const AudioUsageLedgerTable = ({
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
           <td className="mono text-xs">{item.restaurantId}</td>
           <td className="mono text-xs">{item.audioId ?? "-"}</td>
-          <td className="mono text-xs">{item.actionType}</td>
+          <td className="mono text-xs">{formatActionType(item.actionType)}</td>
           <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
           <td className="mono text-xs">{formatNumber(item.billableUnits)}</td>
         </tr>
@@ -379,7 +390,9 @@ const TranslationBillingPage = () => {
 
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Lịch sử đơn vị tính phí</h2>
+            <h2 className="text-lg font-semibold">
+              Lịch sử sử dụng dịch vụ dịch thuật
+            </h2>
             <span className="text-xs text-muted-foreground mono">
               {usageData?.totalCount ?? 0} sự kiện
             </span>
@@ -444,7 +457,9 @@ const TranslationBillingPage = () => {
 
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Lịch sử tạo audio</h2>
+            <h2 className="text-lg font-semibold">
+              Lịch sử tạo tệp thuyết minh
+            </h2>
             <span className="text-xs text-muted-foreground mono">
               {audioUsageData?.totalCount ?? 0} sự kiện
             </span>
