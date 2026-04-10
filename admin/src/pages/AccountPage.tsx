@@ -64,7 +64,11 @@ const AccountPage = () => {
       }),
     onSuccess: () => {
       toast.success("Đổi mật khẩu thành công");
-      setPasswordForm({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
+      setPasswordForm({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Đổi mật khẩu thất bại");
@@ -132,7 +136,9 @@ const AccountPage = () => {
       <div className="mx-auto grid max-w-4xl gap-6 px-8 py-6">
         <section className="stat-card p-6">
           <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 className="text-base font-semibold">Thông tin tài khoản hiện tại</h2>
+            <h2 className="text-base font-semibold">
+              Thông tin tài khoản hiện tại
+            </h2>
             {!isEditingProfile ? (
               <Button size="sm" variant="outline" onClick={startEditProfile}>
                 <Pencil className="mr-1.5 h-4 w-4" />
@@ -150,13 +156,23 @@ const AccountPage = () => {
             )}
           </div>
 
-          {isLoading && <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>}
+          {isLoading && (
+            <p className="text-sm text-muted-foreground">
+              Đang tải thông tin...
+            </p>
+          )}
           {isError && (
-            <p className="text-sm text-destructive">Không thể tải thông tin tài khoản.</p>
+            <p className="text-sm text-destructive">
+              Không thể tải thông tin tài khoản.
+            </p>
           )}
 
           {!isLoading && !isError && data && !isEditingProfile && (
             <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-muted-foreground">Họ và tên</p>
+                <p className="font-medium">{data.fullName || "-"}</p>
+              </div>
               <div>
                 <p className="text-muted-foreground">Tên đăng nhập</p>
                 <p className="font-medium">{data.username}</p>
@@ -183,7 +199,9 @@ const AccountPage = () => {
                 <Input
                   className="mt-1"
                   value={profileForm.username}
-                  onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, username: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -191,7 +209,9 @@ const AccountPage = () => {
                 <Input
                   className="mt-1"
                   value={profileForm.phone}
-                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, phone: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -199,7 +219,9 @@ const AccountPage = () => {
                 <Input
                   className="mt-1"
                   value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, email: e.target.value })
+                  }
                 />
               </div>
               <Button
@@ -207,7 +229,9 @@ const AccountPage = () => {
                 onClick={handleSaveProfile}
                 disabled={updateProfileMutation.isPending}
               >
-                {updateProfileMutation.isPending ? "Đang cập nhật..." : "Lưu thông tin"}
+                {updateProfileMutation.isPending
+                  ? "Đang cập nhật..."
+                  : "Lưu thông tin"}
               </Button>
             </div>
           )}
@@ -222,7 +246,12 @@ const AccountPage = () => {
                 type="password"
                 className="mt-1"
                 value={passwordForm.oldPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    oldPassword: e.target.value,
+                  })
+                }
                 autoComplete="current-password"
               />
             </div>
@@ -232,7 +261,12 @@ const AccountPage = () => {
                 type="password"
                 className="mt-1"
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    newPassword: e.target.value,
+                  })
+                }
                 autoComplete="new-password"
               />
             </div>
@@ -243,7 +277,10 @@ const AccountPage = () => {
                 className="mt-1"
                 value={passwordForm.confirmNewPassword}
                 onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })
+                  setPasswordForm({
+                    ...passwordForm,
+                    confirmNewPassword: e.target.value,
+                  })
                 }
                 autoComplete="new-password"
               />
@@ -253,7 +290,9 @@ const AccountPage = () => {
               onClick={handleChangePassword}
               disabled={changePasswordMutation.isPending || userId <= 0}
             >
-              {changePasswordMutation.isPending ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
+              {changePasswordMutation.isPending
+                ? "Đang cập nhật..."
+                : "Cập nhật mật khẩu"}
             </Button>
           </div>
         </section>

@@ -17,6 +17,7 @@ public class EdgeTtsSettings
 public class TranslationPricingSettings
 {
     public decimal PricePer1KChars { get; set; } = 0.02m;
+    public decimal BillableUnitMultiplier { get; set; } = 1.2m;
     public string Currency { get; set; } = "USD";
     public string RateVersion { get; set; } = "v1";
 }

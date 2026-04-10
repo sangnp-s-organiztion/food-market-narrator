@@ -98,13 +98,11 @@ export interface TourStopResponse {
 export interface TourResponse {
   tourId: number;
   name: string;
-  shortDescription: string | null;
   description: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl: string | null;
   isActive: boolean;
-  isFeatured: boolean;
-  sortPriority: number;
+  createdAt: string;
   stopCount: number;
   nearbyStopCount: number;
   nearestDistanceMeters: number | null;
@@ -124,30 +122,54 @@ export interface ReorderTourStopsRequest {
 }
 
 export interface UpdateTourRequest {
+  name?: string | null;
+  description?: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl: string | null;
-  sortPriority: number;
   isActive: boolean;
-  isFeatured: boolean;
 }
 
 export interface CreateTourRequest {
   name: string;
-  shortDescription?: string | null;
   description?: string | null;
   estimatedDurationMinutes: number | null;
   imageUrl?: string | null;
-  sortPriority: number;
   isActive: boolean;
-  isFeatured: boolean;
 }
 
 function buildCreateTourFormData(data: CreateTourRequest): FormData {
   const formData = new FormData();
 
   formData.append("name", data.name);
-  if (data.shortDescription !== null && data.shortDescription !== undefined) {
-    formData.append("shortDescription", data.shortDescription);
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("isActive", `${data.isActive}`);
+
+  return formData;
+}
+
+function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
+  const formData = new FormData();
+
+  if (data.name !== null && data.name !== undefined) {
+    formData.append("name", data.name);
   }
 
   if (data.description !== null && data.description !== undefined) {
@@ -168,33 +190,7 @@ function buildCreateTourFormData(data: CreateTourRequest): FormData {
     formData.append("urlImage", data.imageUrl);
   }
 
-  formData.append("sortPriority", `${data.sortPriority}`);
   formData.append("isActive", `${data.isActive}`);
-  formData.append("isFeatured", `${data.isFeatured}`);
-
-  return formData;
-}
-
-function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
-  const formData = new FormData();
-
-  if (
-    data.estimatedDurationMinutes !== null &&
-    data.estimatedDurationMinutes !== undefined
-  ) {
-    formData.append(
-      "estimatedDurationMinutes",
-      `${data.estimatedDurationMinutes}`,
-    );
-  }
-
-  if (data.imageUrl !== null && data.imageUrl !== undefined) {
-    formData.append("urlImage", data.imageUrl);
-  }
-
-  formData.append("sortPriority", `${data.sortPriority}`);
-  formData.append("isActive", `${data.isActive}`);
-  formData.append("isFeatured", `${data.isFeatured}`);
 
   return formData;
 }
@@ -206,6 +202,7 @@ export interface UserResponse {
   username: string;
   phone?: string | null;
   email?: string | null;
+  fullName?: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -291,14 +288,12 @@ export interface TranslationUsageLedgerItem {
   taxAmount: number;
   totalAmount: number;
   currency: string;
-  status: string;
   billingMonth: string;
   createdAtUtc: string;
 }
 
 export interface TranslationUsageLedgerSummary {
   billingMonth: string;
-  status: string;
   eventCount: number;
   totalBillableUnits: number;
   totalAmount: number;
@@ -311,6 +306,37 @@ export interface TranslationUsageLedgerResponse {
   page: number;
   pageSize: number;
   summary: TranslationUsageLedgerSummary;
+}
+
+export interface AudioUsageLedgerItem {
+  usageEventId: string;
+  requestId: string;
+  sellerUserId: number;
+  sellerUsername: string;
+  restaurantId: string;
+  audioId: number | null;
+  provider: string;
+  actionType: string;
+  unitType: string;
+  inputChars: number;
+  outputChars: number;
+  billableUnits: number;
+  billingMonth: string;
+  createdAtUtc: string;
+}
+
+export interface AudioUsageLedgerSummary {
+  billingMonth: string;
+  eventCount: number;
+  totalBillableUnits: number;
+}
+
+export interface AudioUsageLedgerResponse {
+  items: AudioUsageLedgerItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: AudioUsageLedgerSummary;
 }
 
 export interface ResolvedMapCoordinatesResponse {
@@ -406,6 +432,14 @@ export const tourApi = {
       body: JSON.stringify(data),
     }),
 
+  removeRestaurant: (id: number, restaurantId: string) =>
+    adminFetch<{ message: string }>(
+      `/Tour/${id}/restaurants/${encodeURIComponent(restaurantId)}`,
+      {
+        method: "DELETE",
+      },
+    ),
+
   reorderStops: (id: number, data: ReorderTourStopsRequest) =>
     adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
       method: "PUT",
@@ -500,19 +534,29 @@ export const translationBillingApi = {
     );
   },
 
-  getUsage: (
-    filter: TranslationBillingFilter & { status?: "billable" | "failed" },
-  ) => {
+  getUsage: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
       sellerUserId: filter.sellerUserId,
-      status: filter.status,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });
 
     return adminFetch<TranslationUsageLedgerResponse>(
       `/api/admin/translation-billing/usage?${query}`,
+    );
+  },
+
+  getAudioUsage: (filter: TranslationBillingFilter) => {
+    const query = toQueryString({
+      billingMonth: filter.billingMonth,
+      sellerUserId: filter.sellerUserId,
+      page: filter.page ?? 1,
+      pageSize: filter.pageSize ?? 20,
+    });
+
+    return adminFetch<AudioUsageLedgerResponse>(
+      `/api/admin/translation-billing/audio-usage?${query}`,
     );
   },
 };

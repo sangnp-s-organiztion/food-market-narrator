@@ -390,11 +390,19 @@ public partial class POIDetailPage : ContentPage
 
 		var restaurantId = _playbackRestaurantId;
 		var audioId = _playbackAudioId;
+		var playedDurationSeconds = _audioService != null
+			? (int)Math.Round(_audioService.CurrentPosition.TotalSeconds)
+			: 0;
+		var trackDurationSeconds = _audioService != null
+			? (int)Math.Round(_audioService.Duration.TotalSeconds)
+			: 0;
 		_ = Task.Run(() => _audioLogSyncService.LogPlaybackAsync(
 			restaurantId,
 			audioId,
 			startedAtUtc,
-			endedAtUtc));
+			endedAtUtc,
+			playedDurationSeconds,
+			trackDurationSeconds));
 	}
 
 	private void ClearPlaybackContext()

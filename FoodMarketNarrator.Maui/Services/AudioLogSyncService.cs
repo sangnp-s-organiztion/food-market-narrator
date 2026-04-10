@@ -24,6 +24,8 @@ public class AudioLogSyncService : IAudioLogSyncService
         int audioId,
         DateTime startTimeUtc,
         DateTime endTimeUtc,
+        int? playedDurationSeconds = null,
+        int? trackDurationSeconds = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(restaurantId) || audioId <= 0)
@@ -48,7 +50,19 @@ public class AudioLogSyncService : IAudioLogSyncService
             normalizedEnd = normalizedStart;
         }
 
-        var duration = (int)Math.Round((normalizedEnd - normalizedStart).TotalSeconds);
+        var duration = playedDurationSeconds.GetValueOrDefault();
+        if (duration <= 0)
+        {
+            duration = (int)Math.Round((normalizedEnd - normalizedStart).TotalSeconds);
+        }
+
+        if (trackDurationSeconds.GetValueOrDefault() > 0)
+        {
+            duration = Math.Min(duration, trackDurationSeconds!.Value);
+        }
+
+        duration = Math.Max(0, duration);
+        normalizedEnd = normalizedStart.AddSeconds(duration);
 
         var request = new AudioLogCreateRequest
         {
@@ -57,7 +71,7 @@ public class AudioLogSyncService : IAudioLogSyncService
             AudioId = audioId,
             StartTime = normalizedStart,
             EndTime = normalizedEnd,
-            Duration = Math.Max(0, duration)
+            Duration = duration
         };
 
         try

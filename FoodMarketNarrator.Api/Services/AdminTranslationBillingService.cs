@@ -75,23 +75,20 @@ public class AdminTranslationBillingService
     public async Task<TranslationUsageLedgerListResponse> GetUsageLedgerAsync(
         string? billingMonth,
         int? sellerUserId,
-        string? status,
         int page,
         int pageSize)
     {
         var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
-        var normalizedStatus = NormalizeStatus(status);
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
 
         var (items, totalCount) = await _translationHistoryRepository.GetUsageLedgerAsync(
             normalizedMonth,
             sellerUserId,
-            normalizedStatus,
             normalizedPage,
             normalizedPageSize);
 
-        var summary = await _translationHistoryRepository.GetUsageLedgerSummaryAsync(normalizedMonth, sellerUserId, normalizedStatus);
+        var summary = await _translationHistoryRepository.GetUsageLedgerSummaryAsync(normalizedMonth, sellerUserId);
         var usernames = await ResolveUsernamesAsync(items.Select(x => x.SellerUserId));
 
         var currency = items.FirstOrDefault()?.Currency ?? "USD";
@@ -116,7 +113,6 @@ public class AdminTranslationBillingService
                 TaxAmount = x.TaxAmount,
                 TotalAmount = x.TotalAmount,
                 Currency = x.Currency,
-                Status = x.Status,
                 BillingMonth = x.BillingMonth,
                 CreatedAtUtc = x.CreatedAtUtc
             }).ToList(),
@@ -126,11 +122,60 @@ public class AdminTranslationBillingService
             Summary = new TranslationUsageLedgerSummaryResponse
             {
                 BillingMonth = normalizedMonth ?? "all",
-                Status = normalizedStatus ?? "all",
                 EventCount = summary.EventCount,
                 TotalBillableUnits = summary.TotalBillableUnits,
                 TotalAmount = summary.TotalAmount,
                 Currency = currency
+            }
+        };
+    }
+
+    public async Task<AudioUsageLedgerListResponse> GetAudioUsageLedgerAsync(
+        string? billingMonth,
+        int? sellerUserId,
+        int page,
+        int pageSize)
+    {
+        var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (items, totalCount) = await _translationHistoryRepository.GetAudioUsageLedgerAsync(
+            normalizedMonth,
+            sellerUserId,
+            normalizedPage,
+            normalizedPageSize);
+
+        var summary = await _translationHistoryRepository.GetAudioUsageLedgerSummaryAsync(normalizedMonth, sellerUserId);
+        var usernames = await ResolveUsernamesAsync(items.Select(x => x.SellerUserId));
+
+        return new AudioUsageLedgerListResponse
+        {
+            Items = items.Select(x => new AudioUsageLedgerItemResponse
+            {
+                UsageEventId = x.UsageEventId,
+                RequestId = x.RequestId,
+                SellerUserId = x.SellerUserId,
+                SellerUsername = usernames.TryGetValue(x.SellerUserId, out var name) ? name : string.Empty,
+                RestaurantId = x.RestaurantId,
+                AudioId = x.AudioId,
+                Provider = x.Provider,
+                ActionType = x.ActionType,
+                UnitType = x.UnitType,
+                InputChars = x.InputChars,
+                OutputChars = x.OutputChars,
+                BillableUnits = x.BillableUnits,
+                BillingMonth = x.BillingMonth,
+                CreatedAtUtc = x.CreatedAtUtc
+            }).ToList(),
+            TotalCount = totalCount,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize,
+            Summary = new AudioUsageLedgerSummaryResponse
+            {
+                BillingMonth = normalizedMonth ?? "all",
+                EventCount = summary.EventCount,
+                TotalBillableUnits = summary.TotalBillableUnits
             }
         };
     }
@@ -163,19 +208,4 @@ public class AdminTranslationBillingService
         return normalized;
     }
 
-    private static string? NormalizeStatus(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status))
-        {
-            return null;
-        }
-
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized switch
-        {
-            "billable" => "billable",
-            "failed" => "failed",
-            _ => throw new ArgumentException("status must be 'billable' or 'failed'.")
-        };
-    }
 }

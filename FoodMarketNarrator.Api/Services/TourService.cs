@@ -21,8 +21,6 @@ public class TourService
             .Select(t => MapTour(t, latitude, longitude, radiusMeters))
             .OrderByDescending(t => t.NearbyStopCount)
             .ThenBy(t => t.NearestDistanceMeters ?? double.MaxValue)
-            .ThenByDescending(t => t.IsFeatured)
-            .ThenByDescending(t => t.SortPriority)
             .ThenBy(t => t.Name)
             .ToList();
     }
@@ -68,6 +66,30 @@ public class TourService
 
         await _tourRepository.AddRestaurantToTourAsync(tourId, normalizedRestaurantId, effectiveStopOrder);
         return AddTourRestaurantResult.Success();
+    }
+
+    public async Task<RemoveTourRestaurantResult> RemoveRestaurantFromTourAsync(int tourId, string restaurantId)
+    {
+        var normalizedRestaurantId = restaurantId.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedRestaurantId))
+        {
+            return RemoveTourRestaurantResult.Invalid("restaurantId is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return RemoveTourRestaurantResult.NotFound("Tour not found.");
+        }
+
+        var mappingExists = await _tourRepository.TourRestaurantExistsAsync(tourId, normalizedRestaurantId);
+        if (!mappingExists)
+        {
+            return RemoveTourRestaurantResult.NotFound("Restaurant is not in this tour.");
+        }
+
+        await _tourRepository.RemoveRestaurantFromTourAsync(tourId, normalizedRestaurantId);
+        return RemoveTourRestaurantResult.Success();
     }
 
     public async Task<ReorderTourStopsResult> ReorderTourStopsAsync(int tourId, IReadOnlyList<string> orderedRestaurantIds)
@@ -117,29 +139,34 @@ public class TourService
 
     public async Task<UpdateTourResult> UpdateTourAsync(
         int tourId,
+        string? name,
+        string? description,
         int? estimatedDurationMinutes,
         string? urlImage,
-        int sortPriority,
-        bool isActive,
-        bool isFeatured)
+        bool isActive)
     {
+        var normalizedName = name?.Trim();
+        if (normalizedName != null && string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return UpdateTourResult.Invalid("name is required.");
+        }
+
+        var normalizedDescription = string.IsNullOrWhiteSpace(description)
+            ? null
+            : description.Trim();
+
         if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
         {
             return UpdateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
         }
 
-        if (sortPriority < 0)
-        {
-            return UpdateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
-        }
-
         var updated = await _tourRepository.UpdateTourMetadataAsync(
             tourId,
+            normalizedName,
+            normalizedDescription,
             estimatedDurationMinutes,
             NormalizeUrlImageForStorage(urlImage),
-            sortPriority,
-            isActive,
-            isFeatured);
+            isActive);
 
         if (!updated)
         {
@@ -168,13 +195,10 @@ public class TourService
 
     public async Task<CreateTourResult> CreateTourAsync(
         string name,
-        string? shortDescription,
         string? description,
         int? estimatedDurationMinutes,
         string? urlImage,
-        bool isActive,
-        bool isFeatured,
-        int sortPriority)
+        bool isActive)
     {
         var normalizedName = name.Trim();
         if (string.IsNullOrWhiteSpace(normalizedName))
@@ -187,20 +211,12 @@ public class TourService
             return CreateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
         }
 
-        if (sortPriority < 0)
-        {
-            return CreateTourResult.Invalid("sortPriority must be greater than or equal to 0.");
-        }
-
         var created = await _tourRepository.CreateTourAsync(
             normalizedName,
-            string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
             string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             estimatedDurationMinutes,
             NormalizeUrlImageForStorage(urlImage),
-            isActive,
-            isFeatured,
-            sortPriority);
+            isActive);
 
         var createdTour = await _tourRepository.GetByIdAsync(created.TourId, includeInactive: true);
         if (createdTour == null)
@@ -268,13 +284,11 @@ public class TourService
         {
             TourId = tour.TourId,
             Name = tour.Name,
-            ShortDescription = tour.ShortDescription,
             Description = tour.Description,
             EstimatedDurationMinutes = tour.EstimatedDurationMinutes,
             ImageUrl = imageUrl,
             IsActive = tour.IsActive,
-            IsFeatured = tour.IsFeatured,
-            SortPriority = tour.SortPriority,
+            CreatedAt = tour.CreatedAt,
             StopCount = stops.Count,
             NearbyStopCount = nearbyStopCount,
             NearestDistanceMeters = nearestDistanceMeters,
@@ -369,6 +383,27 @@ public class AddTourRestaurantResult
 
     public static AddTourRestaurantResult Invalid(string message) =>
         new() { Status = AddTourRestaurantStatus.Invalid, Message = message };
+}
+
+public enum RemoveTourRestaurantStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class RemoveTourRestaurantResult
+{
+    public RemoveTourRestaurantStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static RemoveTourRestaurantResult Success() => new() { Status = RemoveTourRestaurantStatus.Success };
+
+    public static RemoveTourRestaurantResult NotFound(string message) =>
+        new() { Status = RemoveTourRestaurantStatus.NotFound, Message = message };
+
+    public static RemoveTourRestaurantResult Invalid(string message) =>
+        new() { Status = RemoveTourRestaurantStatus.Invalid, Message = message };
 }
 
 public enum ReorderTourStopsStatus

@@ -2,6 +2,7 @@ export interface User {
   user_id: number;
   username: string;
   role: string;
+  full_name?: string;
   phone?: string;
   email?: string;
   is_active?: boolean;
@@ -101,14 +102,12 @@ export interface TranslationUsageLedgerItem {
   tax_amount: number;
   total_amount: number;
   currency: string;
-  status: string;
   billing_month: string;
   created_at_utc: string;
 }
 
 export interface TranslationUsageLedgerSummary {
   billing_month: string;
-  status: string;
   event_count: number;
   total_billable_units: number;
   total_amount: number;

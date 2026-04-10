@@ -7,5 +7,7 @@ public interface IAudioLogSyncService
         int audioId,
         DateTime startTimeUtc,
         DateTime endTimeUtc,
+    int? playedDurationSeconds = null,
+    int? trackDurationSeconds = null,
         CancellationToken cancellationToken = default);
 }

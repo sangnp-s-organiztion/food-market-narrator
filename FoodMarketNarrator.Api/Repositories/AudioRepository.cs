@@ -105,8 +105,22 @@ namespace food_market_narrator_api.Repositories
                 return false;
             }
 
+            string restaurantId = existing.RestaurantId;
+            int languageId = existing.LanguageId;
+
             _context.Audio.Remove(existing);
             await _context.SaveChangesAsync();
+
+            var remainingInLanguage = await _context.Audio
+                .Where(a => a.RestaurantId == restaurantId && a.LanguageId == languageId)
+                .ToListAsync();
+
+            if (remainingInLanguage.Count == 1 && !remainingInLanguage[0].IsActive)
+            {
+                remainingInLanguage[0].IsActive = true;
+                await _context.SaveChangesAsync();
+            }
+
             return true;
         }
     }

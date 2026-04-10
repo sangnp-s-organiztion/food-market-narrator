@@ -19,7 +19,7 @@ const TrajectoryPage = () => {
         <div>
           <h1 className="page-title">Tuyến di chuyển người dùng</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Theo dõi đường đi ẩn danh theo session để phân tích hành vi nghe audio
+            Theo dõi đường đi ẩn danh theo phiên để phân tích hành vi nghe audio
           </p>
         </div>
       </div>
