@@ -126,7 +126,7 @@ export default function LoginPage() {
     const normalizedEmail = forgotEmail.trim();
 
     if (!normalizedUsername || !normalizedEmail) {
-      setForgotError("Vui lòng nhập tên đăng nhập và Gmail.");
+      setForgotError("Vui lòng nhập tên đăng nhập và Email.");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
       setForgotNewPassword("");
       setForgotConfirmPassword("");
       setRemainingSeconds(Math.max(0, response.expiresInSeconds || 120));
-      setForgotSuccess(response.message || "Đã gửi OTP qua Gmail.");
+      setForgotSuccess(response.message || "Đã gửi OTP qua Email.");
       setForgotError("");
     } catch (err) {
       setForgotError(parseErrorMessage(err, "Không thể gửi OTP."));
@@ -167,7 +167,7 @@ export default function LoginPage() {
     }
 
     if (!normalizedUsername || !normalizedEmail || !normalizedOtp) {
-      setForgotError("Vui lòng nhập đầy đủ tên đăng nhập, Gmail và OTP.");
+      setForgotError("Vui lòng nhập đầy đủ tên đăng nhập, Email và OTP.");
       return;
     }
 
@@ -302,7 +302,7 @@ export default function LoginPage() {
           <DialogHeader>
             <DialogTitle>Quên mật khẩu</DialogTitle>
             <DialogDescription>
-              Nhập tên đăng nhập và Gmail để nhận mã OTP đặt lại mật khẩu.
+              Nhập tên đăng nhập và Email để nhận mã OTP đặt lại mật khẩu.
             </DialogDescription>
           </DialogHeader>
 
@@ -319,12 +319,12 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="forgot-email">Gmail</Label>
+              <Label htmlFor="forgot-email">Email</Label>
               <Input
                 id="forgot-email"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
-                placeholder="Nhập Gmail"
+                placeholder="Nhập Email"
                 disabled={resettingPassword || verifyingOtp || otpVerified}
               />
             </div>

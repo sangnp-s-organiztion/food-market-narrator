@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.DTOs.Auth;
 using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
@@ -53,7 +54,7 @@ namespace food_market_narrator_api.Controllers
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthSchemes.Saler,
                 principal,
                 new AuthenticationProperties
                 {
@@ -111,7 +112,7 @@ namespace food_market_narrator_api.Controllers
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthSchemes.Admin,
                 principal,
                 new AuthenticationProperties
                 {
@@ -208,7 +209,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Saler)]
         public async Task<IActionResult> Logout()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -228,12 +229,38 @@ namespace food_market_narrator_api.Controllers
                 });
             }
 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(AuthSchemes.Saler);
             return Ok(new { message = "Logged out successfully." });
         }
 
+        [HttpPost("admin/logout")]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
+        public async Task<IActionResult> AdminLogout()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.Identity?.Name ?? "unknown";
+
+            if (int.TryParse(userIdClaim, out var uid))
+            {
+                await _auditLogService.WriteLogAsync(new AuditLog
+                {
+                    UserId = uid,
+                    Username = username,
+                    Action = "LOGOUT",
+                    TargetType = "User",
+                    TargetId = uid.ToString(),
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    CreatedAt = DateTime.UtcNow,
+                    Details = "Admin portal logout"
+                });
+            }
+
+            await HttpContext.SignOutAsync(AuthSchemes.Admin);
+            return Ok(new { message = "Admin logged out successfully." });
+        }
+
         [HttpGet("me")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Saler)]
         public async Task<IActionResult> Me()
         {
             var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -252,7 +279,7 @@ namespace food_market_narrator_api.Controllers
         }
 
         [HttpGet("admin/me")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
         public async Task<IActionResult> AdminMe()
         {
             var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -344,9 +371,12 @@ namespace food_market_narrator_api.Controllers
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
+            var targetScheme = string.Equals(updated.Role, AdminRole, StringComparison.OrdinalIgnoreCase)
+                ? AuthSchemes.Admin
+                : AuthSchemes.Saler;
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                targetScheme,
                 principal,
                 new AuthenticationProperties
                 {

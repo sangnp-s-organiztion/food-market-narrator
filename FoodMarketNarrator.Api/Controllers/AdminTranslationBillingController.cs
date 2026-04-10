@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace food_market_narrator_api.Controllers;
 
 [ApiController]
 [Route("api/admin/translation-billing")]
-[Authorize]
+[Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
 public class AdminTranslationBillingController : ControllerBase
 {
     private readonly AdminTranslationBillingService _adminTranslationBillingService;
@@ -77,7 +78,8 @@ public class AdminTranslationBillingController : ControllerBase
 
     private bool IsCurrentUserAdmin()
     {
-        var role = User.FindFirstValue(ClaimTypes.Role);
-        return string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase);
+        return User.Claims.Any(claim =>
+            claim.Type == ClaimTypes.Role &&
+            string.Equals(claim.Value, "admin", StringComparison.OrdinalIgnoreCase));
     }
 }

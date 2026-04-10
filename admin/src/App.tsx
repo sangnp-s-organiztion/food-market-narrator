@@ -30,7 +30,7 @@ const getTitleByPath = (pathname: string): string => {
   if (pathname === "/") return `Tổng quan | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/restaurants")) return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/users")) return `Quản lý người dùng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/logs")) return `Nhật ký hoạt động | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/logs")) return `Lịch sử hoạt động | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/trajectory")) return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/tours")) return `Quản lý tour | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/translation-billing")) return `Chi phí dịch token | ${TITLE_SUFFIX}`;
