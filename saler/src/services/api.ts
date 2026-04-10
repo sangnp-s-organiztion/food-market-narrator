@@ -278,6 +278,11 @@ type LoginResponse = {
   role: string;
 };
 
+type ForgotPasswordSendOtpResponse = {
+  message: string;
+  expiresInSeconds: number;
+};
+
 type ApiUserProfile = {
   userId: number;
   username: string;
@@ -317,6 +322,28 @@ export async function getMeApi(): Promise<User> {
     username: response.username,
     role: response.role,
   };
+}
+
+export async function forgotPasswordSendOtpApi(
+  username: string,
+  email: string,
+): Promise<ForgotPasswordSendOtpResponse> {
+  return await request<ForgotPasswordSendOtpResponse>("/Auth/forgot-password/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ username, email }),
+  });
+}
+
+export async function forgotPasswordResetApi(
+  username: string,
+  email: string,
+  otp: string,
+  newPassword: string,
+): Promise<void> {
+  await request<{ message: string }>("/Auth/forgot-password/reset", {
+    method: "POST",
+    body: JSON.stringify({ username, email, otp, newPassword }),
+  });
 }
 
 export async function getMyAccountApi(userId: number): Promise<User> {

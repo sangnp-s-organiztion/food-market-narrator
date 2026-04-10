@@ -45,6 +45,7 @@ public class Program
         builder.Services.AddScoped<TranslationService>();
         builder.Services.AddScoped<AdminTranslationBillingService>();
         builder.Services.AddHttpClient();
+        builder.Services.AddMemoryCache();
 
 
         builder.Services
@@ -109,6 +110,7 @@ public class Program
         builder.Services.Configure<LibreTranslateSettings>(builder.Configuration.GetSection("LibreTranslate"));
         builder.Services.Configure<EdgeTtsSettings>(builder.Configuration.GetSection("EdgeTts"));
         builder.Services.Configure<TranslationPricingSettings>(builder.Configuration.GetSection("TranslationPricing"));
+        builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
         builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
         {
             var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;

@@ -140,6 +140,51 @@ namespace food_market_narrator_api.Controllers
             });
         }
 
+        [HttpPost("forgot-password/send-otp")]
+        public async Task<IActionResult> SendForgotPasswordOtp([FromBody] ForgotPasswordSendOtpRequest request)
+        {
+            var result = await _authService.SendForgotPasswordOtpAsync(request.Username, request.Email);
+            return result.Status switch
+            {
+                ForgotPasswordSendOtpStatus.Success => Ok(new ForgotPasswordSendOtpResponse
+                {
+                    Message = "Da gui OTP qua gmail.",
+                    ExpiresInSeconds = result.ExpiresInSeconds
+                }),
+                ForgotPasswordSendOtpStatus.InvalidInput => BadRequest(new { message = "Username va gmail la bat buoc." }),
+                ForgotPasswordSendOtpStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
+                ForgotPasswordSendOtpStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
+                ForgotPasswordSendOtpStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
+                ForgotPasswordSendOtpStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
+                ForgotPasswordSendOtpStatus.EmailDeliveryFailed => BadRequest(new { message = "Khong the gui OTP. Vui long kiem tra cau hinh Gmail SMTP." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the gui OTP." })
+            };
+        }
+
+        [HttpPost("forgot-password/reset")]
+        public async Task<IActionResult> ResetForgotPassword([FromBody] ForgotPasswordResetRequest request)
+        {
+            var result = await _authService.ResetForgotPasswordAsync(
+                request.Username,
+                request.Email,
+                request.Otp,
+                request.NewPassword);
+
+            return result.Status switch
+            {
+                ForgotPasswordResetStatus.Success => Ok(new { message = "Dat lai mat khau thanh cong." }),
+                ForgotPasswordResetStatus.InvalidInput => BadRequest(new { message = "Vui long nhap day du thong tin." }),
+                ForgotPasswordResetStatus.InvalidNewPassword => BadRequest(new { message = "Mat khau moi phai co it nhat 6 ky tu." }),
+                ForgotPasswordResetStatus.InvalidOtp => BadRequest(new { message = "OTP khong dung." }),
+                ForgotPasswordResetStatus.OtpExpired => BadRequest(new { message = "Het han OTP, vui long gui lai." }),
+                ForgotPasswordResetStatus.UsernameNotFound => NotFound(new { message = "User name khong ton tai." }),
+                ForgotPasswordResetStatus.EmailMismatch => BadRequest(new { message = "Gmail bi sai." }),
+                ForgotPasswordResetStatus.NotFoundBoth => NotFound(new { message = "Thong tin khong ton tai." }),
+                ForgotPasswordResetStatus.EmailNotFound => BadRequest(new { message = "Gmail khong ton tai." }),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Khong the dat lai mat khau." })
+            };
+        }
+
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
