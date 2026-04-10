@@ -364,11 +364,15 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         // Arrange
         var cookie = await LoginAndGetCookie("admin", "admin123");
         var username = $"new_saler_{Guid.NewGuid():N}";
+        var phone = $"09{Random.Shared.Next(10000000, 99999999)}";
+        var email = $"{username}@example.com";
 
         var createRequest = new
         {
             username,
             password = string.Empty,
+            phone,
+            email,
             role = "saler"
         };
 
@@ -753,7 +757,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var createRequest = new CreateDishRequest
         {
             Name = "Món Mới",
-            Description = "Mô tả món ăn",
             Price = 100000m
         };
 
@@ -778,7 +781,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var createRequest = new CreateDishRequest
         {
             Name = "Món Test",
-            Description = "Test",
             Price = 50000m
         };
         var createResponse = await AuthorizedRequestAsync(
@@ -792,7 +794,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var updateRequest = new UpdateDishRequest
         {
             Name = "Món Đã Cập Nhật",
-            Description = "Mô tả mới",
             Price = 150000m
         };
 

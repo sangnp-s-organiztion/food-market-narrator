@@ -12,8 +12,6 @@ public class NarrationFlowService : INarrationFlowService
     private readonly IAudioLogSyncService _audioLogSyncService;
     private readonly ILanguageService _languageService;
     private readonly IHistoryService _historyService;
-    private readonly ILocationLogSyncService _locationLogSyncService;
-    private readonly IQrAccessService _qrAccessService;
 
     // Track POI đã phát audio trong phiên
     private readonly HashSet<string> _playedPOIs = new();
@@ -34,7 +32,6 @@ public class NarrationFlowService : INarrationFlowService
     private HashSet<string>? _autoNarrationScopedPoiIds;
     private CancellationTokenSource? _switchCutoffCts;
     private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3);
-    private CancellationTokenSource? _qrGuardCts;
     public bool IsNarrating => _isNarrationEnabled;
 
     public NarrationFlowService(
@@ -43,9 +40,7 @@ public class NarrationFlowService : INarrationFlowService
         IAudioService audioService,
         IAudioLogSyncService audioLogSyncService,
         ILanguageService languageService,
-        IHistoryService historyService,
-        ILocationLogSyncService locationLogSyncService,
-        IQrAccessService qrAccessService)
+        IHistoryService historyService)
     {
         _poiService = poiService;
         _locationService = locationService;
@@ -53,8 +48,6 @@ public class NarrationFlowService : INarrationFlowService
         _audioLogSyncService = audioLogSyncService;
         _languageService = languageService;
         _historyService = historyService;
-        _locationLogSyncService = locationLogSyncService;
-        _qrAccessService = qrAccessService;
     }
 
     public void StartNarration()
@@ -71,7 +64,6 @@ public class NarrationFlowService : INarrationFlowService
 
         _locationService.LocationChanged += OnLocationChanged;
         _ = _locationService.StartTrackingAsync();
-        StartQrGuardLoopIfNeeded();
 
         var cachedLocation = _locationService.LastKnownLocation;
         if (cachedLocation != null)
@@ -138,8 +130,6 @@ public class NarrationFlowService : INarrationFlowService
 
         // stop audio
         _audioService.StopSound();
-        _qrGuardCts?.Cancel();
-        _qrGuardCts = null;
         _switchCutoffCts?.Cancel();
         _switchCutoffCts = null;
         _currentPlayingPoiId = null;
@@ -178,12 +168,6 @@ public class NarrationFlowService : INarrationFlowService
 
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
-        if (_isNarrationEnabled && !await EnsureQrAccessAsync())
-        {
-            StopNarration();
-            return;
-        }
-
         if (currentLocation == null)
             currentLocation = await _locationService.GetCurrentLocationAsync();
 
@@ -453,50 +437,6 @@ public class NarrationFlowService : INarrationFlowService
     {
         _playedPOIs.Clear();
         _poiLastPlayedTime.Clear();
-    }
-
-    private void StartQrGuardLoopIfNeeded()
-    {
-        if (!_qrAccessService.IsQrTimeRestricted)
-        {
-            return;
-        }
-
-        _qrGuardCts?.Cancel();
-        _qrGuardCts = new CancellationTokenSource();
-        var token = _qrGuardCts.Token;
-
-        _ = Task.Run(async () =>
-        {
-            while (!token.IsCancellationRequested && _isNarrationEnabled)
-            {
-                if (!await EnsureQrAccessAsync())
-                {
-                    StopNarration();
-                    break;
-                }
-
-                try
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(5), token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-            }
-        }, token);
-    }
-
-    private async Task<bool> EnsureQrAccessAsync()
-    {
-        if (!_qrAccessService.IsQrTimeRestricted)
-        {
-            return true;
-        }
-
-        var sessionId = _locationLogSyncService.CurrentSessionId;
-        return await _qrAccessService.CanContinueNarrationAsync(sessionId);
     }
 
     private static AudioModel? ResolveSelectedAudio(POI poi, string languageCode)

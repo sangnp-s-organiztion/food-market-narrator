@@ -38,7 +38,6 @@ public static class AppSettings
     public const string TourEndpoint = "tour";
     public const string LanguageEndpoint = "language";
     public const string UserSessionsStartEndpoint = "api/user-sessions/start";
-    public const string UserSessionQrAccessEndpointFormat = "api/user-sessions/{0}/qr-access";
     public const string LocationLogsBatchEndpoint = "api/location-logs/batch";
     public const string AudioLogsEndpoint = "api/audio-logs";
     public const string MapTileCacheParentFolderName = "map_cache";

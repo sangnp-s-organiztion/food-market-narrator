@@ -21,7 +21,6 @@ public class LocationLogSyncService : ILocationLogSyncService
     private readonly List<LocationLogItem> _buffer = [];
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
-    private readonly IQrAccessService _qrAccessService;
     private readonly string _sessionId = Guid.NewGuid().ToString("N");
     private readonly SemaphoreSlim _bufferFileLock = new(1, 1);
     public string CurrentSessionId => _sessionId;
@@ -31,11 +30,10 @@ public class LocationLogSyncService : ILocationLogSyncService
     private bool _started;
     private bool _sessionStartedSynced;
 
-    public LocationLogSyncService(HttpClient httpClient, ILocationService locationService, IQrAccessService qrAccessService)
+    public LocationLogSyncService(HttpClient httpClient, ILocationService locationService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
-        _qrAccessService = qrAccessService;
     }
 
     public void Start()
@@ -192,10 +190,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         {
             SessionId = _sessionId,
             DeviceId = GetOrCreateDeviceId(),
-            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}",
-            QrAccessExpiresAtUtc = _qrAccessService.IsQrTimeRestricted
-                ? _qrAccessService.QrAccessExpiresAtUtc
-                : null
+            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}"
         };
 
         try
@@ -346,5 +341,4 @@ public class UserSessionStartRequest
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
-    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }
