@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace food_market_narrator_api.Controllers;
 
 [ApiController]
 [Route("api/translation-billing")]
-[Authorize]
+[Authorize(AuthenticationSchemes = AuthSchemes.Saler)]
 public class TranslationBillingController : ControllerBase
 {
     private readonly AdminTranslationBillingService _translationBillingService;
@@ -24,7 +25,12 @@ public class TranslationBillingController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
-        var currentUserIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var salerIdentity = User.Identities.FirstOrDefault(identity =>
+            identity.HasClaim(ClaimTypes.Role, "saler"));
+
+        var currentUserIdRaw = salerIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (!int.TryParse(currentUserIdRaw, out var currentUserId) || currentUserId <= 0)
         {
             return Unauthorized(new { message = "Phiên đăng nhập không hợp lệ." });

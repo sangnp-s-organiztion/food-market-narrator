@@ -41,7 +41,7 @@ const MonthlyBillingTable = ({
   if (items.length === 0) {
     return (
       <tr>
-        <td colSpan={8} className="text-center py-8 text-muted-foreground">
+        <td colSpan={7} className="text-center py-8 text-muted-foreground">
           Chưa có dữ liệu chi phí theo bộ lọc.
         </td>
       </tr>
@@ -67,9 +67,6 @@ const MonthlyBillingTable = ({
           <td className="mono text-xs">
             {formatNumber(item.totalBillableUnits)}
           </td>
-          <td className="mono text-xs font-medium">
-            {formatNumber(item.totalAmount)} {item.currency}
-          </td>
         </tr>
       ))}
     </>
@@ -84,7 +81,7 @@ const UsageLedgerTable = ({
   if (items.length === 0) {
     return (
       <tr>
-        <td colSpan={9} className="text-center py-8 text-muted-foreground">
+        <td colSpan={6} className="text-center py-8 text-muted-foreground">
           Chưa có lịch sử sử dụng token theo bộ lọc.
         </td>
       </tr>
@@ -103,15 +100,8 @@ const UsageLedgerTable = ({
             {item.sellerUserId}
           </td>
           <td className="mono text-xs">{item.actionType}</td>
-          <td className="mono text-xs">{item.status}</td>
           <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
           <td className="mono text-xs">{formatNumber(item.billableUnits)}</td>
-          <td className="mono text-xs font-medium">
-            {formatNumber(item.totalAmount)} {item.currency}
-          </td>
-          <td className="mono text-xs text-muted-foreground">
-            {item.provider}
-          </td>
         </tr>
       ))}
     </>
@@ -121,9 +111,6 @@ const UsageLedgerTable = ({
 const TranslationBillingPage = () => {
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
   const [sellerUserIdRaw, setSellerUserIdRaw] = useState("");
-  const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">(
-    "all",
-  );
   const [monthlyPage, setMonthlyPage] = useState(1);
   const [usagePage, setUsagePage] = useState(1);
 
@@ -167,14 +154,12 @@ const TranslationBillingPage = () => {
       "usage",
       billingMonth,
       sellerUserId,
-      usageStatus,
       usagePage,
     ],
     queryFn: () =>
       translationBillingApi.getUsage({
         billingMonth,
         sellerUserId,
-        status: usageStatus === "all" ? undefined : usageStatus,
         page: usagePage,
         pageSize: PAGE_SIZE,
       }),
@@ -197,14 +182,14 @@ const TranslationBillingPage = () => {
         <div>
           <h1 className="page-title">Chi phí dịch token</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Theo dõi lịch sử sử dụng token dịch và tổng chi phí theo tháng
+            Theo dõi lịch sử sử dụng token dịch theo tháng
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-6 space-y-6">
         <div className="stat-card">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="stat-label">Tháng</label>
               <Input
@@ -231,27 +216,10 @@ const TranslationBillingPage = () => {
                 placeholder="Để trống = tất cả"
               />
             </div>
-            <div>
-              <label className="stat-label">Trạng thái sử dụng</label>
-              <select
-                className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                value={usageStatus}
-                onChange={(e) => {
-                  setUsageStatus(
-                    e.target.value as "all" | "billable" | "failed",
-                  );
-                  setUsagePage(1);
-                }}
-              >
-                <option value="all">Tất cả</option>
-                <option value="billable">Tính phí</option>
-                <option value="failed">Thất bại</option>
-              </select>
-            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="stat-card">
             <span className="stat-label">Tổng yêu cầu</span>
             <div className="stat-value mono mt-2">
@@ -262,13 +230,6 @@ const TranslationBillingPage = () => {
             <span className="stat-label">Tổng đơn vị tính phí</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalBillableUnits ?? 0)}
-            </div>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Tổng tiền</span>
-            <div className="stat-value mono mt-2">
-              {formatNumber(monthlyData?.summary.totalAmount ?? 0)}{" "}
-              {monthlyData?.summary.currency ?? "USD"}
             </div>
           </div>
         </div>
@@ -293,14 +254,13 @@ const TranslationBillingPage = () => {
                 <th>Thành công</th>
                 <th>Thất bại</th>
                 <th>Đơn vị tính phí</th>
-                <th>Tổng tiền</th>
               </tr>
             </thead>
             <tbody>
               {monthlyLoading && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải dữ liệu chi phí...
@@ -309,7 +269,7 @@ const TranslationBillingPage = () => {
               )}
               {monthlyError && (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-destructive">
+                  <td colSpan={7} className="text-center py-8 text-destructive">
                     Không thể tải dữ liệu chi phí theo tháng.
                   </td>
                 </tr>
@@ -358,18 +318,15 @@ const TranslationBillingPage = () => {
                 <th>Người bán</th>
                 <th>ID người bán</th>
                 <th>Hành động</th>
-                <th>Trạng thái</th>
                 <th>Ký tự đầu vào</th>
                 <th>Đơn vị tính phí</th>
-                <th>Tổng tiền</th>
-                <th>Nhà cung cấp</th>
               </tr>
             </thead>
             <tbody>
               {usageLoading && (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={6}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải lịch sử sử dụng...
@@ -378,7 +335,7 @@ const TranslationBillingPage = () => {
               )}
               {usageError && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-destructive">
+                  <td colSpan={6} className="text-center py-8 text-destructive">
                     Không thể tải lịch sử sử dụng token.
                   </td>
                 </tr>

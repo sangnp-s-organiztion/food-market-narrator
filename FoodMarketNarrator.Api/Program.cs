@@ -49,12 +49,39 @@ public class Program
 
 
         builder.Services
-            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options =>
+            .AddAuthentication(options =>
             {
-                options.Cookie.Name = "fmn_saler_auth";
+                options.DefaultAuthenticateScheme = AuthSchemes.Saler;
+                options.DefaultChallengeScheme = AuthSchemes.Saler;
+                options.DefaultSignInScheme = AuthSchemes.Saler;
+                options.DefaultSignOutScheme = AuthSchemes.Saler;
+            })
+            .AddCookie(AuthSchemes.Saler, options =>
+            {
+                options.Cookie.Name = "fmn_saler_auth_v2";
                 options.LoginPath = "/Auth/login";
                 options.AccessDeniedPath = "/Auth/login";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.Events = new CookieAuthenticationEvents
+                {
+                    OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddCookie(AuthSchemes.Admin, options =>
+            {
+                options.Cookie.Name = "fmn_admin_auth_v2";
+                options.LoginPath = "/Auth/admin/login";
+                options.AccessDeniedPath = "/Auth/admin/login";
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
                 options.Events = new CookieAuthenticationEvents
@@ -74,9 +101,13 @@ public class Program
 
         builder.Services.AddAuthorization(options =>
         {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            var combinedCookiePolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(AuthSchemes.Saler, AuthSchemes.Admin)
                 .RequireAuthenticatedUser()
                 .Build();
+
+            options.DefaultPolicy = combinedCookiePolicy;
+            options.FallbackPolicy = combinedCookiePolicy;
         });
 
         builder.Services.AddCors(options =>
