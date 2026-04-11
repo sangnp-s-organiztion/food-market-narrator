@@ -140,8 +140,8 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 
 ## 12) HistoryPage (Lịch sử)
 
-- Lấy lịch sử xem từ HistoryService (lưu trong memory - reset khi đóng app).
-- Hiển thị danh sách POI đã xem theo thứ tự thời gian (mới nhất trước).
+- Lấy lịch sử nghe từ HistoryService (lưu trong memory - reset khi đóng app).
+- Hiển thị danh sách POI đã nghe theo thứ tự thời gian (mới nhất trước).
 - Tap vào item để mở POIDetailPage.
 - Hiển thị empty state khi không có lịch sử.
 

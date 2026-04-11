@@ -43,7 +43,8 @@ Hệ thống tập trung vào khu vực **phố ẩm thực Vĩnh Khánh, Quận
 ### 4.2 Người quản trị / quản lý nội dung
 
 - Thêm, chỉnh sửa và quản lý thông tin địa điểm.
-- Quản lý và kiểm duyệt nội dung thuyết minh (audio, văn bản).
+- Quản lý nội dung thuyết minh (audio, văn bản).
+- Thống kê dữ liệu phục vụ cho việc phân tích
 
 ---
 
@@ -72,9 +73,6 @@ Một số vấn đề phổ biến mà người dùng thường gặp:
 
 - **Thiếu thông tin giới thiệu về quán ăn**  
   Người dùng không biết lịch sử, đặc điểm nổi bật hoặc điểm đặc trưng của từng quán ăn.
-
-- **Xếp hàng lâu tại các quán nổi tiếng**  
-  Một số quán đông khách khiến người dùng phải chờ lâu mà không biết trước tình trạng đông đúc.
 
 - **Trải nghiệm khám phá ẩm thực còn bị động**  
   Du khách thường chỉ đi dọc khu phố và chọn quán ngẫu nhiên, thiếu thông tin hướng dẫn hoặc gợi ý.
@@ -139,41 +137,50 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 
 **Đặc điểm:**
 
-- Quản lý nội dung của hệ thống.
-- Chịu trách nhiệm cập nhật thông tin về quán ăn và nội dung thuyết minh.
+- Là quản trị viên vận hành hệ thống ở cấp toàn cục.
+- Theo dõi hoạt động người dùng và chất lượng dữ liệu trên toàn nền tảng.
+- Sử dụng web admin để quản lý quyền truy cập, nhà hàng, tour và các chỉ số vận hành.
 
 **Nhu cầu:**
 
-- Thêm mới các địa điểm hoặc quán ăn vào hệ thống.
-- Chỉnh sửa thông tin như mô tả, menu, nội dung thuyết minh.
-- Quản lý dữ liệu địa điểm một cách dễ dàng.
+- Quản lý tài khoản người dùng: tạo mới, khóa/mở khóa.
+- Quản lý toàn bộ nhà hàng ở mức hệ thống và kiểm soát trạng thái hoạt động.
+- Theo dõi dashboard vận hành: Nhật ký hoạt động, tuyến di chuyển và heatmap.
+- Quản lý hành trình (tour), cấu hình QR mở app và theo dõi chi phí dịch/tạo tệp thuyết minh.
+- Quản lý tài khoản admin (thông tin cá nhân, mật khẩu) một cách an toàn.
 
 **Pain points:**
 
-- Cần một hệ thống quản lý đơn giản và dễ sử dụng.
-- Phải đảm bảo thông tin hiển thị cho người dùng luôn chính xác và cập nhật.
+- Cần một giao diện quản trị thống nhất để thao tác nhanh trên nhiều nhóm dữ liệu.
+- Khó phát hiện sớm bất thường nếu thiếu log và số liệu vận hành theo thời gian thực.
+- Rủi ro phân quyền sai có thể làm lộ hoặc sai lệch dữ liệu vận hành.
+- Cần đảm bảo dữ liệu hiển thị cho visitor luôn nhất quán, chính xác và cập nhật.
 
 ---
 
 ### 8.3 Chủ quán / Người bán (Seller)
 
-**Độ tuổi:** 20 – 50  
-**Thiết bị sử dụng:** Smartphone hoặc máy tính
+**Độ tuổi:** 20 – 50+  
+**Thiết bị sử dụng:** Máy tính
 
 **Đặc điểm:**
 
 - Là chủ quán hoặc người quản lý quán ăn trong khu phố.
-- Muốn quảng bá quán ăn và món đặc trưng của mình.
+- Tập trung vận hành dữ liệu nhà hàng của chính mình thay vì quản trị toàn hệ thống.
+- Thao tác chủ yếu qua saler dashboard theo từng nhà hàng được phân quyền.
 
 **Nhu cầu:**
 
-- Quán của mình được giới thiệu cho nhiều khách hơn.
-- Có thể cập nhật menu hoặc thông tin quán.
+- Đăng nhập an toàn, chọn đúng nhà hàng cần thao tác.
+- Cập nhật thông tin nhà hàng, menu món ăn và hình ảnh.
+- Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử thuyết minh.
+- Cập nhật thông tin tài khoản cá nhân để sử dụng dashboard ổn định.
 
 **Pain points:**
 
-- Khó tiếp cận khách du lịch mới.
-- Cạnh tranh với nhiều quán khác trong khu vực.
+- Dễ chỉnh nhầm dữ liệu nếu thao tác sai nhà hàng trong trường hợp quản lý nhiều cơ sở.
+- Mất nhiều thời gian khi cập nhật menu/ảnh/audio nếu quy trình không tập trung.
+- Cần đồng bộ nội dung nhanh để thông tin hiển thị cho visitor luôn chính xác.
 
 ## 9. User Stories
 
@@ -193,7 +200,7 @@ Format chuẩn:
 
 Với vai trò là du khách  
 Tôi muốn quét mã QR  
-Để có thể mở nhanh ứng dụng chợ ẩm thực.
+Để có thể mở nhanh ứng dụng thuyết minh về phố ẩm thực.
 
 **Story V2 - Cấp quyền vị trí**
 
@@ -222,7 +229,7 @@ Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI
 **Story V6 - Đổi ngôn ngữ thuyết minh**
 
 Với vai trò là du khách  
-Tôi muốn đổi ngôn ngữ thuyết minh  
+Tôi muốn đổi ngôn ngữ nghe thuyết minh  
 Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
 
 **Story V7 - Phát lại thủ công**
@@ -300,6 +307,12 @@ Tôi muốn bật hoặc tắt các bản ghi audio
 Với vai trò là chủ quán  
 Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu  
 Để tránh cập nhật nhầm địa điểm.
+
+**Story S8 - Quản lý tài khoản saler**
+
+Với vai trò là chủ quán  
+Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập  
+Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
 
 ---
 

@@ -24,10 +24,6 @@ Tài liệu này mô tả chính xác vị trí lưu audio đã tải và cơ ch
 
 - Nằm trong vùng LocalAppData của ứng dụng MAUI, dưới thư mục files/audio_cache.
 
-3. iOS
-
-- Nằm trong sandbox của app (vùng dữ liệu ứng dụng), có thư mục audio_cache.
-
 ## Cơ chế cache hiện tại
 
 1. Nếu file cache hợp lệ (>= 256 bytes), phát trực tiếp từ cache.
