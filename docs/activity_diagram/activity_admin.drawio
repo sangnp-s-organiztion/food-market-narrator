@@ -20,7 +20,7 @@
           <mxGeometry height="60" width="260" x="470" y="175" as="geometry" />
         </mxCell>
         <mxCell id="12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Gọi GET /Auth/admin/me" vertex="1">
-          <mxGeometry height="60" width="260" x="470" y="260" as="geometry" />
+          <mxGeometry height="60" width="260" x="470" y="270" as="geometry" />
         </mxCell>
         <mxCell id="13" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Phiên hợp lệ?" vertex="1">
           <mxGeometry height="95" width="160" x="520" y="345" as="geometry" />
@@ -269,7 +269,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="act-restaurants" name="Activity - Quản lý nhà hàng">
-    <mxGraphModel dx="3727" dy="1690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="3012" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1300" pageHeight="3012" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -441,39 +441,39 @@
     </mxGraphModel>
   </diagram>
   <diagram id="act-users-logs" name="Activity - Người dùng và nhật ký">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
+    <mxGraphModel dx="1863" dy="845" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" value="Khối 1: Quản lý người dùng" vertex="1">
-          <mxGeometry height="980" width="700" x="250" y="24" as="geometry" />
+          <mxGeometry height="980" width="700" x="250" y="140" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" value="Khối 2: Nhật ký hệ thống và audio" vertex="1">
-          <mxGeometry height="980" width="700" x="250" y="1215" as="geometry" />
+          <mxGeometry height="825" width="700" x="250" y="1215" as="geometry" />
         </mxCell>
         <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="Bắt đầu" vertex="1">
-          <mxGeometry height="90" width="90" x="555" y="71" as="geometry" />
+          <mxGeometry height="90" width="90" x="555" y="187" as="geometry" />
         </mxCell>
         <mxCell id="11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Mở trang Người dùng" vertex="1">
-          <mxGeometry height="60" width="260" x="470" y="201" as="geometry" />
+          <mxGeometry height="60" width="260" x="470" y="317" as="geometry" />
         </mxCell>
         <mxCell id="12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="GET /api/users" vertex="1">
-          <mxGeometry height="60" width="200" x="500" y="301" as="geometry" />
+          <mxGeometry height="60" width="200" x="500" y="417" as="geometry" />
         </mxCell>
         <mxCell id="13" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Chọn thao tác user" vertex="1">
-          <mxGeometry height="95" width="160" x="520" y="401" as="geometry" />
+          <mxGeometry height="95" width="160" x="520" y="517" as="geometry" />
         </mxCell>
         <mxCell id="14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Tạo user mới\n(POST /api/users)" vertex="1">
-          <mxGeometry height="70" width="220" x="280" y="578" as="geometry" />
+          <mxGeometry height="70" width="220" x="280" y="694" as="geometry" />
         </mxCell>
         <mxCell id="15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Khóa/Mở khóa user\n(PATCH status)" vertex="1">
-          <mxGeometry height="70" width="220" x="520" y="578" as="geometry" />
+          <mxGeometry height="70" width="220" x="520" y="694" as="geometry" />
         </mxCell>
         <mxCell id="16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Xem chi tiết user + nhà hàng quản lý" vertex="1">
-          <mxGeometry height="70" width="250" x="760" y="578" as="geometry" />
+          <mxGeometry height="70" width="250" x="760" y="694" as="geometry" />
         </mxCell>
         <mxCell id="17" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Tiếp tục thao tác user?" vertex="1">
-          <mxGeometry height="95" width="180" x="510" y="732" as="geometry" />
+          <mxGeometry height="95" width="180" x="510" y="848" as="geometry" />
         </mxCell>
         <mxCell id="18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Mở trang Lịch sử" vertex="1">
           <mxGeometry height="60" width="260" x="470" y="1322" as="geometry" />
@@ -526,8 +526,8 @@
         <mxCell id="109" edge="1" parent="1" source="17" style="endArrow=block;html=1;" target="13" value="Có">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="350" y="788" />
-              <mxPoint x="350" y="460" />
+              <mxPoint x="350" y="904" />
+              <mxPoint x="350" y="576" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -575,7 +575,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="act-tours" name="Activity - Quản lý tour">
-    <mxGraphModel dx="2236" dy="1014" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
+    <mxGraphModel dx="1597" dy="724" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -583,7 +583,7 @@
           <mxGeometry height="520" width="700" x="250" y="24" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" value="Khối 2: Thao tác tour" vertex="1">
-          <mxGeometry height="739" width="700" x="250" y="661" as="geometry" />
+          <mxGeometry height="699" width="700" x="250" y="661" as="geometry" />
         </mxCell>
         <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="Bắt đầu" vertex="1">
           <mxGeometry height="90" width="90" x="555" y="71" as="geometry" />
@@ -687,7 +687,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="act-account-billing" name="Activity - Tài khoản và chi phí token">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
+    <mxGraphModel dx="2033" dy="922" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2776" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -695,7 +695,7 @@
           <mxGeometry height="760" width="700" x="250" y="24" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" value="Khối 2: Chi phí dịch token" vertex="1">
-          <mxGeometry height="980" width="700" x="250" y="956" as="geometry" />
+          <mxGeometry height="904" width="700" x="250" y="956" as="geometry" />
         </mxCell>
         <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="Bắt đầu" vertex="1">
           <mxGeometry height="90" width="90" x="555" y="71" as="geometry" />
