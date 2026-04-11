@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace food_market_narrator_api.Controllers;
 
 [ApiController]
 [Route("api/admin/translation-billing")]
-[Authorize]
+[Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
 public class AdminTranslationBillingController : ControllerBase
 {
     private readonly AdminTranslationBillingService _adminTranslationBillingService;
@@ -20,7 +21,7 @@ public class AdminTranslationBillingController : ControllerBase
     [HttpGet("monthly")]
     public async Task<IActionResult> GetMonthlyBilling(
         [FromQuery] string? billingMonth = null,
-        [FromQuery] int? sellerUserId = null,
+        [FromQuery] string? sellerUsername = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -33,7 +34,7 @@ public class AdminTranslationBillingController : ControllerBase
         {
             var result = await _adminTranslationBillingService.GetMonthlyBillingAsync(
                 billingMonth,
-                sellerUserId,
+                sellerUsername,
                 page,
                 pageSize);
 
@@ -48,8 +49,7 @@ public class AdminTranslationBillingController : ControllerBase
     [HttpGet("usage")]
     public async Task<IActionResult> GetUsageLedger(
         [FromQuery] string? billingMonth = null,
-        [FromQuery] int? sellerUserId = null,
-        [FromQuery] string? status = null,
+        [FromQuery] string? sellerUsername = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -62,8 +62,35 @@ public class AdminTranslationBillingController : ControllerBase
         {
             var result = await _adminTranslationBillingService.GetUsageLedgerAsync(
                 billingMonth,
-                sellerUserId,
-                status,
+                sellerUsername,
+                page,
+                pageSize);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("audio-usage")]
+    public async Task<IActionResult> GetAudioUsageLedger(
+        [FromQuery] string? billingMonth = null,
+        [FromQuery] string? sellerUsername = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        if (!IsCurrentUserAdmin())
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            var result = await _adminTranslationBillingService.GetAudioUsageLedgerAsync(
+                billingMonth,
+                sellerUsername,
                 page,
                 pageSize);
 
@@ -77,7 +104,8 @@ public class AdminTranslationBillingController : ControllerBase
 
     private bool IsCurrentUserAdmin()
     {
-        var role = User.FindFirstValue(ClaimTypes.Role);
-        return string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase);
+        return User.Claims.Any(claim =>
+            claim.Type == ClaimTypes.Role &&
+            string.Equals(claim.Value, "admin", StringComparison.OrdinalIgnoreCase));
     }
 }

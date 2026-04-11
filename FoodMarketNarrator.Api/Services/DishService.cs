@@ -30,7 +30,6 @@ namespace food_market_narrator_api.Services
             {
                 Name = request.Name.Trim(),
                 Price = request.Price,
-                Description = request.Description,
                 RestaurantId = restaurantId,
                 ImageId = request.ImageId,
                 CreatedAt = DateTime.UtcNow
@@ -50,7 +49,6 @@ namespace food_market_narrator_api.Services
 
             existing.Name = request.Name.Trim();
             existing.Price = request.Price;
-            existing.Description = request.Description;
             existing.ImageId = request.ImageId;
 
             bool updated = await _dishRepository.UpdateAsync(existing);
@@ -81,7 +79,6 @@ namespace food_market_narrator_api.Services
                 DishId = dish.DishId,
                 Name = dish.Name,
                 Price = dish.Price,
-                Description = dish.Description,
                 RestaurantId = dish.RestaurantId,
                 ImageId = dish.ImageId,
                 ImageFileName = imageFileName,

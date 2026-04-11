@@ -160,11 +160,6 @@ export function HeatmapSection({
     [poiMarkerData],
   );
 
-  const topPoisByGpsDensity = useMemo(
-    () => poiMarkerData.filter((x) => x.gpsPointCount > 0).slice(0, 5),
-    [poiMarkerData],
-  );
-
   const handleRecenterMap = () => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -381,22 +376,6 @@ export function HeatmapSection({
             {/* <span className="text-muted-foreground/70">(loang mượt)</span> */}
           </div>
           {/* <span>(7 mức)</span> */}
-        </div>
-      )}
-
-      {topPoisByGpsDensity.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-muted-foreground">
-            POI nhiều điểm GPS nhất:
-          </span>
-          {topPoisByGpsDensity.map((poi, idx) => (
-            <span
-              key={poi.restaurantId}
-              className="rounded-full border border-border bg-accent/40 px-2 py-1 text-foreground"
-            >
-              #{idx + 1} {poi.restaurantName} ({poi.gpsPointCount})
-            </span>
-          ))}
         </div>
       )}
 

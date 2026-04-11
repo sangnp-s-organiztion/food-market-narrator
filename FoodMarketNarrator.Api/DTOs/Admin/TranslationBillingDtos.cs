@@ -9,6 +9,8 @@ public class TranslationMonthlyBillingItemResponse
     public int SuccessRequests { get; set; }
     public int FailedRequests { get; set; }
     public decimal TotalBillableUnits { get; set; }
+    public decimal TranslationBillableUnits { get; set; }
+    public decimal AudioBillableUnits { get; set; }
     public decimal TotalAmount { get; set; }
     public string Currency { get; set; } = "USD";
     public DateTime LastRecomputedAtUtc { get; set; }
@@ -53,7 +55,6 @@ public class TranslationUsageLedgerItemResponse
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public string Currency { get; set; } = "USD";
-    public string Status { get; set; } = string.Empty;
     public string BillingMonth { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
 }
@@ -61,7 +62,6 @@ public class TranslationUsageLedgerItemResponse
 public class TranslationUsageLedgerSummaryResponse
 {
     public string BillingMonth { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
     public int EventCount { get; set; }
     public decimal TotalBillableUnits { get; set; }
     public decimal TotalAmount { get; set; }
@@ -75,4 +75,38 @@ public class TranslationUsageLedgerListResponse
     public int Page { get; set; }
     public int PageSize { get; set; }
     public TranslationUsageLedgerSummaryResponse Summary { get; set; } = new();
+}
+
+public class AudioUsageLedgerItemResponse
+{
+    public string UsageEventId { get; set; } = string.Empty;
+    public string RequestId { get; set; } = string.Empty;
+    public int SellerUserId { get; set; }
+    public string SellerUsername { get; set; } = string.Empty;
+    public string RestaurantId { get; set; } = string.Empty;
+    public int? AudioId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ActionType { get; set; } = string.Empty;
+    public string UnitType { get; set; } = "chars";
+    public int InputChars { get; set; }
+    public int OutputChars { get; set; }
+    public decimal BillableUnits { get; set; }
+    public string BillingMonth { get; set; } = string.Empty;
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public class AudioUsageLedgerSummaryResponse
+{
+    public string BillingMonth { get; set; } = string.Empty;
+    public int EventCount { get; set; }
+    public decimal TotalBillableUnits { get; set; }
+}
+
+public class AudioUsageLedgerListResponse
+{
+    public List<AudioUsageLedgerItemResponse> Items { get; set; } = new();
+    public long TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public AudioUsageLedgerSummaryResponse Summary { get; set; } = new();
 }

@@ -1,9 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5044";
 
 async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...options?.headers,
+    },
     ...options,
   });
 
@@ -81,6 +85,115 @@ export interface CreateRestaurantRequest {
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
+export interface TourStopResponse {
+  stopOrder: number;
+  restaurantId: string;
+  restaurantName: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  primaryImageUrl: string | null;
+}
+
+export interface TourResponse {
+  tourId: number;
+  name: string;
+  description: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+  stopCount: number;
+  nearbyStopCount: number;
+  nearestDistanceMeters: number | null;
+  stops: TourStopResponse[];
+}
+
+export interface TourImageUploadResponse {
+  imageUrl: string;
+}
+
+export interface AddTourRestaurantRequest {
+  restaurantId: string;
+}
+
+export interface ReorderTourStopsRequest {
+  restaurantIds: string[];
+}
+
+export interface UpdateTourRequest {
+  name?: string | null;
+  description?: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl: string | null;
+  isActive: boolean;
+}
+
+export interface CreateTourRequest {
+  name: string;
+  description?: string | null;
+  estimatedDurationMinutes: number | null;
+  imageUrl?: string | null;
+  isActive: boolean;
+}
+
+function buildCreateTourFormData(data: CreateTourRequest): FormData {
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("isActive", `${data.isActive}`);
+
+  return formData;
+}
+
+function buildUpdateTourFormData(data: UpdateTourRequest): FormData {
+  const formData = new FormData();
+
+  if (data.name !== null && data.name !== undefined) {
+    formData.append("name", data.name);
+  }
+
+  if (data.description !== null && data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (
+    data.estimatedDurationMinutes !== null &&
+    data.estimatedDurationMinutes !== undefined
+  ) {
+    formData.append(
+      "estimatedDurationMinutes",
+      `${data.estimatedDurationMinutes}`,
+    );
+  }
+
+  if (data.imageUrl !== null && data.imageUrl !== undefined) {
+    formData.append("urlImage", data.imageUrl);
+  }
+
+  formData.append("isActive", `${data.isActive}`);
+
+  return formData;
+}
 
 // ─── User types ──────────────────────────────────────────────────────────────
 
@@ -89,6 +202,7 @@ export interface UserResponse {
   username: string;
   phone?: string | null;
   email?: string | null;
+  fullName?: string | null;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -115,6 +229,13 @@ export interface UpdateUserPasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateMyProfileRequest {
+  username: string;
+  fullName?: string | null;
+  phone: string;
+  email: string;
+}
+
 export interface CountResponse {
   count: number;
 }
@@ -127,6 +248,8 @@ export interface TranslationMonthlyBillingItem {
   successRequests: number;
   failedRequests: number;
   totalBillableUnits: number;
+  translationBillableUnits?: number;
+  audioBillableUnits?: number;
   totalAmount: number;
   currency: string;
   lastRecomputedAtUtc: string;
@@ -168,14 +291,12 @@ export interface TranslationUsageLedgerItem {
   taxAmount: number;
   totalAmount: number;
   currency: string;
-  status: string;
   billingMonth: string;
   createdAtUtc: string;
 }
 
 export interface TranslationUsageLedgerSummary {
   billingMonth: string;
-  status: string;
   eventCount: number;
   totalBillableUnits: number;
   totalAmount: number;
@@ -188,6 +309,42 @@ export interface TranslationUsageLedgerResponse {
   page: number;
   pageSize: number;
   summary: TranslationUsageLedgerSummary;
+}
+
+export interface AudioUsageLedgerItem {
+  usageEventId: string;
+  requestId: string;
+  sellerUserId: number;
+  sellerUsername: string;
+  restaurantId: string;
+  audioId: number | null;
+  provider: string;
+  actionType: string;
+  unitType: string;
+  inputChars: number;
+  outputChars: number;
+  billableUnits: number;
+  billingMonth: string;
+  createdAtUtc: string;
+}
+
+export interface AudioUsageLedgerSummary {
+  billingMonth: string;
+  eventCount: number;
+  totalBillableUnits: number;
+}
+
+export interface AudioUsageLedgerResponse {
+  items: AudioUsageLedgerItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: AudioUsageLedgerSummary;
+}
+
+export interface ResolvedMapCoordinatesResponse {
+  latitude: number;
+  longitude: number;
 }
 
 // ─── Restaurant API ──────────────────────────────────────────────────────────
@@ -218,10 +375,86 @@ export const restaurantApi = {
         body: JSON.stringify(data),
       },
     ),
+
+  uploadImage: (
+    id: string,
+    file: File,
+    options?: { isPrimary?: boolean; sortOrder?: number },
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("is_primary", `${options?.isPrimary ?? true}`);
+    formData.append("sort_order", `${options?.sortOrder ?? 1}`);
+
+    return adminFetch<RestaurantImageResponse>(
+      `/Restaurant/${encodeURIComponent(id)}/images`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+  },
 };
 
 // ─── User API ────────────────────────────────────────────────────────────────
 
+export const tourApi = {
+  getAll: () => adminFetch<TourResponse[]>("/Tour"),
+
+  getById: (id: number) => adminFetch<TourResponse>(`/Tour/${id}`),
+
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>("/Tour/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  uploadImageForTour: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return adminFetch<TourImageUploadResponse>(`/Tour/${id}/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  create: (data: CreateTourRequest) =>
+    adminFetch<TourResponse>("/Tour", {
+      method: "POST",
+      body: buildCreateTourFormData(data),
+    }),
+
+  addRestaurant: (id: number, data: AddTourRestaurantRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/restaurants`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  removeRestaurant: (id: number, restaurantId: string) =>
+    adminFetch<{ message: string }>(
+      `/Tour/${id}/restaurants/${encodeURIComponent(restaurantId)}`,
+      {
+        method: "DELETE",
+      },
+    ),
+
+  reorderStops: (id: number, data: ReorderTourStopsRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}/stops/order`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: UpdateTourRequest) =>
+    adminFetch<{ message: string }>(`/Tour/${id}`, {
+      method: "PATCH",
+      body: buildUpdateTourFormData(data),
+    }),
+};
 export const userApi = {
   getAll: () => adminFetch<UserResponse[]>("/api/users"),
 
@@ -250,6 +483,12 @@ export const userApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+
+  updateMyProfile: (data: UpdateMyProfileRequest) =>
+    adminFetch<UserResponse>("/Auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ─── Admin Stats API ───────────────────────────────────────────────────────
@@ -269,7 +508,7 @@ export const adminStatsApi = {
 
 type TranslationBillingFilter = {
   billingMonth?: string;
-  sellerUserId?: number;
+  sellerUsername?: string;
   page?: number;
   pageSize?: number;
 };
@@ -288,7 +527,7 @@ export const translationBillingApi = {
   getMonthly: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
-      sellerUserId: filter.sellerUserId,
+      sellerUsername: filter.sellerUsername,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });
@@ -298,13 +537,10 @@ export const translationBillingApi = {
     );
   },
 
-  getUsage: (
-    filter: TranslationBillingFilter & { status?: "billable" | "failed" },
-  ) => {
+  getUsage: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
-      sellerUserId: filter.sellerUserId,
-      status: filter.status,
+      sellerUsername: filter.sellerUsername,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });
@@ -313,4 +549,24 @@ export const translationBillingApi = {
       `/api/admin/translation-billing/usage?${query}`,
     );
   },
+
+  getAudioUsage: (filter: TranslationBillingFilter) => {
+    const query = toQueryString({
+      billingMonth: filter.billingMonth,
+      sellerUsername: filter.sellerUsername,
+      page: filter.page ?? 1,
+      pageSize: filter.pageSize ?? 20,
+    });
+
+    return adminFetch<AudioUsageLedgerResponse>(
+      `/api/admin/translation-billing/audio-usage?${query}`,
+    );
+  },
+};
+
+export const mapsApi = {
+  resolveCoordinates: (url: string) =>
+    adminFetch<ResolvedMapCoordinatesResponse>(
+      `/api/maps/resolve-coordinates?url=${encodeURIComponent(url)}`,
+    ),
 };

@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+﻿import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
 import {
   translationBillingApi,
+  type AudioUsageLedgerItem,
   type TranslationMonthlyBillingItem,
   type TranslationUsageLedgerItem,
 } from "@/lib/adminApi";
@@ -33,6 +34,17 @@ const formatDateTime = (iso: string) => {
   });
 };
 
+const formatActionType = (actionType: string) => {
+  switch ((actionType ?? "").toLowerCase()) {
+    case "translate":
+      return "dịch";
+    case "create_audio":
+      return "tạo tệp thuyết minh";
+    default:
+      return actionType;
+  }
+};
+
 const MonthlyBillingTable = ({
   items,
 }: {
@@ -41,8 +53,8 @@ const MonthlyBillingTable = ({
   if (items.length === 0) {
     return (
       <tr>
-        <td colSpan={8} className="text-center py-8 text-muted-foreground">
-          Chưa có dữ liệu billing theo bộ lọc.
+        <td colSpan={5} className="text-center py-8 text-muted-foreground">
+          Chưa có dữ liệu chi phí theo bộ lọc.
         </td>
       </tr>
     );
@@ -53,22 +65,15 @@ const MonthlyBillingTable = ({
       {items.map((item) => (
         <tr key={`${item.sellerUserId}-${item.billingMonth}`}>
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
-          <td className="mono text-xs text-muted-foreground">
-            {item.sellerUserId}
-          </td>
           <td className="mono text-xs">{item.billingMonth}</td>
           <td className="mono text-xs">{formatNumber(item.totalRequests)}</td>
-          <td className="mono text-xs text-emerald-700">
-            {formatNumber(item.successRequests)}
-          </td>
-          <td className="mono text-xs text-red-600">
-            {formatNumber(item.failedRequests)}
+          <td className="mono text-xs">
+            {formatNumber(
+              item.translationBillableUnits ?? item.totalBillableUnits,
+            )}
           </td>
           <td className="mono text-xs">
-            {formatNumber(item.totalBillableUnits)}
-          </td>
-          <td className="mono text-xs font-medium">
-            {formatNumber(item.totalAmount)} {item.currency}
+            {formatNumber(item.audioBillableUnits ?? 0)}
           </td>
         </tr>
       ))}
@@ -84,8 +89,8 @@ const UsageLedgerTable = ({
   if (items.length === 0) {
     return (
       <tr>
-        <td colSpan={9} className="text-center py-8 text-muted-foreground">
-          Chưa có lịch sử sử dụng token theo bộ lọc.
+        <td colSpan={5} className="text-center py-8 text-muted-foreground">
+          Chưa có lịch sử sử dụng dịch vụ theo bộ lọc.
         </td>
       </tr>
     );
@@ -99,19 +104,43 @@ const UsageLedgerTable = ({
             {formatDateTime(item.createdAtUtc)}
           </td>
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
-          <td className="mono text-xs text-muted-foreground">
-            {item.sellerUserId}
-          </td>
-          <td className="mono text-xs">{item.actionType}</td>
-          <td className="mono text-xs">{item.status}</td>
+          <td className="mono text-xs">{formatActionType(item.actionType)}</td>
           <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
           <td className="mono text-xs">{formatNumber(item.billableUnits)}</td>
-          <td className="mono text-xs font-medium">
-            {formatNumber(item.totalAmount)} {item.currency}
+        </tr>
+      ))}
+    </>
+  );
+};
+
+const AudioUsageLedgerTable = ({
+  items,
+}: {
+  items: AudioUsageLedgerItem[];
+}) => {
+  if (items.length === 0) {
+    return (
+      <tr>
+        <td colSpan={7} className="text-center py-8 text-muted-foreground">
+          Chưa có lịch sử tạo audio theo bộ lọc.
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <>
+      {items.map((item) => (
+        <tr key={item.usageEventId}>
+          <td className="mono text-xs whitespace-nowrap">
+            {formatDateTime(item.createdAtUtc)}
           </td>
-          <td className="mono text-xs text-muted-foreground">
-            {item.provider}
-          </td>
+          <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
+          <td className="mono text-xs">{item.restaurantId}</td>
+          <td className="mono text-xs">{item.audioId ?? "-"}</td>
+          <td className="mono text-xs">{formatActionType(item.actionType)}</td>
+          <td className="mono text-xs">{formatNumber(item.inputChars)}</td>
+          <td className="mono text-xs">{formatNumber(item.billableUnits)}</td>
         </tr>
       ))}
     </>
@@ -120,18 +149,10 @@ const UsageLedgerTable = ({
 
 const TranslationBillingPage = () => {
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
-  const [sellerUserIdRaw, setSellerUserIdRaw] = useState("");
-  const [usageStatus, setUsageStatus] = useState<"all" | "billable" | "failed">(
-    "all",
-  );
+  const [sellerUsername, setSellerUsername] = useState("");
   const [monthlyPage, setMonthlyPage] = useState(1);
   const [usagePage, setUsagePage] = useState(1);
-
-  const sellerUserId = useMemo(() => {
-    if (!sellerUserIdRaw.trim()) return undefined;
-    const parsed = Number(sellerUserIdRaw.trim());
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-  }, [sellerUserIdRaw]);
+  const [audioUsagePage, setAudioUsagePage] = useState(1);
 
   const {
     data: monthlyData,
@@ -143,13 +164,13 @@ const TranslationBillingPage = () => {
       "translation-billing",
       "monthly",
       billingMonth,
-      sellerUserId,
+      sellerUsername,
       monthlyPage,
     ],
     queryFn: () =>
       translationBillingApi.getMonthly({
         billingMonth,
-        sellerUserId,
+        sellerUsername: sellerUsername.trim() || undefined,
         page: monthlyPage,
         pageSize: PAGE_SIZE,
       }),
@@ -166,16 +187,37 @@ const TranslationBillingPage = () => {
       "translation-billing",
       "usage",
       billingMonth,
-      sellerUserId,
-      usageStatus,
+      sellerUsername,
       usagePage,
     ],
     queryFn: () =>
       translationBillingApi.getUsage({
         billingMonth,
-        sellerUserId,
-        status: usageStatus === "all" ? undefined : usageStatus,
+        sellerUsername: sellerUsername.trim() || undefined,
         page: usagePage,
+        pageSize: PAGE_SIZE,
+      }),
+    placeholderData: (previous) => previous,
+  });
+
+  const {
+    data: audioUsageData,
+    isLoading: audioUsageLoading,
+    isError: audioUsageError,
+  } = useQuery({
+    queryKey: [
+      "admin",
+      "translation-billing",
+      "audio-usage",
+      billingMonth,
+      sellerUsername,
+      audioUsagePage,
+    ],
+    queryFn: () =>
+      translationBillingApi.getAudioUsage({
+        billingMonth,
+        sellerUsername: sellerUsername.trim() || undefined,
+        page: audioUsagePage,
         pageSize: PAGE_SIZE,
       }),
     placeholderData: (previous) => previous,
@@ -191,22 +233,27 @@ const TranslationBillingPage = () => {
     Math.ceil((usageData?.totalCount ?? 0) / PAGE_SIZE),
   );
 
+  const audioUsageTotalPages = Math.max(
+    1,
+    Math.ceil((audioUsageData?.totalCount ?? 0) / PAGE_SIZE),
+  );
+
   return (
     <AdminLayout>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Billing token dịch</h1>
+          <h1 className="page-title">Dịch vụ</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Theo dõi lịch sử usage token dịch và tổng tiền theo tháng
+            Theo dõi lịch sử và mức sử dụng dịch vụ theo tháng
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-6 space-y-6">
         <div className="stat-card">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="stat-label">Tháng billing</label>
+              <label className="stat-label">Tháng</label>
               <Input
                 type="month"
                 value={billingMonth}
@@ -214,61 +261,56 @@ const TranslationBillingPage = () => {
                   setBillingMonth(e.target.value);
                   setMonthlyPage(1);
                   setUsagePage(1);
+                  setAudioUsagePage(1);
                 }}
                 className="mt-1"
               />
             </div>
             <div>
-              <label className="stat-label">Seller User ID</label>
+              <label className="stat-label">Tên đăng nhập người bán</label>
               <Input
-                value={sellerUserIdRaw}
+                value={sellerUsername}
                 onChange={(e) => {
-                  setSellerUserIdRaw(e.target.value);
+                  setSellerUsername(e.target.value);
                   setMonthlyPage(1);
                   setUsagePage(1);
+                  setAudioUsagePage(1);
                 }}
                 className="mt-1"
-                placeholder="Để trống = tất cả"
+                placeholder="Nhập tên đăng nhập người bán, để trống = tất cả"
               />
-            </div>
-            <div>
-              <label className="stat-label">Trạng thái usage</label>
-              <select
-                className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                value={usageStatus}
-                onChange={(e) => {
-                  setUsageStatus(
-                    e.target.value as "all" | "billable" | "failed",
-                  );
-                  setUsagePage(1);
-                }}
-              >
-                <option value="all">Tất cả</option>
-                <option value="billable">Billable</option>
-                <option value="failed">Failed</option>
-              </select>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="stat-card">
-            <span className="stat-label">Tổng requests</span>
+            <span className="stat-label">Tổng yêu cầu</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalRequests ?? 0)}
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Tổng billable units</span>
+            <span className="stat-label">Tổng mức sử dụng dịch vụ</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalBillableUnits ?? 0)}
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="stat-card">
-            <span className="stat-label">Tổng tiền</span>
+            <span className="stat-label">Tổng sự kiện tạo tệp thuyết minh</span>
             <div className="stat-value mono mt-2">
-              {formatNumber(monthlyData?.summary.totalAmount ?? 0)}{" "}
-              {monthlyData?.summary.currency ?? "USD"}
+              {formatNumber(audioUsageData?.summary.eventCount ?? 0)}
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">
+              Tổng mức sử dụng dịch vụ tạo tệp thuyết minh
+            </span>
+            <div className="stat-value mono mt-2">
+              {formatNumber(audioUsageData?.summary.totalBillableUnits ?? 0)}
             </div>
           </div>
         </div>
@@ -276,7 +318,7 @@ const TranslationBillingPage = () => {
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">
-              Tổng hợp theo seller/tháng
+              Tổng hợp theo người bán/tháng
             </h2>
             <span className="text-xs text-muted-foreground mono">
               {monthlyData?.totalCount ?? 0} bản ghi
@@ -286,31 +328,28 @@ const TranslationBillingPage = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Seller</th>
-                <th>Seller ID</th>
+                <th>Người bán</th>
                 <th>Tháng</th>
-                <th>Requests</th>
-                <th>Success</th>
-                <th>Failed</th>
-                <th>Billable Units</th>
-                <th>Tổng tiền</th>
+                <th>Yêu cầu</th>
+                <th>Mức sử dụng dịch vụ dịch thuật</th>
+                <th>Mức sử dụng dịch vụ tạo tệp thuyết minh</th>
               </tr>
             </thead>
             <tbody>
               {monthlyLoading && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={5}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Đang tải dữ liệu billing...
+                    Đang tải dữ liệu chi phí...
                   </td>
                 </tr>
               )}
               {monthlyError && (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-destructive">
-                    Không thể tải dữ liệu billing theo tháng.
+                  <td colSpan={5} className="text-center py-8 text-destructive">
+                    Không thể tải dữ liệu chi phí theo tháng.
                   </td>
                 </tr>
               )}
@@ -345,7 +384,9 @@ const TranslationBillingPage = () => {
 
         <div className="stat-card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Lịch sử usage token dịch</h2>
+            <h2 className="text-lg font-semibold">
+              Lịch sử sử dụng dịch vụ dịch thuật
+            </h2>
             <span className="text-xs text-muted-foreground mono">
               {usageData?.totalCount ?? 0} sự kiện
             </span>
@@ -355,31 +396,27 @@ const TranslationBillingPage = () => {
             <thead>
               <tr>
                 <th>Thời gian</th>
-                <th>Seller</th>
-                <th>Seller ID</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>Input chars</th>
-                <th>Billable units</th>
-                <th>Tổng tiền</th>
-                <th>Provider</th>
+                <th>Người bán</th>
+                <th>Hành động</th>
+                <th>Ký tự đầu vào</th>
+                <th>Mức sử dụng dịch vụ</th>
               </tr>
             </thead>
             <tbody>
               {usageLoading && (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={6}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Đang tải lịch sử usage...
+                    Đang tải lịch sử sử dụng...
                   </td>
                 </tr>
               )}
               {usageError && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-destructive">
-                    Không thể tải lịch sử usage token.
+                  <td colSpan={6} className="text-center py-8 text-destructive">
+                    Không thể tải lịch sử sử dụng dịch vụ.
                   </td>
                 </tr>
               )}
@@ -406,6 +443,75 @@ const TranslationBillingPage = () => {
               className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
               disabled={usagePage >= usageTotalPages}
               onClick={() => setUsagePage((p) => p + 1)}
+            >
+              Trang sau
+            </button>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold">
+              Lịch sử tạo tệp thuyết minh
+            </h2>
+            <span className="text-xs text-muted-foreground mono">
+              {audioUsageData?.totalCount ?? 0} sự kiện
+            </span>
+          </div>
+
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Thời gian</th>
+                <th>Người bán</th>
+                <th>Nhà hàng</th>
+                <th>Audio</th>
+                <th>Hành động</th>
+                <th>Ký tự đầu vào</th>
+                <th>Mức sử dụng dịch vụ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {audioUsageLoading && (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Đang tải lịch sử tạo audio...
+                  </td>
+                </tr>
+              )}
+              {audioUsageError && (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-destructive">
+                    Không thể tải lịch sử tạo audio.
+                  </td>
+                </tr>
+              )}
+              {!audioUsageLoading && !audioUsageError && (
+                <AudioUsageLedgerTable items={audioUsageData?.items ?? []} />
+              )}
+            </tbody>
+          </table>
+
+          <div className="mt-3 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+              disabled={audioUsagePage <= 1}
+              onClick={() => setAudioUsagePage((p) => Math.max(1, p - 1))}
+            >
+              Trang trước
+            </button>
+            <span className="text-xs text-muted-foreground mono">
+              {audioUsagePage}/{audioUsageTotalPages}
+            </span>
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+              disabled={audioUsagePage >= audioUsageTotalPages}
+              onClick={() => setAudioUsagePage((p) => p + 1)}
             >
               Trang sau
             </button>

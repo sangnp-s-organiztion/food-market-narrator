@@ -17,6 +17,18 @@ public class EdgeTtsSettings
 public class TranslationPricingSettings
 {
     public decimal PricePer1KChars { get; set; } = 0.02m;
+    public decimal BillableUnitMultiplier { get; set; } = 1.2m;
     public string Currency { get; set; } = "USD";
     public string RateVersion { get; set; } = "v1";
+}
+
+public class SmtpSettings
+{
+    public string Host { get; set; } = "smtp.gmail.com";
+    public int Port { get; set; } = 587;
+    public bool EnableSsl { get; set; } = true;
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string FromEmail { get; set; } = string.Empty;
+    public string FromName { get; set; } = "Food Market Narrator";
 }

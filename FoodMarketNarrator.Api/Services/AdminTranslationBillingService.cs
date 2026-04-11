@@ -21,21 +21,33 @@ public class AdminTranslationBillingService
 
     public async Task<TranslationMonthlyBillingListResponse> GetMonthlyBillingAsync(
         string? billingMonth,
-        int? sellerUserId,
+        string? sellerUsername,
         int page,
         int pageSize)
     {
         var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
+        var resolvedSellerUserId = await ResolveSellerUserIdByUsernameAsync(sellerUsername);
 
         var (items, totalCount) = await _translationHistoryRepository.GetMonthlyBillingAsync(
             normalizedMonth,
-            sellerUserId,
+            resolvedSellerUserId,
             normalizedPage,
             normalizedPageSize);
 
-        var summary = await _translationHistoryRepository.GetMonthlyBillingSummaryAsync(normalizedMonth, sellerUserId);
+        var sellerIdsInPage = items
+            .Select(x => x.SellerUserId)
+            .Where(x => x > 0)
+            .Distinct()
+            .ToList();
+
+        var audioBillableBySellerMonth = await _translationHistoryRepository.GetAudioBillableUnitsBySellerMonthAsync(
+            normalizedMonth,
+            resolvedSellerUserId,
+            sellerIdsInPage);
+
+        var summary = await _translationHistoryRepository.GetMonthlyBillingSummaryAsync(normalizedMonth, resolvedSellerUserId);
         var usernames = await ResolveUsernamesAsync(items.Select(x => x.SellerUserId));
 
         var currency = items.FirstOrDefault()?.Currency ?? "USD";
@@ -51,6 +63,10 @@ public class AdminTranslationBillingService
                 SuccessRequests = x.SuccessRequests,
                 FailedRequests = x.FailedRequests,
                 TotalBillableUnits = x.TotalBillableUnits,
+                TranslationBillableUnits = x.TotalBillableUnits,
+                AudioBillableUnits = audioBillableBySellerMonth.TryGetValue((x.SellerUserId, x.BillingMonth), out var audioUnits)
+                    ? audioUnits
+                    : 0m,
                 TotalAmount = x.TotalAmount,
                 Currency = x.Currency,
                 LastRecomputedAtUtc = x.LastRecomputedAtUtc
@@ -74,24 +90,58 @@ public class AdminTranslationBillingService
 
     public async Task<TranslationUsageLedgerListResponse> GetUsageLedgerAsync(
         string? billingMonth,
-        int? sellerUserId,
-        string? status,
+        string? sellerUsername,
         int page,
         int pageSize)
     {
         var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
-        var normalizedStatus = NormalizeStatus(status);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
+        var resolvedSellerUserId = await ResolveSellerUserIdByUsernameAsync(sellerUsername);
+
+        return await BuildUsageLedgerResponseAsync(
+            normalizedMonth,
+            resolvedSellerUserId,
+            normalizedPage,
+            normalizedPageSize);
+    }
+
+    public async Task<TranslationUsageLedgerListResponse> GetUsageLedgerBySellerUserIdAsync(
+        string? billingMonth,
+        int sellerUserId,
+        int page,
+        int pageSize)
+    {
+        if (sellerUserId <= 0)
+        {
+            throw new ArgumentException("sellerUserId must be greater than zero.");
+        }
+
+        var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
 
-        var (items, totalCount) = await _translationHistoryRepository.GetUsageLedgerAsync(
+        return await BuildUsageLedgerResponseAsync(
             normalizedMonth,
             sellerUserId,
-            normalizedStatus,
+            normalizedPage,
+            normalizedPageSize);
+    }
+
+    private async Task<TranslationUsageLedgerListResponse> BuildUsageLedgerResponseAsync(
+        string? normalizedMonth,
+        int? resolvedSellerUserId,
+        int normalizedPage,
+        int normalizedPageSize)
+    {
+
+        var (items, totalCount) = await _translationHistoryRepository.GetUsageLedgerAsync(
+            normalizedMonth,
+            resolvedSellerUserId,
             normalizedPage,
             normalizedPageSize);
 
-        var summary = await _translationHistoryRepository.GetUsageLedgerSummaryAsync(normalizedMonth, sellerUserId, normalizedStatus);
+        var summary = await _translationHistoryRepository.GetUsageLedgerSummaryAsync(normalizedMonth, resolvedSellerUserId);
         var usernames = await ResolveUsernamesAsync(items.Select(x => x.SellerUserId));
 
         var currency = items.FirstOrDefault()?.Currency ?? "USD";
@@ -116,7 +166,6 @@ public class AdminTranslationBillingService
                 TaxAmount = x.TaxAmount,
                 TotalAmount = x.TotalAmount,
                 Currency = x.Currency,
-                Status = x.Status,
                 BillingMonth = x.BillingMonth,
                 CreatedAtUtc = x.CreatedAtUtc
             }).ToList(),
@@ -126,11 +175,61 @@ public class AdminTranslationBillingService
             Summary = new TranslationUsageLedgerSummaryResponse
             {
                 BillingMonth = normalizedMonth ?? "all",
-                Status = normalizedStatus ?? "all",
                 EventCount = summary.EventCount,
                 TotalBillableUnits = summary.TotalBillableUnits,
                 TotalAmount = summary.TotalAmount,
                 Currency = currency
+            }
+        };
+    }
+
+    public async Task<AudioUsageLedgerListResponse> GetAudioUsageLedgerAsync(
+        string? billingMonth,
+        string? sellerUsername,
+        int page,
+        int pageSize)
+    {
+        var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
+        var resolvedSellerUserId = await ResolveSellerUserIdByUsernameAsync(sellerUsername);
+
+        var (items, totalCount) = await _translationHistoryRepository.GetAudioUsageLedgerAsync(
+            normalizedMonth,
+            resolvedSellerUserId,
+            normalizedPage,
+            normalizedPageSize);
+
+        var summary = await _translationHistoryRepository.GetAudioUsageLedgerSummaryAsync(normalizedMonth, resolvedSellerUserId);
+        var usernames = await ResolveUsernamesAsync(items.Select(x => x.SellerUserId));
+
+        return new AudioUsageLedgerListResponse
+        {
+            Items = items.Select(x => new AudioUsageLedgerItemResponse
+            {
+                UsageEventId = x.UsageEventId,
+                RequestId = x.RequestId,
+                SellerUserId = x.SellerUserId,
+                SellerUsername = usernames.TryGetValue(x.SellerUserId, out var name) ? name : string.Empty,
+                RestaurantId = x.RestaurantId,
+                AudioId = x.AudioId,
+                Provider = x.Provider,
+                ActionType = x.ActionType,
+                UnitType = x.UnitType,
+                InputChars = x.InputChars,
+                OutputChars = x.OutputChars,
+                BillableUnits = x.BillableUnits,
+                BillingMonth = x.BillingMonth,
+                CreatedAtUtc = x.CreatedAtUtc
+            }).ToList(),
+            TotalCount = totalCount,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize,
+            Summary = new AudioUsageLedgerSummaryResponse
+            {
+                BillingMonth = normalizedMonth ?? "all",
+                EventCount = summary.EventCount,
+                TotalBillableUnits = summary.TotalBillableUnits
             }
         };
     }
@@ -145,6 +244,18 @@ public class AdminTranslationBillingService
 
         var users = await _userRepository.GetByIdsAsync(ids);
         return users.ToDictionary(x => x.UserId, x => x.Username);
+    }
+
+    private async Task<int?> ResolveSellerUserIdByUsernameAsync(string? sellerUsername)
+    {
+        if (string.IsNullOrWhiteSpace(sellerUsername))
+        {
+            return null;
+        }
+
+        var normalizedUsername = sellerUsername.Trim();
+        var user = await _userRepository.GetByUsernameAsync(normalizedUsername);
+        return user?.UserId ?? -1;
     }
 
     private static string? NormalizeBillingMonthOrThrow(string? billingMonth)
@@ -163,19 +274,4 @@ public class AdminTranslationBillingService
         return normalized;
     }
 
-    private static string? NormalizeStatus(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status))
-        {
-            return null;
-        }
-
-        var normalized = status.Trim().ToLowerInvariant();
-        return normalized switch
-        {
-            "billable" => "billable",
-            "failed" => "failed",
-            _ => throw new ArgumentException("status must be 'billable' or 'failed'.")
-        };
-    }
 }

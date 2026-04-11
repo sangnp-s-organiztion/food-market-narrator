@@ -2,6 +2,7 @@ export interface User {
   user_id: number;
   username: string;
   role: string;
+  full_name?: string;
   phone?: string;
   email?: string;
   is_active?: boolean;
@@ -42,7 +43,6 @@ export interface Dish {
   dish_id: number;
   name: string;
   price: number;
-  description: string;
   restaurant_id: string;
   image_id: number | null;
   image_url?: string;
@@ -83,6 +83,50 @@ export interface CreateAudioFromTextResult {
   language_code: string;
   voice: string;
   created_at: string;
+}
+
+export interface TranslationUsageLedgerItem {
+  usage_event_id: string;
+  request_id: string;
+  seller_user_id: number;
+  seller_username: string;
+  restaurant_id: string;
+  audio_id: number | null;
+  provider: string;
+  action_type: string;
+  unit_type: string;
+  input_chars: number;
+  output_chars: number;
+  billable_units: number;
+  cost_amount: number;
+  tax_amount: number;
+  total_amount: number;
+  currency: string;
+  billing_month: string;
+  created_at_utc: string;
+}
+
+export interface TranslationUsageLedgerSummary {
+  billing_month: string;
+  event_count: number;
+  total_billable_units: number;
+  total_amount: number;
+  currency: string;
+}
+
+export interface TranslationUsageLedgerResponse {
+  items: TranslationUsageLedgerItem[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  summary: TranslationUsageLedgerSummary;
+}
+
+export interface AnalyticsKpi {
+  total_users: number;
+  average_listening_time_seconds: number;
+  average_listening_time_formatted: string;
+  total_poi_plays: number;
 }
 
 export interface AuthState {

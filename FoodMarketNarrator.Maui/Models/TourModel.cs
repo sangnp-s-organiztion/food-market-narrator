@@ -2,18 +2,22 @@ namespace food_market_narrator.Models;
 
 public class TourModel
 {
+    private List<TourStopModel>? _stops;
+
     public int TourId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? ShortDescription { get; set; }
     public string? Description { get; set; }
     public int? EstimatedDurationMinutes { get; set; }
     public string? ImageUrl { get; set; }
-    public bool IsFeatured { get; set; }
-    public int SortPriority { get; set; }
+    public bool IsActive { get; set; } = true;
     public int StopCount { get; set; }
     public int NearbyStopCount { get; set; }
     public double? NearestDistanceMeters { get; set; }
-    public List<TourStopModel> Stops { get; set; } = new();
+    public List<TourStopModel> Stops
+    {
+        get => _stops ??= new List<TourStopModel>();
+        set => _stops = value ?? new List<TourStopModel>();
+    }
 
     public string? ResolvedImageUrl { get; set; }
 
@@ -24,6 +28,10 @@ public class TourModel
     public string DurationDisplay => EstimatedDurationMinutes.HasValue
         ? $"{EstimatedDurationMinutes.Value} PHÚT"
         : "ĐANG CẬP NHẬT";
+
+    public string DurationCompactDisplay => EstimatedDurationMinutes.HasValue
+        ? $"{EstimatedDurationMinutes.Value}p"
+        : "--";
 
     public string StopCountDisplay => $"{StopCount} ĐIỂM DỪNG";
 
@@ -36,7 +44,7 @@ public class TourModel
                 return $"{NearbyStopCount} gần";
             }
 
-            return IsFeatured ? "Nổi bật" : "4.9";
+            return "4.9";
         }
     }
 }

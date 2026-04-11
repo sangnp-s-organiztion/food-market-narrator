@@ -15,27 +15,216 @@ public class TourService
 
     public async Task<List<TourResponse>> GetAllToursAsync(double? latitude = null, double? longitude = null, double radiusMeters = 30)
     {
-        var tours = await _tourRepository.GetAllAsync();
+        var tours = await _tourRepository.GetAllAsync(includeInactive: true);
 
         return tours
             .Select(t => MapTour(t, latitude, longitude, radiusMeters))
             .OrderByDescending(t => t.NearbyStopCount)
             .ThenBy(t => t.NearestDistanceMeters ?? double.MaxValue)
-            .ThenByDescending(t => t.IsFeatured)
-            .ThenByDescending(t => t.SortPriority)
             .ThenBy(t => t.Name)
             .ToList();
     }
 
     public async Task<TourResponse?> GetTourByIdAsync(int id, double? latitude = null, double? longitude = null, double radiusMeters = 30)
     {
-        var tour = await _tourRepository.GetByIdAsync(id);
+        var tour = await _tourRepository.GetByIdAsync(id, includeInactive: true);
         if (tour == null)
         {
             return null;
         }
 
         return MapTour(tour, latitude, longitude, radiusMeters);
+    }
+
+    public async Task<AddTourRestaurantResult> AddRestaurantToTourAsync(int tourId, string restaurantId)
+    {
+        var normalizedRestaurantId = restaurantId.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedRestaurantId))
+        {
+            return AddTourRestaurantResult.Invalid("restaurantId is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return AddTourRestaurantResult.NotFound("Tour not found.");
+        }
+
+        var restaurantExists = await _tourRepository.RestaurantExistsAsync(normalizedRestaurantId);
+        if (!restaurantExists)
+        {
+            return AddTourRestaurantResult.NotFound("Restaurant not found.");
+        }
+
+        var mappingExists = await _tourRepository.TourRestaurantExistsAsync(tourId, normalizedRestaurantId);
+        if (mappingExists)
+        {
+            return AddTourRestaurantResult.Conflict("Restaurant already exists in this tour.");
+        }
+
+        var effectiveStopOrder = await _tourRepository.GetNextStopOrderAsync(tourId);
+
+        await _tourRepository.AddRestaurantToTourAsync(tourId, normalizedRestaurantId, effectiveStopOrder);
+        return AddTourRestaurantResult.Success();
+    }
+
+    public async Task<RemoveTourRestaurantResult> RemoveRestaurantFromTourAsync(int tourId, string restaurantId)
+    {
+        var normalizedRestaurantId = restaurantId.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedRestaurantId))
+        {
+            return RemoveTourRestaurantResult.Invalid("restaurantId is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return RemoveTourRestaurantResult.NotFound("Tour not found.");
+        }
+
+        var mappingExists = await _tourRepository.TourRestaurantExistsAsync(tourId, normalizedRestaurantId);
+        if (!mappingExists)
+        {
+            return RemoveTourRestaurantResult.NotFound("Restaurant is not in this tour.");
+        }
+
+        await _tourRepository.RemoveRestaurantFromTourAsync(tourId, normalizedRestaurantId);
+        return RemoveTourRestaurantResult.Success();
+    }
+
+    public async Task<ReorderTourStopsResult> ReorderTourStopsAsync(int tourId, IReadOnlyList<string> orderedRestaurantIds)
+    {
+        if (orderedRestaurantIds == null || orderedRestaurantIds.Count == 0)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds is required.");
+        }
+
+        var tourExists = await _tourRepository.ExistsAsync(tourId, includeInactive: true);
+        if (!tourExists)
+        {
+            return ReorderTourStopsResult.NotFound("Tour not found.");
+        }
+
+        var normalizedIds = orderedRestaurantIds
+            .Select(id => id?.Trim() ?? string.Empty)
+            .ToList();
+
+        if (normalizedIds.Any(string.IsNullOrWhiteSpace))
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds contains invalid value.");
+        }
+
+        var hasDuplicates = normalizedIds.Count != normalizedIds.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        if (hasDuplicates)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds contains duplicated values.");
+        }
+
+        var currentIds = await _tourRepository.GetTourRestaurantIdsAsync(tourId);
+        if (currentIds.Count != normalizedIds.Count)
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds must contain all stops in the tour.");
+        }
+
+        var currentSet = new HashSet<string>(currentIds, StringComparer.OrdinalIgnoreCase);
+        var incomingSet = new HashSet<string>(normalizedIds, StringComparer.OrdinalIgnoreCase);
+        if (!currentSet.SetEquals(incomingSet))
+        {
+            return ReorderTourStopsResult.Invalid("restaurantIds must match current stops in the tour.");
+        }
+
+        await _tourRepository.ReorderStopsAsync(tourId, normalizedIds);
+        return ReorderTourStopsResult.Success();
+    }
+
+    public async Task<UpdateTourResult> UpdateTourAsync(
+        int tourId,
+        string? name,
+        string? description,
+        int? estimatedDurationMinutes,
+        string? urlImage,
+        bool isActive)
+    {
+        var normalizedName = name?.Trim();
+        if (normalizedName != null && string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return UpdateTourResult.Invalid("name is required.");
+        }
+
+        var normalizedDescription = string.IsNullOrWhiteSpace(description)
+            ? null
+            : description.Trim();
+
+        if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
+        {
+            return UpdateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
+        }
+
+        var updated = await _tourRepository.UpdateTourMetadataAsync(
+            tourId,
+            normalizedName,
+            normalizedDescription,
+            estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
+            isActive);
+
+        if (!updated)
+        {
+            return UpdateTourResult.NotFound("Tour not found.");
+        }
+
+        return UpdateTourResult.Success();
+    }
+
+    public async Task<UpdateTourResult> SetTourImageAsync(int tourId, string? urlImage)
+    {
+        var normalized = NormalizeUrlImageForStorage(urlImage);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return UpdateTourResult.Invalid("imageUrl is required.");
+        }
+
+        var updated = await _tourRepository.UpdateTourImageAsync(tourId, normalized);
+        if (!updated)
+        {
+            return UpdateTourResult.NotFound("Tour not found.");
+        }
+
+        return UpdateTourResult.Success();
+    }
+
+    public async Task<CreateTourResult> CreateTourAsync(
+        string name,
+        string? description,
+        int? estimatedDurationMinutes,
+        string? urlImage,
+        bool isActive)
+    {
+        var normalizedName = name.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return CreateTourResult.Invalid("name is required.");
+        }
+
+        if (estimatedDurationMinutes.HasValue && estimatedDurationMinutes.Value < 0)
+        {
+            return CreateTourResult.Invalid("estimatedDurationMinutes must be greater than or equal to 0.");
+        }
+
+        var created = await _tourRepository.CreateTourAsync(
+            normalizedName,
+            string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+            estimatedDurationMinutes,
+            NormalizeUrlImageForStorage(urlImage),
+            isActive);
+
+        var createdTour = await _tourRepository.GetByIdAsync(created.TourId, includeInactive: true);
+        if (createdTour == null)
+        {
+            return CreateTourResult.Invalid("Unable to load created tour.");
+        }
+
+        return CreateTourResult.Success(MapTour(createdTour, null, null, 30));
     }
 
     private static TourResponse MapTour(TourModel tour, double? latitude, double? longitude, double radiusMeters)
@@ -89,20 +278,17 @@ public class TourService
             }
         }
 
-        var imageUrl = !string.IsNullOrWhiteSpace(tour.Image?.ImageUrl)
-            ? tour.Image.ImageUrl
-            : stops.Select(s => s.PrimaryImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+        var imageUrl = NormalizeUrlImageForResponse(tour.UrlImage);
 
         return new TourResponse
         {
             TourId = tour.TourId,
             Name = tour.Name,
-            ShortDescription = tour.ShortDescription,
             Description = tour.Description,
             EstimatedDurationMinutes = tour.EstimatedDurationMinutes,
             ImageUrl = imageUrl,
-            IsFeatured = tour.IsFeatured,
-            SortPriority = tour.SortPriority,
+            IsActive = tour.IsActive,
+            CreatedAt = tour.CreatedAt,
             StopCount = stops.Count,
             NearbyStopCount = nearbyStopCount,
             NearestDistanceMeters = nearestDistanceMeters,
@@ -129,4 +315,154 @@ public class TourService
     {
         return degrees * (Math.PI / 180);
     }
+
+    private static string? NormalizeUrlImageForStorage(string? urlImage)
+    {
+        return string.IsNullOrWhiteSpace(urlImage) ? null : urlImage.Trim();
+    }
+
+    private static string? NormalizeUrlImageForResponse(string? urlImage)
+    {
+        if (string.IsNullOrWhiteSpace(urlImage))
+        {
+            return null;
+        }
+
+        var normalized = urlImage.Replace("\\", "/", StringComparison.Ordinal).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var absoluteUri)
+            && (absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("/", StringComparison.Ordinal))
+        {
+            return normalized;
+        }
+
+        if (normalized.StartsWith("maui-images/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"/{normalized}";
+        }
+
+        if (!normalized.Contains('/', StringComparison.Ordinal))
+        {
+            return $"/maui-images/{normalized}";
+        }
+
+        return $"/{normalized.TrimStart('/')}";
+    }
+}
+
+public enum AddTourRestaurantStatus
+{
+    Success,
+    NotFound,
+    Conflict,
+    Invalid
+}
+
+public class AddTourRestaurantResult
+{
+    public AddTourRestaurantStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static AddTourRestaurantResult Success() => new() { Status = AddTourRestaurantStatus.Success };
+
+    public static AddTourRestaurantResult NotFound(string message) =>
+        new() { Status = AddTourRestaurantStatus.NotFound, Message = message };
+
+    public static AddTourRestaurantResult Conflict(string message) =>
+        new() { Status = AddTourRestaurantStatus.Conflict, Message = message };
+
+    public static AddTourRestaurantResult Invalid(string message) =>
+        new() { Status = AddTourRestaurantStatus.Invalid, Message = message };
+}
+
+public enum RemoveTourRestaurantStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class RemoveTourRestaurantResult
+{
+    public RemoveTourRestaurantStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static RemoveTourRestaurantResult Success() => new() { Status = RemoveTourRestaurantStatus.Success };
+
+    public static RemoveTourRestaurantResult NotFound(string message) =>
+        new() { Status = RemoveTourRestaurantStatus.NotFound, Message = message };
+
+    public static RemoveTourRestaurantResult Invalid(string message) =>
+        new() { Status = RemoveTourRestaurantStatus.Invalid, Message = message };
+}
+
+public enum ReorderTourStopsStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class ReorderTourStopsResult
+{
+    public ReorderTourStopsStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static ReorderTourStopsResult Success() => new() { Status = ReorderTourStopsStatus.Success };
+
+    public static ReorderTourStopsResult NotFound(string message) =>
+        new() { Status = ReorderTourStopsStatus.NotFound, Message = message };
+
+    public static ReorderTourStopsResult Invalid(string message) =>
+        new() { Status = ReorderTourStopsStatus.Invalid, Message = message };
+}
+
+public enum UpdateTourStatus
+{
+    Success,
+    NotFound,
+    Invalid
+}
+
+public class UpdateTourResult
+{
+    public UpdateTourStatus Status { get; private set; }
+    public string? Message { get; private set; }
+
+    public static UpdateTourResult Success() => new() { Status = UpdateTourStatus.Success };
+
+    public static UpdateTourResult NotFound(string message) =>
+        new() { Status = UpdateTourStatus.NotFound, Message = message };
+
+    public static UpdateTourResult Invalid(string message) =>
+        new() { Status = UpdateTourStatus.Invalid, Message = message };
+}
+
+public enum CreateTourStatus
+{
+    Success,
+    Invalid
+}
+
+public class CreateTourResult
+{
+    public CreateTourStatus Status { get; private set; }
+    public string? Message { get; private set; }
+    public TourResponse? Data { get; private set; }
+
+    public static CreateTourResult Success(TourResponse data) =>
+        new() { Status = CreateTourStatus.Success, Data = data };
+
+    public static CreateTourResult Invalid(string message) =>
+        new() { Status = CreateTourStatus.Invalid, Message = message };
 }

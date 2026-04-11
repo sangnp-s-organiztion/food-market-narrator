@@ -1,37 +1,26 @@
-# Luồng QR Access Session (trạng thái hiện tại)
+# Luồng QR App Open (trạng thái hiện tại)
 
-Tài liệu này mô tả flow thực tế theo code hiện tại của MAUI app và API.
+Tài liệu này mô tả flow thực tế theo code hiện tại của MAUI app.
 
 ## 1) Tổng quan
 
-QR deep link có thể bật chế độ giới hạn thời gian truy cập narration.
+QR deep link hiện chỉ dùng để mở ứng dụng.
 
-- Nếu deep link không có tham số thời gian: app chạy như bình thường (không giới hạn QR).
-- Nếu deep link có tham số thời gian: app bật chế độ QR time-restricted và theo dõi hạn truy cập liên tục.
+- Không còn chế độ giới hạn thời gian từ QR.
+- Không còn chặn narration theo trạng thái hết hạn QR.
 
 Deep link hợp lệ:
 
 - Scheme: foodmarketnarrator
 - Host: open
-- Ví dụ: foodmarketnarrator://open?durationMinutes=30
+- Ví dụ khuyến nghị: foodmarketnarrator://open
 
-## 2) Các tham số deep link được hỗ trợ
+## 2) Tham số deep link
 
-QrAccessService đang parse các tham số sau theo thứ tự ưu tiên:
+QrAccessService hiện chỉ kiểm tra định dạng deep link hợp lệ theo scheme/host.
 
-1. expiresAtUtc | expiresAt | until
-2. durationMinutes | durationMins | ttlMinutes
-3. durationSeconds | ttlSeconds
-
-Nếu parse được expiry:
-
-- IsQrTimeRestricted = true
-- QrAccessExpiresAtUtc được set theo UTC
-
-Nếu không parse được expiry:
-
-- IsQrTimeRestricted = false
-- QrAccessExpiresAtUtc = null
+- App không còn parse các tham số thời gian.
+- Nếu deep link có query string, app vẫn mở bình thường miễn là đúng scheme/host.
 
 ## 3) Runtime flow trong app
 
@@ -45,52 +34,20 @@ App nhận deep link qua 2 đường:
 Sau đó app gọi:
 
 1. QrAccessService.ApplyDeepLink(deepLink)
-2. EnsureQrAccessGuardLoopState()
 
-### 3.2 Vòng guard kiểm tra quyền narration
+### 3.2 Hành vi narration
 
-Khi IsQrTimeRestricted = true, app bật vòng loop check mỗi 1 giây:
-
-1. Lấy CurrentSessionId từ LocationLogSyncService.
-2. Gọi CanContinueNarrationAsync(sessionId).
-3. Nếu allowed = false: dừng narration và thông báo QR hết hạn.
-
-### 3.3 Logic CanContinueNarrationAsync
-
-1. Nếu không bị giới hạn QR -> true.
-2. Nếu local expiry đã qua -> false (reason = expired).
-3. Nếu sessionId rỗng -> true (không check server).
-4. Nếu vừa check cùng session trong < 10 giây -> dùng cache kết quả lần trước.
-5. Nếu cần check server:
-   - Gọi GET /api/user-sessions/{sessionId}/qr-access
-   - Nhận allowed, expiresAtUtc, reason
-   - Cập nhật cache và đồng bộ expiry local theo min(local, server)
-6. Nếu lỗi mạng khi gọi server -> fallback true (không cắt narration ngay).
+- Nút thuyết minh và phát audio không còn bị disable bởi trạng thái QR.
+- App không hiển thị cảnh báo "QR hết hạn".
 
 ## 4) API liên quan
 
-- POST /api/user-sessions/start
-- GET /api/user-sessions/{sessionId}/qr-access
+- MAUI app không còn gọi endpoint kiểm tra QR access theo session.
+- Endpoint session start và các endpoint log vẫn hoạt động bình thường theo flow tracking/audio.
 
-Qr-access response:
+## 5) Checklist test nhanh
 
-- allowed: bool
-- expiresAtUtc: datetime?
-- reason: string?
-
-## 5) Xử lý hết hạn QR
-
-Khi guard nhận allowed = false:
-
-1. Flush log đang chờ gửi.
-2. Dừng NarrationFlowService.StopNarration().
-3. Hiển thị alert cho user: "QR hết hạn".
-4. Yêu cầu user quét lại QR để tiếp tục.
-
-## 6) Checklist test nhanh
-
-1. Quét deep link có durationMinutes=1, narration chạy được trong khoảng 1 phút.
-2. Hết thời gian, app dừng narration và hiển thị thông báo hết hạn.
-3. Quét deep link không có tham số thời gian, narration không bị giới hạn QR.
-4. Mất mạng tạm thời, narration không bị cắt ngay (nếu local expiry chưa qua).
-5. Server trả allowed=false sớm hơn local expiry, app vẫn cắt narration theo kết quả server.
+1. Quét deep link foodmarketnarrator://open, app mở thành công.
+2. Bật thuyết minh tự động, narration hoạt động bình thường.
+3. Vào trang chi tiết POI, phát audio bình thường.
+4. Đóng app và quét lại QR, app vẫn mở và hoạt động như trên.

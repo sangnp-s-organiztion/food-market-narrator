@@ -7,17 +7,6 @@ import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
 
-// Map action type from duration-based heuristics
-function inferAction(duration: number): { label: string; cls: string } {
-  if (duration >= 120)
-    return { label: "NGHE ĐẦY ĐỦ", cls: "bg-emerald-100 text-emerald-700" };
-  if (duration >= 60)
-    return { label: "NGHE TỪNG PHẦN", cls: "bg-blue-100 text-blue-700" };
-  if (duration >= 20)
-    return { label: "NGHE NHANH", cls: "bg-amber-100 text-amber-700" };
-  return { label: "NGẮT SỚM", cls: "bg-red-100 text-red-700" };
-}
-
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
@@ -40,8 +29,60 @@ function formatTimestamp(iso: string): string {
   }
 }
 
+function normalizeAuditAction(action: string): string | null {
+  const normalized = (action ?? "").toUpperCase();
+
+  if (!normalized || normalized === "ERROR" || normalized === "MOBILE_PLAY") {
+    return null;
+  }
+
+  if (
+    normalized === "LOGIN" ||
+    normalized === "LOGOUT" ||
+    normalized === "MOBILE_SYNC"
+  ) {
+    return normalized;
+  }
+
+  if (normalized.includes("DELETE")) {
+    return "DELETE";
+  }
+
+  if (normalized.includes("CREATE") || normalized.includes("UPLOAD")) {
+    return "CREATE";
+  }
+
+  return "UPDATE";
+}
+
+function formatAuditActionLabel(action: string): string {
+  switch ((action ?? "").toUpperCase()) {
+    case "LOGIN":
+      return "Đăng nhập";
+    case "LOGOUT":
+      return "Đăng xuất";
+    case "CREATE":
+      return "Tạo mới";
+    case "UPDATE":
+      return "Cập nhật";
+    case "DELETE":
+      return "Xóa";
+    case "MOBILE_SYNC":
+      return "Đồng bộ vị trí";
+    default:
+      return action;
+  }
+}
+
 function actionBadge(action: string): { cls: string; meaning: string } {
   const normalized = (action ?? "").toUpperCase();
+
+  if (normalized === "UPDATE") {
+    return {
+      cls: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      meaning: "cập nhật dữ liệu",
+    };
+  }
 
   if (normalized.startsWith("RESTAURANT_")) {
     return {
@@ -94,20 +135,15 @@ function actionBadge(action: string): { cls: string; meaning: string } {
         cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
         meaning: "tạo dữ liệu",
       };
+    case "DELETE":
+      return {
+        cls: "bg-rose-100 text-rose-700 border-rose-200",
+        meaning: "xóa dữ liệu",
+      };
     case "MOBILE_SYNC":
       return {
         cls: "bg-violet-100 text-violet-700 border-violet-200",
         meaning: "low priority",
-      };
-    case "ERROR":
-      return {
-        cls: "bg-red-100 text-red-700 border-red-200",
-        meaning: "cần chú ý",
-      };
-    case "MOBILE_PLAY":
-      return {
-        cls: "bg-cyan-100 text-cyan-700 border-cyan-200",
-        meaning: "mobile playback",
       };
     default:
       return {
@@ -152,6 +188,23 @@ const LogsPage = () => {
   });
 
   const auditItems = auditResponse?.items ?? [];
+  const visibleAuditItems = useMemo(
+    () =>
+      auditItems.flatMap((item) => {
+        const displayAction = normalizeAuditAction(item.action);
+        if (!displayAction) {
+          return [];
+        }
+
+        return [
+          {
+            item,
+            displayAction,
+          },
+        ];
+      }),
+    [auditItems],
+  );
   const auditTotalCount = auditResponse?.totalCount ?? 0;
   const auditTotalPages = Math.max(1, Math.ceil(auditTotalCount / PAGE_SIZE));
 
@@ -201,7 +254,7 @@ const LogsPage = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1 className="page-title">Nhật ký hoạt động</h1>
+        <h1 className="page-title">Lịch sử hoạt động</h1>
         <span className="text-xs text-muted-foreground mono">
           Tự động cập nhật mỗi 30 giây
         </span>
@@ -211,35 +264,7 @@ const LogsPage = () => {
         <div className="stat-card">
           <div className="mb-6">
             <div className="mb-3">
-              <h2 className="text-lg font-semibold">Nhật ký hệ thống</h2>
-            </div>
-
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {[
-                "LOGIN",
-                "LOGOUT",
-                "RESTAURANT_UPDATE",
-                "DISH_CREATE",
-                "IMAGE_UPLOAD",
-                "AUDIO_DELETE",
-                "USER_UPDATE_STATUS",
-                "MOBILE_SYNC",
-                "ERROR",
-              ].map((action) => {
-                const style = actionBadge(action);
-                return (
-                  <span
-                    key={action}
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
-                      style.cls,
-                    )}
-                    title={style.meaning}
-                  >
-                    {action}
-                  </span>
-                );
-              })}
+              <h2 className="text-lg font-semibold">Lịch sử hệ thống</h2>
             </div>
 
             <table className="data-table">
@@ -258,7 +283,7 @@ const LogsPage = () => {
                       colSpan={4}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      Đang tải nhật ký hệ thống...
+                      Đang tải lịch sử hệ thống...
                     </td>
                   </tr>
                 )}
@@ -268,25 +293,25 @@ const LogsPage = () => {
                       colSpan={4}
                       className="text-center py-8 text-destructive"
                     >
-                      Không thể tải nhật ký hệ thống.
+                      Không thể tải lịch sử hệ thống.
                     </td>
                   </tr>
                 )}
                 {!isAuditLoading &&
                   !isAuditError &&
-                  auditItems.length === 0 && (
+                  visibleAuditItems.length === 0 && (
                     <tr>
                       <td
                         colSpan={4}
                         className="text-center py-8 text-muted-foreground"
                       >
-                        Chưa có nhật ký hệ thống nào.
+                        Chưa có lịch sử hệ thống nào.
                       </td>
                     </tr>
                   )}
                 {!isAuditLoading &&
                   !isAuditError &&
-                  auditItems.map((item, idx) => (
+                  visibleAuditItems.map(({ item, displayAction }, idx) => (
                     <tr key={`${item.username}-${item.action}-${idx}`}>
                       <td className="font-medium text-xs">
                         {item.username?.toLowerCase() === "mobile"
@@ -297,11 +322,11 @@ const LogsPage = () => {
                         <span
                           className={cn(
                             "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                            actionBadge(item.action).cls,
+                            actionBadge(displayAction).cls,
                           )}
-                          title={actionBadge(item.action).meaning}
+                          title={actionBadge(displayAction).meaning}
                         >
-                          {item.action}
+                          {formatAuditActionLabel(displayAction)}
                         </span>
                       </td>
                       <td className="mono text-xs text-muted-foreground">
@@ -315,89 +340,62 @@ const LogsPage = () => {
               </tbody>
             </table>
 
-            {!isAuditLoading && !isAuditError && auditItems.length > 0 && (
-              <div className="mt-3 px-1 flex flex-col gap-3">
-                <p className="text-xs text-muted-foreground">
-                  Hiển thị {auditItems.length} / {auditTotalCount} bản ghi nhật
-                  ký hệ thống.
-                </p>
+            {!isAuditLoading &&
+              !isAuditError &&
+              visibleAuditItems.length > 0 && (
+                <div className="mt-3 px-1 flex flex-col gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Hiển thị {visibleAuditItems.length} bản ghi lịch sử hệ
+                    thống.
+                  </p>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-                    disabled={!hasAuditPrev}
-                    onClick={() => setAuditPage((p) => Math.max(1, p - 1))}
-                  >
-                    Trang trước
-                  </button>
-
-                  {auditPageWindow.map((p) => (
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
-                      key={`audit-${p}`}
                       type="button"
-                      className={cn(
-                        "px-3 py-1.5 rounded-md border text-xs font-medium",
-                        p === auditPage
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "hover:bg-muted",
-                      )}
-                      onClick={() => setAuditPage(p)}
+                      className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                      disabled={!hasAuditPrev}
+                      onClick={() => setAuditPage((p) => Math.max(1, p - 1))}
                     >
-                      {p}
+                      Trang trước
                     </button>
-                  ))}
 
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-                    disabled={!hasAuditNext}
-                    onClick={() => setAuditPage((p) => p + 1)}
-                  >
-                    Trang sau
-                  </button>
+                    {auditPageWindow.map((p) => (
+                      <button
+                        key={`audit-${p}`}
+                        type="button"
+                        className={cn(
+                          "px-3 py-1.5 rounded-md border text-xs font-medium",
+                          p === auditPage
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "hover:bg-muted",
+                        )}
+                        onClick={() => setAuditPage(p)}
+                      >
+                        {p}
+                      </button>
+                    ))}
 
-                  <span className="text-xs text-muted-foreground ml-1">
-                    Trang {auditPage} / {Math.max(auditTotalPages, 1)}
-                  </span>
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+                      disabled={!hasAuditNext}
+                      onClick={() => setAuditPage((p) => p + 1)}
+                    >
+                      Trang sau
+                    </button>
+
+                    <span className="text-xs text-muted-foreground ml-1">
+                      Trang {auditPage} / {Math.max(auditTotalPages, 1)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           <div className="h-px bg-border mb-6" />
 
           <div className="mb-3">
-            <h2 className="text-lg font-semibold">Nhật ký nghe audio</h2>
-          </div>
-
-          {/* Subtle hint for action types */}
-          <div className="flex flex-wrap gap-3 mb-4">
-            {[
-              {
-                label: "Nghe đầy đủ (≥2p)",
-                cls: "bg-emerald-100 text-emerald-700",
-              },
-              {
-                label: "Nghe từng phần (1–2p)",
-                cls: "bg-blue-100 text-blue-700",
-              },
-              {
-                label: "Nghe nhanh (20s–1p)",
-                cls: "bg-amber-100 text-amber-700",
-              },
-              { label: "Ngắt sớm (<20s)", cls: "bg-red-100 text-red-700" },
-            ].map(({ label, cls }) => (
-              <span
-                key={label}
-                className={cn(
-                  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
-                  cls,
-                )}
-              >
-                {label}
-              </span>
-            ))}
+            <h2 className="text-lg font-semibold">Lịch sử nghe audio</h2>
           </div>
 
           <table className="data-table">
@@ -406,7 +404,6 @@ const LogsPage = () => {
                 <th>Nhà hàng</th>
                 <th>Audio ID</th>
                 <th>Thời lượng</th>
-                <th>Hành động</th>
                 <th>Thời gian</th>
               </tr>
             </thead>
@@ -414,7 +411,7 @@ const LogsPage = () => {
               {isAudioLoading && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải…
@@ -423,52 +420,39 @@ const LogsPage = () => {
               )}
               {isAudioError && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-destructive">
-                    Không thể tải nhật ký. Vui lòng thử lại.
+                  <td colSpan={4} className="text-center py-8 text-destructive">
+                    Không thể tải lịch sử. Vui lòng thử lại.
                   </td>
                 </tr>
               )}
               {!isAudioLoading && !isAudioError && activity.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    Chưa có nhật ký nào.
+                    Chưa có lịch sử nào.
                   </td>
                 </tr>
               )}
               {!isAudioLoading &&
                 !isAudioError &&
-                activity.map((item, idx) => {
-                  const action = inferAction(item.duration);
-                  return (
-                    <tr key={`${item.audioId}-${idx}`}>
-                      <td className="font-medium text-xs">
-                        {item.restaurantName ?? item.restaurantId}
-                      </td>
-                      <td className="mono text-xs text-muted-foreground">
-                        #{item.audioId}
-                      </td>
-                      <td className="mono text-xs">
-                        {formatDuration(item.duration)}
-                      </td>
-                      <td>
-                        <span
-                          className={cn(
-                            "inline-block px-2 py-0.5 rounded-full text-xs font-medium",
-                            action.cls,
-                          )}
-                        >
-                          {action.label}
-                        </span>
-                      </td>
-                      <td className="mono text-xs text-muted-foreground whitespace-nowrap">
-                        {formatTimestamp(item.timestamp)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                activity.map((item, idx) => (
+                  <tr key={`${item.audioId}-${idx}`}>
+                    <td className="font-medium text-xs">
+                      {item.restaurantName ?? item.restaurantId}
+                    </td>
+                    <td className="mono text-xs text-muted-foreground">
+                      #{item.audioId}
+                    </td>
+                    <td className="mono text-xs">
+                      {formatDuration(item.duration)}
+                    </td>
+                    <td className="mono text-xs text-muted-foreground whitespace-nowrap">
+                      {formatTimestamp(item.timestamp)}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
 
@@ -476,7 +460,7 @@ const LogsPage = () => {
             <div className="mt-3 px-1 flex flex-col gap-3">
               <p className="text-xs text-muted-foreground">
                 Hiển thị {activity.length} / {audioTotalCount} bản ghi nghe
-                audio. Nhật ký tự động cập nhật mỗi 30 giây.
+                audio. Lịch sử tự động cập nhật mỗi 30 giây.
               </p>
 
               <div className="flex flex-wrap items-center gap-2">

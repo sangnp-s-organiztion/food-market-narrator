@@ -12,13 +12,11 @@ public class AudioLogSyncService : IAudioLogSyncService
 
     private readonly HttpClient _httpClient;
     private readonly ILocationLogSyncService _locationLogSyncService;
-    private readonly IQrAccessService _qrAccessService;
 
-    public AudioLogSyncService(HttpClient httpClient, ILocationLogSyncService locationLogSyncService, IQrAccessService qrAccessService)
+    public AudioLogSyncService(HttpClient httpClient, ILocationLogSyncService locationLogSyncService)
     {
         _httpClient = httpClient;
         _locationLogSyncService = locationLogSyncService;
-        _qrAccessService = qrAccessService;
     }
 
     public async Task LogPlaybackAsync(
@@ -26,6 +24,8 @@ public class AudioLogSyncService : IAudioLogSyncService
         int audioId,
         DateTime startTimeUtc,
         DateTime endTimeUtc,
+        int? playedDurationSeconds = null,
+        int? trackDurationSeconds = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(restaurantId) || audioId <= 0)
@@ -50,7 +50,19 @@ public class AudioLogSyncService : IAudioLogSyncService
             normalizedEnd = normalizedStart;
         }
 
-        var duration = (int)Math.Round((normalizedEnd - normalizedStart).TotalSeconds);
+        var duration = playedDurationSeconds.GetValueOrDefault();
+        if (duration <= 0)
+        {
+            duration = (int)Math.Round((normalizedEnd - normalizedStart).TotalSeconds);
+        }
+
+        if (trackDurationSeconds.GetValueOrDefault() > 0)
+        {
+            duration = Math.Min(duration, trackDurationSeconds!.Value);
+        }
+
+        duration = Math.Max(0, duration);
+        normalizedEnd = normalizedStart.AddSeconds(duration);
 
         var request = new AudioLogCreateRequest
         {
@@ -59,7 +71,7 @@ public class AudioLogSyncService : IAudioLogSyncService
             AudioId = audioId,
             StartTime = normalizedStart,
             EndTime = normalizedEnd,
-            Duration = Math.Max(0, duration)
+            Duration = duration
         };
 
         try
@@ -137,10 +149,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         {
             SessionId = sessionId,
             DeviceId = GetOrCreateDeviceId(),
-            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}",
-            QrAccessExpiresAtUtc = _qrAccessService.IsQrTimeRestricted
-                ? _qrAccessService.QrAccessExpiresAtUtc
-                : null
+            DeviceInfo = $"{DeviceInfo.Manufacturer} {DeviceInfo.Model}, {DeviceInfo.Platform} {DeviceInfo.VersionString}"
         };
 
         try
@@ -190,7 +199,6 @@ public class AudioUserSessionStartRequest
     public string SessionId { get; set; } = string.Empty;
     public string DeviceId { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
-    public DateTime? QrAccessExpiresAtUtc { get; set; }
 }
 
 public class AudioLogErrorResponse

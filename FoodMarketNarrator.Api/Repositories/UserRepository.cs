@@ -54,6 +54,12 @@ namespace food_market_narrator_api.Repositories
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.User
+                .AnyAsync(u => u.Email != null && u.Email == email);
+        }
+
         public async Task<bool> ValidateCredentialsAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);
@@ -108,6 +114,19 @@ namespace food_market_narrator_api.Repositories
             var user = await _context.User.FindAsync(userId);
             if (user == null) return false;
             user.Password = passwordHash;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateProfileAsync(int userId, string username, string? fullName, string phone, string email)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+
+            user.Username = username;
+            user.FullName = fullName;
+            user.Phone = phone;
+            user.Email = email;
             await _context.SaveChangesAsync();
             return true;
         }

@@ -1,14 +1,7 @@
 import { useMemo, useState, type ComponentType } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
-import {
-  Store,
-  Headphones,
-  Users,
-  UtensilsCrossed,
-  TrendingUp,
-  ArrowUp,
-} from "lucide-react";
+import { Store, Users } from "lucide-react";
 import {
   XAxis,
   YAxis,
@@ -42,8 +35,6 @@ function toBarChartData(
 type EntityStat = {
   label: string;
   value: number;
-  delta: string;
-  deltaType: "neutral" | "positive";
   icon: ComponentType<{ className?: string }>;
 };
 
@@ -58,21 +49,9 @@ const Dashboard = () => {
     staleTime: 60_000,
   });
 
-  const { data: audioCount } = useQuery({
-    queryKey: ["admin-stats", "audios", "count"],
-    queryFn: () => adminStatsApi.getAudioCount(),
-    staleTime: 60_000,
-  });
-
   const { data: userCount } = useQuery({
     queryKey: ["admin-stats", "users", "count"],
     queryFn: () => adminStatsApi.getUserCount(),
-    staleTime: 60_000,
-  });
-
-  const { data: dishCount } = useQuery({
-    queryKey: ["admin-stats", "dishes", "count"],
-    queryFn: () => adminStatsApi.getDishCount(),
     staleTime: 60_000,
   });
 
@@ -80,30 +59,12 @@ const Dashboard = () => {
     {
       label: "Tổng nhà hàng",
       value: restaurantCount?.count ?? 0,
-      delta: "",
-      deltaType: "neutral",
       icon: Store,
-    },
-    {
-      label: "Tổng âm thanh",
-      value: audioCount?.count ?? 0,
-      delta: "",
-      deltaType: "neutral",
-      icon: Headphones,
     },
     {
       label: "Người dùng",
       value: userCount?.count ?? 0,
-      delta: "",
-      deltaType: "neutral",
       icon: Users,
-    },
-    {
-      label: "Tổng món ăn",
-      value: dishCount?.count ?? 0,
-      delta: "",
-      deltaType: "neutral",
-      icon: UtensilsCrossed,
     },
   ];
 
@@ -158,7 +119,7 @@ const Dashboard = () => {
   }, [allRestaurantsData, topRestaurantsData]);
 
   const avgTime = kpis?.averageListeningTimeSeconds ?? 0;
-  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "—";
+  const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "0.0";
 
   return (
     <AdminLayout>
@@ -184,15 +145,32 @@ const Dashboard = () => {
                 <span className="stat-value">
                   {stat.value.toLocaleString()}
                 </span>
-                {stat.deltaType === "positive" && stat.delta && (
-                  <span className="stat-delta-positive flex items-center gap-0.5 mb-0.5">
-                    <ArrowUp className="h-3 w-3" />
-                    {stat.delta}
-                  </span>
-                )}
               </div>
             </div>
           ))}
+          <div className="stat-card">
+            <span className="stat-label">Tổng lượt nghe</span>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="stat-value mono">
+                {kpis?.totalPoiPlays != null
+                  ? kpis.totalPoiPlays.toLocaleString("vi-VN")
+                  : "—"}
+              </span>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">
+              Thời gian trung bình nghe 1 nhà hàng
+            </span>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="stat-value mono">{formattedAvgTime}</span>
+              {avgTime > 0 && (
+                <span className="text-xs text-muted-foreground mb-0.5">
+                  phút
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* ── Charts row ────────────────────────────────────────────────────── */}
@@ -240,37 +218,6 @@ const Dashboard = () => {
                 Chưa có dữ liệu lượt nghe
               </div>
             )}
-          </div>
-        </div>
-
-        {/* ── Analytics KPIs ────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 max-w-2xl gap-4">
-          <div className="stat-card">
-            <span className="stat-label">Tổng lượt nghe</span>
-            <div className="mt-2 flex items-baseline gap-1">
-              <span className="stat-value mono">
-                {kpis?.totalPoiPlays != null
-                  ? kpis.totalPoiPlays.toLocaleString("vi-VN")
-                  : "—"}
-              </span>
-              {kpis && (
-                <span className="stat-delta-positive flex items-center gap-0.5">
-                  <TrendingUp className="h-3 w-3" />
-                  {kpis.totalUsers.toLocaleString()} phiên
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
-            <div className="mt-2 flex items-baseline gap-1">
-              <span className="stat-value mono">{formattedAvgTime}</span>
-              {avgTime > 0 && (
-                <span className="text-xs text-muted-foreground mb-0.5">
-                  phút
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
