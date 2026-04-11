@@ -33,7 +33,7 @@ Tài liệu này mô tả chính xác vị trí lưu audio đã tải và cơ ch
 1. Nếu file cache hợp lệ (>= 256 bytes), phát trực tiếp từ cache.
 2. Nếu chưa có cache, thử mở file từ app package bằng FileSystem.OpenAppPackageFileAsync(...), sau đó lưu vào cache.
 3. Nếu không có trong package, thử tải từ các URL ứng viên (BaseAddress và ApiFallbackBaseUrls), lưu cache nếu đủ điều kiện.
-4. Nếu không thể ghi cache (thiếu dung lượng), app vẫn có thể phát online-only qua MemoryStream nếu tải được.
+4. Nếu không thể ghi cache do giới hạn dung lượng, dữ liệu tải từ network sẽ không được giữ lại; với luồng phát theo audioId, lần phát đó có thể thất bại nếu chưa có file local hợp lệ.
 
 ## Chính sách dung lượng
 

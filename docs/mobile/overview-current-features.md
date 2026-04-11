@@ -7,11 +7,12 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 - AppShell đang khai báo các ShellContent chính:
   - MainPage (Trang chủ)
   - MapPage (Bản đồ)
+  - TourPage (Hành trình)
   - FavoritePage (Yêu thích)
   - HistoryPage (Lịch sử)
   - SettingsPage (Cài đặt)
 - Đã đăng ký route POIDetailPage để mở chi tiết theo restaurantId.
-- Bottom navigation custom hiển thị 5 mục (Trang chủ, Bản đồ, Yêu thích, Lịch sử, Cài đặt), tất cả đều đã có handler thực thi.
+- Bottom navigation custom hiển thị 5 mục (Trang chủ, Bản đồ, Hành trình, Yêu thích, Cài đặt), tất cả đều đã có handler thực thi.
 
 ## 2) Nguồn dữ liệu và POI
 
@@ -46,7 +47,7 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 ## 4) Bản đồ (Mapsui + OSM)
 
 - Dùng Mapsui và tile OpenStreetMap.
-- Tile cache trong FileSystem.CacheDirectory/osm_tiles.
+- Tile cache trong FileSystem.AppDataDirectory/map_cache/osm_tiles.
 - MapHelper chịu trách nhiệm:
   - Load layer map + marker POI.
   - Highlight một hoặc nhiều POI.
@@ -60,10 +61,8 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
   - Bản đồ nhúng.
   - Danh sách POI (CollectionView) và điều hướng sang POIDetailPage.
   - Nút floating bật/tắt thuyết minh tự động.
-  - Popup chọn ngôn ngữ.
 - Khi mới vào app:
-  - Nếu chưa chọn ngôn ngữ: tự mở popup chọn ngôn ngữ.
-  - Nếu đã chọn: tự bật narration 1 lần cho mỗi phiên chạy app.
+  - Tự bật narration 1 lần cho mỗi phiên chạy app.
 - Start tracking được trì hoãn ~1.2 giây ở lần vào đầu tiên trong phiên app; các lần quay lại MainPage sẽ không delay lại.
 - Floating button chỉ hiện khi ở trong phạm vi TriggerDistanceMeters (30m) so với POI gần nhất.
 - Floating button có cache trạng thái hiển thị gần nhất để render nhanh ngay frame đầu khi quay lại MainPage.
@@ -174,7 +173,7 @@ Tài liệu này tổng hợp trạng thái tính năng thực tế của dự �
 
 Chưa hoàn thiện hoặc mới ở mức khung:
 
-- Filter chip danh mục trên MapPage chưa có logic lọc dữ liệu.
+- Không còn mục filter chip ở trạng thái khung: MapPage đã có logic lọc cho các chip Tất cả, Gần bạn, Yêu thích, Đang mở.
 
 ## 16) Cấu hình API hiện tại
 

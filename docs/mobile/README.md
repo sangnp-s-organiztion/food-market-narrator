@@ -41,7 +41,8 @@ Cấu hình host và endpoint trong:
 Lưu ý thiết bị thật:
 
 - Điện thoại và máy chạy API phải cùng mạng
-- API local thông thường: <http://localhost:5044>
+- Android emulator dùng host `10.0.2.2` (port 5044)
+- Thiết bị thật dùng IP LAN của máy chạy API (cấu hình `LocalApiHost` trong AppSettings, không dùng localhost)
 
 ## Chạy local
 

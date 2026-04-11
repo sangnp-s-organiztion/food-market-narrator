@@ -79,7 +79,7 @@ Các bước này áp dụng cho cả highlight POI và cập nhật marker vị
 ## 7) Trạng thái hiện tại
 
 - Đã hoạt động: tap POI, popup card, zoom, my location, view detail, search + suggestion + highlight.
-- Chưa triển khai logic thật cho các filter chip (Tất cả, Hải sản, Ốc...) ở phần UI phía trên map.
+- Đã có logic filter chip trên MapPage cho các nhóm: Tất cả, Gần bạn, Yêu thích, Đang mở.
 
 ## 8) Checklist kiểm thử
 

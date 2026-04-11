@@ -110,7 +110,7 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 ### 8.1 Du khách / Khách tham quan (Visitor)
 
 **Độ tuổi:** 13+  
-**Thiết bị sử dụng:** Smartphone (Android / iOS)
+**Thiết bị sử dụng:** Smartphone (Android)
 
 **Đặc điểm:**
 
@@ -248,6 +248,12 @@ Tôi muốn thấy POI gần nhất được làm nổi bật
 Với vai trò là du khách  
 Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên  
 Để tôi không bị khó chịu vì âm thanh lặp lại.
+
+**Story V11 – Tham quan theo tour**
+
+Với vai trò là du khách  
+Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn  
+Để tôi được hướng dẫn theo lộ trình tối ưu và không bỏ sót các điểm quan trọng
 
 ---
 
