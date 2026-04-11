@@ -1,0 +1,174 @@
+<mxfile host="app.diagrams.net" agent="Copilot" pages="3">
+  <diagram id="saler-auth-routing" name="Class Saler - Auth &amp; Routing">
+    <mxGraphModel dx="68640" dy="26145" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" value="UI / Routing Layer" vertex="1">
+          <mxGeometry height="820" width="420" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" value="Context Layer" vertex="1">
+          <mxGeometry height="820" width="420" x="470" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" value="Service/API Layer" vertex="1">
+          <mxGeometry height="820" width="420" x="920" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" value="Type Layer" vertex="1">
+          <mxGeometry height="820" width="310" x="1370" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;App.tsx&lt;/b&gt;&lt;hr/&gt;+ RouterProvider&#xa;+ ProtectedRoute&#xa;+ LoginPage route&#xa;+ Dashboard routes" vertex="1">
+          <mxGeometry height="140" width="360" x="50" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;DashboardLayout.tsx&lt;/b&gt;&lt;hr/&gt;+ Guard selectedRestaurant&#xa;+ Header switch restaurant&#xa;+ Outlet pages" vertex="1">
+          <mxGeometry height="130" width="360" x="50" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;DashboardSidebar.tsx&lt;/b&gt;&lt;hr/&gt;+ Menu navigation&#xa;+ Logout action" vertex="1">
+          <mxGeometry height="110" width="360" x="50" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="23" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;LoginPage.tsx&lt;/b&gt;&lt;hr/&gt;+ Login form&#xa;+ Forgot password (OTP flow)" vertex="1">
+          <mxGeometry height="120" width="360" x="50" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="24" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;SelectRestaurantPage.tsx&lt;/b&gt;&lt;hr/&gt;+ List assigned restaurants&#xa;+ selectRestaurant()" vertex="1">
+          <mxGeometry height="120" width="360" x="50" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="30" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;AuthContext.tsx&lt;/b&gt;&lt;hr/&gt;+ isAuthenticated: boolean&#xa;+ user: User | null&#xa;+ login(username,password)&#xa;+ logout()&#xa;+ refreshMe()" vertex="1">
+          <mxGeometry height="180" width="360" x="500" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="31" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;RestaurantContext.tsx&lt;/b&gt;&lt;hr/&gt;+ restaurants: Restaurant[]&#xa;+ selectedRestaurant&#xa;+ selectRestaurant(id)&#xa;+ refreshRestaurants()&#xa;+ clearSelection()" vertex="1">
+          <mxGeometry height="180" width="360" x="500" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="40" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;services/api.ts&lt;/b&gt;&lt;hr/&gt;+ loginApi() / logoutApi() / getMeApi()&#xa;+ getRestaurantsApi()&#xa;+ CRUD dishes/images/audio&#xa;+ translation billing APIs" vertex="1">
+          <mxGeometry height="180" width="360" x="950" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="41" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;services/audioHistoryLog.ts&lt;/b&gt;&lt;hr/&gt;+ log helpers for audio history" vertex="1">
+          <mxGeometry height="100" width="360" x="950" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="50" parent="1" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" value="&lt;b&gt;types/index.ts&lt;/b&gt;&lt;hr/&gt;User, Restaurant, Dish, Audio,&#xa;Language, AuthState, AnalyticsKpi,&#xa;TranslationUsageLedgerResponse" vertex="1">
+          <mxGeometry height="170" width="250" x="1400" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="100" edge="1" parent="1" source="20" style="endArrow=block;html=1;" target="30" value="useAuth()" />
+        <mxCell id="101" edge="1" parent="1" source="20" style="endArrow=block;html=1;" target="31" value="useRestaurant()" />
+        <mxCell id="102" edge="1" parent="1" source="21" style="endArrow=block;html=1;" target="30" value="auth guard" />
+        <mxCell id="103" edge="1" parent="1" source="21" style="endArrow=block;html=1;" target="31" value="restaurant guard" />
+        <mxCell id="104" edge="1" parent="1" source="22" style="endArrow=block;html=1;" target="30" value="logout()" />
+        <mxCell id="105" edge="1" parent="1" source="23" style="endArrow=block;html=1;" target="30" value="login()" />
+        <mxCell id="106" edge="1" parent="1" source="24" style="endArrow=block;html=1;" target="31" value="selectRestaurant()" />
+        <mxCell id="107" edge="1" parent="1" source="30" style="endArrow=block;html=1;" target="40" value="calls" />
+        <mxCell id="108" edge="1" parent="1" source="31" style="endArrow=block;html=1;" target="40" value="calls" />
+        <mxCell id="109" edge="1" parent="1" source="40" style="endArrow=block;html=1;" target="50" value="maps to types" />
+        <mxCell id="110" edge="1" parent="1" source="41" style="endArrow=block;html=1;" target="50" value="uses types" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="saler-management-pages" name="Class Saler - Management Pages">
+    <mxGraphModel dx="1500" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="10" value="Feature Page" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="420" height="980" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="Data / Query Layer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="490" y="20" width="520" height="980" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="Backend Endpoint Groups" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=14;spacingTop=16;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="20" width="620" height="980" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="&lt;b&gt;RestaurantPage.tsx&lt;/b&gt;&lt;hr/&gt;+ update restaurant info&#xa;+ set active status&#xa;+ google map coordinate fill" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="360" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="&lt;b&gt;DishesPage.tsx&lt;/b&gt;&lt;hr/&gt;+ list dishes&#xa;+ create/update/delete dish&#xa;+ image rollback handling" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="240" width="360" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="&lt;b&gt;ImagesPage.tsx&lt;/b&gt;&lt;hr/&gt;+ upload images&#xa;+ set primary image" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="410" width="360" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="&lt;b&gt;AudioPage.tsx&lt;/b&gt;&lt;hr/&gt;+ upload/manage audio versions&#xa;+ translate text + create audio" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="550" width="360" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="&lt;b&gt;AudioHistoryPage.tsx&lt;/b&gt;&lt;hr/&gt;+ usage ledger paging&#xa;+ KPI for selected restaurant" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="710" width="360" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="&lt;b&gt;AccountPage.tsx&lt;/b&gt;&lt;hr/&gt;+ update profile&#xa;+ change password" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="60" y="860" width="360" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="30" value="&lt;b&gt;React Query Hooks&lt;/b&gt;&lt;hr/&gt;+ useQuery() for read data&#xa;+ useMutation() for CUD ops&#xa;+ invalidateQueries() refresh cache" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="530" y="130" width="440" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="&lt;b&gt;services/api.ts&lt;/b&gt;&lt;hr/&gt;+ request() wrapper (credentials include)&#xa;+ endpoint-specific functions" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="530" y="310" width="440" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="&lt;b&gt;contexts/AuthContext + RestaurantContext&lt;/b&gt;&lt;hr/&gt;+ provide user + selectedRestaurant to pages" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="530" y="470" width="440" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="40" value="&lt;b&gt;Restaurant APIs&lt;/b&gt;&lt;hr/&gt;/Restaurant&#xa;/Restaurant/{id}&#xa;/Restaurant/{id}/status&#xa;/Restaurant/resolve-coordinates" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="90" width="540" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="41" value="&lt;b&gt;Dish/Image APIs&lt;/b&gt;&lt;hr/&gt;/Restaurant/{id}/dishes&#xa;/Restaurant/{id}/images" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="280" width="540" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="42" value="&lt;b&gt;Audio/Translate APIs&lt;/b&gt;&lt;hr/&gt;/Restaurant/{id}/audios&#xa;/Audio/translate&#xa;/Audio/create-from-text" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="430" width="540" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="43" value="&lt;b&gt;Account/Auth APIs&lt;/b&gt;&lt;hr/&gt;/Auth/login /Auth/me /Auth/logout&#xa;/Auth/profile /Auth/change-password&#xa;/Auth/forgot-password/*" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="590" width="540" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="44" value="&lt;b&gt;Analytics/Billing APIs&lt;/b&gt;&lt;hr/&gt;/TranslationBilling/summary&#xa;/TranslationBilling/usage-ledger&#xa;/api/analytics/kpis" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="760" width="540" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="100" edge="1" parent="1" source="20" target="30" value="query/mutation" style="endArrow=block;html=1;" />
+        <mxCell id="101" edge="1" parent="1" source="21" target="30" value="query/mutation" style="endArrow=block;html=1;" />
+        <mxCell id="102" edge="1" parent="1" source="22" target="30" value="query/mutation" style="endArrow=block;html=1;" />
+        <mxCell id="103" edge="1" parent="1" source="23" target="30" value="query/mutation" style="endArrow=block;html=1;" />
+        <mxCell id="104" edge="1" parent="1" source="24" target="30" value="query" style="endArrow=block;html=1;" />
+        <mxCell id="105" edge="1" parent="1" source="25" target="30" value="query/mutation" style="endArrow=block;html=1;" />
+        <mxCell id="106" edge="1" parent="1" source="30" target="31" value="call functions" style="endArrow=block;html=1;" />
+        <mxCell id="107" edge="1" parent="1" source="20" target="32" value="selectedRestaurant" style="endArrow=block;html=1;" />
+        <mxCell id="108" edge="1" parent="1" source="24" target="32" value="selectedRestaurant" style="endArrow=block;html=1;" />
+        <mxCell id="109" edge="1" parent="1" source="31" target="40" value="restaurant" style="endArrow=block;html=1;" />
+        <mxCell id="110" edge="1" parent="1" source="31" target="41" value="dish/image" style="endArrow=block;html=1;" />
+        <mxCell id="111" edge="1" parent="1" source="31" target="42" value="audio" style="endArrow=block;html=1;" />
+        <mxCell id="112" edge="1" parent="1" source="31" target="43" value="auth/account" style="endArrow=block;html=1;" />
+        <mxCell id="113" edge="1" parent="1" source="31" target="44" value="billing" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="saler-core-types" name="Class Saler - Core Types">
+    <mxGraphModel dx="1500" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="10" value="&lt;b&gt;User&lt;/b&gt;&lt;hr/&gt;+ user_id: number&#xa;+ username: string&#xa;+ role: string&#xa;+ is_active: boolean" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="80" y="90" width="300" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="&lt;b&gt;Restaurant&lt;/b&gt;&lt;hr/&gt;+ restaurant_id: string&#xa;+ name: string&#xa;+ user_id: number&#xa;+ is_active: boolean" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="430" y="90" width="320" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="&lt;b&gt;RestaurantImage&lt;/b&gt;&lt;hr/&gt;+ image_id: number&#xa;+ restaurant_id: string&#xa;+ image_url: string&#xa;+ is_primary: boolean" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="810" y="90" width="320" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="&lt;b&gt;Dish&lt;/b&gt;&lt;hr/&gt;+ dish_id: number&#xa;+ restaurant_id: string&#xa;+ image_id?: number&#xa;+ price?: number" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="810" y="270" width="320" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="&lt;b&gt;Language&lt;/b&gt;&lt;hr/&gt;+ language_id: number&#xa;+ language_code: string&#xa;+ language_name: string" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="90" width="320" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="&lt;b&gt;Audio&lt;/b&gt;&lt;hr/&gt;+ audio_id: number&#xa;+ restaurant_id: string&#xa;+ language_id: number&#xa;+ audio_url: string&#xa;+ is_active: boolean" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="250" width="320" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="&lt;b&gt;AnalyticsKpi&lt;/b&gt;&lt;hr/&gt;+ total_users&#xa;+ total_audios&#xa;+ total_dishes&#xa;+ total_restaurants" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="300" width="300" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="&lt;b&gt;TranslationUsageLedgerResponse&lt;/b&gt;&lt;hr/&gt;+ items[]&#xa;+ summary&#xa;+ page&#xa;+ pageSize&#xa;+ total" style="shape=rectangle;rounded=0;whiteSpace=wrap;html=1;align=left;spacing=6;fontFamily=Consolas;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="430" y="300" width="320" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="100" edge="1" parent="1" source="11" target="10" value="user_id FK" style="endArrow=block;html=1;" />
+        <mxCell id="101" edge="1" parent="1" source="12" target="11" value="restaurant_id FK" style="endArrow=block;html=1;" />
+        <mxCell id="102" edge="1" parent="1" source="13" target="11" value="restaurant_id FK" style="endArrow=block;html=1;" />
+        <mxCell id="103" edge="1" parent="1" source="13" target="12" value="image_id FK" style="endArrow=block;html=1;" />
+        <mxCell id="104" edge="1" parent="1" source="15" target="11" value="restaurant_id FK" style="endArrow=block;html=1;" />
+        <mxCell id="105" edge="1" parent="1" source="15" target="14" value="language_id FK" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
