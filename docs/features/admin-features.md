@@ -30,6 +30,11 @@ Các route bảo vệ được khai báo trong `admin/src/App.tsx` và được 
 - `/`: dashboard (tổng quan + widget analytics)
 - `/restaurants`: quản lý nhà hàng
 - `/users`: quản lý người dùng
+- `/trajectory`: theo dõi tuyến di chuyển visitor
+- `/tours`: quản lý hành trình (tour)
+- `/translation-billing`: theo dõi chi phí dịch/TTS
+- `/qr-code`: quản lý QR mở app
+- `/account`: quản lý tài khoản admin
 - `/logs`: hoạt động nghe gần đây
 
 Menu sidebar được định nghĩa trong `admin/src/components/AdminSidebar.tsx`.
@@ -38,9 +43,9 @@ Menu sidebar được định nghĩa trong `admin/src/components/AdminSidebar.ts
 
 Luồng hiện tại sử dụng API xác thực backend và phiên cookie:
 
-- `POST /Auth/login`
-- `GET /Auth/me`
-- `POST /Auth/logout`
+- `POST /Auth/admin/login`
+- `GET /Auth/admin/me`
+- `POST /Auth/admin/logout`
 
 Các file triển khai:
 
@@ -50,7 +55,7 @@ Các file triển khai:
 
 Hành vi:
 
-- Khi app khởi động, frontend gọi `/Auth/me` để khôi phục trạng thái đăng nhập từ cookie.
+- Khi app khởi động, frontend gọi `/Auth/admin/me` để khôi phục trạng thái đăng nhập từ cookie.
 - Route bảo vệ sẽ chờ hoàn tất bootstrap (`isLoading`) trước khi chuyển hướng.
 - Logout gọi API theo cơ chế best-effort, sau đó xóa trạng thái xác thực cục bộ.
 
@@ -67,10 +72,10 @@ Hành vi:
 
 2. Trang quản lý nhà hàng (`/restaurants`)
 
-- GET `/api/restaurant`
-- GET `/api/restaurant/{id}`
-- PATCH `/api/restaurant/{id}`
-- PATCH `/api/restaurant/{id}/status`
+- GET `/restaurant`
+- GET `/restaurant/{id}`
+- PATCH `/restaurant/{id}`
+- PATCH `/restaurant/{id}/status`
 
 3. Widget analytics trên dashboard (`/`)
 
@@ -82,6 +87,33 @@ Hành vi:
 4. Trang nhật ký hoạt động (`/logs`)
 
 - GET `/api/analytics/recent-activity`
+- GET `/api/audit-logs`
+
+5. Trang tuyến di chuyển (`/trajectory`)
+
+- GET `/api/analytics/movement-paths`
+
+6. Trang hành trình (`/tours`)
+
+- GET `/Tour`
+- GET `/Tour/{id}`
+- POST `/Tour`
+- PATCH `/Tour/{id}`
+- POST `/Tour/{id}/restaurants`
+- DELETE `/Tour/{id}/restaurants/{restaurantId}`
+- PUT `/Tour/{id}/stops/order`
+- POST `/Tour/upload-image`
+- POST `/Tour/{id}/upload-image`
+
+7. Trang chi phí dịch (`/translation-billing`)
+
+- GET `/api/admin/translation-billing/monthly`
+- GET `/api/admin/translation-billing/usage`
+- GET `/api/admin/translation-billing/audio-usage`
+
+8. Trang QR (`/qr-code`)
+
+- POST `/Auth/admin/qr-code`
 
 ### 5.2 Các phần vẫn dùng dữ liệu tĩnh/mock
 
@@ -165,6 +197,49 @@ Triển khai một phần / placeholder:
 - hiển thị nhãn hành động suy luận theo thời lượng
 - tự làm mới mỗi 30 giây
 - trạng thái loading/empty/error
+
+### 7.5 Tuyến di chuyển (`/trajectory`)
+
+Đã triển khai:
+
+- hiển thị movement paths theo session ẩn danh
+- dùng `sessionLimit = 100` trong UI hiện tại
+- trạng thái loading/empty/error
+
+### 7.6 Hành trình (`/tours`)
+
+Đã triển khai:
+
+- tạo tour mới (name/description/estimatedDuration/image)
+- xem danh sách và xem chi tiết tour
+- thêm/xóa nhà hàng trong tour
+- đổi thứ tự stop trong tour
+- bật/tắt trạng thái hoạt động tour
+- tải ảnh cover chung hoặc ảnh cho tour cụ thể
+
+### 7.7 Chi phí dịch (`/translation-billing`)
+
+Đã triển khai:
+
+- bảng tổng hợp chi phí theo tháng và seller
+- bảng chi tiết usage dịch văn bản
+- bảng chi tiết usage audio/TTS
+- filter theo tháng + seller + phân trang
+
+### 7.8 Mã QR (`/qr-code`)
+
+Đã triển khai:
+
+- upload file QR PNG cho admin portal
+- thay thế bản QR hiện tại dùng để mở app visitor
+
+### 7.9 Tài khoản (`/account`)
+
+Đã triển khai:
+
+- xem và cập nhật profile admin
+- đổi mật khẩu
+- đồng bộ trạng thái user sau cập nhật
 
 ## 8. Cấu hình môi trường
 
