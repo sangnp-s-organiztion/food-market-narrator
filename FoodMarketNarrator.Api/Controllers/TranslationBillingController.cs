@@ -37,7 +37,7 @@ public class TranslationBillingController : ControllerBase
 
         try
         {
-            var result = await _translationBillingService.GetUsageLedgerAsync(
+            var result = await _translationBillingService.GetUsageLedgerBySellerUserIdAsync(
                 billingMonth,
                 currentUserId,
                 page,

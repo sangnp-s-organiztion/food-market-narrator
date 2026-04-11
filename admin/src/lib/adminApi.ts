@@ -231,6 +231,7 @@ export interface UpdateUserPasswordRequest {
 
 export interface UpdateMyProfileRequest {
   username: string;
+  fullName?: string | null;
   phone: string;
   email: string;
 }
@@ -247,6 +248,8 @@ export interface TranslationMonthlyBillingItem {
   successRequests: number;
   failedRequests: number;
   totalBillableUnits: number;
+  translationBillableUnits?: number;
+  audioBillableUnits?: number;
   totalAmount: number;
   currency: string;
   lastRecomputedAtUtc: string;
@@ -505,7 +508,7 @@ export const adminStatsApi = {
 
 type TranslationBillingFilter = {
   billingMonth?: string;
-  sellerUserId?: number;
+  sellerUsername?: string;
   page?: number;
   pageSize?: number;
 };
@@ -524,7 +527,7 @@ export const translationBillingApi = {
   getMonthly: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
-      sellerUserId: filter.sellerUserId,
+      sellerUsername: filter.sellerUsername,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });
@@ -537,7 +540,7 @@ export const translationBillingApi = {
   getUsage: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
-      sellerUserId: filter.sellerUserId,
+      sellerUsername: filter.sellerUsername,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });
@@ -550,7 +553,7 @@ export const translationBillingApi = {
   getAudioUsage: (filter: TranslationBillingFilter) => {
     const query = toQueryString({
       billingMonth: filter.billingMonth,
-      sellerUserId: filter.sellerUserId,
+      sellerUsername: filter.sellerUsername,
       page: filter.page ?? 1,
       pageSize: filter.pageSize ?? 20,
     });

@@ -118,12 +118,13 @@ namespace food_market_narrator_api.Repositories
             return true;
         }
 
-        public async Task<bool> UpdateProfileAsync(int userId, string username, string phone, string email)
+        public async Task<bool> UpdateProfileAsync(int userId, string username, string? fullName, string phone, string email)
         {
             var user = await _context.User.FindAsync(userId);
             if (user == null) return false;
 
             user.Username = username;
+            user.FullName = fullName;
             user.Phone = phone;
             user.Email = email;
             await _context.SaveChangesAsync();

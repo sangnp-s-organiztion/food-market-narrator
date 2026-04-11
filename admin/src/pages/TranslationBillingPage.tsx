@@ -1,5 +1,5 @@
 ﻿import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,7 +53,7 @@ const MonthlyBillingTable = ({
   if (items.length === 0) {
     return (
       <tr>
-        <td colSpan={6} className="text-center py-8 text-muted-foreground">
+        <td colSpan={5} className="text-center py-8 text-muted-foreground">
           Chưa có dữ liệu chi phí theo bộ lọc.
         </td>
       </tr>
@@ -67,14 +67,13 @@ const MonthlyBillingTable = ({
           <td className="font-medium">{item.sellerUsername || "(không rõ)"}</td>
           <td className="mono text-xs">{item.billingMonth}</td>
           <td className="mono text-xs">{formatNumber(item.totalRequests)}</td>
-          <td className="mono text-xs text-emerald-700">
-            {formatNumber(item.successRequests)}
-          </td>
-          <td className="mono text-xs text-red-600">
-            {formatNumber(item.failedRequests)}
+          <td className="mono text-xs">
+            {formatNumber(
+              item.translationBillableUnits ?? item.totalBillableUnits,
+            )}
           </td>
           <td className="mono text-xs">
-            {formatNumber(item.totalBillableUnits)}
+            {formatNumber(item.audioBillableUnits ?? 0)}
           </td>
         </tr>
       ))}
@@ -91,7 +90,7 @@ const UsageLedgerTable = ({
     return (
       <tr>
         <td colSpan={5} className="text-center py-8 text-muted-foreground">
-          Chưa có lịch sử đơn vị tính phí theo bộ lọc.
+          Chưa có lịch sử sử dụng dịch vụ theo bộ lọc.
         </td>
       </tr>
     );
@@ -150,16 +149,10 @@ const AudioUsageLedgerTable = ({
 
 const TranslationBillingPage = () => {
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
-  const [sellerUserIdRaw, setSellerUserIdRaw] = useState("");
+  const [sellerUsername, setSellerUsername] = useState("");
   const [monthlyPage, setMonthlyPage] = useState(1);
   const [usagePage, setUsagePage] = useState(1);
   const [audioUsagePage, setAudioUsagePage] = useState(1);
-
-  const sellerUserId = useMemo(() => {
-    if (!sellerUserIdRaw.trim()) return undefined;
-    const parsed = Number(sellerUserIdRaw.trim());
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-  }, [sellerUserIdRaw]);
 
   const {
     data: monthlyData,
@@ -171,13 +164,13 @@ const TranslationBillingPage = () => {
       "translation-billing",
       "monthly",
       billingMonth,
-      sellerUserId,
+      sellerUsername,
       monthlyPage,
     ],
     queryFn: () =>
       translationBillingApi.getMonthly({
         billingMonth,
-        sellerUserId,
+        sellerUsername: sellerUsername.trim() || undefined,
         page: monthlyPage,
         pageSize: PAGE_SIZE,
       }),
@@ -194,13 +187,13 @@ const TranslationBillingPage = () => {
       "translation-billing",
       "usage",
       billingMonth,
-      sellerUserId,
+      sellerUsername,
       usagePage,
     ],
     queryFn: () =>
       translationBillingApi.getUsage({
         billingMonth,
-        sellerUserId,
+        sellerUsername: sellerUsername.trim() || undefined,
         page: usagePage,
         pageSize: PAGE_SIZE,
       }),
@@ -217,13 +210,13 @@ const TranslationBillingPage = () => {
       "translation-billing",
       "audio-usage",
       billingMonth,
-      sellerUserId,
+      sellerUsername,
       audioUsagePage,
     ],
     queryFn: () =>
       translationBillingApi.getAudioUsage({
         billingMonth,
-        sellerUserId,
+        sellerUsername: sellerUsername.trim() || undefined,
         page: audioUsagePage,
         pageSize: PAGE_SIZE,
       }),
@@ -251,7 +244,7 @@ const TranslationBillingPage = () => {
         <div>
           <h1 className="page-title">Dịch vụ</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Theo dõi lịch sử và đơn vị tính phí theo tháng
+            Theo dõi lịch sử và mức sử dụng dịch vụ theo tháng
           </p>
         </div>
       </div>
@@ -274,17 +267,17 @@ const TranslationBillingPage = () => {
               />
             </div>
             <div>
-              <label className="stat-label">ID người bán</label>
+              <label className="stat-label">Tên đăng nhập người bán</label>
               <Input
-                value={sellerUserIdRaw}
+                value={sellerUsername}
                 onChange={(e) => {
-                  setSellerUserIdRaw(e.target.value);
+                  setSellerUsername(e.target.value);
                   setMonthlyPage(1);
                   setUsagePage(1);
                   setAudioUsagePage(1);
                 }}
                 className="mt-1"
-                placeholder="Để trống = tất cả"
+                placeholder="Nhập tên đăng nhập người bán, để trống = tất cả"
               />
             </div>
           </div>
@@ -298,7 +291,7 @@ const TranslationBillingPage = () => {
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Tổng đơn vị tính phí</span>
+            <span className="stat-label">Tổng mức sử dụng dịch vụ</span>
             <div className="stat-value mono mt-2">
               {formatNumber(monthlyData?.summary.totalBillableUnits ?? 0)}
             </div>
@@ -307,13 +300,15 @@ const TranslationBillingPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="stat-card">
-            <span className="stat-label">Tổng sự kiện tạo audio</span>
+            <span className="stat-label">Tổng sự kiện tạo tệp thuyết minh</span>
             <div className="stat-value mono mt-2">
               {formatNumber(audioUsageData?.summary.eventCount ?? 0)}
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Tổng đơn vị tính phí audio</span>
+            <span className="stat-label">
+              Tổng mức sử dụng dịch vụ tạo tệp thuyết minh
+            </span>
             <div className="stat-value mono mt-2">
               {formatNumber(audioUsageData?.summary.totalBillableUnits ?? 0)}
             </div>
@@ -336,16 +331,15 @@ const TranslationBillingPage = () => {
                 <th>Người bán</th>
                 <th>Tháng</th>
                 <th>Yêu cầu</th>
-                <th>Thành công</th>
-                <th>Thất bại</th>
-                <th>Đơn vị tính phí</th>
+                <th>Mức sử dụng dịch vụ dịch thuật</th>
+                <th>Mức sử dụng dịch vụ tạo tệp thuyết minh</th>
               </tr>
             </thead>
             <tbody>
               {monthlyLoading && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={5}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải dữ liệu chi phí...
@@ -354,7 +348,7 @@ const TranslationBillingPage = () => {
               )}
               {monthlyError && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-destructive">
+                  <td colSpan={5} className="text-center py-8 text-destructive">
                     Không thể tải dữ liệu chi phí theo tháng.
                   </td>
                 </tr>
@@ -405,7 +399,7 @@ const TranslationBillingPage = () => {
                 <th>Người bán</th>
                 <th>Hành động</th>
                 <th>Ký tự đầu vào</th>
-                <th>Đơn vị tính phí</th>
+                <th>Mức sử dụng dịch vụ</th>
               </tr>
             </thead>
             <tbody>
@@ -422,7 +416,7 @@ const TranslationBillingPage = () => {
               {usageError && (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-destructive">
-                    Không thể tải lịch sử đơn vị tính phí.
+                    Không thể tải lịch sử sử dụng dịch vụ.
                   </td>
                 </tr>
               )}
@@ -474,7 +468,7 @@ const TranslationBillingPage = () => {
                 <th>Audio</th>
                 <th>Hành động</th>
                 <th>Ký tự đầu vào</th>
-                <th>Đơn vị tính phí</th>
+                <th>Mức sử dụng dịch vụ</th>
               </tr>
             </thead>
             <tbody>
