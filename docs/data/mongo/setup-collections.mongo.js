@@ -3,14 +3,15 @@
 
 // Tạo collection và index
 
-// ===================================================================
+// =======================================================================
 db.createCollection("UserSessions");
 db.UserSessions.createIndex(
   { device_id: 1 },
   { name: "ux_user_sessions_device_id", unique: true },
 );
 db.UserSessions.createIndex({ created_at: -1 });
-// ===================================================================
+
+// =======================================================================
 db.createCollection("LocationLogs");
 
 // index cho session
@@ -22,7 +23,7 @@ db.LocationLogs.createIndex({ timestamp: -1 });
 // 🔥 GEO INDEX (bắt buộc)
 db.LocationLogs.createIndex({ location: "2dsphere" });
 
-// ===================================================================
+// =======================================================================
 db.createCollection("AudioLogs");
 
 // index theo session
@@ -39,6 +40,7 @@ db.AudioLogs.createIndex({ restaurant_id: 1, timestamp: -1 });
 
 // use food_market_narrator
 
+//  =======================================================================
 db.createCollection("AudioTranslationVersions");
 db.AudioTranslationVersions.createIndex(
   { audio_id: 1, target_language_code: 1, version_no: -1 },
@@ -57,6 +59,7 @@ db.AudioTranslationVersions.createIndex(
   { name: "ix_atv_seller_created" },
 );
 
+// =======================================================================
 db.createCollection("TranslationJobs");
 db.TranslationJobs.createIndex(
   { request_id: 1 },
@@ -75,6 +78,7 @@ db.TranslationJobs.createIndex(
   { name: "ix_tj_audio_lang_created" },
 );
 
+// =======================================================================
 db.createCollection("TranslationUsageLedger");
 db.TranslationUsageLedger.createIndex(
   { usage_event_id: 1 },
@@ -97,6 +101,26 @@ db.TranslationUsageLedger.createIndex(
   { name: "ix_tul_status_created" },
 );
 
+// =======================================================================
+db.createCollection("AudioUsageLedger");
+db.AudioUsageLedger.createIndex(
+  { usage_event_id: 1 },
+  { name: "ux_aul_usage_event_id", unique: true },
+);
+db.AudioUsageLedger.createIndex(
+  { request_id: 1 },
+  { name: "ix_aul_request_id" },
+);
+db.AudioUsageLedger.createIndex(
+  { seller_user_id: 1, created_at: -1 },
+  { name: "ix_aul_seller_created" },
+);
+db.AudioUsageLedger.createIndex(
+  { seller_user_id: 1, billing_month: 1 },
+  { name: "ix_aul_seller_billing_month" },
+);
+
+// =======================================================================
 db.createCollection("TranslationBillingMonthly");
 db.TranslationBillingMonthly.createIndex(
   { seller_user_id: 1, billing_month: 1 },
