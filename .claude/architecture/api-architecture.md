@@ -17,6 +17,7 @@ Luu y:
 - POST /Auth/admin/logout
 - GET /Auth/me
 - GET /Auth/admin/me
+- POST /Auth/admin/qr-code (admin upload PNG, overwrite fixed file)
 
 ## Language
 

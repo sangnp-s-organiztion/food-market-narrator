@@ -1,5 +1,7 @@
 using food_market_narrator_api.DTOs.Audio;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -111,14 +113,15 @@ namespace food_market_narrator_api.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (!TryGetCurrentUserId(out var sellerUserId))
+            var sellerUserId = await TryGetCurrentSellerUserIdAsync();
+            if (!sellerUserId.HasValue)
             {
                 return Unauthorized(new { message = "Unauthorized." });
             }
 
             try
             {
-                var result = await _translationService.TranslateAsync(sellerUserId, restaurantId, request);
+                var result = await _translationService.TranslateAsync(sellerUserId.Value, restaurantId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -147,14 +150,15 @@ namespace food_market_narrator_api.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (!TryGetCurrentUserId(out var sellerUserId))
+            var sellerUserId = await TryGetCurrentSellerUserIdAsync();
+            if (!sellerUserId.HasValue)
             {
                 return Unauthorized(new { message = "Unauthorized." });
             }
 
             try
             {
-                var result = await _translationService.CreateAudioFromTextAsync(sellerUserId, restaurantId, request);
+                var result = await _translationService.CreateAudioFromTextAsync(sellerUserId.Value, restaurantId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -319,11 +323,17 @@ namespace food_market_narrator_api.Controllers
             return true;
         }
 
-        private bool TryGetCurrentUserId(out int userId)
+        private async Task<int?> TryGetCurrentSellerUserIdAsync()
         {
-            userId = 0;
-            var userIdRaw = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.TryParse(userIdRaw, out userId);
+            var authResult = await HttpContext.AuthenticateAsync(AuthSchemes.Saler);
+            var principal = authResult.Succeeded ? authResult.Principal : null;
+            var userIdRaw = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdRaw, out var userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
     }
 }

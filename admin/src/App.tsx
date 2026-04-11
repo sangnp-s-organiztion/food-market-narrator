@@ -21,6 +21,7 @@ import TrajectoryPage from "./pages/TrajectoryPage.tsx";
 import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
 import ToursPage from "./pages/ToursPage.tsx";
+import QrCodePage from "./pages/QrCodePage.tsx";
 
 const queryClient = new QueryClient();
 const TITLE_SUFFIX = "Food Market Narrator Admin";
@@ -28,12 +29,19 @@ const TITLE_SUFFIX = "Food Market Narrator Admin";
 const getTitleByPath = (pathname: string): string => {
   if (pathname === "/login") return `Đăng nhập | ${TITLE_SUFFIX}`;
   if (pathname === "/") return `Tổng quan | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/restaurants")) return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/users")) return `Quản lý người dùng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/logs")) return `Lịch sử hoạt động | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/trajectory")) return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/tours")) return `Quản lý tour | ${TITLE_SUFFIX}`;
-  if (pathname.startsWith("/translation-billing")) return `Chi phí dịch token | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/restaurants"))
+    return `Quản lý nhà hàng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/users"))
+    return `Quản lý người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/logs"))
+    return `Lịch sử hoạt động | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/trajectory"))
+    return `Lộ trình người dùng | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/tours"))
+    return `Quản lý hành trình | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/translation-billing"))
+    return `Dịch vụ | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/qr-code")) return `Mã QR | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/account")) return `Tài khoản | ${TITLE_SUFFIX}`;
   return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 };
@@ -131,6 +139,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TranslationBillingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/qr-code"
+        element={
+          <ProtectedRoute>
+            <QrCodePage />
           </ProtectedRoute>
         }
       />

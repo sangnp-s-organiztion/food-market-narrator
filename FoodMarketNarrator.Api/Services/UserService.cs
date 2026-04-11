@@ -130,9 +130,10 @@ public class UserService
         return await _userRepository.UpdatePasswordAsync(userId, PasswordHasher.Hash(newPassword));
     }
 
-    public async Task<UserResponse?> UpdateProfileAsync(int userId, string username, string phone, string email)
+    public async Task<UserResponse?> UpdateProfileAsync(int userId, string username, string? fullName, string phone, string email)
     {
         var normalizedUsername = (username ?? string.Empty).Trim();
+        var normalizedFullName = string.IsNullOrWhiteSpace(fullName) ? null : fullName.Trim();
         var normalizedPhone = (phone ?? string.Empty).Trim();
         var normalizedEmail = (email ?? string.Empty).Trim();
 
@@ -160,6 +161,7 @@ public class UserService
         var updated = await _userRepository.UpdateProfileAsync(
             userId,
             normalizedUsername,
+            normalizedFullName,
             normalizedPhone,
             normalizedEmail);
 
@@ -184,6 +186,7 @@ public class UserService
             Username = u.Username,
             Phone = u.Phone,
             Email = u.Email,
+            FullName = u.FullName,
             Role = normalizedRole,
             IsActive = u.IsActive,
             CreatedAt = u.CreatedAt

@@ -55,8 +55,14 @@ export default function AudioHistoryPage() {
   });
 
   const { data: restaurantKpis } = useQuery({
-    queryKey: ["saler", "analytics", "restaurant-kpis", selectedRestaurant?.restaurant_id],
-    queryFn: () => getRestaurantKpisApi(selectedRestaurant?.restaurant_id ?? ""),
+    queryKey: [
+      "saler",
+      "analytics",
+      "restaurant-kpis",
+      selectedRestaurant?.restaurant_id,
+    ],
+    queryFn: () =>
+      getRestaurantKpisApi(selectedRestaurant?.restaurant_id ?? ""),
     enabled: !!selectedRestaurant?.restaurant_id,
     staleTime: 30_000,
   });
@@ -74,7 +80,7 @@ export default function AudioHistoryPage() {
       <div className="page-header">
         <h1 className="page-title">Lịch sử thuyết minh</h1>
         <p className="page-description">
-          Theo dõi lịch sử sử dụng token dịch khi tạo thuyết minh âm thanh.
+          Theo dõi lịch sử đơn vị tính phí khi tạo thuyết minh âm thanh.
         </p>
       </div>
 
@@ -104,7 +110,7 @@ export default function AudioHistoryPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-base">Lịch sử sử dụng token dịch</h2>
+            <h2 className="font-semibold text-base">Lịch sử đơn vị tính phí</h2>
           </div>
           <span className="text-xs text-muted-foreground mono">
             {data?.total_count ?? 0} sự kiện
@@ -113,7 +119,9 @@ export default function AudioHistoryPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Tháng</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Tháng
+            </label>
             <Input
               type="month"
               value={billingMonth}
@@ -125,7 +133,9 @@ export default function AudioHistoryPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Tổng đơn vị tính phí</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Tổng đơn vị tính phí
+            </label>
             <div className="mt-1 h-10 rounded-md border border-input bg-muted/40 px-3 flex items-center text-sm font-medium">
               {formatNumber(data?.summary.total_billable_units ?? 0)}
             </div>
@@ -147,7 +157,10 @@ export default function AudioHistoryPage() {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <td
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Đang tải lịch sử sử dụng...
                   </td>
                 </tr>
@@ -155,26 +168,40 @@ export default function AudioHistoryPage() {
               {isError && (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-destructive">
-                    Không thể tải lịch sử sử dụng token.
+                    Không thể tải lịch sử đơn vị tính phí.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && (data?.items.length ?? 0) === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Chưa có lịch sử sử dụng token theo bộ lọc.
+                  <td
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Chưa có lịch sử đơn vị tính phí theo bộ lọc.
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError &&
+              {!isLoading &&
+                !isError &&
                 (data?.items ?? []).map((item) => (
                   <tr key={item.usage_event_id}>
-                    <td className="mono text-xs whitespace-nowrap">{formatDateTime(item.created_at_utc)}</td>
-                    <td className="font-medium">{item.seller_username || "(không rõ)"}</td>
-                    <td className="mono text-xs text-muted-foreground">{item.seller_user_id}</td>
+                    <td className="mono text-xs whitespace-nowrap">
+                      {formatDateTime(item.created_at_utc)}
+                    </td>
+                    <td className="font-medium">
+                      {item.seller_username || "(không rõ)"}
+                    </td>
+                    <td className="mono text-xs text-muted-foreground">
+                      {item.seller_user_id}
+                    </td>
                     <td className="mono text-xs">{item.action_type}</td>
-                    <td className="mono text-xs">{formatNumber(item.input_chars)}</td>
-                    <td className="mono text-xs">{formatNumber(item.billable_units)}</td>
+                    <td className="mono text-xs">
+                      {formatNumber(item.input_chars)}
+                    </td>
+                    <td className="mono text-xs">
+                      {formatNumber(item.billable_units)}
+                    </td>
                   </tr>
                 ))}
             </tbody>
@@ -190,7 +217,9 @@ export default function AudioHistoryPage() {
           >
             Trang trước
           </button>
-          <span className="text-xs text-muted-foreground mono">{page}/{totalPages}</span>
+          <span className="text-xs text-muted-foreground mono">
+            {page}/{totalPages}
+          </span>
           <button
             type="button"
             className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
@@ -201,7 +230,6 @@ export default function AudioHistoryPage() {
           </button>
         </div>
       </div>
-
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { MovementPath } from "@/types/analytics";
+import type { DateRange } from "react-day-picker";
 
 interface TrajectorySectionProps {
   movementPaths?: MovementPath[];
@@ -26,7 +27,8 @@ const PATH_COLORS = [
   "hsl(280, 67%, 54%)",
   "hsl(25, 95%, 53%)",
 ];
-const SESSION_IDS_PER_PAGE = 10;
+const SESSION_IDS_PER_PAGE = 20;
+const TABLE_ROWS_PER_PAGE = 20;
 
 const toTimestamp = (value: string): number => {
   const parsed = Date.parse(value);
@@ -38,35 +40,43 @@ const formatSessionDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString("vi-VN");
 };
 
-const isSameDate = (timestamp: number, selectedDate: Date): boolean => {
+const isWithinRange = (
+  timestamp: number,
+  range: DateRange | undefined,
+): boolean => {
+  if (!range?.from && !range?.to) {
+    return true;
+  }
+
   const date = new Date(timestamp);
-  return (
-    date.getFullYear() === selectedDate.getFullYear() &&
-    date.getMonth() === selectedDate.getMonth() &&
-    date.getDate() === selectedDate.getDate()
-  );
+
+  if (range.from) {
+    const from = new Date(range.from);
+    from.setHours(0, 0, 0, 0);
+    if (date < from) {
+      return false;
+    }
+  }
+
+  if (range.to) {
+    const to = new Date(range.to);
+    to.setHours(23, 59, 59, 999);
+    if (date > to) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
-const formatDateChip = (value?: Date): string => {
-  if (!value) return "Chọn ngày";
-  return value.toLocaleDateString("vi-VN");
-};
+const formatRangeLabel = (range: DateRange | undefined): string => {
+  if (!range?.from && !range?.to) {
+    return "Chọn khoảng thời gian";
+  }
 
-const getMonthKey = (timestamp: number): string => {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${date.getFullYear()}-${month}`;
-};
-
-const isSameMonth = (timestamp: number, monthKey: string): boolean => {
-  return getMonthKey(timestamp) === monthKey;
-};
-
-const formatMonthLabel = (monthKey: string): string => {
-  if (!monthKey) return "Tất cả tháng";
-  const [year, month] = monthKey.split("-");
-  return `${month}/${year}`;
+  const fromLabel = range.from ? range.from.toLocaleDateString("vi-VN") : "...";
+  const toLabel = range.to ? range.to.toLocaleDateString("vi-VN") : "...";
+  return `${fromLabel} - ${toLabel}`;
 };
 
 export function TrajectorySection({
@@ -77,9 +87,9 @@ export function TrajectorySection({
     null,
   );
   const [dateSortOrder, setDateSortOrder] = useState<DateSortOrder>("desc");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [tablePage, setTablePage] = useState(1);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const pathLayerRef = useRef<L.LayerGroup | null>(null);
@@ -114,32 +124,8 @@ export function TrajectorySection({
   }, [movementPaths, dateSortOrder]);
 
   const dateFilteredPaths = useMemo<SortedPath[]>(() => {
-    let pathsAfterMonth = sortedMovementPaths;
-
-    if (selectedMonth !== "all") {
-      pathsAfterMonth = sortedMovementPaths
-        .map((path) => {
-          const pointsInMonth = path.points.filter((point) =>
-            isSameMonth(toTimestamp(point.timestamp), selectedMonth),
-          );
-
-          if (pointsInMonth.length === 0) {
-            return null;
-          }
-
-          return {
-            ...path,
-            points: pointsInMonth,
-            latestTimestamp: toTimestamp(
-              pointsInMonth[pointsInMonth.length - 1].timestamp,
-            ),
-          };
-        })
-        .filter((path): path is SortedPath => path !== null);
-    }
-
-    if (!selectedDate) {
-      return [...pathsAfterMonth].sort((a, b) => {
+    if (!selectedRange?.from && !selectedRange?.to) {
+      return [...sortedMovementPaths].sort((a, b) => {
         if (dateSortOrder === "asc") {
           return a.latestTimestamp - b.latestTimestamp;
         }
@@ -147,21 +133,21 @@ export function TrajectorySection({
       });
     }
 
-    return pathsAfterMonth
+    return sortedMovementPaths
       .map((path) => {
-        const pointsInDay = path.points.filter((point) =>
-          isSameDate(toTimestamp(point.timestamp), selectedDate),
+        const pointsInRange = path.points.filter((point) =>
+          isWithinRange(toTimestamp(point.timestamp), selectedRange),
         );
 
-        if (pointsInDay.length === 0) {
+        if (pointsInRange.length === 0) {
           return null;
         }
 
         return {
           ...path,
-          points: pointsInDay,
+          points: pointsInRange,
           latestTimestamp: toTimestamp(
-            pointsInDay[pointsInDay.length - 1].timestamp,
+            pointsInRange[pointsInRange.length - 1].timestamp,
           ),
         };
       })
@@ -172,21 +158,7 @@ export function TrajectorySection({
         }
         return b.latestTimestamp - a.latestTimestamp;
       });
-  }, [dateSortOrder, selectedDate, selectedMonth, sortedMovementPaths]);
-
-  const availableMonths = useMemo(() => {
-    return Array.from(
-      new Set(
-        sortedMovementPaths
-          .map((path) => getMonthKey(path.latestTimestamp))
-          .filter((monthKey) => Boolean(monthKey)),
-      ),
-    ).sort((a, b) => {
-      if (a < b) return 1;
-      if (a > b) return -1;
-      return 0;
-    });
-  }, [sortedMovementPaths]);
+  }, [dateSortOrder, selectedRange, sortedMovementPaths]);
 
   const dateSessionRows = useMemo(
     () =>
@@ -194,10 +166,23 @@ export function TrajectorySection({
         sessionId: path.sessionId,
         pointsCount: path.points.length,
         startTimestamp: toTimestamp(path.points[0]?.timestamp ?? ""),
-        endTimestamp: toTimestamp(path.points[path.points.length - 1]?.timestamp ?? ""),
+        endTimestamp: toTimestamp(
+          path.points[path.points.length - 1]?.timestamp ?? "",
+        ),
       })),
     [dateFilteredPaths],
   );
+
+  const totalTablePages = Math.max(
+    1,
+    Math.ceil(dateSessionRows.length / TABLE_ROWS_PER_PAGE),
+  );
+
+  const paginatedDateSessionRows = useMemo(() => {
+    const start = (tablePage - 1) * TABLE_ROWS_PER_PAGE;
+    const end = start + TABLE_ROWS_PER_PAGE;
+    return dateSessionRows.slice(start, end);
+  }, [dateSessionRows, tablePage]);
 
   const sessionMetaById = useMemo(() => {
     return new Map(
@@ -234,6 +219,12 @@ export function TrajectorySection({
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (tablePage > totalTablePages) {
+      setTablePage(totalTablePages);
+    }
+  }, [tablePage, totalTablePages]);
 
   useEffect(() => {
     if (!selectedSessionId) return;
@@ -405,36 +396,9 @@ export function TrajectorySection({
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <div className="flex h-[620px] flex-col rounded-lg border border-border bg-background p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">
-              Session ID
-            </span>
-            <span className="text-xs text-muted-foreground mono">
-              {filteredPaths.length}/{dateFilteredPaths.length}
-            </span>
-          </div>
-
           <div className="mb-2 rounded-md border border-border p-2">
             <div className="mb-2 text-[11px] font-medium text-muted-foreground">
-              Lọc theo tháng / ngày
-            </div>
-            <div className="mb-2">
-              <select
-                value={selectedMonth}
-                onChange={(event) => {
-                  setSelectedMonth(event.target.value);
-                  setSelectedDate(undefined);
-                  setCurrentPage(1);
-                }}
-                className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground"
-              >
-                <option value="all">Tất cả tháng</option>
-                {availableMonths.map((monthKey) => (
-                  <option key={monthKey} value={monthKey}>
-                    {formatMonthLabel(monthKey)}
-                  </option>
-                ))}
-              </select>
+              Lọc theo khoảng thời gian
             </div>
             <div className="flex items-center gap-2">
               <Popover>
@@ -443,15 +407,19 @@ export function TrajectorySection({
                     type="button"
                     className="inline-flex w-full items-center justify-between rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground"
                   >
-                    <span>{formatDateChip(selectedDate)}</span>
+                    <span>{formatRangeLabel(selectedRange)}</span>
                     <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-auto p-0">
                   <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
+                    mode="range"
+                    selected={selectedRange}
+                    onSelect={(range) => {
+                      setSelectedRange(range);
+                      setCurrentPage(1);
+                      setTablePage(1);
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
@@ -460,8 +428,9 @@ export function TrajectorySection({
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedDate(undefined);
-                  setSelectedMonth("all");
+                  setSelectedRange(undefined);
+                  setCurrentPage(1);
+                  setTablePage(1);
                 }}
                 className="rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
               >
@@ -470,8 +439,10 @@ export function TrajectorySection({
             </div>
           </div>
 
-          <div className="mb-2 text-[11px] text-muted-foreground">
-            Phân trang {SESSION_IDS_PER_PAGE} session/trang
+          <div className="mb-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Danh sách phiên
+            </span>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
@@ -485,7 +456,7 @@ export function TrajectorySection({
                     : "border-border bg-background text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Tất cả session
+                Tất cả phiên
               </button>
 
               {paginatedSessionIds.map((sessionId) => {
@@ -585,51 +556,74 @@ export function TrajectorySection({
       <div className="mt-4 rounded-lg border border-border bg-background p-3">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="text-sm font-semibold text-foreground">
-            Bảng tuyến theo thời gian
+            Bảng tuyến di chuyển của khách tham quan theo thời gian
           </h4>
           <span className="text-xs text-muted-foreground">
-            {selectedDate
-              ? `${dateSessionRows.length} session trong ngày ${formatDateChip(selectedDate)}`
-              : selectedMonth !== "all"
-                ? `${dateSessionRows.length} session trong tháng ${formatMonthLabel(selectedMonth)}`
-                : `${dateSessionRows.length} session`}
+            {selectedRange?.from || selectedRange?.to
+              ? `${dateSessionRows.length} phiên trong khoảng đã chọn`
+              : `${dateSessionRows.length} phiên`}
           </span>
         </div>
 
-        {!selectedDate && selectedMonth === "all" && (
-          <p className="text-xs text-muted-foreground">
-            Chưa chọn bộ lọc thời gian. Hãy chọn tháng hoặc ngày để thu hẹp dữ liệu.
-          </p>
-        )}
-
-        {(selectedDate || selectedMonth !== "all") && dateSessionRows.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            Không có dữ liệu tuyến di chuyển theo bộ lọc đã chọn.
-          </p>
-        )}
+        {(selectedRange?.from || selectedRange?.to) &&
+          dateSessionRows.length === 0 && (
+            <p className="text-xs text-muted-foreground">
+              Không có dữ liệu tuyến di chuyển theo bộ lọc đã chọn.
+            </p>
+          )}
 
         {dateSessionRows.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-border text-muted-foreground">
-                  <th className="py-2 pr-3">Session ID</th>
+                  <th className="py-2 pr-3">Mã phiên</th>
                   <th className="py-2 pr-3">Số điểm</th>
                   <th className="py-2 pr-3">Bắt đầu</th>
                   <th className="py-2">Kết thúc</th>
                 </tr>
               </thead>
               <tbody>
-                {dateSessionRows.map((row) => (
+                {paginatedDateSessionRows.map((row) => (
                   <tr key={row.sessionId} className="border-b border-border/60">
                     <td className="py-2 pr-3 mono">{row.sessionId}</td>
                     <td className="py-2 pr-3">{row.pointsCount}</td>
-                    <td className="py-2 pr-3">{formatSessionDate(row.startTimestamp)}</td>
-                    <td className="py-2">{formatSessionDate(row.endTimestamp)}</td>
+                    <td className="py-2 pr-3">
+                      {formatSessionDate(row.startTimestamp)}
+                    </td>
+                    <td className="py-2">
+                      {formatSessionDate(row.endTimestamp)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {dateSessionRows.length > 0 && (
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <button
+              type="button"
+              onClick={() => setTablePage((prev) => Math.max(1, prev - 1))}
+              disabled={tablePage === 1}
+              className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="mono text-xs text-muted-foreground">
+              {tablePage}/{totalTablePages}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setTablePage((prev) => Math.min(totalTablePages, prev + 1))
+              }
+              disabled={tablePage === totalTablePages}
+              className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Sau
+            </button>
           </div>
         )}
       </div>

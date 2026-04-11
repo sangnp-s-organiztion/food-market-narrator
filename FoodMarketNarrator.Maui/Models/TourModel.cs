@@ -6,13 +6,10 @@ public class TourModel
 
     public int TourId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? ShortDescription { get; set; }
     public string? Description { get; set; }
     public int? EstimatedDurationMinutes { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
-    public bool IsFeatured { get; set; }
-    public int SortPriority { get; set; }
     public int StopCount { get; set; }
     public int NearbyStopCount { get; set; }
     public double? NearestDistanceMeters { get; set; }
@@ -47,7 +44,7 @@ public class TourModel
                 return $"{NearbyStopCount} gần";
             }
 
-            return IsFeatured ? "Nổi bật" : "4.9";
+            return "4.9";
         }
     }
 }
