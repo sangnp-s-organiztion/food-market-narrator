@@ -41,7 +41,8 @@ Cấu hình host và endpoint trong:
 Lưu ý thiết bị thật:
 
 - Điện thoại và máy chạy API phải cùng mạng
-- API local thông thường: <http://localhost:5044>
+- Android emulator dùng host `10.0.2.2` (port 5044)
+- Thiết bị thật dùng IP LAN của máy chạy API (cấu hình `LocalApiHost` trong AppSettings, không dùng localhost)
 
 ## Chạy local
 
@@ -60,8 +61,8 @@ dotnet test test/maui-testing/FoodMarketNarrator.Maui.UnitTests/unit-test.csproj
 
 ## Tài liệu liên quan
 
-- overview-current-features.md
-- narration-geofence-trigger-flow.md
-- qr-access-session-flow.md
-- audio-cache-storage.md
-- ../testing/unit/maui-unit-test-cases.md
+- [overview-current-features.md](overview-current-features.md)
+- [narration-geofence-trigger-flow.md](narration-geofence-trigger-flow.md)
+- [qr-access-session-flow.md](qr-access-session-flow.md)
+- [audio-cache-storage.md](audio-cache-storage.md)
+- [../testing/unit/maui-unit-test-cases.md](../testing/unit/maui-unit-test-cases.md)

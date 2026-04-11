@@ -33,6 +33,7 @@ Nguyên tắc:
 - GET /Auth/me
 - GET /Auth/admin/me
 - POST /Auth/logout
+- POST /Auth/admin/logout
 
 ### Public visitor data
 
@@ -41,6 +42,8 @@ Nguyên tắc:
 - GET /Language
 - GET /Language/{languageCode}
 - GET /Restaurant/{restaurantId}/images
+- GET /Restaurant/{restaurantId}/dishes
+- GET /Restaurant/{restaurantId}/audios
 - GET /public/Restaurant/{restaurantId}/dishes
 - GET /public/Restaurant/{restaurantId}/audios
 
@@ -56,8 +59,22 @@ Nguyên tắc:
 - PATCH /Images/{imageId}/primary
 - PATCH /Restaurant/{restaurantId}/images/reorder
 - POST /Restaurant/{restaurantId}/audios
+- POST /Restaurant/{restaurantId}/translate
+- POST /Restaurant/{restaurantId}/audios/from-text
 - PATCH /Audios/{audioId}/active
 - DELETE /Audios/{audioId}
+
+### Tour management (admin)
+
+- GET /Tour
+- GET /Tour/{id}
+- POST /Tour
+- PATCH /Tour/{id}
+- POST /Tour/{id}/restaurants
+- DELETE /Tour/{id}/restaurants/{restaurantId}
+- PUT /Tour/{id}/stops/order
+- POST /Tour/upload-image
+- POST /Tour/{id}/upload-image
 
 Lưu ý Dish payload hiện tại:
 

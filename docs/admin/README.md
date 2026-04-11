@@ -8,8 +8,12 @@ Admin dashboard dùng để:
 
 - Quản lý users và role/status
 - Quản lý restaurants
+- Quản lý hành trình (tour)
 - Theo dõi analytics (kpi, heatmap, top audios, movement)
 - Xem audit logs
+- Quản lý chi phí dịch/TTS
+- Quản lý QR mở app
+- Quản lý tài khoản admin
 
 ## Stack
 
@@ -36,12 +40,14 @@ npm test
 
 ## API chính
 
-- Auth: /Auth/admin/login, /Auth/admin/me, /Auth/logout
+- Auth: /Auth/admin/login, /Auth/admin/me, /Auth/admin/logout, /Auth/admin/qr-code
 - Users: /api/users/\*
 - Restaurants: /restaurant, /restaurant/{id}, /restaurant/{id}/status
+- Tours: /Tour, /Tour/{id}, /Tour/{id}/restaurants, /Tour/{id}/stops/order
 - Admin stats: /api/admin/stats/\*
 - Analytics: /api/analytics/\*
 - Audit logs: /api/audit-logs
+- Translation billing: /api/admin/translation-billing/\*
 
 ## Lưu ý
 

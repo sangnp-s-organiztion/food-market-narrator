@@ -24,7 +24,7 @@ Khi gọi StartNarration():
 
 Mỗi LocationChanged sẽ gọi CheckAndNarrateAsync(location, force: false):
 
-1. Bỏ qua nếu đang phát audio (trừ force).
+1. Không chặn cứng khi đang phát audio; POI mới vẫn có thể được enqueue để phát tuần tự.
 2. Lấy danh sách POI.
 3. Gọi UpdateNearestPOI(lat, lng) để kiểm tra geofence transition.
 4. Nếu có POI mới (enter hoặc switch POI) HOẶC force = true:
@@ -70,6 +70,7 @@ NarrationFlowService dùng queue để xử lý tuần tự:
    - Gọi AudioService.PlaySound.
    - Lưu vào History khi bắt đầu phát thành công.
    - Chờ audio phát xong mới xử lý tiếp.
+3. Nếu đang phát POI A mà phát hiện switch sang POI B (auto trigger), hệ thống có thể cắt audio POI A sau khoảng 3 giây để chuyển sang POI B.
 
 ## 6) Checklist test nhanh
 
