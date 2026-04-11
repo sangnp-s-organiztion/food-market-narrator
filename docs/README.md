@@ -22,6 +22,7 @@ Thư mục `docs/` được tổ chức theo nhóm tài liệu để dễ tìm, 
 2. `setup/local-development.md`
 3. `testing/test-strategy.md`
 4. `api/README.md`
+5. `features/prd.md` (bao gồm requirements Tour ở nhóm Admin)
 
 ## Component docs
 
