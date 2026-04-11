@@ -9,6 +9,8 @@ public class TranslationMonthlyBillingItemResponse
     public int SuccessRequests { get; set; }
     public int FailedRequests { get; set; }
     public decimal TotalBillableUnits { get; set; }
+    public decimal TranslationBillableUnits { get; set; }
+    public decimal AudioBillableUnits { get; set; }
     public decimal TotalAmount { get; set; }
     public string Currency { get; set; } = "USD";
     public DateTime LastRecomputedAtUtc { get; set; }

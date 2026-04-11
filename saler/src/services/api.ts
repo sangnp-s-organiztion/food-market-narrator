@@ -293,7 +293,7 @@ type ApiUserProfile = {
 };
 
 type UpdateProfilePayload = {
-  username: string;
+  fullName: string;
   phone: string;
   email: string;
 };

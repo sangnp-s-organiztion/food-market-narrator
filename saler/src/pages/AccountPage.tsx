@@ -36,6 +36,7 @@ export default function AccountPage() {
   const { user, refreshMe } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
+    fullName: "",
     username: "",
     phone: "",
     email: "",
@@ -74,7 +75,7 @@ export default function AccountPage() {
   const updateProfileMutation = useMutation({
     mutationFn: () =>
       updateMyProfileApi({
-        username: profileForm.username.trim(),
+        fullName: profileForm.fullName.trim(),
         phone: profileForm.phone.trim(),
         email: profileForm.email.trim(),
       }),
@@ -129,6 +130,7 @@ export default function AccountPage() {
 
   const startEditProfile = () => {
     setProfileForm({
+      fullName: account?.full_name ?? user?.full_name ?? "",
       username: account?.username ?? user?.username ?? "",
       phone: account?.phone ?? "",
       email: account?.email ?? "",
@@ -137,11 +139,6 @@ export default function AccountPage() {
   };
 
   const handleSaveProfile = () => {
-    if (!profileForm.username.trim()) {
-      toast.error("Vui lòng nhập tên đăng nhập");
-      return;
-    }
-
     if (!PHONE_REGEX.test(profileForm.phone.trim())) {
       toast.error("Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 số)");
       return;
@@ -228,13 +225,22 @@ export default function AccountPage() {
         {!isLoading && !isError && isEditingProfile && (
           <div className="space-y-3">
             <div>
+              <Label className="text-xs">Họ và tên</Label>
+              <Input
+                className="mt-1"
+                value={profileForm.fullName}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, fullName: e.target.value })
+                }
+              />
+            </div>
+            <div>
               <Label className="text-xs">Tên đăng nhập</Label>
               <Input
                 className="mt-1"
                 value={profileForm.username}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, username: e.target.value })
-                }
+                disabled
+                readOnly
               />
             </div>
             <div>

@@ -252,6 +252,13 @@ public class TranslationService
 
             var audioUrl = $"/uploads/audios/{fileName}";
             var createdAudio = await _audioService.CreateAsync(restaurantId, languageId, audioUrl);
+            var persistedAudio = await _audioService.GetByIdAsync(createdAudio.AudioId);
+            if (persistedAudio == null)
+            {
+                throw new InvalidOperationException("Created audio was not found in SQL after insert.");
+            }
+
+            var sqlAudioId = persistedAudio.AudioId;
 
             var nowUtc = DateTime.UtcNow;
             var sourceText = string.IsNullOrWhiteSpace(request.SourceText) ? ttsText : request.SourceText.Trim();
@@ -264,7 +271,7 @@ public class TranslationService
                 JobId = requestId,
                 SellerUserId = sellerUserId,
                 RestaurantId = restaurantId,
-                AudioId = createdAudio.AudioId,
+                AudioId = sqlAudioId,
                 Provider = "edge-tts",
                 ActionType = "create_audio",
                 UnitType = "tokens",
@@ -279,7 +286,7 @@ public class TranslationService
             {
                 SellerUserId = sellerUserId,
                 RestaurantId = restaurantId,
-                AudioId = createdAudio.AudioId,
+                AudioId = sqlAudioId,
                 SourceLanguageCode = languageCode,
                 TargetLanguageCode = languageCode,
                 SourceText = sourceText,
@@ -297,7 +304,7 @@ public class TranslationService
             return new CreateAudioFromTextResponse
             {
                 RequestId = requestId,
-                AudioId = createdAudio.AudioId,
+                AudioId = sqlAudioId,
                 AudioUrl = createdAudio.AudioUrl,
                 LanguageCode = languageCode,
                 Voice = ttsResult.Voice,

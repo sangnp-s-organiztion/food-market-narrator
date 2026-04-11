@@ -322,6 +322,65 @@ public class TranslationHistoryRepository
         };
     }
 
+    public async Task<Dictionary<(int SellerUserId, string BillingMonth), decimal>> GetAudioBillableUnitsBySellerMonthAsync(
+        string? billingMonth,
+        int? sellerUserId,
+        IEnumerable<int>? sellerUserIds = null)
+    {
+        var filter = BuildAudioUsageLedgerFilter(billingMonth, sellerUserId);
+
+        var normalizedSellerIds = sellerUserIds?
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList() ?? new List<int>();
+
+        if (normalizedSellerIds.Count > 0)
+        {
+            filter = Builders<BsonDocument>.Filter.And(
+                filter,
+                Builders<BsonDocument>.Filter.In("seller_user_id", normalizedSellerIds));
+        }
+
+        var groupedDocs = await _audioUsageLedger.Aggregate()
+            .Match(filter)
+            .Group(new BsonDocument
+            {
+                {
+                    "_id", new BsonDocument
+                    {
+                        { "seller_user_id", "$seller_user_id" },
+                        { "billing_month", "$billing_month" }
+                    }
+                },
+                { "total_billable_units", new BsonDocument("$sum", "$billable_units") }
+            })
+            .ToListAsync();
+
+        var result = new Dictionary<(int SellerUserId, string BillingMonth), decimal>();
+
+        foreach (var doc in groupedDocs)
+        {
+            if (!doc.TryGetValue("_id", out var idValue) || !idValue.IsBsonDocument)
+            {
+                continue;
+            }
+
+            var idDoc = idValue.AsBsonDocument;
+            var sellerId = ReadInt32(idDoc, "seller_user_id");
+            var month = ReadString(idDoc, "billing_month");
+
+            if (sellerId <= 0 || string.IsNullOrWhiteSpace(month))
+            {
+                continue;
+            }
+
+            var totalUnits = ReadDecimal(doc, "total_billable_units");
+            result[(sellerId, month)] = totalUnits;
+        }
+
+        return result;
+    }
+
     public async Task<UsageLedgerAggregateSummary> GetUsageLedgerSummaryAsync(string? billingMonth, int? sellerUserId)
     {
         var filter = BuildUsageLedgerFilter(billingMonth, sellerUserId);

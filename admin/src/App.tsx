@@ -21,6 +21,7 @@ import TrajectoryPage from "./pages/TrajectoryPage.tsx";
 import TranslationBillingPage from "./pages/TranslationBillingPage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
 import ToursPage from "./pages/ToursPage.tsx";
+import QrCodePage from "./pages/QrCodePage.tsx";
 
 const queryClient = new QueryClient();
 const TITLE_SUFFIX = "Food Market Narrator Admin";
@@ -40,6 +41,7 @@ const getTitleByPath = (pathname: string): string => {
     return `Quản lý hành trình | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/translation-billing"))
     return `Dịch vụ | ${TITLE_SUFFIX}`;
+  if (pathname.startsWith("/qr-code")) return `Mã QR | ${TITLE_SUFFIX}`;
   if (pathname.startsWith("/account")) return `Tài khoản | ${TITLE_SUFFIX}`;
   return `Không tìm thấy trang | ${TITLE_SUFFIX}`;
 };
@@ -137,6 +139,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <TranslationBillingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/qr-code"
+        element={
+          <ProtectedRoute>
+            <QrCodePage />
           </ProtectedRoute>
         }
       />

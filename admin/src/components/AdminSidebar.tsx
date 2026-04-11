@@ -5,6 +5,7 @@ import {
   Compass,
   LayoutDashboard,
   LogOut,
+  QrCode,
   Receipt,
   Route,
   ScrollText,
@@ -22,6 +23,7 @@ const navItems = [
   { path: "/users", label: "Người dùng", icon: Users },
   { path: "/logs", label: "Lịch sử", icon: ScrollText },
   { path: "/translation-billing", label: "Dịch vụ", icon: Receipt },
+  { path: "/qr-code", label: "Mã QR", icon: QrCode },
   { path: "/account", label: "Tài khoản", icon: CircleUser },
 ];
 
