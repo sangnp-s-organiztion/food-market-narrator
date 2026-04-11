@@ -323,6 +323,12 @@ Với vai trò là quản trị viên
 Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng  
 Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
 
+**Story A5 - Quản lý hành trình (Tour)**
+
+Với vai trò là quản trị viên  
+Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng  
+Để du khách có thể khám phá theo tuyến gợi ý có cấu trúc.
+
 ## 10. Features / Functional Requirements
 
 Đây là phần đặc tả chức năng chi tiết của sản phẩm theo 3 nhóm người dùng: Visitor, Seller, Admin.
@@ -516,8 +522,8 @@ Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng
 
 Ghi chú phạm vi:
 
-- Nhóm A-01 đến A-05 là phạm vi đã có trong trạng thái hiện tại.
-- Nhóm A-06 đến A-08 là roadmap, chưa phải module hoàn chỉnh trên admin web.
+- Nhóm A-01 đến A-06 là phạm vi đã có trong trạng thái hiện tại.
+- Nhóm A-07 đến A-09 là roadmap, chưa phải module hoàn chỉnh trên admin web.
 
 **Feature A-01: Đăng nhập quản trị**
 
@@ -589,7 +595,24 @@ Ghi chú phạm vi:
 - -> lọc theo nhu cầu
 - -> đối chiếu sự kiện
 
-**Feature A-06 (Roadmap): Quản lý ngôn ngữ hệ thống**
+**Feature A-06: Quản lý hành trình (Tour Management)**
+
+- Mô tả: Admin tạo và quản lý tuyến hành trình du lịch theo nhiều điểm dừng.
+- Actor: Admin.
+- Functional requirements:
+- Xem danh sách tour và chi tiết từng tour.
+- Tạo/sửa thông tin tour (name, description, estimated duration, isActive).
+- Thêm/xóa nhà hàng trong tour.
+- Sắp xếp lại thứ tự stop trong tour.
+- Upload ảnh đại diện cho tour.
+- Flow:
+- Mở module Tours
+- -> tạo/chỉnh sửa tour
+- -> thêm hoặc xóa nhà hàng
+- -> sắp xếp thứ tự điểm dừng
+- -> lưu thay đổi
+
+**Feature A-07 (Roadmap): Quản lý ngôn ngữ hệ thống**
 
 - Mô tả: Duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
 - Actor: Admin.
@@ -603,7 +626,7 @@ Ghi chú phạm vi:
 - -> validate
 - -> lưu
 
-**Feature A-07 (Roadmap): Kiểm duyệt media và chất lượng nội dung**
+**Feature A-08 (Roadmap): Kiểm duyệt media và chất lượng nội dung**
 
 - Mô tả: Admin kiểm duyệt nội dung media để đảm bảo chất lượng trải nghiệm visitor.
 - Actor: Admin.
@@ -617,7 +640,7 @@ Ghi chú phạm vi:
   - -> duyệt hoặc từ chối
   - -> cập nhật trạng thái
 
-**Feature A-08 (Roadmap): Cấu hình chính sách bảo mật endpoint**
+**Feature A-09 (Roadmap): Cấu hình chính sách bảo mật endpoint**
 
 - Mô tả: Admin kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
 - Actor: Admin.
@@ -638,9 +661,10 @@ Ghi chú phạm vi:
 - FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
 - FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
 - FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu.
-- FR-06: Admin quản lý user/role, restaurants, analytics và logs để vận hành hệ thống.
+- FR-06: Admin quản lý user/role, restaurants, tours, analytics và logs để vận hành hệ thống.
 - FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
-- FR-08: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
+- FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và translation billing.
+- FR-09: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
 
 ## 11. Technical Requirements
 
@@ -663,11 +687,14 @@ Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển
   - GET /Restaurant/{id}
   - GET /Language
   - GET /Restaurant/{restaurantId}/images
+  - GET /Restaurant/{restaurantId}/dishes
+  - GET /Restaurant/{restaurantId}/audios
   - GET /public/Restaurant/{restaurantId}/dishes
   - GET /public/Restaurant/{restaurantId}/audios
 - Protected APIs cho Seller/Admin:
   - CRUD Restaurant, Dish, Image, Audio
   - User/Role management
+  - Tour management (GET/POST/PATCH tour, add/remove stop, reorder stops, upload image)
 - Chuẩn dữ liệu:
   - JSON UTF-8
   - HTTP status code rõ ràng (200/400/401/403/404/500)

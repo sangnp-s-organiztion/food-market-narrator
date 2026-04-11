@@ -3,6 +3,43 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-11
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Cập nhật giao diện admin và saler, đồng thời vá một số lỗi UI/logic giữa hai cổng web.
+  - Điều chỉnh flow QR ở admin theo hướng upload file QR thay vì tạo mới trực tiếp trong UI.
+  - Cập nhật logic MAUI để tính thời gian nghe audio chính xác hơn.
+  - Bổ sung schema Mongo và cập nhật file setup collection liên quan.
+  - Bổ sung `.gitignore` để chặn file build tạm.
+  - Cập nhật tài liệu sequence và dọn dẹp file draw.io không còn dùng.
+- Merged:
+  - Merge pull request #197 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #196 từ nhánh `fix/bug-before-submit`.
+
+### Nguyen Phuoc Sang (2 commits)
+
+- [1735940] Merge pull request #197 from sangnp-s-organiztion/fix/bug-giathieu
+- [db57a6a] Merge pull request #196 from sangnp-s-organiztion/fix/bug-before-submit
+
+### sangnpdev (10 commits)
+
+- [14bc53e] xóa draw.io
+- [96a0f70] sửa saler cho phép sửa full name và ko cho sửa username
+- [6d8b2cd] đổi giao diện admin, sửa qr từ tạo mới thành upload
+- [c3a31e5] thêm mongo schema và cập nhật file set up collection mongo
+- [c79e1a3] thêm gitignore chặn build temp
+- [7fb2d61] cập nhật lại giao diện
+- [1d64fec] cập nhật lại giao diện
+- [2c665c2] sửa giao diện admin
+- [5dd286a] sửa lại logic tính thời gian nghe audio ở maui
+- [06c2e7b] sửa lỗi admin và saler
+
+### giathieu0311 (1 commit)
+
+- [f938611] cap nhat sequence
+
 ## 2026-04-10
 
 ### Tóm tắt trong ngày
