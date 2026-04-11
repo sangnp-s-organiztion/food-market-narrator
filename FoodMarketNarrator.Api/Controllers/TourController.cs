@@ -77,6 +77,20 @@ public class TourController : ControllerBase
         };
     }
 
+    [HttpDelete("{id:int}/restaurants/{restaurantId}")]
+    public async Task<IActionResult> RemoveRestaurantFromTour(int id, string restaurantId)
+    {
+        var result = await _tourService.RemoveRestaurantFromTourAsync(id, restaurantId);
+
+        return result.Status switch
+        {
+            RemoveTourRestaurantStatus.Success => Ok(new { message = "Restaurant removed from tour." }),
+            RemoveTourRestaurantStatus.NotFound => NotFound(new { message = result.Message }),
+            RemoveTourRestaurantStatus.Invalid => BadRequest(new { message = result.Message }),
+            _ => BadRequest(new { message = "Unable to remove restaurant from tour." })
+        };
+    }
+
     [HttpPost]
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> CreateTour([FromForm] CreateTourRequest request)
@@ -94,13 +108,10 @@ public class TourController : ControllerBase
 
         var result = await _tourService.CreateTourAsync(
             request.Name,
-            request.ShortDescription,
             request.Description,
             request.EstimatedDurationMinutes,
             urlImage ?? request.UrlImage,
-            request.IsActive,
-            request.IsFeatured,
-            request.SortPriority);
+            request.IsActive);
 
         return result.Status switch
         {
@@ -179,11 +190,11 @@ public class TourController : ControllerBase
 
         var result = await _tourService.UpdateTourAsync(
             id,
+            request.Name,
+            request.Description,
             request.EstimatedDurationMinutes,
             urlImageToSave,
-            request.SortPriority,
-            request.IsActive,
-            request.IsFeatured);
+            request.IsActive);
 
         return result.Status switch
         {

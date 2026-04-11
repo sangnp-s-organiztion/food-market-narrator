@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, X } from "lucide-react";
+import { Eye, EyeOff, Pencil, X } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ const AccountPage = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     username: "",
+    fullName: "",
     phone: "",
     email: "",
   });
@@ -27,6 +28,9 @@ const AccountPage = () => {
     newPassword: "",
     confirmNewPassword: "",
   });
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   const userId = user?.userId ?? 0;
 
@@ -41,6 +45,7 @@ const AccountPage = () => {
     mutationFn: () =>
       userApi.updateMyProfile({
         username: profileForm.username.trim(),
+        fullName: profileForm.fullName.trim() || null,
         phone: profileForm.phone.trim(),
         email: profileForm.email.trim(),
       }),
@@ -64,7 +69,11 @@ const AccountPage = () => {
       }),
     onSuccess: () => {
       toast.success("Đổi mật khẩu thành công");
-      setPasswordForm({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
+      setPasswordForm({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Đổi mật khẩu thất bại");
@@ -74,6 +83,7 @@ const AccountPage = () => {
   const startEditProfile = () => {
     setProfileForm({
       username: data?.username ?? "",
+      fullName: data?.fullName ?? "",
       phone: data?.phone ?? "",
       email: data?.email ?? "",
     });
@@ -132,7 +142,9 @@ const AccountPage = () => {
       <div className="mx-auto grid max-w-4xl gap-6 px-8 py-6">
         <section className="stat-card p-6">
           <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 className="text-base font-semibold">Thông tin tài khoản hiện tại</h2>
+            <h2 className="text-base font-semibold">
+              Thông tin tài khoản hiện tại
+            </h2>
             {!isEditingProfile ? (
               <Button size="sm" variant="outline" onClick={startEditProfile}>
                 <Pencil className="mr-1.5 h-4 w-4" />
@@ -150,13 +162,23 @@ const AccountPage = () => {
             )}
           </div>
 
-          {isLoading && <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>}
+          {isLoading && (
+            <p className="text-sm text-muted-foreground">
+              Đang tải thông tin...
+            </p>
+          )}
           {isError && (
-            <p className="text-sm text-destructive">Không thể tải thông tin tài khoản.</p>
+            <p className="text-sm text-destructive">
+              Không thể tải thông tin tài khoản.
+            </p>
           )}
 
           {!isLoading && !isError && data && !isEditingProfile && (
             <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-muted-foreground">Họ và tên</p>
+                <p className="font-medium">{data.fullName || "-"}</p>
+              </div>
               <div>
                 <p className="text-muted-foreground">Tên đăng nhập</p>
                 <p className="font-medium">{data.username}</p>
@@ -179,11 +201,22 @@ const AccountPage = () => {
           {!isLoading && !isError && data && isEditingProfile && (
             <div className="grid gap-3">
               <div>
+                <Label className="text-xs">Họ và tên</Label>
+                <Input
+                  className="mt-1"
+                  value={profileForm.fullName}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, fullName: e.target.value })
+                  }
+                />
+              </div>
+              <div>
                 <Label className="text-xs">Tên đăng nhập</Label>
                 <Input
                   className="mt-1"
                   value={profileForm.username}
-                  onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                  disabled
+                  readOnly
                 />
               </div>
               <div>
@@ -191,7 +224,9 @@ const AccountPage = () => {
                 <Input
                   className="mt-1"
                   value={profileForm.phone}
-                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, phone: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -199,7 +234,9 @@ const AccountPage = () => {
                 <Input
                   className="mt-1"
                   value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, email: e.target.value })
+                  }
                 />
               </div>
               <Button
@@ -207,7 +244,9 @@ const AccountPage = () => {
                 onClick={handleSaveProfile}
                 disabled={updateProfileMutation.isPending}
               >
-                {updateProfileMutation.isPending ? "Đang cập nhật..." : "Lưu thông tin"}
+                {updateProfileMutation.isPending
+                  ? "Đang cập nhật..."
+                  : "Lưu thông tin"}
               </Button>
             </div>
           )}
@@ -218,42 +257,107 @@ const AccountPage = () => {
           <div className="grid gap-3">
             <div>
               <Label className="text-xs">Mật khẩu cũ</Label>
-              <Input
-                type="password"
-                className="mt-1"
-                value={passwordForm.oldPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                autoComplete="current-password"
-              />
+              <div className="relative mt-1">
+                <Input
+                  type={showOldPassword ? "text" : "password"}
+                  className="pr-11"
+                  value={passwordForm.oldPassword}
+                  onChange={(e) =>
+                    setPasswordForm({
+                      ...passwordForm,
+                      oldPassword: e.target.value,
+                    })
+                  }
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={
+                    showOldPassword ? "Ẩn mật khẩu cũ" : "Hiện mật khẩu cũ"
+                  }
+                >
+                  {showOldPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <Label className="text-xs">Mật khẩu mới</Label>
-              <Input
-                type="password"
-                className="mt-1"
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                autoComplete="new-password"
-              />
+              <div className="relative mt-1">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  className="pr-11"
+                  value={passwordForm.newPassword}
+                  onChange={(e) =>
+                    setPasswordForm({
+                      ...passwordForm,
+                      newPassword: e.target.value,
+                    })
+                  }
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={
+                    showNewPassword ? "Ẩn mật khẩu mới" : "Hiện mật khẩu mới"
+                  }
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <Label className="text-xs">Nhập lại mật khẩu mới</Label>
-              <Input
-                type="password"
-                className="mt-1"
-                value={passwordForm.confirmNewPassword}
-                onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })
-                }
-                autoComplete="new-password"
-              />
+              <div className="relative mt-1">
+                <Input
+                  type={showConfirmNewPassword ? "text" : "password"}
+                  className="pr-11"
+                  value={passwordForm.confirmNewPassword}
+                  onChange={(e) =>
+                    setPasswordForm({
+                      ...passwordForm,
+                      confirmNewPassword: e.target.value,
+                    })
+                  }
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmNewPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={
+                    showConfirmNewPassword
+                      ? "Ẩn xác nhận mật khẩu mới"
+                      : "Hiện xác nhận mật khẩu mới"
+                  }
+                >
+                  {showConfirmNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <Button
               className="mt-2 w-fit"
               onClick={handleChangePassword}
               disabled={changePasswordMutation.isPending || userId <= 0}
             >
-              {changePasswordMutation.isPending ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
+              {changePasswordMutation.isPending
+                ? "Đang cập nhật..."
+                : "Cập nhật mật khẩu"}
             </Button>
           </div>
         </section>

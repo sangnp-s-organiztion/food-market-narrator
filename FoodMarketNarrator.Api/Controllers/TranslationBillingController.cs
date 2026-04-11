@@ -21,7 +21,6 @@ public class TranslationBillingController : ControllerBase
     [HttpGet("my-usage")]
     public async Task<IActionResult> GetMyUsageLedger(
         [FromQuery] string? billingMonth = null,
-        [FromQuery] string? status = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -38,10 +37,9 @@ public class TranslationBillingController : ControllerBase
 
         try
         {
-            var result = await _translationBillingService.GetUsageLedgerAsync(
+            var result = await _translationBillingService.GetUsageLedgerBySellerUserIdAsync(
                 billingMonth,
                 currentUserId,
-                status,
                 page,
                 pageSize);
 

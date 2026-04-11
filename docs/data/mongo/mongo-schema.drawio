@@ -1,0 +1,74 @@
+<mxfile host="app.diagrams.net" modified="2026-04-11T12:00:00.000Z" agent="GPT-5.3-Codex" version="24.7.17">
+  <diagram id="mongo_schema_v1" name="Mongo Schema">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="2" value="UserSessions&#xa;_id: ObjectId&#xa;device_id: string&#xa;created_at: date&#xa;&#xa;Indexes:&#xa;- ux_user_sessions_device_id (unique)&#xa;- created_at (-1)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="320" height="190" as="geometry" />
+        </mxCell>
+
+        <mxCell id="3" value="LocationLogs&#xa;_id: ObjectId&#xa;session_id: ObjectId&#xa;location: GeoJSON Point&#xa;timestamp: date&#xa;&#xa;Indexes:&#xa;- session_id (1)&#xa;- timestamp (-1)&#xa;- location (2dsphere)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="410" y="60" width="320" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="4" value="AudioLogs&#xa;_id: ObjectId&#xa;session_id: ObjectId&#xa;restaurant_id: string&#xa;audio_id: int&#xa;timestamp: date&#xa;&#xa;Indexes:&#xa;- session_id (1)&#xa;- restaurant_id (1)&#xa;- timestamp (-1)&#xa;- restaurant_id + timestamp" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="60" width="340" height="240" as="geometry" />
+        </mxCell>
+
+        <mxCell id="5" value="TranslationJobs&#xa;_id: ObjectId&#xa;request_id: string&#xa;seller_user_id: int&#xa;restaurant_id: string&#xa;audio_id: int|null&#xa;source_language_code: string&#xa;target_language_code: string&#xa;status: string&#xa;created_at: date&#xa;&#xa;Indexes:&#xa;- ux_tj_request_id (unique)&#xa;- seller_user_id + created_at&#xa;- status + created_at&#xa;- audio_id + target_language_code + created_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="40" width="420" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="6" value="TranslationUsageLedger&#xa;_id: ObjectId&#xa;usage_event_id: string&#xa;request_id: string&#xa;job_id: string|null&#xa;seller_user_id: int&#xa;restaurant_id: string&#xa;audio_id: int|null&#xa;billable_units: decimal&#xa;total_amount: decimal&#xa;billing_month: string&#xa;status: string&#xa;created_at: date&#xa;&#xa;Indexes:&#xa;- ux_tul_usage_event_id (unique)&#xa;- request_id (1)&#xa;- seller_user_id + created_at&#xa;- seller_user_id + billing_month&#xa;- status + created_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="420" height="320" as="geometry" />
+        </mxCell>
+
+        <mxCell id="7" value="AudioUsageLedger&#xa;_id: ObjectId&#xa;usage_event_id: string&#xa;request_id: string&#xa;job_id: string|null&#xa;seller_user_id: int&#xa;restaurant_id: string&#xa;audio_id: int|null&#xa;provider: string&#xa;action_type: string&#xa;unit_type: string&#xa;billable_units: decimal&#xa;billing_month: string&#xa;created_at: date&#xa;&#xa;Indexes:&#xa;- ux_aul_usage_event_id (unique)&#xa;- request_id (1)&#xa;- seller_user_id + created_at&#xa;- seller_user_id + billing_month" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="340" width="400" height="320" as="geometry" />
+        </mxCell>
+
+        <mxCell id="8" value="AudioTranslationVersions&#xa;_id: ObjectId&#xa;seller_user_id: int&#xa;restaurant_id: string&#xa;audio_id: int&#xa;source_language_code: string&#xa;target_language_code: string&#xa;version_no: int&#xa;is_active: bool&#xa;job_id: string|null&#xa;usage_event_id: string|null&#xa;created_at: date&#xa;&#xa;Indexes:&#xa;- audio_id + target_language_code + version_no&#xa;- audio_id + target_language_code + is_active (partial unique)&#xa;- seller_user_id + created_at" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="360" width="410" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="9" value="TranslationBillingMonthly&#xa;_id: ObjectId&#xa;seller_user_id: int&#xa;billing_month: string&#xa;total_requests: int&#xa;success_requests: int&#xa;failed_requests: int&#xa;total_billable_units: decimal&#xa;total_amount: decimal&#xa;currency: string&#xa;last_recomputed_at: date&#xa;&#xa;Indexes:&#xa;- ux_tbm_seller_month (unique)&#xa;- billing_month + total_amount" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1390" y="380" width="380" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="20" value="session_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="3" target="2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="21" value="session_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="4" target="2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="22" value="request_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="6" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="23" value="request_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="7" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="24" value="job_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="8" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="25" value="usage_event_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="8" target="6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="26" value="seller_user_id + billing_month" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="9" target="6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="27" value="seller_user_id + billing_month" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;endArrow=block;endFill=1;" edge="1" parent="1" source="9" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

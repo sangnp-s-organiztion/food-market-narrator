@@ -487,6 +487,7 @@ bin/
 obj/
 *.bin/
 *.obj/
+FoodMarketNarrator.Api/build-temp/
 .vs/
 
 # Git worktrees

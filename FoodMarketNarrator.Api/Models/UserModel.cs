@@ -32,6 +32,9 @@ namespace food_market_narrator_api.Models
         [Column("email")]
         public string? Email { get; set; }
 
+        [Column("full_name")]
+        public string? FullName { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

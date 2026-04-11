@@ -197,7 +197,10 @@ const UsersPage = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={7}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     Đang tải...
                   </td>
                 </tr>
@@ -213,7 +216,10 @@ const UsersPage = () => {
 
               {!isLoading && !isError && pageUsers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={7}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     Chưa có người dùng nào.
                   </td>
                 </tr>
@@ -224,8 +230,12 @@ const UsersPage = () => {
                 pageUsers.map((u) => (
                   <tr key={u.user_id}>
                     <td className="font-medium">{u.username}</td>
-                    <td className="mono text-xs text-muted-foreground">{u.phone || "-"}</td>
-                    <td className="text-xs text-muted-foreground">{u.email || "-"}</td>
+                    <td className="mono text-xs text-muted-foreground">
+                      {u.phone || "-"}
+                    </td>
+                    <td className="text-xs text-muted-foreground">
+                      {u.email || "-"}
+                    </td>
                     <td>
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -239,11 +249,17 @@ const UsersPage = () => {
                       </span>
                     </td>
                     <td>
-                      <span className={u.is_active ? "status-active" : "status-inactive"}>
+                      <span
+                        className={
+                          u.is_active ? "status-active" : "status-inactive"
+                        }
+                      >
                         {u.is_active ? "Hoạt động" : "Ngừng hoạt động"}
                       </span>
                     </td>
-                    <td className="mono text-xs text-muted-foreground">{u.created_at}</td>
+                    <td className="mono text-xs text-muted-foreground">
+                      {u.created_at}
+                    </td>
                     <td className="flex items-center gap-1">
                       <button
                         onClick={() => setDetailUser(u)}
@@ -261,11 +277,19 @@ const UsersPage = () => {
                           })
                         }
                         className={`rounded-md p-1.5 transition-colors hover:bg-muted ${
-                          !u.is_active ? "text-destructive" : "text-muted-foreground"
+                          !u.is_active
+                            ? "text-destructive"
+                            : "text-muted-foreground"
                         }`}
-                        title={u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"}
+                        title={
+                          u.is_active ? "Khóa người dùng" : "Mở khóa người dùng"
+                        }
                       >
-                        {u.is_active ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                        {u.is_active ? (
+                          <Unlock className="h-4 w-4" />
+                        ) : (
+                          <Lock className="h-4 w-4" />
+                        )}
                       </button>
                     </td>
                   </tr>
@@ -327,7 +351,9 @@ const UsersPage = () => {
               <Input
                 type="password"
                 value={form.confirmPassword}
-                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
                 className="mt-1"
                 placeholder="Nhập lại mật khẩu"
                 autoComplete="new-password"
@@ -337,7 +363,9 @@ const UsersPage = () => {
               <Label className="text-xs">Vai trò</Label>
               <Select
                 value={form.role}
-                onValueChange={(v) => setForm({ ...form, role: v as "admin" | "saler" })}
+                onValueChange={(v) =>
+                  setForm({ ...form, role: v as "admin" | "saler" })
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -348,14 +376,21 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleCreate} className="mt-2" disabled={createMutation.isPending}>
+            <Button
+              onClick={handleCreate}
+              className="mt-2"
+              disabled={createMutation.isPending}
+            >
               {createMutation.isPending ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!detailUser} onOpenChange={(open) => !open && setDetailUser(null)}>
+      <Dialog
+        open={!!detailUser}
+        onOpenChange={(open) => !open && setDetailUser(null)}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Chi tiết người dùng</DialogTitle>
@@ -365,12 +400,22 @@ const UsersPage = () => {
             <div className="space-y-4">
               <div className="grid gap-3 rounded-md border p-4 sm:grid-cols-2">
                 <div>
+                  <p className="text-xs text-muted-foreground">Họ và tên</p>
+                  <p className="mt-1 font-medium">
+                    {detailUser.fullName || "-"}
+                  </p>
+                </div>
+                <div>
                   <p className="text-xs text-muted-foreground">Tên đăng nhập</p>
                   <p className="mt-1 font-medium">{detailUser.username}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Vai trò</p>
-                  <p className="mt-1">{detailUser.role === "admin" ? "Quản trị viên" : "Người bán"}</p>
+                  <p className="mt-1">
+                    {detailUser.role === "admin"
+                      ? "Quản trị viên"
+                      : "Người bán"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Số điện thoại</p>
@@ -386,7 +431,9 @@ const UsersPage = () => {
                 <h3 className="text-sm font-semibold">Nhà hàng đang quản lý</h3>
 
                 {isRestaurantsLoading && (
-                  <p className="mt-3 text-sm text-muted-foreground">Đang tải danh sách nhà hàng...</p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Đang tải danh sách nhà hàng...
+                  </p>
                 )}
 
                 {isRestaurantsError && (
@@ -395,38 +442,52 @@ const UsersPage = () => {
                   </p>
                 )}
 
-                {!isRestaurantsLoading && !isRestaurantsError && detailUserRestaurants.length === 0 && (
-                  <p className="mt-3 text-sm text-muted-foreground">Người dùng này chưa quản lý nhà hàng nào.</p>
-                )}
+                {!isRestaurantsLoading &&
+                  !isRestaurantsError &&
+                  detailUserRestaurants.length === 0 && (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      Người dùng này chưa quản lý nhà hàng nào.
+                    </p>
+                  )}
 
-                {!isRestaurantsLoading && !isRestaurantsError && detailUserRestaurants.length > 0 && (
-                  <div className="mt-3 overflow-x-auto">
-                    <table className="data-table min-w-[560px]">
-                      <thead>
-                        <tr>
-                          <th className="w-48">Mã nhà hàng</th>
-                          <th>Tên nhà hàng</th>
-                          <th className="w-28">Trạng thái</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {detailUserRestaurants.map((restaurant) => (
-                          <tr key={restaurant.restaurantId}>
-                            <td className="mono text-xs">{restaurant.restaurantId}</td>
-                            <td>{restaurant.name}</td>
-                            <td>
-                              <span
-                                className={restaurant.isActive ? "status-active" : "status-inactive"}
-                              >
-                                {restaurant.isActive ? "Hoạt động" : "Ngừng hoạt động"}
-                              </span>
-                            </td>
+                {!isRestaurantsLoading &&
+                  !isRestaurantsError &&
+                  detailUserRestaurants.length > 0 && (
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="data-table min-w-[560px]">
+                        <thead>
+                          <tr>
+                            <th className="w-48">Mã nhà hàng</th>
+                            <th>Tên nhà hàng</th>
+                            <th className="w-28">Trạng thái</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {detailUserRestaurants.map((restaurant) => (
+                            <tr key={restaurant.restaurantId}>
+                              <td className="mono text-xs">
+                                {restaurant.restaurantId}
+                              </td>
+                              <td>{restaurant.name}</td>
+                              <td>
+                                <span
+                                  className={
+                                    restaurant.isActive
+                                      ? "status-active"
+                                      : "status-inactive"
+                                  }
+                                >
+                                  {restaurant.isActive
+                                    ? "Hoạt động"
+                                    : "Ngừng hoạt động"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
               </div>
             </div>
           )}

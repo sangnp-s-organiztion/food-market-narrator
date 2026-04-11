@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMyAccountApi, updateMyPasswordApi, updateMyProfileApi } from "@/services/api";
+import {
+  getMyAccountApi,
+  updateMyPasswordApi,
+  updateMyProfileApi,
+} from "@/services/api";
 
 const PHONE_REGEX = /^0\d{9,10}$/;
 const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -32,6 +36,7 @@ export default function AccountPage() {
   const { user, refreshMe } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
+    fullName: "",
     username: "",
     phone: "",
     email: "",
@@ -54,7 +59,8 @@ export default function AccountPage() {
   });
 
   const changePasswordMutation = useMutation({
-    mutationFn: () => updateMyPasswordApi(userId, oldPassword.trim(), newPassword.trim()),
+    mutationFn: () =>
+      updateMyPasswordApi(userId, oldPassword.trim(), newPassword.trim()),
     onSuccess: () => {
       toast.success("Đổi mật khẩu thành công");
       setOldPassword("");
@@ -69,7 +75,7 @@ export default function AccountPage() {
   const updateProfileMutation = useMutation({
     mutationFn: () =>
       updateMyProfileApi({
-        username: profileForm.username.trim(),
+        fullName: profileForm.fullName.trim(),
         phone: profileForm.phone.trim(),
         email: profileForm.email.trim(),
       }),
@@ -80,7 +86,9 @@ export default function AccountPage() {
       setIsEditingProfile(false);
     },
     onError: (error) => {
-      toast.error(parseErrorMessage(error, "Không thể cập nhật thông tin tài khoản"));
+      toast.error(
+        parseErrorMessage(error, "Không thể cập nhật thông tin tài khoản"),
+      );
     },
   });
 
@@ -122,6 +130,7 @@ export default function AccountPage() {
 
   const startEditProfile = () => {
     setProfileForm({
+      fullName: account?.full_name ?? user?.full_name ?? "",
       username: account?.username ?? user?.username ?? "",
       phone: account?.phone ?? "",
       email: account?.email ?? "",
@@ -130,11 +139,6 @@ export default function AccountPage() {
   };
 
   const handleSaveProfile = () => {
-    if (!profileForm.username.trim()) {
-      toast.error("Vui lòng nhập tên đăng nhập");
-      return;
-    }
-
     if (!PHONE_REGEX.test(profileForm.phone.trim())) {
       toast.error("Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 số)");
       return;
@@ -152,7 +156,9 @@ export default function AccountPage() {
     <div className="mx-auto max-w-3xl animate-fade-in space-y-6">
       <div className="page-header">
         <h1 className="page-title">Tài khoản</h1>
-        <p className="page-description">Xem thông tin tài khoản và đổi mật khẩu</p>
+        <p className="page-description">
+          Xem thông tin tài khoản và đổi mật khẩu
+        </p>
       </div>
 
       <div className="form-section space-y-4">
@@ -166,24 +172,40 @@ export default function AccountPage() {
               Chỉnh sửa
             </Button>
           ) : (
-            <Button size="sm" variant="ghost" onClick={() => setIsEditingProfile(false)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsEditingProfile(false)}
+            >
               <X className="mr-1.5 h-4 w-4" />
               Hủy
             </Button>
           )}
         </div>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>}
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>
+        )}
 
         {isError && (
-          <p className="text-sm text-destructive">Không thể tải thông tin tài khoản.</p>
+          <p className="text-sm text-destructive">
+            Không thể tải thông tin tài khoản.
+          </p>
         )}
 
         {!isLoading && !isError && !isEditingProfile && (
           <div className="grid gap-4 text-sm md:grid-cols-2">
             <div>
+              <p className="text-muted-foreground">Họ và tên</p>
+              <p className="font-medium">
+                {account?.full_name || user?.full_name || "-"}
+              </p>
+            </div>
+            <div>
               <p className="text-muted-foreground">Tên đăng nhập</p>
-              <p className="font-medium">{account?.username ?? user?.username ?? "-"}</p>
+              <p className="font-medium">
+                {account?.username ?? user?.username ?? "-"}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground">Vai trò</p>
@@ -203,13 +225,22 @@ export default function AccountPage() {
         {!isLoading && !isError && isEditingProfile && (
           <div className="space-y-3">
             <div>
+              <Label className="text-xs">Họ và tên</Label>
+              <Input
+                className="mt-1"
+                value={profileForm.fullName}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, fullName: e.target.value })
+                }
+              />
+            </div>
+            <div>
               <Label className="text-xs">Tên đăng nhập</Label>
               <Input
                 className="mt-1"
                 value={profileForm.username}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, username: e.target.value })
-                }
+                disabled
+                readOnly
               />
             </div>
             <div>
@@ -217,7 +248,9 @@ export default function AccountPage() {
               <Input
                 className="mt-1"
                 value={profileForm.phone}
-                onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, phone: e.target.value })
+                }
               />
             </div>
             <div>
@@ -225,11 +258,18 @@ export default function AccountPage() {
               <Input
                 className="mt-1"
                 value={profileForm.email}
-                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, email: e.target.value })
+                }
               />
             </div>
-            <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
-              {updateProfileMutation.isPending ? "Đang cập nhật..." : "Lưu thông tin"}
+            <Button
+              onClick={handleSaveProfile}
+              disabled={updateProfileMutation.isPending}
+            >
+              {updateProfileMutation.isPending
+                ? "Đang cập nhật..."
+                : "Lưu thông tin"}
             </Button>
           </div>
         )}
@@ -278,7 +318,9 @@ export default function AccountPage() {
             onClick={handleChangePassword}
             disabled={changePasswordMutation.isPending || userId <= 0}
           >
-            {changePasswordMutation.isPending ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
+            {changePasswordMutation.isPending
+              ? "Đang cập nhật..."
+              : "Cập nhật mật khẩu"}
           </Button>
         </div>
       </div>
