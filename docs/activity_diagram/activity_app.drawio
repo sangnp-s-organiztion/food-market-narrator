@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" agent="Copilot" pages="5">
+  <diagram id="app-startup" name="Activity - Khởi động và dịch vụ nền">
+    <mxGraphModel dx="1400" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+        <mxCell id="2" value="Khối 1: Startup" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="20" width="700" height="760" as="geometry" /></mxCell>
+        <mxCell id="3" value="Khối 2: Tracking và sync log" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="810" width="700" height="960" as="geometry" /></mxCell>
+
+        <mxCell id="10" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="60" width="90" height="90" as="geometry" /></mxCell>
+        <mxCell id="11" value="Mở app" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="175" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="12" value="CreateWindow(AppShell)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="255" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="13" value="Xử lý deep link đầu vào (nếu có)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="430" y="335" width="340" height="60" as="geometry" /></mxCell>
+        <mxCell id="14" value="Warm-up language + tour + POI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="450" y="415" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="15" value="Bootstrap audio library" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="495" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="16" value="Online?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="520" y="575" width="160" height="95" as="geometry" /></mxCell>
+        <mxCell id="17" value="Prefetch audio active / cập nhật mới" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="740" y="593" width="240" height="60" as="geometry" /></mxCell>
+
+        <mxCell id="18" value="StartTrackingAsync" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="900" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="19" value="Xin quyền location + notification" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="440" y="980" width="320" height="60" as="geometry" /></mxCell>
+        <mxCell id="20" value="Được cấp quyền?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1060" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="21" value="Start foreground service + loop GPS" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="410" y="1180" width="380" height="60" as="geometry" /></mxCell>
+        <mxCell id="22" value="Start location log sync\n(open session + batch logs + retry)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="390" y="1260" width="420" height="80" as="geometry" /></mxCell>
+        <mxCell id="23" value="App sẵn sàng" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="1360" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="24" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="1460" width="90" height="90" as="geometry" /></mxCell>
+
+        <mxCell id="100" edge="1" parent="1" source="10" target="11" style="endArrow=block;html=1;" /><mxCell id="101" edge="1" parent="1" source="11" target="12" style="endArrow=block;html=1;" />
+        <mxCell id="102" edge="1" parent="1" source="12" target="13" style="endArrow=block;html=1;" /><mxCell id="103" edge="1" parent="1" source="13" target="14" style="endArrow=block;html=1;" />
+        <mxCell id="104" edge="1" parent="1" source="14" target="15" style="endArrow=block;html=1;" /><mxCell id="105" edge="1" parent="1" source="15" target="16" style="endArrow=block;html=1;" />
+        <mxCell id="106" edge="1" parent="1" source="16" target="17" value="Có" style="endArrow=block;html=1;" /><mxCell id="107" edge="1" parent="1" source="16" target="18" value="Không" style="endArrow=block;html=1;" />
+        <mxCell id="108" edge="1" parent="1" source="17" target="18" style="endArrow=block;html=1;" /><mxCell id="109" edge="1" parent="1" source="18" target="19" style="endArrow=block;html=1;" />
+        <mxCell id="110" edge="1" parent="1" source="19" target="20" style="endArrow=block;html=1;" /><mxCell id="111" edge="1" parent="1" source="20" target="21" value="Có" style="endArrow=block;html=1;" />
+        <mxCell id="112" edge="1" parent="1" source="20" target="24" value="Không" style="endArrow=block;html=1;" /><mxCell id="113" edge="1" parent="1" source="21" target="22" style="endArrow=block;html=1;" />
+        <mxCell id="114" edge="1" parent="1" source="22" target="23" style="endArrow=block;html=1;" /><mxCell id="115" edge="1" parent="1" source="23" target="24" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="app-narration" name="Activity - Narration và geofence">
+    <mxGraphModel dx="1400" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+        <mxCell id="2" value="Khối 1: Bật/tắt narration" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="20" width="700" height="680" as="geometry" /></mxCell>
+        <mxCell id="3" value="Khối 2: Trigger geofence và playback" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="730" width="700" height="1180" as="geometry" /></mxCell>
+
+        <mxCell id="10" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="55" width="90" height="90" as="geometry" /></mxCell>
+        <mxCell id="11" value="User bấm nút thuyết minh" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="450" y="170" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="12" value="Đang narrating?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="250" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="13" value="StartNarration\n(reset state + subscribe location)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="390" y="370" width="420" height="70" as="geometry" /></mxCell>
+        <mxCell id="14" value="StopNarration\n(unsubscribe + clear queue + stop audio)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="370" y="460" width="460" height="70" as="geometry" /></mxCell>
+
+        <mxCell id="15" value="Nhận LocationChanged" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="810" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="16" value="Debounce + UpdateNearestPOI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="440" y="890" width="320" height="60" as="geometry" /></mxCell>
+        <mxCell id="17" value="Có enter/exit/switch POI?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="970" width="200" height="95" as="geometry" /></mxCell>
+        <mxCell id="18" value="Check distance + cooldown + played list" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="410" y="1090" width="380" height="60" as="geometry" /></mxCell>
+        <mxCell id="19" value="Lấy ngôn ngữ hiện tại + resolve audio" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="410" y="1170" width="380" height="60" as="geometry" /></mxCell>
+        <mxCell id="20" value="Audio có sẵn cache?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1250" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="21" value="Tải audio từ network + lưu cache" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="740" y="1268" width="240" height="60" as="geometry" /></mxCell>
+        <mxCell id="22" value="Play audio + ghi audio logs" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="430" y="1360" width="340" height="60" as="geometry" /></mxCell>
+        <mxCell id="23" value="Tiếp tục narration?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1440" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="24" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="1550" width="90" height="90" as="geometry" /></mxCell>
+
+        <mxCell id="100" edge="1" parent="1" source="10" target="11" style="endArrow=block;html=1;" /><mxCell id="101" edge="1" parent="1" source="11" target="12" style="endArrow=block;html=1;" />
+        <mxCell id="102" edge="1" parent="1" source="12" target="13" value="Không" style="endArrow=block;html=1;" /><mxCell id="103" edge="1" parent="1" source="12" target="14" value="Có" style="endArrow=block;html=1;" />
+        <mxCell id="104" edge="1" parent="1" source="13" target="15" style="endArrow=block;html=1;" /><mxCell id="105" edge="1" parent="1" source="14" target="24" style="endArrow=block;html=1;" />
+        <mxCell id="106" edge="1" parent="1" source="15" target="16" style="endArrow=block;html=1;" /><mxCell id="107" edge="1" parent="1" source="16" target="17" style="endArrow=block;html=1;" />
+        <mxCell id="108" edge="1" parent="1" source="17" target="18" value="Có" style="endArrow=block;html=1;" /><mxCell id="109" edge="1" parent="1" source="17" target="15" value="Không" style="endArrow=block;html=1;" />
+        <mxCell id="110" edge="1" parent="1" source="18" target="19" style="endArrow=block;html=1;" /><mxCell id="111" edge="1" parent="1" source="19" target="20" style="endArrow=block;html=1;" />
+        <mxCell id="112" edge="1" parent="1" source="20" target="21" value="Không" style="endArrow=block;html=1;" /><mxCell id="113" edge="1" parent="1" source="20" target="22" value="Có" style="endArrow=block;html=1;" />
+        <mxCell id="114" edge="1" parent="1" source="21" target="22" style="endArrow=block;html=1;" /><mxCell id="115" edge="1" parent="1" source="22" target="23" style="endArrow=block;html=1;" />
+        <mxCell id="116" edge="1" parent="1" source="23" target="15" value="Có" style="endArrow=block;html=1;" /><mxCell id="117" edge="1" parent="1" source="23" target="24" value="Không" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="app-main-map-detail" name="Activity - Main, Map và POI detail">
+    <mxGraphModel dx="1400" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="2100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+        <mxCell id="2" value="Khối 1: MainPage và MapPage" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="20" width="700" height="920" as="geometry" /></mxCell>
+        <mxCell id="3" value="Khối 2: POI detail" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="970" width="700" height="880" as="geometry" /></mxCell>
+
+        <mxCell id="10" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="55" width="90" height="90" as="geometry" /></mxCell>
+        <mxCell id="11" value="Mở tab MainPage" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="170" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="12" value="Load map + danh sách POI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="250" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="13" value="Filter POI (All/Nearby/Favorite/Open)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="420" y="330" width="360" height="60" as="geometry" /></mxCell>
+        <mxCell id="14" value="Mở tab MapPage" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="410" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="15" value="Search/lọc marker + scope theo tour" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="420" y="490" width="360" height="60" as="geometry" /></mxCell>
+        <mxCell id="16" value="Chọn POI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="570" width="200" height="60" as="geometry" /></mxCell>
+
+        <mxCell id="17" value="Mở POIDetail" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="1030" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="18" value="Tải POI + dishes" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="1110" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="19" value="Chọn thao tác chi tiết" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1190" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="20" value="Play/Pause audio thủ công" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="1330" width="220" height="60" as="geometry" /></mxCell>
+        <mxCell id="21" value="Add/Remove favorite" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1330" width="220" height="60" as="geometry" /></mxCell>
+        <mxCell id="22" value="Mở app bản đồ chỉ đường" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="730" y="1330" width="220" height="60" as="geometry" /></mxCell>
+        <mxCell id="23" value="Tiếp tục duyệt POI?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1430" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="24" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="1540" width="90" height="90" as="geometry" /></mxCell>
+
+        <mxCell id="100" edge="1" parent="1" source="10" target="11" style="endArrow=block;html=1;" /><mxCell id="101" edge="1" parent="1" source="11" target="12" style="endArrow=block;html=1;" /><mxCell id="102" edge="1" parent="1" source="12" target="13" style="endArrow=block;html=1;" />
+        <mxCell id="103" edge="1" parent="1" source="13" target="14" style="endArrow=block;html=1;" /><mxCell id="104" edge="1" parent="1" source="14" target="15" style="endArrow=block;html=1;" />
+        <mxCell id="105" edge="1" parent="1" source="15" target="16" style="endArrow=block;html=1;" /><mxCell id="106" edge="1" parent="1" source="16" target="17" style="endArrow=block;html=1;" />
+        <mxCell id="107" edge="1" parent="1" source="17" target="18" style="endArrow=block;html=1;" /><mxCell id="108" edge="1" parent="1" source="18" target="19" style="endArrow=block;html=1;" />
+        <mxCell id="109" edge="1" parent="1" source="19" target="20" value="Audio" style="endArrow=block;html=1;" /><mxCell id="110" edge="1" parent="1" source="19" target="21" value="Favorite" style="endArrow=block;html=1;" /><mxCell id="111" edge="1" parent="1" source="19" target="22" value="Đường đi" style="endArrow=block;html=1;" />
+        <mxCell id="112" edge="1" parent="1" source="20" target="23" style="endArrow=block;html=1;" /><mxCell id="113" edge="1" parent="1" source="21" target="23" style="endArrow=block;html=1;" /><mxCell id="114" edge="1" parent="1" source="22" target="23" style="endArrow=block;html=1;" />
+        <mxCell id="115" edge="1" parent="1" source="23" target="16" value="Có" style="endArrow=block;html=1;" /><mxCell id="116" edge="1" parent="1" source="23" target="24" value="Không" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="app-tour-history" name="Activity - Tour, favorites và history">
+    <mxGraphModel dx="1400" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+        <mxCell id="2" value="Khối 1: Tour" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="20" width="700" height="760" as="geometry" /></mxCell>
+        <mxCell id="3" value="Khối 2: Favorites và History" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="810" width="700" height="860" as="geometry" /></mxCell>
+
+        <mxCell id="10" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="55" width="90" height="90" as="geometry" /></mxCell>
+        <mxCell id="11" value="Mở tab Tour" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="170" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="12" value="GetToursAsync (cache + refresh)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="450" y="250" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="13" value="Bắt đầu tour?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="330" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="14" value="Navigate MapPage với tourPoiIds" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="300" y="470" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="15" value="Xem TourDetail" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="650" y="470" width="180" height="60" as="geometry" /></mxCell>
+
+        <mxCell id="16" value="Mở tab Favorite" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="870" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="17" value="Load favorites + map POI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="950" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="18" value="Mở tab History" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="1030" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="19" value="Load history + map POI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="1110" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="20" value="Tiếp tục duyệt tab?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1190" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="21" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="1300" width="90" height="90" as="geometry" /></mxCell>
+
+        <mxCell id="100" edge="1" parent="1" source="10" target="11" style="endArrow=block;html=1;" /><mxCell id="101" edge="1" parent="1" source="11" target="12" style="endArrow=block;html=1;" /><mxCell id="102" edge="1" parent="1" source="12" target="13" style="endArrow=block;html=1;" />
+        <mxCell id="103" edge="1" parent="1" source="13" target="14" value="Có" style="endArrow=block;html=1;" /><mxCell id="104" edge="1" parent="1" source="13" target="15" value="Không" style="endArrow=block;html=1;" />
+        <mxCell id="105" edge="1" parent="1" source="14" target="16" style="endArrow=block;html=1;" /><mxCell id="106" edge="1" parent="1" source="15" target="16" style="endArrow=block;html=1;" />
+        <mxCell id="107" edge="1" parent="1" source="16" target="17" style="endArrow=block;html=1;" /><mxCell id="108" edge="1" parent="1" source="17" target="18" style="endArrow=block;html=1;" />
+        <mxCell id="109" edge="1" parent="1" source="18" target="19" style="endArrow=block;html=1;" /><mxCell id="110" edge="1" parent="1" source="19" target="20" style="endArrow=block;html=1;" />
+        <mxCell id="111" edge="1" parent="1" source="20" target="16" value="Có" style="endArrow=block;html=1;" /><mxCell id="112" edge="1" parent="1" source="20" target="21" value="Không" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="app-settings-deeplink" name="Activity - Settings và deep link QR">
+    <mxGraphModel dx="1400" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" /><mxCell id="1" parent="0" />
+        <mxCell id="2" value="Khối 1: Settings" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="20" width="700" height="980" as="geometry" /></mxCell>
+        <mxCell id="3" value="Khối 2: Deep link QR" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="250" y="1030" width="700" height="760" as="geometry" /></mxCell>
+
+        <mxCell id="10" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="55" width="90" height="90" as="geometry" /></mxCell>
+        <mxCell id="11" value="Mở tab Settings" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="170" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="12" value="Tải languages + thống kê cache" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="450" y="250" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="13" value="Chọn thao tác cài đặt" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="330" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="14" value="Đổi ngôn ngữ" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="470" width="180" height="60" as="geometry" /></mxCell>
+        <mxCell id="15" value="Xin quyền vị trí nền" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="470" width="180" height="60" as="geometry" /></mxCell>
+        <mxCell id="16" value="Xóa cache / dữ liệu cục bộ" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="730" y="470" width="220" height="60" as="geometry" /></mxCell>
+        <mxCell id="17" value="Xóa history/favorite" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="550" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="18" value="Tiếp tục chỉnh settings?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="640" width="180" height="95" as="geometry" /></mxCell>
+
+        <mxCell id="19" value="Nhận intent deep link" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="470" y="1110" width="260" height="60" as="geometry" /></mxCell>
+        <mxCell id="20" value="Validate scheme/host" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="490" y="1190" width="220" height="60" as="geometry" /></mxCell>
+        <mxCell id="21" value="Deep link hợp lệ?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="510" y="1270" width="180" height="95" as="geometry" /></mxCell>
+        <mxCell id="22" value="Apply payload qua QrAccessService" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="410" y="1390" width="380" height="60" as="geometry" /></mxCell>
+        <mxCell id="23" value="Điều hướng/cập nhật state" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="450" y="1470" width="300" height="60" as="geometry" /></mxCell>
+        <mxCell id="24" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1"><mxGeometry x="555" y="1570" width="90" height="90" as="geometry" /></mxCell>
+
+        <mxCell id="100" edge="1" parent="1" source="10" target="11" style="endArrow=block;html=1;" /><mxCell id="101" edge="1" parent="1" source="11" target="12" style="endArrow=block;html=1;" />
+        <mxCell id="102" edge="1" parent="1" source="12" target="13" style="endArrow=block;html=1;" /><mxCell id="103" edge="1" parent="1" source="13" target="14" value="Ngôn ngữ" style="endArrow=block;html=1;" />
+        <mxCell id="104" edge="1" parent="1" source="13" target="15" value="Quyền" style="endArrow=block;html=1;" /><mxCell id="105" edge="1" parent="1" source="13" target="16" value="Cache" style="endArrow=block;html=1;" />
+        <mxCell id="106" edge="1" parent="1" source="14" target="17" style="endArrow=block;html=1;" /><mxCell id="107" edge="1" parent="1" source="15" target="17" style="endArrow=block;html=1;" /><mxCell id="108" edge="1" parent="1" source="16" target="17" style="endArrow=block;html=1;" />
+        <mxCell id="109" edge="1" parent="1" source="17" target="18" style="endArrow=block;html=1;" /><mxCell id="110" edge="1" parent="1" source="18" target="13" value="Có" style="endArrow=block;html=1;" />
+        <mxCell id="111" edge="1" parent="1" source="18" target="19" value="Không" style="endArrow=block;html=1;" /><mxCell id="112" edge="1" parent="1" source="19" target="20" style="endArrow=block;html=1;" />
+        <mxCell id="113" edge="1" parent="1" source="20" target="21" style="endArrow=block;html=1;" /><mxCell id="114" edge="1" parent="1" source="21" target="22" value="Có" style="endArrow=block;html=1;" />
+        <mxCell id="115" edge="1" parent="1" source="21" target="24" value="Không" style="endArrow=block;html=1;" /><mxCell id="116" edge="1" parent="1" source="22" target="23" style="endArrow=block;html=1;" />
+        <mxCell id="117" edge="1" parent="1" source="23" target="24" style="endArrow=block;html=1;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
