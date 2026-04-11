@@ -9,6 +9,92 @@ Tài liệu mô tả flow thực tế của trang Admin trong thư mục `admin/
 - Route `/trajectory` hoạt động và hiển thị trên sidebar.
 - Trang trajectory đang dùng `sessionLimit = 100` cố định trong UI (không có control đổi 20/50/100/200/all).
 
+## Tóm tắt chức năng theo sequence
+
+1.Kiểm tra phiên đăng nhập
+Kiểm tra cookie phiên admin qua GET /Auth/admin/me để quyết định vào route bảo vệ hay chuyển về /login.
+
+2.Đăng nhập admin
+Xác thực thông tin đăng nhập với POST /Auth/admin/login sau bước validate form, thành công thì vào dashboard.
+
+3.Đăng xuất
+Gọi logout theo best-effort, luôn xóa state local và đưa người dùng về /login.
+
+4.Điều hướng và bảo vệ route
+Sidebar điều hướng qua React Router, ProtectedRoute chặn truy cập khi chưa đăng nhập hoặc sai role admin.
+
+5.Xem dashboard tổng quan
+Tải song song các KPI thực thể, KPI analytics và dữ liệu map để hiển thị tổng quan hệ thống.
+
+6.Đổi bộ lọc heatmap trên dashboard
+Cho phép đổi mốc thời gian heatmap và gọi lại API để cập nhật bản đồ nhiệt theo filter mới.
+
+7.Xem tuyến di chuyển người dùng
+Mở trang trajectory và tải dữ liệu đường đi theo sessionLimit cố định 100 để render lên bản đồ.
+
+8.Xem danh sách và tìm kiếm nhà hàng
+Tải danh sách nhà hàng cùng người dùng, lọc seller active cho form tạo và tìm kiếm nhà hàng ngay trên client.
+
+9.Xem chi tiết nhà hàng
+Mở dialog chi tiết bằng dữ liệu GET /restaurant/{id}, ưu tiên ảnh primary khi hiển thị.
+
+10.Tạo nhà hàng mới
+Validate form tạo nhà hàng, gọi POST /restaurant và cập nhật lại danh sách khi tạo thành công.
+
+10a.Tự điền tọa độ từ link Google Maps khi tạo nhà hàng
+Ưu tiên parse tọa độ ở client, nếu không được thì gọi API resolve để tự điền vĩ độ/kinh độ.
+
+11.Khóa hoặc mở khóa nhà hàng
+Yêu cầu xác nhận trước khi đổi trạng thái hoạt động nhà hàng qua PATCH /restaurant/{id}/status.
+
+12.Xem danh sách người dùng
+Tải toàn bộ danh sách người dùng và hiển thị bảng quản trị, có xử lý lỗi tải dữ liệu.
+
+13.Tạo người dùng mới
+Validate thông tin tạo user rồi gọi POST /api/users, thành công thì refresh danh sách người dùng.
+
+14.Khóa hoặc mở khóa người dùng
+Đổi trạng thái active của user qua API sau khi admin xác nhận thao tác.
+
+14a.Xem chi tiết người dùng và nhà hàng đang quản lý
+Hiển thị hồ sơ user và danh sách nhà hàng họ quản lý từ dữ liệu đã load sẵn.
+
+15.Xem nhật ký hệ thống và nhật ký nghe audio
+Hiển thị đồng thời hai bảng audit logs và audio activity để theo dõi vận hành.
+
+16.Tự động làm mới nhật ký
+Tự refresh dữ liệu hai bảng nhật ký mỗi 30 giây theo trang hiện tại.
+
+17.Phân trang nhật ký
+Hỗ trợ phân trang độc lập cho bảng audit và bảng audio activity.
+
+18.Xem danh sách tour và chi tiết tour
+Tải danh sách tour, dữ liệu nhà hàng và chi tiết từng tour để chuẩn bị chỉnh sửa.
+
+18a.Tạo tour mới
+Tạo tour mới với validate dữ liệu đầu vào và upload ảnh tour nếu có file ảnh.
+
+19.Lưu cập nhật tour (thứ tự stop + metadata)
+Lưu thay đổi thứ tự điểm dừng và metadata tour theo từng API tương ứng sau khi validate.
+
+20.Thêm nhà hàng vào tour
+Thêm restaurant vào tour khi dữ liệu hợp lệ và không có unsaved changes.
+
+20a.Khóa hoặc mở khóa tour
+Cho phép kích hoạt/ngưng hoạt động tour qua PATCH /Tour/{id} sau bước xác nhận.
+
+21.Xem và cập nhật thông tin tài khoản
+Xem profile admin, chỉnh sửa thông tin cá nhân và refresh trạng thái đăng nhập sau khi lưu.
+
+22.Đổi mật khẩu tài khoản
+Đổi mật khẩu với validate bắt buộc/độ dài/xác nhận khớp và reset form khi thành công.
+
+23.Xem chi phí dịch token
+Tải dữ liệu tổng hợp và chi tiết usage để hiển thị KPI cùng hai bảng chi phí dịch token.
+
+24.Lọc và phân trang chi phí dịch token
+Cho phép lọc theo tháng/seller, reset trang phù hợp và phân trang độc lập cho bảng monthly và usage.
+
 ## 1. Kiểm tra phiên đăng nhập
 
 ```mermaid

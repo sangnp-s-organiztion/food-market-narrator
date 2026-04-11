@@ -10,6 +10,8 @@ Tài liệu mô tả flow thực tế của ứng dụng mobile trong thư mục
 - Deep link hiện nhận scheme foodmarketnarrator://open, validate hợp lệ rồi apply qua QrAccessService.
 - Dữ liệu có cơ chế offline cache cho POI, language, dishes, tours, images, audio.
 
+## Tóm tắt chức năng theo sequence
+
 1.Khởi Động App
 Khởi tạo AppShell và giao diện tab, xử lý deep link đầu vào (nếu có), đồng thời kích hoạt các dịch vụ nền quan trọng gồm warm-up dữ liệu, khởi tạo audio, đồng bộ location log và bắt đầu tracking GPS.
 
