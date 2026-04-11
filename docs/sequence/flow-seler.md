@@ -11,6 +11,65 @@ Tài liệu mô tả flow thực tế của trang Saler trong thư mục `saler/
 - Trang account là ngoại lệ: có thể truy cập dù chưa chọn nhà hàng; các trang dashboard còn lại yêu cầu đã chọn nhà hàng.
 - `selectedRestaurant` hiện lưu trong state context (không persist localStorage), nên khi reload cần chọn lại nhà hàng.
 
+## Tóm tắt chức năng theo sequence
+
+1.Kiểm tra phiên đăng nhập
+Xác thực phiên bằng cookie qua GET /Auth/me và kiểm tra role saler; nếu không hợp lệ thì logout best-effort rồi chuyển về trang login.
+
+2.Đăng nhập saler
+Gửi thông tin đăng nhập tới POST /Auth/login, chỉ cho vào flow saler khi role hợp lệ, ngược lại hiển thị lỗi và giữ ở trang đăng nhập.
+
+3.Quên mật khẩu bằng OTP
+Hỗ trợ reset mật khẩu qua 3 bước: gửi OTP, xác minh OTP, đặt mật khẩu mới; có xử lý trường hợp OTP sai hoặc hết hạn.
+
+4.Đăng xuất
+Thực hiện logout phía backend (best-effort), xóa auth state phía client và điều hướng về /login.
+
+5.Điều hướng và bảo vệ route
+Áp dụng guard cho route: chưa đăng nhập thì về /login, đã đăng nhập nhưng chưa chọn nhà hàng thì về /select-restaurant (trừ trang account).
+
+6.Chọn nhà hàng để quản lý
+Tải danh sách nhà hàng, lọc theo saler hiện tại và ghi selectedRestaurant vào context để vào dashboard đúng nhà hàng.
+
+7.Chuyển nhà hàng từ header dashboard
+Cho phép đổi selectedRestaurant ngay trên header để toàn bộ trang con trong dashboard dùng dữ liệu nhà hàng mới.
+
+8.Cập nhật thông tin nhà hàng
+Cập nhật dữ liệu nhà hàng và trạng thái hoạt động qua API, sau đó refresh danh sách và phản hồi kết quả bằng toast.
+
+9.Tự động/Thủ công trạng thái mở cửa
+Hỗ trợ auto mode tính trạng thái mở cửa theo lịch định kỳ và manual mode cho phép saler tự gạt trạng thái.
+
+10.Tự điền tọa độ từ link Google Maps
+Ưu tiên parse tọa độ ngay trên client từ URL Google Maps; nếu không parse được thì gọi API resolve tọa độ để điền latitude/longitude.
+
+11.Xem danh sách món ăn
+Tải song song danh sách món và ảnh, sau đó map ảnh phù hợp theo image_id để hiển thị danh sách món đầy đủ.
+
+12.Thêm món ăn mới
+Tạo món mới với luồng upload ảnh tùy chọn; nếu tạo món lỗi sau khi upload ảnh thì rollback ảnh theo best-effort.
+
+13.Cập nhật món ăn
+Cho phép sửa tên/giá/ảnh món; có xử lý thay ảnh an toàn bằng cách dọn ảnh cũ hoặc rollback ảnh mới khi cập nhật thất bại.
+
+14.Xóa món ăn
+Xóa món qua API và cập nhật lại danh sách hiển thị; hiện tại flow xóa chưa có bước confirm dialog.
+
+15.Thay ảnh đại diện nhà hàng
+Tải ảnh primary mới, xử lý các món đang phụ thuộc ảnh primary cũ rồi xóa ảnh cũ để đảm bảo dữ liệu ảnh nhất quán.
+
+16.Tải lên và quản lý phiên bản âm thanh
+Quản lý audio theo ngôn ngữ gồm tải lên, bật/tắt active và xóa bản ghi, kèm ràng buộc không để ngôn ngữ mất toàn bộ bản active.
+
+17.Dịch văn bản và tạo âm thanh từ text
+Hỗ trợ dịch nội dung và ước tính chi phí token trước khi gọi tạo audio từ văn bản, sau đó refresh danh sách audio để preview.
+
+18.Xem thống kê nghe và lịch sử chi phí token
+Hiển thị KPI nghe và bảng usage token theo tháng/trang, hỗ trợ đổi filter để tải lại dữ liệu phục vụ theo dõi chi phí.
+
+19.Xem và cập nhật tài khoản
+Cho phép xem profile, cập nhật thông tin cá nhân và đổi mật khẩu với validate phía client, đồng thời refresh trạng thái người dùng sau khi cập nhật.
+
 ## 1. Kiểm tra phiên đăng nhập
 
 ```mermaid
