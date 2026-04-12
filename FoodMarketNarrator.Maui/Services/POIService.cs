@@ -19,38 +19,54 @@ public class POIService : IPOIService
         Dishes = 1
     }
 
+    // Đơn vị công việc warm-up cho queue nền (ảnh hoặc món ăn).
     private sealed record WarmupJob(string Key, WarmupJobKind Kind, string Value, int Priority);
 
+    // Trạng thái geofence/POI gần nhất đang theo dõi trong phiên hiện tại.
     private POI? _lastNearest;
     private bool _isInsidePOI = false;
+
+    // Cache POI trong memory và các mốc thời gian phục vụ TTL/cooldown refresh.
     private List<POI>? _pois;
     private DateTime _lastFetchUtc = DateTime.MinValue;
     private DateTime _lastFetchFailureUtc = DateTime.MinValue;
     private int _consecutiveFetchFailures;
     private bool _lastLoadSucceededFromNetwork;
+
+    // Cấu hình refresh POI từ network.
     private static readonly TimeSpan PoiTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan FetchFailureCooldown = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan RestaurantRequestTimeout = TimeSpan.FromSeconds(5);
+
+    // Lock điều phối refresh để tránh nhiều request/network warmup chạy chồng nhau.
     private readonly SemaphoreSlim _networkRefreshLock = new(1, 1);
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly SemaphoreSlim _offlineWarmupLock = new(1, 1);
     private Task? _offlineWarmupTask;
+
+    // Queue warm-up nền và tín hiệu worker xử lý theo độ ưu tiên.
     private readonly object _warmupQueueLock = new();
     private readonly PriorityQueue<WarmupJob, int> _warmupQueue = new();
     private readonly SemaphoreSlim _warmupQueueSignal = new(0);
-    private readonly ConcurrentDictionary<string, byte> _queuedOrRunningWarmupKeys = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentDictionary<string, Task<string?>> _imageDownloadsInFlight = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentDictionary<string, Task<List<DishModel>>> _dishRequestsInFlight = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileWriteLocks = new(StringComparer.OrdinalIgnoreCase);
-    private readonly SemaphoreSlim _imageWarmupLimiter = new(AppSettings.OfflineWarmupImageConcurrency, AppSettings.OfflineWarmupImageConcurrency);
-    private readonly SemaphoreSlim _dishWarmupLimiter = new(1, 1);
+
+    // Dedupe in-flight để tránh enqueue/request/download trùng lặp.
+    private readonly ConcurrentDictionary<string, byte> _queuedOrRunningWarmupKeys = new(StringComparer.OrdinalIgnoreCase); // tránh enqueue job trùng lặp dựa trên job.Key
+    private readonly ConcurrentDictionary<string, Task<string?>> _imageDownloadsInFlight = new(StringComparer.OrdinalIgnoreCase); // tránh request/download ảnh trùng lặp dựa trên URL nguồn
+    private readonly ConcurrentDictionary<string, Task<List<DishModel>>> _dishRequestsInFlight = new(StringComparer.OrdinalIgnoreCase); // tránh request món ăn trùng lặp dựa trên restaurantId
+
+    // Khóa ghi file cache và limiter cho số tác vụ warm-up chạy song song.
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileWriteLocks = new(StringComparer.OrdinalIgnoreCase); // tránh ghi file trùng lặp dựa trên key
+    private readonly SemaphoreSlim _imageWarmupLimiter = new(AppSettings.OfflineWarmupImageConcurrency, AppSettings.OfflineWarmupImageConcurrency); // giới hạn số tác vụ warm-up ảnh chạy đồng thời để tránh quá tải mạng và I/O
+    private readonly SemaphoreSlim _dishWarmupLimiter = new(1, 1); // giới hạn số tác vụ warm-up món ăn chạy đồng thời
     private int _warmupWorkersStarted;
-    private const string ImageCacheFolderName = "image_cache";
-    private const int MinValidImageBytes = 128;
-    private const int WarmupWorkerCount = 2;
-    private const int WarmupPhaseATopCount = 6;
-    private const int WarmupPriorityHigh = 0;
-    private const int WarmupPriorityNormal = 1;
+
+    // Hằng số cache/warm-up dùng chung trong toàn bộ lifecycle của service.
+    private const string ImageCacheFolderName = "image_cache"; // tên thư mục lưu cache ảnh đã tải về, nằm trong thư mục app data của ứng dụng
+    private const int MinValidImageBytes = 128; // kích thước tối thiểu của một file ảnh hợp lệ sau khi tải về, dùng để xác định xem ảnh đã tải có thành công và có nội dung hay không (tránh cache các file lỗi hoặc trống)
+    private const int WarmupWorkerCount = 2; // số lượng worker nền xử lý queue warm-up, có thể điều chỉnh để cân bằng giữa tốc độ warm-up và tài nguyên hệ thống (CPU, mạng, I/O)
+    private const int WarmupPhaseATopCount = 6; // số lượng POI ưu tiên trong phase A của warm-up, thường là các POI có nhiều audio hoặc lượt truy cập để đảm bảo trải nghiệm mượt mà cho phần lớn người dùng ngay sau khi load POI từ cache hoặc network. Các POI còn lại sẽ được xếp vào phase B để warm-up sau đó nhằm tối ưu tài nguyên và tránh quá tải khi mới load POI.
+    private const int WarmupPriorityHigh = 0; // độ ưu tiên cao cho các job warm-up ảnh của POI ưu tiên trong phase A, giúp đảm bảo các POI này có trải nghiệm tốt nhất ngay sau khi load
+    private const int WarmupPriorityNormal = 1; // độ ưu tiên bình thường cho các job warm-up còn lại, sẽ được xử lý sau khi các job ưu tiên đã được xếp hàng và xử lý
     private static readonly TimeSpan WarmupInitialDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupInitialDelayMs);
     private static readonly TimeSpan WarmupPhaseBDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupPhaseBDelayMs);
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -68,6 +84,7 @@ public class POIService : IPOIService
         Log($"[POIService] HttpClient.BaseAddress = {_httpClient.BaseAddress}");
     }
 
+    // Ghi log debug/runtime, có lọc bớt log ảnh không quan trọng theo cấu hình.
     private static void Log(string message)
     {
         if (ShouldSkipVerboseImageLog(message))
@@ -79,6 +96,7 @@ public class POIService : IPOIService
         Console.WriteLine(message);
     }
 
+    // Lọc bớt các log liên quan đến warm-up ảnh nếu cấu hình verbose mode không bật, chỉ giữ lại các log lỗi hoặc thông tin quan trọng để tránh quá nhiều log khi warm-up ảnh hàng loạt.
     private static bool ShouldSkipVerboseImageLog(string message)
     {
         if (AppSettings.EnableVerboseImageWarmupLogs)
@@ -103,6 +121,7 @@ public class POIService : IPOIService
             && !message.Contains("404", StringComparison.Ordinal);
     }
 
+    // Chuẩn hóa thông tin exception để log ngắn gọn nhưng vẫn có inner exception khi cần.
     private static string FormatException(Exception ex)
     {
         var inner = ex.InnerException?.Message;
@@ -153,7 +172,7 @@ public class POIService : IPOIService
         return await TryRefreshPoisFromNetworkAsync(runInBackground: false);
     }
 
-    // Thử refresh POI từ network qua danh sách endpoint fallback.
+    // Thử refresh POI từ network qua danh sách endpoint fallback. để lấy POI mới nhất và đảm bảo trải nghiệm tốt nhất cho người dùng, đồng thời cập nhật cache và warm-up nền. Nếu runInBackground=true thì sẽ không chờ kết quả network mà trả về ngay cache hiện tại (nếu có) và refresh POI trong nền, ngược lại sẽ chờ kết quả network để trả về POI mới nhất.
     private async Task<List<POI>> TryRefreshPoisFromNetworkAsync(bool runInBackground)
     {
         if (runInBackground)
@@ -236,6 +255,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Trả về đường dẫn file cache pois.json trong bộ nhớ app (và đảm bảo thư mục tồn tại)
     private static string GetPoiCacheFilePath()
     {
         var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
@@ -243,6 +263,7 @@ public class POIService : IPOIService
         return Path.Combine(cacheDir, "pois.json");
     }
 
+    // Đọc cache POI từ file, nếu có. Nếu đọc thành công sẽ trả về danh sách POI, ngược lại sẽ trả về danh sách rỗng. Hàm này được gọi khi load POI lần đầu tiên để có dữ liệu hiển thị nhanh, sau đó sẽ refresh từ network nếu có kết nối.
     private static async Task<List<POI>> ReadPoisCacheAsync()
     {
         var path = GetPoiCacheFilePath();
@@ -264,6 +285,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Lưu danh sách POI vào file cache để dùng cho lần sau khi không thể gọi API. Hàm này được gọi sau khi load POI thành công từ network để cập nhật cache và làm nguồn dữ liệu nhanh cho lần load tiếp theo.
     private static async Task SavePoisCacheAsync(List<POI> pois)
     {
         try
@@ -289,6 +311,8 @@ public class POIService : IPOIService
         }
     }
 
+    
+    // Lấy (và đảm bảo tồn tại) thư mục gốc để lưu cache offline như POI và món ăn, tránh lỗi khi ghi file cache vào thư mục không tồn tại. Hàm này được gọi trước khi đọc hoặc ghi cache để đảm bảo thư mục đã sẵn sàng.
     private static string GetOfflineCacheRootPath()
     {
         var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
@@ -296,6 +320,7 @@ public class POIService : IPOIService
         return cacheDir;
     }
 
+    // Tương tự như GetPoiCacheFilePath nhưng dành cho cache món ăn theo restaurantId, đảm bảo tên file hợp lệ và thư mục tồn tại. Hàm này được gọi khi đọc hoặc ghi cache món ăn để xác định đường dẫn file cache tương ứng với restaurantId.
     private static string GetDishesCacheFilePath(string restaurantId)
     {
         var dishesDir = Path.Combine(GetOfflineCacheRootPath(), "dishes");
@@ -304,6 +329,7 @@ public class POIService : IPOIService
         return Path.Combine(dishesDir, $"{safeId}.json");
     }
 
+    // Đọc cache món ăn theo restaurantId, trả list rỗng nếu file không có hoặc lỗi parse.
     private static async Task<List<DishModel>> ReadDishesCacheAsync(string restaurantId)
     {
         var path = GetDishesCacheFilePath(restaurantId);
@@ -324,6 +350,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Ghi cache món ăn theo restaurantId, dùng file lock để tránh ghi chồng nhiều luồng.
     private async Task SaveDishesCacheAsync(string restaurantId, List<DishModel> dishes)
     {
         var path = GetDishesCacheFilePath(restaurantId);
@@ -355,6 +382,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Lấy thư mục gốc cache ảnh và tự tạo nếu chưa tồn tại.
     private static string GetImageCacheRootPath()
     {
         var path = Path.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName);
@@ -362,6 +390,7 @@ public class POIService : IPOIService
         return path;
     }
 
+    // Tạo đường dẫn cache ảnh theo hash từ nguồn ảnh để dedupe ổn định.
     private static string GetImageCachePath(string source)
     {
         var normalized = source.Replace("\\", "/", StringComparison.Ordinal).Trim();
@@ -375,6 +404,7 @@ public class POIService : IPOIService
         return Path.Combine(GetImageCacheRootPath(), $"{hash}{ext}");
     }
 
+    // Kiểm tra file ảnh cache có tồn tại và đủ kích thước tối thiểu.
     private static bool IsValidImageFile(string path)
     {
         if (!File.Exists(path))
@@ -392,6 +422,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Bắt đầu warm-up nền cho ảnh và món ăn theo 2 phase ưu tiên.
     private void StartOfflineAssetWarmup(List<POI> pois)
     {
         if (pois.Count == 0)
@@ -444,6 +475,7 @@ public class POIService : IPOIService
         });
     }
 
+    // Khởi động worker xử lý queue warm-up một lần duy nhất trong lifecycle service.
     private void EnsureWarmupWorkersStarted()
     {
         if (Interlocked.Exchange(ref _warmupWorkersStarted, 1) == 1)
@@ -457,6 +489,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Vòng lặp worker: lấy job từ queue và xử lý theo loại ảnh/món ăn.
     private async Task WarmupWorkerLoopAsync()
     {
         while (true)
@@ -525,6 +558,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Enqueue warm-up cho mỗi POI: dishes theo restaurantId và ảnh theo rule ưu tiên.
     private void EnqueuePoiWarmupJobs(IEnumerable<POI> pois, int priority, bool includeAllImages)
     {
         foreach (var poi in pois)
@@ -595,6 +629,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Enqueue một job warm-up có dedupe theo key để tránh duplicate queue.
     private void EnqueueWarmupJob(WarmupJob job)
     {
         if (!_queuedOrRunningWarmupKeys.TryAdd(job.Key, 0))
@@ -614,6 +649,7 @@ public class POIService : IPOIService
         _warmupQueueSignal.Release();
     }
 
+    // Đảm bảo 1 nguồn ảnh chỉ có một flow download in-flight tại cùng thời điểm.
     private async Task<string?> EnsureImageCachedWithDedupeAsync(string imageUrl)
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
@@ -653,6 +689,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Core download ảnh: thử qua danh sách URL candidate và ghi vào cache khi thành công.
     private async Task<string?> DownloadImageToCacheCoreAsync(string imageUrl)
     {
         if (File.Exists(imageUrl))
@@ -692,6 +729,7 @@ public class POIService : IPOIService
         return null;
     }
 
+    // Xác định imageUrl có phải nguồn remote hợp lệ để đưa vào warm-up/download hay không.
     private static bool IsRemoteImageCandidate(string imageUrl)
     {
         if (File.Exists(imageUrl))
@@ -729,6 +767,7 @@ public class POIService : IPOIService
         return false;
     }
 
+    // Kiểm tra extension có thuộc nhóm định dạng ảnh hỗ trợ.
     private static bool HasImageLikeExtension(string path)
     {
         var ext = Path.GetExtension(path);
@@ -744,6 +783,7 @@ public class POIService : IPOIService
             || ext.Equals(".gif", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Áp dụng đường dẫn ảnh cache local cho POI nếu file đã được warm-up trước đó.
     private static void ApplyCachedImagePaths(IEnumerable<POI> pois)
     {
         foreach (var poi in pois)
@@ -774,6 +814,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Xây URL ứng viên để tải ảnh từ base URL hiện tại và các fallback URL.
     private IEnumerable<string> BuildImageUrlCandidates(string imageUrl)
     {
         if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var absoluteUri)
@@ -831,6 +872,7 @@ public class POIService : IPOIService
             .Where(x => !string.IsNullOrWhiteSpace(x));
     }
 
+    // Tải một ảnh về cache bằng khóa ghi file theo path để tránh race-condition.
     private async Task<bool> TryDownloadImageToCacheAsync(string url, string cachePath)
     {
         var fileLock = GetFileWriteLock(cachePath);
@@ -884,6 +926,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Lấy lock theo từng file cache để serialize thao tác ghi/xóa/đổi tên file.
     private SemaphoreSlim GetFileWriteLock(string path)
     {
         return _fileWriteLocks.GetOrAdd(path, _ => new SemaphoreSlim(1, 1));
@@ -977,6 +1020,7 @@ public class POIService : IPOIService
         }
     }
 
+    // Tìm POI theo restaurantId từ tập dữ liệu POI đã refresh theo TTL hiện tại.
     public async Task<POI?> GetPOIByIdAsync(string restaurantId)
     {
         if (string.IsNullOrWhiteSpace(restaurantId))
@@ -989,11 +1033,13 @@ public class POIService : IPOIService
             string.Equals(p.restaurantId, restaurantId, StringComparison.OrdinalIgnoreCase));
     }
 
+    // Lấy POI gần nhất theo tọa độ lat/lng hiện tại.
     public POI? GetNearestPOI(double currentLat, double currentLng)
     {
         return GetNearestPOI(new Location(currentLat, currentLng), _pois);
     }
 
+    // Lấy POI gần nhất từ tập dữ liệu đầu vào hoặc cache _pois hiện tại.
     public POI? GetNearestPOI(Location currentLocation, IEnumerable<POI>? pois = null)
     {
         var source = pois?.ToList() ?? _pois;
@@ -1007,6 +1053,7 @@ public class POIService : IPOIService
             .FirstOrDefault();
     }
 
+    // Tính khoảng cách mét giữa vị trí hiện tại và tâm của một POI.
     public double GetDistanceMeters(Location currentLocation, POI poi)
     {
         return Location.CalculateDistance(
@@ -1033,26 +1080,26 @@ public class POIService : IPOIService
 
         if (!_isInsidePOI)
         {
-            // ChÆ°a á»Ÿ trong POI â†’ xÃ©t EnterRadius
+            // Chưa ở trong POI: xét điều kiện vào vùng theo EnterRadius.
             if (minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _isInsidePOI = true;
                 _lastNearest = nearest;
 
-                return nearest; // Trigger khi má»›i vÃ o
+                return nearest; // Trigger khi mới vào.
             }
         }
         else
         {
-            // Äang á»Ÿ trong POI
-            // Náº¿u Ä‘á»•i sang POI khÃ¡c vÃ  Ä‘á»§ gáº§n
+            // Đang ở trong POI.
+            // Nếu đổi sang POI khác và vẫn đủ gần thì trigger POI mới.
             if (nearest != _lastNearest && minDistance <= AppSettings.PoiEnterRadiusMeters)
             {
                 _lastNearest = nearest;
-                return nearest; // Trigger POI má»›i
+                return nearest; // Trigger POI mới.
             }
 
-            // Náº¿u Ä‘i xa khá»i POI hiá»‡n táº¡i > ExitRadius
+            // Nếu đi xa khỏi POI hiện tại hơn ExitRadius thì thoát trạng thái inside.
             if (_lastNearest != null)
             {
                 var lastLocation = new Location(
@@ -1075,6 +1122,7 @@ public class POIService : IPOIService
         return null; // Không có transition geofence
     }
 
+    // Reset trạng thái geofence khi bắt đầu phiên narration mới hoặc cần clear state.
     public void ResetGeofenceState()
     {
         _isInsidePOI = false;
@@ -1094,6 +1142,7 @@ public class POIService : IPOIService
             _ => LoadDishesByRestaurantIdCoreAsync(restaurantId));
     }
 
+    // Load dishes từ network và fallback cache nếu lỗi, đồng thời cập nhật cache khi thành công.
     private async Task<List<DishModel>> LoadDishesByRestaurantIdCoreAsync(string restaurantId)
     {
         try

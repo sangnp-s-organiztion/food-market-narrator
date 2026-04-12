@@ -81,7 +81,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         {
             _buffer.Add(item);
 
-            // Keep memory bounded if network is unstable for a long period.
+            // giữ buffer không vượt quá MaxBufferSize để tránh chiếm quá nhiều bộ nhớ nếu server không phản hồi trong thời gian dài. Nếu vượt, sẽ loại bỏ những mẫu cũ nhất ở đầu danh sách.
             if (_buffer.Count > MaxBufferSize)
             {
                 var removeCount = _buffer.Count - MaxBufferSize;
@@ -92,6 +92,8 @@ public class LocationLogSyncService : ILocationLogSyncService
         _ = PersistBufferSnapshotAsync();
     }
 
+    // Flush: đẩy dữ liệu lên server theo batch. Nếu thành công thì xóa batch khỏi buffer, nếu thất bại thì giữ lại để retry lần sau.
+    // Buffer: vùng nhớ tạm để chứa dữ liệu trước khi xử lí tiếp theo logic nghiệp vụ (ví dụ gửi lên server). Buffer này có thể được lưu tạm thời xuống disk để tránh mất dữ liệu khi app bị đóng đột ngột hoặc crash.
     // Vòng lặp nền: cứ mỗi FlushInterval sẽ thử đẩy batch hiện có lên server.
     private async Task RunFlushLoopAsync(CancellationToken cancellationToken)
     {
@@ -291,7 +293,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         }
     }
 
-    // Persist snapshot buffer hiện tại xuống disk (best-effort) để hỗ trợ retry sau crash/restart.
+    // Lưu tạm trạng thái hiện tại của buffer hiện tại xuống disk (best-effort) để hỗ trợ retry sau crash/restart.
     private async Task PersistBufferSnapshotAsync()
     {
         List<LocationLogItem> snapshot;
