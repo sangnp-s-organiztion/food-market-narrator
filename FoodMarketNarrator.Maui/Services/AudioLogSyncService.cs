@@ -19,6 +19,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         _locationLogSyncService = locationLogSyncService;
     }
 
+    // hàm này được dùng để ghi lại thông tin về việc phát audio, bao gồm nhà hàng, audioId, thời gian bắt đầu và kết thúc, cũng như thời lượng đã phát. Nó sẽ gửi thông tin này lên backend để lưu trữ và phân tích sau này. Hàm cũng xử lý một số trường hợp đặc biệt như session bị mất trên backend và sẽ thử tạo lại session và gửi lại log nếu cần thiết.
     public async Task LogPlaybackAsync(
         string restaurantId,
         int audioId,
@@ -106,6 +107,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         }
     }
 
+    // hàm này được dùng để chuẩn hóa thời gian UTC, đảm bảo rằng thời gian được gửi lên backend luôn ở định dạng UTC và có kiểu DateTimeKind.Utc. Nếu thời gian đầu vào là default (chưa được gán), nó sẽ trả về thời gian hiện tại theo UTC.
     private static DateTime NormalizeUtc(DateTime timestamp)
     {
         if (timestamp == default)
@@ -116,6 +118,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         return DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
     }
 
+    // hàm này được dùng để gửi yêu cầu ghi log phát audio lên backend. Nó sẽ sử dụng HttpClient để gửi một POST request với nội dung là AudioLogCreateRequest được chuyển đổi thành JSON. Hàm này trả về HttpResponseMessage để caller có thể kiểm tra kết quả và xử lý lỗi nếu cần thiết.
     private Task<HttpResponseMessage> SendAsync(AudioLogCreateRequest request, CancellationToken cancellationToken)
     {
         return _httpClient.PostAsJsonAsync(
@@ -124,6 +127,7 @@ public class AudioLogSyncService : IAudioLogSyncService
             cancellationToken);
     }
 
+    // hàm này được dùng để kiểm tra xem có cần thử lại yêu cầu khi session bị mất trên backend hay không. Nó sẽ kiểm tra mã trạng thái của phản hồi và nội dung của phản hồi để xác định xem có phải là lỗi session not found hay không.
     private static async Task<bool> ShouldRetryForMissingSessionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         if (response.StatusCode != HttpStatusCode.NotFound)
@@ -143,6 +147,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         }
     }
 
+    // hàm này được dùng để đảm bảo rằng session đã được tạo trên backend trước khi gửi log phát audio. Nếu session chưa tồn tại, nó sẽ gửi một yêu cầu để tạo session mới với thông tin thiết bị và sau đó tiếp tục gửi log. Điều này giúp tránh lỗi khi backend không tìm thấy session tương ứng với log đang gửi.
     private async Task EnsureSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
     {
         var request = new AudioUserSessionStartRequest
@@ -170,6 +175,7 @@ public class AudioLogSyncService : IAudioLogSyncService
         }
     }
 
+    // hàm này được dùng để lấy hoặc tạo một deviceId duy nhất cho thiết bị hiện tại. DeviceId này sẽ được sử dụng để theo dõi các phiên session của người dùng trên backend. Nếu deviceId đã tồn tại trong Preferences, nó sẽ trả về deviceId đó. Nếu chưa tồn tại, nó sẽ tạo một deviceId mới bằng cách sinh ra một GUID, lưu vào Preferences và trả về deviceId mới đó.
     private static string GetOrCreateDeviceId()
     {
         var existingDeviceId = Preferences.Get(DeviceIdPreferenceKey, string.Empty);
