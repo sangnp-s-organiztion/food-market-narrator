@@ -50,5 +50,38 @@ public class TranslationBillingController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpGet("my-audio-usage")]
+    public async Task<IActionResult> GetMyAudioUsageLedger(
+        [FromQuery] string? billingMonth = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var salerIdentity = User.Identities.FirstOrDefault(identity =>
+            identity.HasClaim(ClaimTypes.Role, "saler"));
+
+        var currentUserIdRaw = salerIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(currentUserIdRaw, out var currentUserId) || currentUserId <= 0)
+        {
+            return Unauthorized(new { message = "Phiên đăng nhập không hợp lệ." });
+        }
+
+        try
+        {
+            var result = await _translationBillingService.GetAudioUsageLedgerBySellerUserIdAsync(
+                billingMonth,
+                currentUserId,
+                page,
+                pageSize);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
 

@@ -96,27 +96,6 @@ export default function AudioPage() {
     currency: string;
   } | null>(null);
 
-  const versionByAudioId = useMemo(() => {
-    const sorted = [...audios].sort((a, b) => {
-      const dateDiff =
-        new Date(a.date_generation).getTime() -
-        new Date(b.date_generation).getTime();
-      if (dateDiff !== 0) return dateDiff;
-      return a.audio_id - b.audio_id;
-    });
-
-    const counts = new Map<number, number>();
-    const versions = new Map<number, number>();
-
-    for (const audio of sorted) {
-      const next = (counts.get(audio.language_id) ?? 0) + 1;
-      counts.set(audio.language_id, next);
-      versions.set(audio.audio_id, next);
-    }
-
-    return versions;
-  }, [audios]);
-
   const languageGroups = useMemo(() => {
     const audiosByLanguage = new Map<number, Audio[]>();
 
@@ -662,7 +641,7 @@ export default function AudioPage() {
 
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-foreground">
-                          Phiên bản {versionByAudioId.get(audio.audio_id) ?? 1}
+                          Phiên bản {audio.version}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           {new Date(audio.date_generation).toLocaleDateString(
@@ -772,9 +751,7 @@ export default function AudioPage() {
             <AlertDialogDescription>
               Bạn có chắc muốn xóa{" "}
               {pendingDeleteAudio
-                ? `Phiên bản ${
-                    versionByAudioId.get(pendingDeleteAudio.audio_id) ?? 1
-                  }`
+                ? `Phiên bản ${pendingDeleteAudio.version}`
                 : "thuyết minh này"}
               ? Hành động này không thể hoàn tác.
             </AlertDialogDescription>

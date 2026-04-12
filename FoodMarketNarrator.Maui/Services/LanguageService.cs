@@ -35,6 +35,7 @@ public class LanguageService : ILanguageService
         }
     }
 
+    // Hàm này được dùng để lấy danh sách tất cả ngôn ngữ hỗ trợ từ backend. Nó sẽ thử gọi API với nhiều base URL khác nhau (bao gồm cả fallback) để đảm bảo có thể lấy được dữ liệu ngay cả khi một số endpoint không khả dụng. Kết quả sẽ được lưu vào cache để sử dụng cho các lần gọi sau, giúp giảm thiểu việc gọi API và cải thiện hiệu suất. Nếu không thể lấy dữ liệu từ API nào, nó sẽ cố gắng đọc từ cache cũ nếu có.
     public async Task<List<LanguageModel>> GetAllLanguagesAsync()
     {
         if (_cachedLanguages != null && _cachedLanguages.Count > 0)

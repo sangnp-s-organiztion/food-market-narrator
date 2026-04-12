@@ -8,6 +8,7 @@ using System.Text.Json;
 
 namespace food_market_narrator.Services;
 
+// Service lấy dữ liệu tour theo chiến lược cache-first + refresh nền, kèm chuẩn hóa ảnh.
 public class TourService : ITourService
 {
     private const string OfflineCacheFolderName = "offline_cache";
@@ -37,6 +38,7 @@ public class TourService : ITourService
         _locationService = locationService;
     }
 
+    // Lấy danh sách tour: ưu tiên memory cache -> disk cache -> network.
     public async Task<List<TourModel>> GetToursAsync()
     {
         if (HasFreshMemoryCache())
@@ -65,6 +67,7 @@ public class TourService : ITourService
         return await RefreshToursFromNetworkAsync(new List<TourModel>());
     }
 
+    // Lấy chi tiết 1 tour theo id, vẫn giữ fallback cache nếu mạng lỗi.
     public async Task<TourModel?> GetTourByIdAsync(int tourId)
     {
         var cachedTour = _cachedTours?.FirstOrDefault(x => x.TourId == tourId);
@@ -106,6 +109,7 @@ public class TourService : ITourService
         return cachedTour == null ? null : NormalizeTour(cachedTour);
     }
 
+    // Kiểm tra memory cache còn trong TTL.
     private bool HasFreshMemoryCache()
     {
         return _cachedTours != null
@@ -113,11 +117,13 @@ public class TourService : ITourService
             && DateTime.UtcNow - _memoryCachedAtUtc < CacheTtl;
     }
 
+    // Quyết định có nên refresh từ network hay chưa.
     private bool ShouldRefreshFromNetwork()
     {
         return DateTime.UtcNow - _lastNetworkFetchUtc >= CacheTtl;
     }
 
+    // Ghi đè memory cache bằng dữ liệu đã normalize.
     private void SetMemoryCache(List<TourModel> tours)
     {
         _cachedTours = NormalizeTours(tours);
@@ -196,6 +202,7 @@ public class TourService : ITourService
         return new List<TourModel>();
     }
 
+    // Build danh sách base URL có ưu tiên endpoint đã thành công gần nhất.
     private IEnumerable<string> BuildBaseUrlCandidates()
     {
         var baseCandidates = new List<string>();
@@ -286,6 +293,7 @@ public class TourService : ITourService
         return $"{baseUrl}/{AppSettings.TourEndpoint}?latitude={lat}&longitude={lng}&radiusMeters={radius}";
     }
 
+    // Build endpoint gọi chi tiết 1 tour, có kèm vị trí hiện tại khi có.
     private static string BuildTourDetailEndpoint(string baseUrl, int tourId, Location? location)
     {
         if (location == null)
@@ -344,6 +352,7 @@ public class TourService : ITourService
         return Path.Combine(cacheDir, "tours.json");
     }
 
+    // Đọc tour cache từ disk và normalize dữ liệu trước khi dùng.
     private async Task<List<TourModel>> ReadToursCacheAsync()
     {
         await _cacheFileLock.WaitAsync();
@@ -372,6 +381,7 @@ public class TourService : ITourService
         }
     }
 
+    // Ghi danh sách tour xuống disk theo cơ chế temp file -> replace để tránh hỏng file.
     private async Task SaveToursCacheAsync(List<TourModel> tours)
     {
         await _cacheFileLock.WaitAsync();

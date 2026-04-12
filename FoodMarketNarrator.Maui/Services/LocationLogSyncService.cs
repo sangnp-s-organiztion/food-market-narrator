@@ -7,6 +7,7 @@ using System.Text.Json;
 
 namespace food_market_narrator.Services;
 
+// Service gom và đồng bộ location logs theo batch định kỳ lên backend.
 public class LocationLogSyncService : ILocationLogSyncService
 {
     private static readonly TimeSpan FlushInterval = TimeSpan.FromSeconds(10);
@@ -36,6 +37,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         _locationService = locationService;
     }
 
+    // Khởi động cơ chế ghi nhận location sample và vòng lặp flush định kỳ.
     public void Start()
     {
         if (_started)
@@ -53,11 +55,13 @@ public class LocationLogSyncService : ILocationLogSyncService
         _flushTask = RunFlushLoopAsync(_flushCts.Token);
     }
 
+    // Cho phép trigger flush thủ công (ví dụ trước khi gửi audio log cần session chắc chắn).
     public Task FlushNowAsync()
     {
         return FlushOnceAsync(CancellationToken.None);
     }
 
+    // Nhận mẫu vị trí từ LocationService và thêm vào buffer trong bộ nhớ.
     private void OnLocationSampled(object? sender, Location? location)
     {
         var item = new LocationLogItem
@@ -88,6 +92,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         _ = PersistBufferSnapshotAsync();
     }
 
+    // Vòng lặp nền: cứ mỗi FlushInterval sẽ thử đẩy batch hiện có lên server.
     private async Task RunFlushLoopAsync(CancellationToken cancellationToken)
     {
         using var timer = new PeriodicTimer(FlushInterval);
@@ -114,6 +119,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         }
     }
 
+    // Flush một lần: gửi batch hiện tại, nếu fail thì đưa lại buffer để retry lần sau.
     private async Task FlushOnceAsync(CancellationToken cancellationToken)
     {
         await EnsureSessionStartedAsync(cancellationToken);
@@ -179,6 +185,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         _ = PersistBufferSnapshotAsync();
     }
 
+    // Đảm bảo session đã tồn tại trên backend trước khi gửi location logs.
     private async Task EnsureSessionStartedAsync(CancellationToken cancellationToken)
     {
         if (_sessionStartedSynced)
@@ -214,6 +221,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         }
     }
 
+    // Lấy hoặc sinh device id duy nhất để gắn với session theo dõi.
     private static string GetOrCreateDeviceId()
     {
         var existingDeviceId = Preferences.Get(DeviceIdPreferenceKey, string.Empty);
@@ -227,6 +235,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         return generated;
     }
 
+    // Trả về đường dẫn file buffer location logs trên local storage.
     private static string GetLocationLogsBufferFilePath()
     {
         var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
@@ -234,6 +243,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         return Path.Combine(cacheDir, "location_logs_buffer.json");
     }
 
+    // Khôi phục buffer từ disk khi app khởi động lại để không mất log chưa sync.
     private void LoadBufferFromDisk()
     {
         try
@@ -281,6 +291,7 @@ public class LocationLogSyncService : ILocationLogSyncService
         }
     }
 
+    // Persist snapshot buffer hiện tại xuống disk (best-effort) để hỗ trợ retry sau crash/restart.
     private async Task PersistBufferSnapshotAsync()
     {
         List<LocationLogItem> snapshot;

@@ -5,6 +5,8 @@ using System.Diagnostics;
 
 namespace food_market_narrator.Services;
 
+// Class này quản lý toàn bộ vòng đời phát audio trong app:
+// tìm nguồn phát (cache/package/remote), cache theo LRU + quota, và xử lý audio focus theo nền tảng.
 public partial class AudioService : IAudioService
 {
     private readonly IAudioManager _audioManager;
@@ -37,6 +39,8 @@ public partial class AudioService : IAudioService
 
     // ================ Audio Methods ================
 
+
+    // Phát audio theo ngôn ngữ + tên file, ưu tiên local cache rồi mới fallback sang package/remote.
     public async Task PlaySound(string language, string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -79,6 +83,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Phát audio theo audioId, phù hợp với luồng lấy file qua endpoint public của backend.
     public async Task PlaySound(int audioId)
     {
         if (audioId <= 0)
@@ -115,6 +120,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Resolve stream phát được theo (language, fileName): local cache -> package -> fallback local sau lưu cache.
     private async Task<Stream?> ResolvePlayableStreamAsync(string language, string fileName)
     {
         var normalizedInput = NormalizeInput(fileName);
@@ -150,6 +156,7 @@ public partial class AudioService : IAudioService
             : null;
     }
 
+    // Resolve stream phát được theo audioId: local cache -> remote endpoint -> fallback local sau khi tải.
     private async Task<Stream?> ResolvePlayableStreamAsync(int audioId)
     {
         if (audioId <= 0)
@@ -185,6 +192,7 @@ public partial class AudioService : IAudioService
             : null;
     }
 
+    // hàm này được dùng để kiểm tra xem có audio nào tồn tại trong local cache dựa trên ngôn ngữ và tên file hay không. Nó sẽ xây dựng đường dẫn cache tương ứng và kiểm tra xem file đó có tồn tại và hợp lệ hay không.
     public bool HasLocalAudio(string language, string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -197,6 +205,7 @@ public partial class AudioService : IAudioService
         return IsValidAudioFile(cachePath);
     }
 
+    // hàm này được dùng để kiểm tra xem có audio nào tồn tại trong local cache dựa trên audioId hay không. Nó sẽ xây dựng đường dẫn cache tương ứng với audioId và kiểm tra xem file đó có tồn tại và hợp lệ hay không.
     public bool HasLocalAudio(int audioId)
     {
         if (audioId <= 0)
@@ -208,6 +217,7 @@ public partial class AudioService : IAudioService
         return IsValidAudioFile(cachePath);
     }
 
+    // Prefetch audio theo (language, fileName) để lần phát sau không bị chờ tải.
     public async Task<bool> PrefetchAudioAsync(string language, string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -268,6 +278,7 @@ public partial class AudioService : IAudioService
         return false;
     }
 
+    // Prefetch audio theo audioId từ endpoint remote và lưu vào cache cục bộ.
     public async Task<bool> PrefetchAudioAsync(int audioId)
     {
         if (audioId <= 0)
@@ -304,6 +315,7 @@ public partial class AudioService : IAudioService
         return false;
     }
 
+    // Chuẩn hóa path audio đầu vào thành path nội bộ thống nhất để so khớp và cache.
     private static string ResolveAudioPath(string language, string fileName)
     {
         var normalized = NormalizeInput(fileName);
@@ -325,6 +337,7 @@ public partial class AudioService : IAudioService
         return $"audio/languages/{language}/{normalized}";
     }
 
+    // Chuẩn hóa chuỗi đầu vào (slash + trim) trước khi dùng cho cache/path building.
     private static string NormalizeInput(string fileName)
     {
         return fileName
@@ -332,11 +345,13 @@ public partial class AudioService : IAudioService
             .Trim();
     }
 
+    // Sinh track key theo audioId để quản lý trạng thái current track.
     private static string GetAudioTrackKey(int audioId)
     {
         return $"audio:{audioId}";
     }
 
+    // Tạo đường dẫn cache cho audioId bằng khóa hash ổn định.
     private static string GetAudioCachePath(int audioId)
     {
         var cacheRoot = GetAudioCacheRootPath();
@@ -346,6 +361,7 @@ public partial class AudioService : IAudioService
         return Path.Combine(cacheRoot, $"{hash}.mp3");
     }
 
+    // Build danh sách path trong app package có thể chứa audio tương ứng.
     private static IEnumerable<string> BuildPackagePathCandidates(string language, string normalizedInput)
     {
         var candidates = new List<string>();
@@ -364,6 +380,7 @@ public partial class AudioService : IAudioService
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
+    // Build danh sách URL remote theo (language, path) dựa trên base URL chính và fallback.
     private IEnumerable<string> BuildRemoteUrlCandidates(string language, string normalizedInput)
     {
         if (Uri.TryCreate(normalizedInput, UriKind.Absolute, out var directUri)
@@ -399,6 +416,7 @@ public partial class AudioService : IAudioService
             .Where(x => !string.IsNullOrWhiteSpace(x));
     }
 
+    // Tạo đường dẫn cache cho (language, input) bằng hash để tránh trùng tên file.
     private static string GetAudioCachePath(string language, string normalizedInput)
     {
         var cacheRoot = GetAudioCacheRootPath();
@@ -416,11 +434,13 @@ public partial class AudioService : IAudioService
         return Path.Combine(cacheRoot, $"{hash}{extension}");
     }
 
+    // Trả về thư mục cache audio cục bộ trong AppDataDirectory.
     private static string GetAudioCacheRootPath()
     {
         return Path.Combine(FileSystem.AppDataDirectory, AudioCacheFolderName);
     }
 
+    // Kiểm tra file cache có tồn tại và đủ kích thước tối thiểu để phát an toàn.
     private static bool IsValidAudioFile(string path)
     {
         if (!File.Exists(path))
@@ -438,6 +458,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Lưu file audio vào cache một cách an toàn (check quota/dung lượng + ghi file tạm tránh file hỏng).
     private async Task SaveAudioCacheAsync(string cachePath, Stream source)
     {
         var expectedBytes = source.CanSeek ? source.Length : MinValidAudioBytes;
@@ -490,6 +511,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Tải audio từ URL; nếu đang ở UI thread thì đẩy sang background để tránh lag khung hình.
     private async Task<bool> TryDownloadAudioToCacheAsync(string url, string cachePath)
     {
         if (MainThread.IsMainThread)
@@ -500,6 +522,7 @@ public partial class AudioService : IAudioService
         return await TryDownloadAudioToCacheCoreAsync(url, cachePath);
     }
 
+    // Core download: tải stream, validate kích thước, rồi commit vào cache bằng file tạm.
     private async Task<bool> TryDownloadAudioToCacheCoreAsync(string url, string cachePath)
     {
         try
@@ -560,11 +583,13 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Trả về tổng dung lượng (bytes) của toàn bộ audio đang cache trên thiết bị.
     public Task<long> GetCachedAudioSizeBytesAsync()
     {
         return Task.FromResult(GetCacheSizeBytes());
     }
 
+    // Xóa toàn bộ file audio cache trong thư mục local cache.
     public Task ClearAudioCacheAsync()
     {
         try
@@ -595,6 +620,7 @@ public partial class AudioService : IAudioService
         return Task.CompletedTask;
     }
 
+    // Kiểm tra đủ quota (giới hạn tối đa tài nguyên mà bạn cho phép sử dụng) + đủ dung lượng trống thiết bị trước khi nhận thêm file mới vào cache.
     private async Task<bool> EnsureStorageForIncomingFileAsync(long incomingBytes, string protectedPath)
     {
         if (incomingBytes <= 0)
@@ -643,6 +669,7 @@ public partial class AudioService : IAudioService
         return true;
     }
 
+    // Đảm bảo tổng cache không vượt quota bằng cách dọn file cũ theo LRU khi cần.
     private bool EnsureQuotaCapacity(long incomingBytes, string protectedPath)
     {
         var existingLength = 0L;
@@ -680,6 +707,7 @@ public partial class AudioService : IAudioService
         return true;
     }
 
+    // Dọn cache theo LRU cho đến khi giải phóng đủ số bytes yêu cầu.
     private long CleanupLruBytes(long bytesNeeded, string protectedPath)
     {
         if (bytesNeeded <= 0)
@@ -715,6 +743,7 @@ public partial class AudioService : IAudioService
         return freed;
     }
 
+    // Liệt kê file cache theo thứ tự ít dùng gần đây nhất (LRU).
     private static IEnumerable<FileInfo> EnumerateCacheFilesByLru()
     {
         var cacheRoot = GetAudioCacheRootPath();
@@ -732,6 +761,7 @@ public partial class AudioService : IAudioService
             .ToList();
     }
 
+    // Tính tổng dung lượng cache hiện tại.
     private static long GetCacheSizeBytes()
     {
         return EnumerateCacheFilesByLru().Sum(f =>
@@ -747,6 +777,7 @@ public partial class AudioService : IAudioService
         });
     }
 
+    // Build endpoint URL theo audioId để phát/tải từ backend.
     private IEnumerable<string> BuildRemoteAudioUrlCandidates(int audioId)
     {
         var relativePath = $"public/audios/{audioId}/file";
@@ -776,6 +807,7 @@ public partial class AudioService : IAudioService
             .Where(x => !string.IsNullOrWhiteSpace(x));
     }
 
+    // Lấy dung lượng trống của ổ chứa cache; null nếu không xác định được.
     private static long? TryGetAvailableSpaceBytes()
     {
         try
@@ -796,6 +828,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Cập nhật access/write time để phản ánh file vừa được dùng (phục vụ LRU).
     private static void TouchCacheFile(string path)
     {
         try
@@ -810,6 +843,7 @@ public partial class AudioService : IAudioService
         }
     }
 
+    // Tạm dừng audio hiện tại nếu đang phát.
     public void Pause()
     {
         if (_player is null || !_player.IsPlaying) return;
@@ -817,6 +851,7 @@ public partial class AudioService : IAudioService
         _isPaused = true;
     }
 
+    // Tiếp tục phát audio đã tạm dừng.
     public void Resume()
     {
         if (_player is null || !_isPaused) return;
@@ -824,6 +859,7 @@ public partial class AudioService : IAudioService
         _isPaused = false;
     }
 
+    // Kiểm tra track hiện tại có khớp với (language, fileName) hay không.
     public bool IsCurrentTrack(string language, string fileName)
     {
         if (string.IsNullOrWhiteSpace(_currentTrackKey) || string.IsNullOrWhiteSpace(fileName))
@@ -835,6 +871,7 @@ public partial class AudioService : IAudioService
         return string.Equals(_currentTrackKey, resolved, StringComparison.OrdinalIgnoreCase);
     }
 
+    // Kiểm tra track hiện tại có khớp audioId hay không.
     public bool IsCurrentTrack(int audioId)
     {
         if (audioId <= 0 || string.IsNullOrWhiteSpace(_currentTrackKey))
@@ -845,6 +882,7 @@ public partial class AudioService : IAudioService
         return string.Equals(_currentTrackKey, GetAudioTrackKey(audioId), StringComparison.OrdinalIgnoreCase);
     }
 
+    // Callback khi audio phát xong: reset state + nhả audio focus + bắn event kết thúc.
     private void OnPlaybackEnded(object? sender, EventArgs e)
     {
         ReleasePlatformAudioFocus();
@@ -853,6 +891,7 @@ public partial class AudioService : IAudioService
         PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 
+    // Dừng phát ngay lập tức và dọn toàn bộ trạng thái playback hiện tại.
     public void StopSound()
     {
         if (_player != null)
@@ -867,6 +906,7 @@ public partial class AudioService : IAudioService
         _currentTrackKey = null;
     }
 
+    // Dừng phát khi bị ngắt do platform interruption (call/app khác/cướp focus).
     internal void StopForPlatformInterruption()
     {
         if (!IsPlaying && !IsPaused)
