@@ -36,7 +36,8 @@ public class POIService : IPOIService
     // Cấu hình refresh POI từ network.
     private static readonly TimeSpan PoiTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan FetchFailureCooldown = TimeSpan.FromSeconds(20);
-    private static readonly TimeSpan RestaurantRequestTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan RestaurantRequestTimeout = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan DishesRequestTimeout = TimeSpan.FromSeconds(3);
 
     // Lock điều phối refresh để tránh nhiều request/network warmup chạy chồng nhau.
     private readonly SemaphoreSlim _networkRefreshLock = new(1, 1);
@@ -1149,27 +1150,55 @@ public class POIService : IPOIService
         {
             var cachedDishes = await ReadDishesCacheAsync(restaurantId);
 
-            var baseUrl = AppSettings.ApiBaseUrl;
-            if (string.IsNullOrWhiteSpace(baseUrl))
+            if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             {
                 return cachedDishes;
             }
 
-            var url = $"{baseUrl.TrimEnd('/')}/Restaurant/{restaurantId}/dishes";
-            Log($"[POIService] Requesting dishes from: {url}");
-            var dishes = await _httpClient.GetFromJsonAsync<List<DishModel>>(url);
+            var baseCandidates = new List<string>();
 
-            if (dishes != null)
+            if (_httpClient.BaseAddress != null)
             {
-                foreach (var dish in dishes)
-                {
-                    Log($"[POIService] Dish: {dish.Name}, ImageFileName: {dish.ImageFileName}");
-                }
-
-                await SaveDishesCacheAsync(restaurantId, dishes);
+                baseCandidates.Add(_httpClient.BaseAddress.ToString());
             }
 
-            return dishes ?? new List<DishModel>();
+            baseCandidates.Add(AppSettings.ApiBaseUrl);
+            baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+
+            var uniqueBaseCandidates = baseCandidates
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var baseUrl in uniqueBaseCandidates)
+            {
+                try
+                {
+                    var requestUrl = new Uri(new Uri(baseUrl), $"Restaurant/{restaurantId}/dishes");
+                    using var cts = new CancellationTokenSource(DishesRequestTimeout);
+                    Log($"[POIService] Requesting dishes from: {requestUrl} | timeout={DishesRequestTimeout.TotalSeconds:F0}s");
+
+                    var dishes = await _httpClient.GetFromJsonAsync<List<DishModel>>(requestUrl, cts.Token);
+                    if (dishes == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var dish in dishes)
+                    {
+                        Log($"[POIService] Dish: {dish.Name}, ImageFileName: {dish.ImageFileName}");
+                    }
+
+                    await SaveDishesCacheAsync(restaurantId, dishes);
+                    return dishes;
+                }
+                catch (Exception ex)
+                {
+                    Log($"[POIService] GetDishes failed: {baseUrl} -> {FormatException(ex)}");
+                }
+            }
+
+            return cachedDishes;
         }
         catch (Exception ex)
         {

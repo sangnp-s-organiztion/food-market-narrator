@@ -67,14 +67,8 @@ public partial class POIDetailPage : ContentPage
 			return;
 		}
 
-		// Load dishes từ API
-		var dishes = await _poiService.GetDishesByRestaurantIdAsync(_restaurantId);
-		if (dishes != null && dishes.Count > 0)
-		{
-			poi.Dishes = dishes;
-		}
-
 		_currentPoi = poi;
+		var requestRestaurantId = _restaurantId;
 
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
@@ -82,6 +76,46 @@ public partial class POIDetailPage : ContentPage
 			SyncAudioUiWithService();
 			UpdateFavoriteIcon();
 		});
+
+		_ = LoadDishesInBackgroundAsync(poi, requestRestaurantId);
+	}
+
+	private async Task LoadDishesInBackgroundAsync(POI poi, string requestRestaurantId)
+	{
+		if (_poiService is null || string.IsNullOrWhiteSpace(requestRestaurantId))
+		{
+			return;
+		}
+
+		try
+		{
+			var dishes = await _poiService.GetDishesByRestaurantIdAsync(requestRestaurantId);
+			if (dishes == null || dishes.Count == 0)
+			{
+				return;
+			}
+
+			if (!string.Equals(_restaurantId, requestRestaurantId, StringComparison.OrdinalIgnoreCase))
+			{
+				return;
+			}
+
+			poi.Dishes = dishes;
+
+			MainThread.BeginInvokeOnMainThread(() =>
+			{
+				if (!string.Equals(_restaurantId, requestRestaurantId, StringComparison.OrdinalIgnoreCase))
+				{
+					return;
+				}
+
+				BindingContext = poi;
+			});
+		}
+		catch
+		{
+			// Bỏ qua lỗi dishes để không chặn UI chi tiết POI.
+		}
 	}
 
 	private void UpdateFavoriteIcon()
@@ -160,6 +194,7 @@ public partial class POIDetailPage : ContentPage
 		}
 	}
 
+	// hàm này sẽ chờ trong khoảng thời gian nhất định để xác nhận xem audio có thực sự bắt đầu phát hay không, vì đôi khi có thể có độ trễ giữa lệnh play và khi trạng thái IsPlaying được cập nhật
 	private async Task<bool> WaitForPlaybackStartAsync(int timeoutMs = 2000)
 	{
 		if (_audioService == null)
@@ -199,6 +234,7 @@ public partial class POIDetailPage : ContentPage
 		_historyService?.AddToHistory(_currentPoi.restaurantId);
 	}
 
+	// Hàm xử lý khi người dùng kéo thanh progress để tua audio
 	private void StartProgressTimer()
 	{
 		StopProgressTimer();
@@ -297,6 +333,7 @@ public partial class POIDetailPage : ContentPage
 		ResetAudioProgressUi();
 	}
 
+	// Hàm này sẽ cố gắng lấy thông tin audio của POI hiện tại dựa trên ngôn ngữ, nếu có audio phù hợp với ngôn ngữ hiện tại thì sẽ trả về, nếu không sẽ trả về audio mặc định (nếu có)
 	private bool TryGetCurrentPoiAudio(out string language, out string audioUrl, out int audioId)
 	{
 		language = _languageService?.CurrentLanguage ?? "vi-VN";
@@ -319,6 +356,7 @@ public partial class POIDetailPage : ContentPage
 		return true;
 	}
 
+	// Hàm này sẽ cập nhật trạng thái của nút play dựa trên việc audio có đang phát hay không
 	private void SetPlayButtonState(bool isPlaying)
 	{
 		PlayIconLabel.Text = isPlaying ? StopGlyph : PlayGlyph;
@@ -340,6 +378,7 @@ public partial class POIDetailPage : ContentPage
 		return $"{time.Minutes:00}:{time.Seconds:00}";
 	}
 
+	// Hàm này sẽ cập nhật trạng thái của các hành động liên quan đến narration (hiện tại là nút play) dựa trên việc có audio nào phù hợp để phát hay không
 	private void UpdateNarrationActionAvailability()
 	{
 		if (PlayAudioButton == null)
@@ -351,6 +390,7 @@ public partial class POIDetailPage : ContentPage
 		PlayAudioButton.Opacity = 1;
 	}
 
+	// Hàm xử lý khi audio kết thúc, sẽ ghi nhận lại thông tin playback vào log nếu có đủ thông tin, sau đó reset trạng thái UI và ngữ cảnh liên quan đến playback
 	private void OnPlaybackEnded(object? sender, EventArgs e)
 	{
 		LogPlaybackIfPossible(DateTime.UtcNow);
@@ -371,7 +411,8 @@ public partial class POIDetailPage : ContentPage
 		ClearPlaybackContext();
 		base.OnDisappearing();
 	}
-
+	 
+	// Hàm này sẽ ghi nhận lại thông tin playback vào log nếu có đủ thông tin, bao gồm thời gian bắt đầu, thời gian kết thúc, độ dài đã phát so với tổng độ dài của track, v.v. Thông tin này sẽ được gửi đến service để đồng bộ với backend
 	private void LogPlaybackIfPossible(DateTime endedAtUtc)
 	{
 		if (_audioLogSyncService == null
@@ -405,6 +446,7 @@ public partial class POIDetailPage : ContentPage
 			trackDurationSeconds));
 	}
 
+	// Hàm này sẽ xóa bỏ ngữ cảnh liên quan đến playback hiện tại, bao gồm reset các biến lưu trữ thông tin về audio đang phát. Hàm này sẽ được gọi sau khi đã ghi nhận lại thông tin playback vào log (nếu có thể) để đảm bảo rằng ngữ cảnh chỉ được xóa sau khi đã lưu lại thông tin cần thiết
 	private void ClearPlaybackContext()
 	{
 		_playbackStartUtc = null;
@@ -412,6 +454,7 @@ public partial class POIDetailPage : ContentPage
 		_playbackRestaurantId = string.Empty;
 	}
 
+	// Hàm này sẽ cố gắng lấy thông tin audio của POI hiện tại dựa trên ngôn ngữ, nếu có audio phù hợp với ngôn ngữ hiện tại thì sẽ trả về, nếu không sẽ trả về audio mặc định (nếu có)	
 	private static AudioModel? ResolveSelectedAudio(POI poi, string languageCode)
 	{
 		var activeAudios = poi.Audios
@@ -435,6 +478,8 @@ public partial class POIDetailPage : ContentPage
 			.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.AudioUrl));
 	}
 
+
+	// Hàm này để dọn dẹp event khi page bị tháo khỏi UI handler.
 	protected override void OnHandlerChanging(HandlerChangingEventArgs args)
 	{
 		if (args.NewHandler == null && _audioService != null)
@@ -467,7 +512,7 @@ public partial class POIDetailPage : ContentPage
 		}
 
 		// Mở Google Maps hoặc ứng dụng bản đồ mặc định
-		var destination = $"{poi.Latitude},{poi.Longitude}";
+		var destination = $"{poi.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)},{poi.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
 		var label = Uri.EscapeDataString(poi.Name ?? "Điểm đến");
 
 		try

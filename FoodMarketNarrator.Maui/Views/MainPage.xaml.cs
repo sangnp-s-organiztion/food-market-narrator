@@ -19,11 +19,11 @@ public partial class MainPage : ContentPage
         OpenNow
     }
 
-    private static bool _hasAutoStartedNarrationThisSession;
-    private static bool _hasAppliedStartupTrackingDelay;
-    private static bool? _lastFloatingButtonVisibility;
-    private const int FeaturedPoiPageSize = 10;
-    private const double NearbyFilterRadiusMeters = 100;
+    private static bool _hasAutoStartedNarrationThisSession; // cờ để đảm bảo tự động bắt đầu thuyết minh chỉ 1 lần duy nhất trong mỗi phiên chạy app, tránh việc tự động bật lại khi người dùng quay lại MainPage sau khi đã có tương tác với thuyết minh trong phiên đó
+    private static bool _hasAppliedStartupTrackingDelay; // cờ để đảm bảo chỉ áp dụng delay khi bắt đầu tracking lần đầu tiên trong phiên chạy app, tránh delay không cần thiết khi quay lại MainPage sau khi đã có vị trí gần đó
+    private static bool? _lastFloatingButtonVisibility; // cache trạng thái visible của FloatingButton để tránh phải tính toán lại khi quay lại MainPage nếu vị trí không thay đổi nhiều
+    private const int FeaturedPoiPageSize = 10; // số lượng POI hiển thị trên mỗi trang khi phân trang
+    private const double NearbyFilterRadiusMeters = 100; // bán kính để xác định POI nào được coi là "gần" khi áp dụng filter Nearby
 
     // Khời tạo tọa độ và tên cho điểm
     private readonly IPOIService _poiService;
@@ -36,10 +36,10 @@ public partial class MainPage : ContentPage
     private bool _isMapLoaded;
     private bool _isPoiListBound;
     private List<POI> _allPois = new();
-    private int _currentPoiPageIndex;
-    private Location? _lastKnownLocation;
+    private int _currentPoiPageIndex; // chỉ số trang hiện tại trong phân trang POI
+    private Location? _lastKnownLocation; // cache vị trí gần nhất để có thể cập nhật UI ngay khi quay lại MainPage mà không phải chờ sự kiện LocationChanged nếu vị trí không thay đổi nhiều
     private bool _isInitializingMainPage;
-    private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All;
+    private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All; // filter đang được áp dụng cho danh sách POI, mặc định là All (tất cả)
     private List<POI> _filteredPois = new();
 
     // private static bool _hasShownLanguagePopupThisSession;
@@ -61,11 +61,13 @@ public partial class MainPage : ContentPage
         _favoriteService = favoriteService;
     }
 
+    // khôi phục trạng thái + cập nhật theo location + load dữ liệu nền + xử lý audio khi page xuất hiện
     protected override void OnAppearing()
     {
         base.OnAppearing();
         var sw = Stopwatch.StartNew();
 
+        // Khôi phục trạng thái visible của FloatingButton dựa trên cache nếu có, tránh việc phải tính toán lại khoảng cách đến POI và cập nhật UI nếu vị trí không thay đổi nhiều kể từ lần trước khi rời khỏi MainPage
         if (_lastFloatingButtonVisibility.HasValue)
         {
             var cachedVisibility = _lastFloatingButtonVisibility.Value;
@@ -73,6 +75,7 @@ public partial class MainPage : ContentPage
             FloatingButton.IsVisible = cachedVisibility;
         }
 
+        // Đăng ký sự kiện thay đổi vị trí để cập nhật UI và thuyết minh khi có vị trí mới, đăng ký ở đây để đảm bảo luôn có sự kiện được xử lý khi ở trên MainPage, kể cả khi người dùng quay lại từ trang khác mà không có sự kiện LocationChanged mới (ví dụ khi quay lại từ Settings sau khi bật/tắt thuyết minh)
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
         LogPerf("OnAppearing: subscribed LocationChanged", sw);
@@ -122,6 +125,7 @@ public partial class MainPage : ContentPage
         LogPerf("OnAppearing: completed", sw);
     }
 
+    // Hàm này sẽ đảm nhiệm việc khởi tạo các phần nặng của MainPage như load map, lấy dữ liệu POI, lấy vị trí hiện tại nếu chưa có, v.v. Hàm này được thiết kế để chạy nền sau khi UI đã kịp render frame đầu tiên để tránh giật lag lúc cold start, đồng thời có cơ chế tránh chạy lại nếu đã đang trong quá trình khởi tạo để đảm bảo hiệu quả và tránh xung đột trạng thái
     private async Task InitializeMainPageAsync()
     {
         if (_isInitializingMainPage)
@@ -136,13 +140,15 @@ public partial class MainPage : ContentPage
             // Nhường 1 nhịp để UI kịp render frame đầu trước khi chạy tác vụ nặng.
             await Task.Yield();
 
+            // Load map nền và hiển thị vị trí người dùng nếu đã có, tránh việc phải chờ load map mỗi khi quay lại MainPage.
             if (!_isMapLoaded)
             {
                 await MapHelper.LoadMapAsync(mapControl, _poiService, _locationService, initialZoomLevel: 19);
                 _isMapLoaded = true;
                 LogPerf("Initialize: map loaded", sw);
             }
-
+            
+            // Lấy dữ liệu POI nền nếu chưa có, tránh việc phải chờ load lại mỗi khi quay lại MainPage.
             if (!_isPoiListBound)
             {
                 var poisData = await _poiService.GetAllPOIsAsync();
@@ -153,6 +159,7 @@ public partial class MainPage : ContentPage
                 LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
             }
 
+            // Nếu chưa có vị trí nào được biết đến, cố gắng lấy vị trí hiện tại để cập nhật UI ngay khi khởi tạo xong, tránh việc phải chờ sự kiện LocationChanged mới để có UI chính xác khi người dùng vừa mở app lên đã ở gần POI.
             if (_lastKnownLocation == null)
             {
                 var currentLocation = await _locationService.GetCurrentLocationAsync();
@@ -172,6 +179,7 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // Chỉ delay 1 lần duy nhất trong session
     private async Task StartTrackingDeferredAsync()
     {
         try
@@ -190,6 +198,8 @@ public partial class MainPage : ContentPage
         }
     }
 
+
+    // Lấy vị trí hiện tại ngay lập tức (on-demand) để cập nhật UI sớm, thay vì phải chờ event tracking (LocationChanged)
     private async Task PrimeUiWithLatestLocationAsync()
     {
         try
@@ -214,6 +224,7 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // đảm bảo dữ liệu POI đã sẵn sàng để UI có thể hiển thị và tương tác, nếu có vị trí thì cập nhật UI theo vị trí đó, tránh việc phải chờ load POI mỗi khi quay lại MainPage để có UI chính xác khi ở gần POI
     private async Task EnsurePoiDataReadyForUiAsync(Location location)
     {
         try
@@ -269,7 +280,8 @@ public partial class MainPage : ContentPage
 
         await animateTapTask;
     }
-
+    
+    // Hàm xử lý animation khi nhấn nút thuyết minh để có hiệu ứng phản hồi người dùng, giúp trải nghiệm mượt mà hơn
     private async Task AnimateNarratorButtonTapAsync()
     {
         await FloatingButton.ScaleToAsync(0.93, 80, Easing.CubicOut);
@@ -299,6 +311,7 @@ public partial class MainPage : ContentPage
         CenterMapOn(currentLocation.Latitude, currentLocation.Longitude, 18);
     }
 
+    // Hàm này để điều chỉnh zoom level của map khi người dùng nhấn nút zoom in/zoom out, có cơ chế giới hạn mức zoom tối đa và tối thiểu để tránh việc zoom quá gần hoặc quá xa, đồng thời giữ nguyên tâm map hiện tại khi zoom để tránh việc mất phương hướng
     private void AdjustMapZoom(double factor)
     {
         if (mapControl?.Map?.Navigator == null)
@@ -316,6 +329,7 @@ public partial class MainPage : ContentPage
         mapControl.Map.RefreshGraphics();
     }
 
+    // Hàm này để căn giữa map vào tọa độ cụ thể với mức zoom nhất định, có cơ chế kiểm tra nếu map chưa sẵn sàng thì sẽ không thực hiện để tránh lỗi, đồng thời sử dụng phép chiếu Spherical Mercator để chuyển đổi từ kinh độ vĩ độ sang tọa độ map phù hợp
     private void CenterMapOn(double latitude, double longitude, int zoomLevel)
     {
         if (mapControl?.Map?.Navigator == null)
@@ -329,6 +343,7 @@ public partial class MainPage : ContentPage
         mapControl.Map.RefreshGraphics();
     }
 
+    // Hàm này để chuyển đổi từ zoom level sang resolution của map, có công thức dựa trên kích thước tile và hệ chiếu Spherical Mercator, đảm bảo rằng mỗi lần tăng 1 zoom level sẽ tương ứng với việc giảm một nửa resolution (tăng độ chi tiết) và ngược lại
     private static double ToResolution(int zoomLevel)
     {
         return 156543.03392 / Math.Pow(2, zoomLevel);
@@ -370,6 +385,7 @@ public partial class MainPage : ContentPage
         BindPoiPage();
     }
 
+    // dùng để xử lý khi người dùng nhấn nút trang tiếp theo trong phân trang danh sách POI, có cơ chế kiểm tra để tránh việc tăng chỉ số trang vượt quá tổng số trang hiện có dựa trên số lượng POI đã được lọc và kích thước trang, sau đó gọi hàm BindPoiPage để cập nhật lại danh sách hiển thị theo trang mới
     private void OnNextPageClicked(object sender, EventArgs e)
     {
         var totalPages = GetTotalPoiPages();
@@ -443,6 +459,7 @@ public partial class MainPage : ContentPage
         UpdateMapHighlightByCurrentFilter(location);
     }
 
+    // Hàm này để lọc danh sách POI dựa trên filter đang được áp dụng và vị trí tham chiếu nếu có, có các nhánh xử lý tương ứng cho từng loại filter như Nearby sẽ lọc dựa trên khoảng cách đến vị trí tham chiếu, Favorite sẽ lọc dựa trên danh sách yêu thích, OpenNow sẽ lọc dựa trên trạng thái mở cửa hiện tại của POI, và All sẽ trả về tất cả POI mà không áp dụng filter nào
     private List<POI> GetFilteredPois(Location? location)
     {
         if (_allPois.Count == 0)
@@ -482,6 +499,7 @@ public partial class MainPage : ContentPage
         return query.ToList();
     }
 
+    // Lấy danh sách ID của các POI (restaurant) đang hiển thị theo filter hiện tại
     private IEnumerable<string>? GetVisiblePoiIdsForCurrentFilter()
     {
         if (_activePoiFilter == PoiCategoryFilter.All)
@@ -495,6 +513,7 @@ public partial class MainPage : ContentPage
             .ToList();
     }
 
+    // cập nhật highlight trên map dựa trên filter hiện tại và vị trí tham chiếu nếu có, sẽ xác định POI nào nên được highlight (ví dụ POI gần nhất trong trường hợp filter Nearby) và gọi helper để cập nhật highlight trên map, nếu không có POI nào phù hợp để highlight thì sẽ xóa highlight
     private void UpdateMapHighlightByCurrentFilter(Location? location)
     {
         if (!_isMapLoaded)
@@ -520,6 +539,7 @@ public partial class MainPage : ContentPage
             visiblePoiIds: GetVisiblePoiIdsForCurrentFilter());
     }
 
+    // Cập nhật trạng thái ẩn/hiện của FloatingButton dựa trên khoảng cách đến POI gần nhất
     private void UpdateCategoryChipUi()
     {
         SetChipState(MainFilterAllChip, MainFilterAllLabel, _activePoiFilter == PoiCategoryFilter.All);
@@ -528,6 +548,7 @@ public partial class MainPage : ContentPage
         SetChipState(MainFilterOpenChip, MainFilterOpenLabel, _activePoiFilter == PoiCategoryFilter.OpenNow, MainFilterOpenIcon);
     }
 
+    // Hàm này để cập nhật trạng thái ẩn/hiện và màu sắc của chip filter dựa trên việc chip đó có đang được chọn (active) hay không, nếu có icon đi kèm thì cũng sẽ cập nhật màu sắc của icon để đồng bộ với trạng thái của chip, giúp người dùng dễ dàng nhận biết filter nào đang được áp dụng
     private static void SetChipState(Border border, Label textLabel, bool isActive, Label? iconLabel = null)
     {
         border.BackgroundColor = isActive ? Color.FromArgb("#F48C06") : Color.FromArgb("#F5F1EE");
@@ -538,6 +559,7 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // Hàm này để cập nhật danh sách POI hiển thị trên UI dựa trên trang hiện tại và danh sách POI đã được lọc, sẽ lấy ra phần tử tương ứng với trang hiện tại dựa trên kích thước trang và cập nhật ItemsSource của list, sau đó gọi hàm để cập nhật UI của phân trang (ví dụ trạng thái enabled/disabled của nút trang tiếp theo/trước đó, hiển thị số trang hiện tại, v.v.)
     private void BindPoiPage()
     {
         if (_filteredPois.Count == 0)
@@ -556,6 +578,7 @@ public partial class MainPage : ContentPage
         UpdatePaginationUi();
     }
 
+    // Hàm này để tính toán tổng số trang hiện có dựa trên số lượng POI đã được lọc và kích thước trang, có cơ chế đảm bảo rằng nếu không có POI nào sau khi lọc thì vẫn sẽ trả về 1 trang để UI có thể hiển thị trạng thái "không có kết quả" thay vì bị lỗi hoặc không hiển thị gì
     private int GetTotalPoiPages()
     {
         if (_filteredPois.Count == 0)
@@ -566,6 +589,8 @@ public partial class MainPage : ContentPage
         return (int)Math.Ceiling((double)_filteredPois.Count / FeaturedPoiPageSize);
     }
 
+
+    // cập nhật UI nút phân trang, dựa trên số lượng poi đã lọc và chỉ số trang hiện tại
     private void UpdatePaginationUi()
     {
         var totalPages = GetTotalPoiPages();
