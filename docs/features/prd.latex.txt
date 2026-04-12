@@ -1095,11 +1095,3 @@ Phần này dùng để đo mức độ thành công của sản phẩm sau khi 
 \end{itemize}
 \end{document}
 
-
-
-
-
-
-
-
-
