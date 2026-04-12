@@ -486,7 +486,7 @@ export default function AudioPage() {
           </p>
         </div>
         <Button onClick={() => openUploadDialog()}>
-          <Plus className="w-4 h-4 mr-2" /> Tải lên âm thanh
+          <Plus className="w-4 h-4 mr-2" /> Tải lên tệp âm thanh
         </Button>
       </div>
 
@@ -613,7 +613,7 @@ export default function AudioPage() {
           {languageGroups.length === 0 && (
             <div className="form-section text-center py-12">
               <p className="text-muted-foreground">
-                Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.
+                Chưa có tệp âm thanh nào. Tải lên tệp âm thanh đầu tiên.
               </p>
             </div>
           )}
@@ -721,7 +721,7 @@ export default function AudioPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tải lên mô tả âm thanh</DialogTitle>
+            <DialogTitle>Tải lên tệp âm thanh</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
