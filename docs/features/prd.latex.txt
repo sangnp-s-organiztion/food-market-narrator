@@ -255,8 +255,8 @@ Phần này mô tả các hành vi chính của người dùng khi sử dụng �
 
 Format chuẩn:
 
-\textbf{Với vai trò là [user]}  
-\textbf{Tôi muốn [action]}  
+\textbf{Với vai trò là [user]}\\
+\textbf{Tôi muốn [action]}\\
 \textbf{Để [goal]}
 
 \medskip\hrule\medskip
@@ -265,68 +265,68 @@ Format chuẩn:
 
 \textbf{Story V1 - Mở ứng dụng nhanh}
 
-Với vai trò là du khách  
-Tôi muốn quét mã QR  
+Với vai trò là du khách\\
+Tôi muốn quét mã QR\\
 Để có thể mở nhanh ứng dụng thuyết minh về phố ẩm thực.
 
 \textbf{Story V2 - Cấp quyền vị trí}
 
-Với vai trò là du khách  
-Tôi muốn ứng dụng xin quyền vị trí một cách rõ ràng  
+Với vai trò là du khách\\
+Tôi muốn ứng dụng xin quyền vị trí một cách rõ ràng\\
 Để tôi hiểu vì sao vị trí là cần thiết cho tính năng thuyết minh.
 
 \textbf{Story V3 - Xem bản đồ POI}
 
-Với vai trò là du khách  
-Tôi muốn xem tất cả POI ẩm thực lân cận trên bản đồ  
+Với vai trò là du khách\\
+Tôi muốn xem tất cả POI ẩm thực lân cận trên bản đồ\\
 Để tôi có thể chọn nơi sẽ đi tiếp theo.
 
 \textbf{Story V4 - Xem chi tiết quán}
 
-Với vai trò là du khách  
-Tôi muốn xem chi tiết một quán ăn đã chọn  
+Với vai trò là du khách\\
+Tôi muốn xem chi tiết một quán ăn đã chọn\\
 Để tôi có thể quyết định quán đó có phù hợp với sở thích của mình hay không.
 
 \textbf{Story V5 - Nghe thuyết minh tự động}
 
-Với vai trò là du khách  
-Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI  
+Với vai trò là du khách\\
+Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI\\
 Để tôi có thể tìm hiểu thông tin mà không cần tự tìm thủ công.
 
 \textbf{Story V6 - Đổi ngôn ngữ thuyết minh}
 
-Với vai trò là du khách  
-Tôi muốn đổi ngôn ngữ nghe thuyết minh  
+Với vai trò là du khách\\
+Tôi muốn đổi ngôn ngữ nghe thuyết minh\\
 Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
 
 \textbf{Story V7 - Phát lại thủ công}
 
-Với vai trò là du khách  
-Tôi muốn phát lại thủ công audio của POI  
+Với vai trò là du khách\\
+Tôi muốn phát lại thủ công audio của POI\\
 Để tôi có thể nghe lại những thông tin đã bỏ lỡ.
 
 \textbf{Story V8 - Hoạt động khi mạng yếu}
 
-Với vai trò là du khách  
-Tôi muốn ứng dụng dùng dữ liệu POI/audio đã cache khi mạng không ổn định  
+Với vai trò là du khách\\
+Tôi muốn ứng dụng dùng dữ liệu POI/audio đã cache khi mạng không ổn định\\
 Để trải nghiệm của tôi không bị gián đoạn.
 
 \textbf{Story V9 - Nhận gợi ý quán gần nhất}
 
-Với vai trò là du khách  
-Tôi muốn thấy POI gần nhất được làm nổi bật  
+Với vai trò là du khách\\
+Tôi muốn thấy POI gần nhất được làm nổi bật\\
 Để tôi có thể nhanh chóng khám phá các địa điểm xung quanh.
 
 \textbf{Story V10 - Không phát lặp gây phiền}
 
-Với vai trò là du khách  
-Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên  
+Với vai trò là du khách\\
+Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên\\
 Để tôi không bị khó chịu vì âm thanh lặp lại.
 
 \textbf{Story V11 – Tham quan theo tour}
 
-Với vai trò là du khách  
-Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn  
+Với vai trò là du khách\\
+Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn\\
 Để tôi được hướng dẫn theo lộ trình tối ưu và không bỏ sót các điểm quan trọng
 
 \medskip\hrule\medskip
@@ -335,56 +335,56 @@ Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵ
 
 \textbf{Story S1 - Đăng nhập quản lý quán}
 
-Với vai trò là chủ quán  
-Tôi muốn đăng nhập vào cổng quản lý của mình  
+Với vai trò là chủ quán\\
+Tôi muốn đăng nhập vào cổng quản lý của mình\\
 Để tôi có thể quản lý dữ liệu nhà hàng một cách an toàn.
 
 \textbf{Story S2 - Cập nhật thông tin quán}
 
-Với vai trò là chủ quán  
-Tôi muốn chỉnh sửa thông tin hồ sơ nhà hàng  
+Với vai trò là chủ quán\\
+Tôi muốn chỉnh sửa thông tin hồ sơ nhà hàng\\
 Để du khách luôn thấy thông tin chính xác.
 
 \textbf{Story S3 - Quản lý menu món ăn}
 
-Với vai trò là chủ quán  
-Tôi muốn tạo, cập nhật và xóa món ăn  
+Với vai trò là chủ quán\\
+Tôi muốn tạo, cập nhật và xóa món ăn\\
 Để menu phản ánh đúng các món đang phục vụ.
 
 \textbf{Story S4 - Quản lý hình ảnh quán}
 
-Với vai trò là chủ quán  
-Tôi muốn tải lên và sắp xếp lại hình ảnh nhà hàng  
+Với vai trò là chủ quán\\
+Tôi muốn tải lên và sắp xếp lại hình ảnh nhà hàng\\
 Để quán của tôi trông hấp dẫn và cung cấp thông tin tốt hơn.
 
 \textbf{Story S5 - Quản lý audio thuyết minh}
 
-Với vai trò là chủ quán  
-Tôi muốn tải lên audio thuyết minh theo từng ngôn ngữ  
+Với vai trò là chủ quán\\
+Tôi muốn tải lên audio thuyết minh theo từng ngôn ngữ\\
 Để du khách có thể nghe phần giới thiệu của quán.
 
 \textbf{Story S6 - Bật/tắt nội dung không còn phù hợp}
 
-Với vai trò là chủ quán  
-Tôi muốn bật hoặc tắt các bản ghi audio  
+Với vai trò là chủ quán\\
+Tôi muốn bật hoặc tắt các bản ghi audio\\
 Để nội dung đã lỗi thời không bị phát cho du khách.
 
 \textbf{Story S7 - Chọn nhà hàng cần thao tác}
 
-Với vai trò là chủ quán  
-Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu  
+Với vai trò là chủ quán\\
+Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu\\
 Để tránh cập nhật nhầm địa điểm.
 
 \textbf{Story S8 - Quản lý tài khoản saler}
 
-Với vai trò là chủ quán  
-Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập  
+Với vai trò là chủ quán\\
+Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập\\
 Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
 
 \textbf{Story S9 - Xem lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh}
 
-Với vai trò là chủ quán  
-Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng  
+Với vai trò là chủ quán\\
+Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng\\
 Để tôi có thể theo dõi mức sử dụng, đối chiếu chi phí và tối ưu nội dung cần dịch/tạo audio.
 
 \medskip\hrule\medskip
@@ -393,32 +393,32 @@ Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật v
 
 \textbf{Story A1 - Quản lý tài khoản người dùng}
 
-Với vai trò là quản trị viên  
-Tôi muốn quản lý tài khoản người dùng và vai trò  
+Với vai trò là quản trị viên\\
+Tôi muốn quản lý tài khoản người dùng và vai trò\\
 Để quyền truy cập được kiểm soát đúng.
 
 \textbf{Story A2 - Quản lý toàn bộ nhà hàng}
 
-Với vai trò là quản trị viên  
-Tôi muốn xem và cập nhật toàn bộ nhà hàng  
+Với vai trò là quản trị viên\\
+Tôi muốn xem và cập nhật toàn bộ nhà hàng\\
 Để chất lượng dữ liệu được đồng nhất trong toàn hệ thống.
 
 \textbf{Story A3 - Theo dõi vận hành hệ thống}
 
-Với vai trò là quản trị viên  
-Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung  
+Với vai trò là quản trị viên\\
+Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung\\
 Để có thể phát hiện và xử lý vấn đề sớm.
 
 \textbf{Story A4 - Khóa/mở trạng thái nhà hàng}
 
-Với vai trò là quản trị viên  
-Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng  
+Với vai trò là quản trị viên\\
+Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng\\
 Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
 
 \textbf{Story A5 - Quản lý hành trình (Tour)}
 
-Với vai trò là quản trị viên  
-Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng  
+Với vai trò là quản trị viên\\
+Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng\\
 Để du khách có thể khám phá theo tuyến gợi ý có cấu trúc.
 
 \section{Features / Functional Requirements}
@@ -1094,4 +1094,12 @@ Phần này dùng để đo mức độ thành công của sản phẩm sau khi 
 \item Mục tiêu giai đoạn đầu: đạt tối thiểu 500 phiên trải nghiệm/ngày trong khu vực triển khai.
 \end{itemize}
 \end{document}
+
+
+
+
+
+
+
+
 

@@ -3,10 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
-  getLanguagesApi,
   getMyAudioUsageApi,
   getMyTranslationUsageApi,
-  getRestaurantAudiosApi,
   getRestaurantKpisApi,
 } from "@/services/api";
 import { useRestaurant } from "@/contexts/RestaurantContext";
@@ -50,10 +48,6 @@ const formatActionType = (actionType: string) => {
 
 const calculateUsageLevel = (inputChars: number) =>
   inputChars * USAGE_MULTIPLIER;
-
-type AudioMeta = {
-  language_id: number;
-};
 
 function formatMinutesSeconds(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -99,67 +93,6 @@ export default function AudioHistoryPage() {
     placeholderData: (previous) => previous,
   });
 
-  const audioHistoryRestaurantIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (audioData?.items ?? [])
-            .map((item) => item.restaurant_id)
-            .filter((id): id is string => Boolean(id)),
-        ),
-      ),
-    [audioData?.items],
-  );
-
-  const audioHistoryAudioIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (audioData?.items ?? [])
-            .map((item) => item.audio_id)
-            .filter((id): id is number => typeof id === "number" && id > 0),
-        ),
-      ).sort((a, b) => a - b),
-    [audioData?.items],
-  );
-
-  const { data: languages } = useQuery({
-    queryKey: ["saler", "languages", "audio-history"],
-    queryFn: () => getLanguagesApi(),
-    staleTime: 5 * 60_000,
-  });
-
-  const { data: audioMetaById } = useQuery({
-    queryKey: [
-      "saler",
-      "audio-meta",
-      "history",
-      ...audioHistoryRestaurantIds,
-      "audio-ids",
-      ...audioHistoryAudioIds,
-    ],
-    queryFn: async () => {
-      const lists = await Promise.all(
-        audioHistoryRestaurantIds.map((restaurantId) =>
-          getRestaurantAudiosApi(restaurantId),
-        ),
-      );
-
-      const metadata: Record<number, AudioMeta> = {};
-      lists.forEach((audios) => {
-        audios.forEach((audio) => {
-          metadata[audio.audio_id] = {
-            language_id: audio.language_id,
-          };
-        });
-      });
-
-      return metadata;
-    },
-    enabled: audioHistoryRestaurantIds.length > 0,
-    staleTime: 15_000,
-  });
-
   const { data: restaurantKpis } = useQuery({
     queryKey: [
       "saler",
@@ -192,21 +125,6 @@ export default function AudioHistoryPage() {
   const audioSummaryUsage = calculateUsageLevel(
     audioData?.summary.total_billable_units ?? 0,
   );
-
-  const languageNameById = useMemo(() => {
-    const map: Record<number, string> = {};
-    (languages ?? []).forEach((language) => {
-      map[language.language_id] = language.name || language.code || "-";
-    });
-    return map;
-  }, [languages]);
-
-  const getAudioLanguageLabel = (audioId: number | null) => {
-    if (!audioId) return "-";
-    const meta = audioMetaById?.[audioId];
-    if (!meta) return "-";
-    return languageNameById[meta.language_id] ?? "-";
-  };
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
@@ -417,7 +335,6 @@ export default function AudioHistoryPage() {
               <tr>
                 <th>Thời gian</th>
                 <th>Nhà hàng</th>
-                <th>Ngôn ngữ</th>
                 <th>Hành động</th>
                 <th>Ký tự đầu vào</th>
                 <th>Mức sử dụng</th>
@@ -427,7 +344,7 @@ export default function AudioHistoryPage() {
               {isAudioLoading && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={5}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải lịch sử tạo audio...
@@ -436,7 +353,7 @@ export default function AudioHistoryPage() {
               )}
               {isAudioError && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-destructive">
+                  <td colSpan={5} className="text-center py-8 text-destructive">
                     Không thể tải lịch sử tạo audio.
                   </td>
                 </tr>
@@ -446,7 +363,7 @@ export default function AudioHistoryPage() {
                 (audioData?.items.length ?? 0) === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={5}
                       className="text-center py-8 text-muted-foreground"
                     >
                       Chưa có lịch sử tạo audio theo bộ lọc.
@@ -461,9 +378,6 @@ export default function AudioHistoryPage() {
                       {formatDateTime(item.created_at_utc)}
                     </td>
                     <td className="mono text-xs">{item.restaurant_id}</td>
-                    <td className="mono text-xs">
-                      {getAudioLanguageLabel(item.audio_id)}
-                    </td>
                     <td className="mono text-xs">
                       {formatActionType(item.action_type)}
                     </td>
