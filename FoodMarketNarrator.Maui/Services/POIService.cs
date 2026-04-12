@@ -10,6 +10,7 @@ using System.Diagnostics;
 
 namespace food_market_narrator.Services;
 
+// Service quản lý POI: cache-first load, refresh network, warmup ảnh/món ăn và geofence state.
 public class POIService : IPOIService
 {
     private enum WarmupJobKind
@@ -58,7 +59,7 @@ public class POIService : IPOIService
         WriteIndented = false
     };
 
-    // Danh sach cac POI
+    // HttpClient dùng cho các request lấy POI, ảnh và món ăn.
     private readonly HttpClient _httpClient;
 
     public POIService(HttpClient httpClient)
@@ -108,6 +109,7 @@ public class POIService : IPOIService
         return $"{ex.GetType().Name}: {ex.Message}" + (string.IsNullOrWhiteSpace(inner) ? string.Empty : $" | Inner: {inner}");
     }
 
+    // Lấy POI theo chiến lược cache-first: memory -> disk -> network.
     public async Task<List<POI>> GetPOIsAsync()
     {
         var swTotal = Stopwatch.StartNew();
@@ -151,6 +153,7 @@ public class POIService : IPOIService
         return await TryRefreshPoisFromNetworkAsync(runInBackground: false);
     }
 
+    // Thử refresh POI từ network qua danh sách endpoint fallback.
     private async Task<List<POI>> TryRefreshPoisFromNetworkAsync(bool runInBackground)
     {
         if (runInBackground)
@@ -886,7 +889,7 @@ public class POIService : IPOIService
         return _fileWriteLocks.GetOrAdd(path, _ => new SemaphoreSlim(1, 1));
     }
 
-    // Láº¥y táº¥t cáº£ cÃ¡c POIs Ä‘á»“ng bá»™
+    // Lấy toàn bộ POI có xét TTL và cooldown khi fetch lỗi liên tiếp.
     public async Task<List<POI>> GetAllPOIsAsync()
     {
         var now = DateTime.UtcNow;
@@ -1012,7 +1015,7 @@ public class POIService : IPOIService
             DistanceUnits.Kilometers) * 1000;
     }
 
-    // Láº¥y POI gáº§n nháº¥t dá»±a trÃªn vá»‹ trÃ­ hiá»‡n táº¡i vÃ  cÃ¡c POIs
+    // Cập nhật geofence state và chỉ trả POI khi xảy ra transition enter/switch.
     public POI? UpdateNearestPOI(double currentLat, double currentLng, IEnumerable<POI>? pois = null)
     {
         var source = pois?.ToList() ?? _pois;
@@ -1069,7 +1072,7 @@ public class POIService : IPOIService
             }
         }
 
-        return null; // KhÃ´ng cÃ³ thay Ä‘á»•i
+        return null; // Không có transition geofence
     }
 
     public void ResetGeofenceState()
@@ -1078,7 +1081,7 @@ public class POIService : IPOIService
         _lastNearest = null;
     }
 
-    // Láº¥y danh sÃ¡ch mÃ³n Äƒn theo restaurant
+    // Lấy danh sách món theo restaurant, có dedupe request in-flight.
     public Task<List<DishModel>> GetDishesByRestaurantIdAsync(string restaurantId)
     {
         if (string.IsNullOrWhiteSpace(restaurantId))

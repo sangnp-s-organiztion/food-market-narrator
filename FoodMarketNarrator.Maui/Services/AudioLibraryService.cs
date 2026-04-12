@@ -27,6 +27,8 @@ public sealed class AudioLibraryService : IAudioLibraryService
         _audioService = audioService;
     }
 
+
+    // hàm này dùng để khởi tạo thư viện audio khi app khởi động. Nó sẽ kiểm tra xem audio đã sẵn sàng chưa (audio_ready), nếu chưa thì sẽ cố gắng đồng bộ tất cả audio có sẵn từ server. Nếu đã sẵn sàng và có kết nối internet, nó sẽ chỉ đồng bộ những phiên bản mới hơn của audio.
     public async Task InitializeOnStartupAsync()
     {
         await _syncGate.WaitAsync();
@@ -81,6 +83,8 @@ public sealed class AudioLibraryService : IAudioLibraryService
         }
     }
 
+
+    // hàm này được dùng để kiểm tra xem có cần hiển thị thông báo offline cho người dùng khi app khởi động hay không. Nếu có, nó sẽ trả về true và đồng thời xóa cờ đã hiển thị để lần sau không hiển thị nữa.
     public bool ConsumeStartupOfflineNoticeFlag()
     {
         var pending = Preferences.Get(StartupOfflineNoticePendingKey, false);
@@ -92,6 +96,8 @@ public sealed class AudioLibraryService : IAudioLibraryService
         return pending;
     }
 
+
+    // hàm này được dùng để lấy danh sách tất cả audio có sẵn từ server, bất kể đã có trong thư viện local hay chưa. Nó sẽ trả về một danh sách các audio model với thông tin chi tiết.
     private async Task<SyncProgress> SyncAllAvailableAudiosAsync()
     {
         var pois = await _poiService.GetAllPOIsAsync();
@@ -144,6 +150,8 @@ public sealed class AudioLibraryService : IAudioLibraryService
         return result;
     }
 
+
+    // hàm này được dùng để kiểm tra và chỉ đồng bộ những audio nào có phiên bản mới hơn so với phiên bản đã có trong thư viện local. Nó sẽ giúp tiết kiệm băng thông và thời gian khi không cần thiết phải tải lại những audio đã có sẵn.
     private async Task SyncOnlyNewerVersionsAsync()
     {
         var pois = await _poiService.GetAllPOIsAsync();
@@ -197,11 +205,14 @@ public sealed class AudioLibraryService : IAudioLibraryService
         }
     }
 
+    // hàm này được dùng để kiểm tra xem thiết bị hiện tại có kết nối internet hay không. Nó sẽ trả về true nếu có kết nối internet, ngược lại trả về false.
     private static bool HasInternetConnection()
     {
         return Connectivity.Current.NetworkAccess == NetworkAccess.Internet;
     }
 
+
+    // hàm này được dùng để lấy danh sách tất cả audio có sẵn từ server, bất kể đã có trong thư viện local hay chưa. Nó sẽ trả về một danh sách các audio model với thông tin chi tiết.
     private static List<AudioModel> FlattenAudioList(IEnumerable<POI> pois)
     {
         return pois
@@ -215,16 +226,19 @@ public sealed class AudioLibraryService : IAudioLibraryService
             .ToList();
     }
 
+    // hàm này được dùng để xây dựng một khóa duy nhất cho mỗi audio dựa trên audioId. Khóa này sẽ được sử dụng để lưu trữ và tra cứu thông tin audio trong manifest.
     private static string BuildManifestKey(int audioId)
     {
         return audioId.ToString();
     }
 
+    // hàm này được dùng để lấy đường dẫn đến file manifest lưu trữ thông tin về các audio đã tải về. File này sẽ được lưu trong thư mục dữ liệu của ứng dụng.
     private static string GetManifestPath()
     {
         return Path.Combine(FileSystem.AppDataDirectory, AudioManifestFileName);
     }
 
+    // hàm này được dùng để tải manifest từ file. Nếu file không tồn tại hoặc có lỗi khi đọc, nó sẽ trả về một manifest mới rỗng. Manifest này chứa thông tin về các audio đã tải về, bao gồm audioId, languageCode, audioUrl, version và thời gian cập nhật.
     private static async Task<AudioManifest> LoadManifestAsync()
     {
         var path = GetManifestPath();
@@ -245,6 +259,7 @@ public sealed class AudioLibraryService : IAudioLibraryService
         }
     }
 
+    // hàm này được dùng để lưu manifest vào file. Nó sẽ ghi manifest mới vào một file tạm thời trước, sau đó xóa file cũ (nếu có) và đổi tên file tạm thành file chính. Cách làm này giúp tránh tình trạng file bị hỏng nếu có lỗi xảy ra trong quá trình ghi.
     private static async Task SaveManifestAsync(AudioManifest manifest)
     {
         try
@@ -270,6 +285,7 @@ public sealed class AudioLibraryService : IAudioLibraryService
         }
     }
 
+    // hàm này được dùng để kiểm tra xem có cần hiển thị thông báo offline cho người dùng khi app khởi động hay không. Nếu có, nó sẽ trả về true và đồng thời xóa cờ đã hiển thị để lần sau không hiển thị nữa.
     private static void QueueFirstInstallOfflineNoticeIfNeeded()
     {
         if (Preferences.Get(FirstInstallOfflineNoticeShownKey, false))
@@ -283,22 +299,27 @@ public sealed class AudioLibraryService : IAudioLibraryService
         Log("Queued first-install offline notice.");
     }
 
+    // hàm này được dùng để ghi log với tiền tố [AudioLibraryService] để dễ dàng phân biệt trong output debug. Nó sẽ giúp theo dõi quá trình đồng bộ audio và phát hiện lỗi nếu có.
     private static void Log(string message)
     {
         Debug.WriteLine($"[AudioLibraryService] {message}");
     }
 
+
+    // các lớp phụ trợ để quản lý tiến trình đồng bộ và lưu trữ thông tin manifest của audio. SyncProgress dùng để theo dõi số lượng audio đã xử lý so với tổng số audio cần đồng bộ. AudioManifest và AudioManifestItem dùng để lưu trữ thông tin chi tiết về các audio đã tải về, bao gồm phiên bản và thời gian cập nhật, giúp cho việc kiểm tra và đồng bộ phiên bản mới dễ dàng hơn.
     private sealed class SyncProgress
     {
         public int TotalCandidates { get; set; }
         public int DownloadedOrAlreadyLocal { get; set; }
     }
 
+    // lớp này đại diện cho manifest lưu trữ thông tin về các audio đã tải về. Nó sử dụng một dictionary để lưu trữ các mục manifest, với khóa là một chuỗi duy nhất (dựa trên audioId) và giá trị là một AudioManifestItem chứa thông tin chi tiết về audio đó.
     private sealed class AudioManifest
     {
         public Dictionary<string, AudioManifestItem> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
+    // lớp này đại diện cho một mục trong manifest, chứa thông tin chi tiết về một audio cụ thể, bao gồm audioId, languageCode, audioUrl, version và thời gian cập nhật. Thông tin này sẽ được sử dụng để kiểm tra phiên bản và đồng bộ audio mới khi cần thiết.
     private sealed class AudioManifestItem
     {
         public int AudioId { get; set; }
