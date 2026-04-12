@@ -39,6 +39,15 @@ namespace food_market_narrator_api.Repositories
                 .FirstOrDefaultAsync(a => a.AudioId == audioId);
         }
 
+        public async Task<int> GetLatestVersionAsync(string restaurantId, int languageId)
+        {
+            var maxVersion = await _context.Audio
+                .Where(a => a.RestaurantId == restaurantId && a.LanguageId == languageId)
+                .MaxAsync(a => (int?)a.Version);
+
+            return maxVersion ?? 0;
+        }
+
         public async Task<AudioModel> CreateAsync(AudioModel audio)
         {
             _context.Audio.Add(audio);

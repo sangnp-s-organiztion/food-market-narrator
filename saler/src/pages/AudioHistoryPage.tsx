@@ -2,10 +2,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { getMyTranslationUsageApi, getRestaurantKpisApi } from "@/services/api";
+import {
+  getMyAudioUsageApi,
+  getMyTranslationUsageApi,
+  getRestaurantKpisApi,
+} from "@/services/api";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 
 const PAGE_SIZE = 20;
+const USAGE_MULTIPLIER = 1.2;
 
 const getCurrentMonth = () => {
   const now = new Date();
@@ -30,6 +35,20 @@ const formatDateTime = (iso: string) => {
   });
 };
 
+const formatActionType = (actionType: string) => {
+  switch ((actionType ?? "").toLowerCase()) {
+    case "translate":
+      return "Dịch";
+    case "create_audio":
+      return "Tạo tệp thuyết minh";
+    default:
+      return actionType;
+  }
+};
+
+const calculateUsageLevel = (inputChars: number) =>
+  inputChars * USAGE_MULTIPLIER;
+
 function formatMinutesSeconds(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
@@ -41,14 +60,34 @@ function formatMinutesSeconds(seconds: number): string {
 export default function AudioHistoryPage() {
   const { selectedRestaurant } = useRestaurant();
   const [billingMonth, setBillingMonth] = useState(getCurrentMonth());
-  const [page, setPage] = useState(1);
+  const [translationPage, setTranslationPage] = useState(1);
+  const [audioPage, setAudioPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["saler", "translation-usage", billingMonth, page],
+  const {
+    data: translationData,
+    isLoading: isTranslationLoading,
+    isError: isTranslationError,
+  } = useQuery({
+    queryKey: ["saler", "translation-usage", billingMonth, translationPage],
     queryFn: () =>
       getMyTranslationUsageApi({
         billingMonth,
-        page,
+        page: translationPage,
+        pageSize: PAGE_SIZE,
+      }),
+    placeholderData: (previous) => previous,
+  });
+
+  const {
+    data: audioData,
+    isLoading: isAudioLoading,
+    isError: isAudioError,
+  } = useQuery({
+    queryKey: ["saler", "audio-usage", billingMonth, audioPage],
+    queryFn: () =>
+      getMyAudioUsageApi({
+        billingMonth,
+        page: audioPage,
         pageSize: PAGE_SIZE,
       }),
     placeholderData: (previous) => previous,
@@ -67,20 +106,32 @@ export default function AudioHistoryPage() {
     staleTime: 30_000,
   });
 
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((data?.total_count ?? 0) / PAGE_SIZE)),
-    [data?.total_count],
+  const translationTotalPages = useMemo(
+    () =>
+      Math.max(1, Math.ceil((translationData?.total_count ?? 0) / PAGE_SIZE)),
+    [translationData?.total_count],
+  );
+
+  const audioTotalPages = useMemo(
+    () => Math.max(1, Math.ceil((audioData?.total_count ?? 0) / PAGE_SIZE)),
+    [audioData?.total_count],
   );
 
   const avgTime = restaurantKpis?.average_listening_time_seconds ?? 0;
   const formattedAvgTime = avgTime > 0 ? formatMinutesSeconds(avgTime) : "0.0";
+  const translationSummaryUsage = calculateUsageLevel(
+    translationData?.summary.total_billable_units ?? 0,
+  );
+  const audioSummaryUsage = calculateUsageLevel(
+    audioData?.summary.total_billable_units ?? 0,
+  );
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
       <div className="page-header">
         <h1 className="page-title">Lịch sử thuyết minh</h1>
         <p className="page-description">
-          Theo dõi lịch sử đơn vị tính phí khi tạo thuyết minh âm thanh.
+          Theo dõi mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
         </p>
       </div>
 
@@ -96,7 +147,9 @@ export default function AudioHistoryPage() {
         </div>
 
         <div className="dashboard-card">
-          <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
+          <span className="stat-label">
+            Thời gian trung bình nghe thuyết minh
+          </span>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="stat-value mono">{formattedAvgTime}</span>
             {avgTime > 0 && (
@@ -106,14 +159,40 @@ export default function AudioHistoryPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="dashboard-card">
+          <span className="stat-label">
+            Tổng mức sử dụng dịch vụ dịch thuật
+          </span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">
+              {formatNumber(translationSummaryUsage)}
+            </span>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <span className="stat-label">
+            Tổng mức sử dụng dịch vụ tạo tệp thuyết minh
+          </span>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="stat-value mono">
+              {formatNumber(audioSummaryUsage)}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-card space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-base">Lịch sử đơn vị tính phí</h2>
+            <h2 className="font-semibold text-base">
+              Lịch sử sử dụng dịch vụ dịch thuật
+            </h2>
           </div>
           <span className="text-xs text-muted-foreground mono">
-            {data?.total_count ?? 0} sự kiện
+            {translationData?.total_count ?? 0} sự kiện
           </span>
         </div>
 
@@ -127,17 +206,18 @@ export default function AudioHistoryPage() {
               value={billingMonth}
               onChange={(e) => {
                 setBillingMonth(e.target.value);
-                setPage(1);
+                setTranslationPage(1);
+                setAudioPage(1);
               }}
               className="mt-1"
             />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground">
-              Tổng đơn vị tính phí
+              Tổng mức sử dụng dịch vụ dịch thuật
             </label>
             <div className="mt-1 h-10 rounded-md border border-input bg-muted/40 px-3 flex items-center text-sm font-medium">
-              {formatNumber(data?.summary.total_billable_units ?? 0)}
+              {formatNumber(translationSummaryUsage)}
             </div>
           </div>
         </div>
@@ -147,60 +227,56 @@ export default function AudioHistoryPage() {
             <thead>
               <tr>
                 <th>Thời gian</th>
-                <th>Người bán</th>
-                <th>ID người bán</th>
                 <th>Hành động</th>
                 <th>Ký tự đầu vào</th>
-                <th>Đơn vị tính phí</th>
+                <th>Mức sử dụng</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && (
+              {isTranslationLoading && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={4}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Đang tải lịch sử sử dụng...
                   </td>
                 </tr>
               )}
-              {isError && (
+              {isTranslationError && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-destructive">
-                    Không thể tải lịch sử đơn vị tính phí.
+                  <td colSpan={4} className="text-center py-8 text-destructive">
+                    Không thể tải lịch sử sử dụng dịch vụ.
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError && (data?.items.length ?? 0) === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    Chưa có lịch sử đơn vị tính phí theo bộ lọc.
-                  </td>
-                </tr>
-              )}
-              {!isLoading &&
-                !isError &&
-                (data?.items ?? []).map((item) => (
+              {!isTranslationLoading &&
+                !isTranslationError &&
+                (translationData?.items.length ?? 0) === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center py-8 text-muted-foreground"
+                    >
+                      Chưa có lịch sử sử dụng dịch vụ dịch thuật theo bộ lọc.
+                    </td>
+                  </tr>
+                )}
+              {!isTranslationLoading &&
+                !isTranslationError &&
+                (translationData?.items ?? []).map((item) => (
                   <tr key={item.usage_event_id}>
                     <td className="mono text-xs whitespace-nowrap">
                       {formatDateTime(item.created_at_utc)}
                     </td>
-                    <td className="font-medium">
-                      {item.seller_username || "(không rõ)"}
+                    <td className="mono text-xs">
+                      {formatActionType(item.action_type)}
                     </td>
-                    <td className="mono text-xs text-muted-foreground">
-                      {item.seller_user_id}
-                    </td>
-                    <td className="mono text-xs">{item.action_type}</td>
                     <td className="mono text-xs">
                       {formatNumber(item.input_chars)}
                     </td>
                     <td className="mono text-xs">
-                      {formatNumber(item.billable_units)}
+                      {formatNumber(calculateUsageLevel(item.input_chars))}
                     </td>
                   </tr>
                 ))}
@@ -212,19 +288,128 @@ export default function AudioHistoryPage() {
           <button
             type="button"
             className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={translationPage <= 1}
+            onClick={() => setTranslationPage((p) => Math.max(1, p - 1))}
           >
             Trang trước
           </button>
           <span className="text-xs text-muted-foreground mono">
-            {page}/{totalPages}
+            {translationPage}/{translationTotalPages}
           </span>
           <button
             type="button"
             className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
+            disabled={translationPage >= translationTotalPages}
+            onClick={() => setTranslationPage((p) => p + 1)}
+          >
+            Trang sau
+          </button>
+        </div>
+      </div>
+
+      <div className="dashboard-card space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-primary" />
+            <h2 className="font-semibold text-base">
+              Lịch sử tạo tệp thuyết minh
+            </h2>
+          </div>
+          <span className="text-xs text-muted-foreground mono">
+            {audioData?.total_count ?? 0} sự kiện
+          </span>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            Tổng mức sử dụng dịch vụ tạo tệp thuyết minh
+          </label>
+          <div className="mt-1 h-10 rounded-md border border-input bg-muted/40 px-3 flex items-center text-sm font-medium">
+            {formatNumber(audioSummaryUsage)}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border border-border/70 bg-card">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Thời gian</th>
+                <th>Nhà hàng</th>
+                <th>Hành động</th>
+                <th>Ký tự đầu vào</th>
+                <th>Mức sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isAudioLoading && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Đang tải lịch sử tạo audio...
+                  </td>
+                </tr>
+              )}
+              {isAudioError && (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-destructive">
+                    Không thể tải lịch sử tạo audio.
+                  </td>
+                </tr>
+              )}
+              {!isAudioLoading &&
+                !isAudioError &&
+                (audioData?.items.length ?? 0) === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="text-center py-8 text-muted-foreground"
+                    >
+                      Chưa có lịch sử tạo audio theo bộ lọc.
+                    </td>
+                  </tr>
+                )}
+              {!isAudioLoading &&
+                !isAudioError &&
+                (audioData?.items ?? []).map((item) => (
+                  <tr key={item.usage_event_id}>
+                    <td className="mono text-xs whitespace-nowrap">
+                      {formatDateTime(item.created_at_utc)}
+                    </td>
+                    <td className="mono text-xs">{item.restaurant_id}</td>
+                    <td className="mono text-xs">
+                      {formatActionType(item.action_type)}
+                    </td>
+                    <td className="mono text-xs">
+                      {formatNumber(item.input_chars)}
+                    </td>
+                    <td className="mono text-xs">
+                      {formatNumber(calculateUsageLevel(item.input_chars))}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-1 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+            disabled={audioPage <= 1}
+            onClick={() => setAudioPage((p) => Math.max(1, p - 1))}
+          >
+            Trang trước
+          </button>
+          <span className="text-xs text-muted-foreground mono">
+            {audioPage}/{audioTotalPages}
+          </span>
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-md border text-xs font-medium disabled:opacity-50"
+            disabled={audioPage >= audioTotalPages}
+            onClick={() => setAudioPage((p) => p + 1)}
           >
             Trang sau
           </button>

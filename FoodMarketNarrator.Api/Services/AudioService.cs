@@ -71,12 +71,15 @@ namespace food_market_narrator_api.Services
 
         public async Task<AudioResponse> CreateAsync(string restaurantId, int languageId, string audioUrl)
         {
+            var latestVersion = await _audioRepository.GetLatestVersionAsync(restaurantId, languageId);
+            var nextVersion = latestVersion + 1;
+
             var created = await _audioRepository.CreateAsync(new AudioModel
             {
                 RestaurantId = restaurantId,
                 LanguageId = languageId,
                 AudioUrl = audioUrl,
-                Version = 1,
+                Version = nextVersion,
                 IsActive = true,
                 DateGeneration = DateTime.UtcNow
             });
