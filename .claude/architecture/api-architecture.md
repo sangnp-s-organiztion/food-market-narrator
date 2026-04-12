@@ -39,6 +39,12 @@ Luu y:
 
 - GET /api/admin/translation-billing/monthly
 - GET /api/admin/translation-billing/usage
+- GET /api/admin/translation-billing/audio-usage
+
+## Seller Translation Billing
+
+- GET /api/translation-billing/my-usage
+- GET /api/translation-billing/my-audio-usage
 
 ## Audio
 

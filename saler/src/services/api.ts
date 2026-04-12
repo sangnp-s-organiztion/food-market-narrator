@@ -1,5 +1,6 @@
 import type {
   Audio,
+  AudioUsageLedgerResponse,
   AnalyticsKpi,
   CreateAudioFromTextResult,
   Dish,
@@ -228,6 +229,37 @@ type ApiTranslationUsageLedgerResponse = {
   page: number;
   pageSize: number;
   summary: ApiTranslationUsageLedgerSummary;
+};
+
+type ApiAudioUsageLedgerItem = {
+  usageEventId: string;
+  requestId: string;
+  sellerUserId: number;
+  sellerUsername: string;
+  restaurantId: string;
+  audioId: number | null;
+  provider: string;
+  actionType: string;
+  unitType: string;
+  inputChars: number;
+  outputChars: number;
+  billableUnits: number;
+  billingMonth: string;
+  createdAtUtc: string;
+};
+
+type ApiAudioUsageLedgerSummary = {
+  billingMonth: string;
+  eventCount: number;
+  totalBillableUnits: number;
+};
+
+type ApiAudioUsageLedgerResponse = {
+  items: ApiAudioUsageLedgerItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  summary: ApiAudioUsageLedgerSummary;
 };
 
 type ApiAnalyticsKpi = {
@@ -760,6 +792,50 @@ export async function getMyTranslationUsageApi(filter: {
       total_billable_units: data.summary.totalBillableUnits,
       total_amount: data.summary.totalAmount,
       currency: data.summary.currency,
+    },
+  };
+}
+
+export async function getMyAudioUsageApi(filter: {
+  billingMonth?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<AudioUsageLedgerResponse> {
+  const query = toQueryString({
+    billingMonth: filter.billingMonth,
+    page: filter.page ?? 1,
+    pageSize: filter.pageSize ?? 20,
+  });
+
+  const data = await request<ApiAudioUsageLedgerResponse>(
+    `/api/translation-billing/my-audio-usage?${query}`,
+    { method: "GET" },
+  );
+
+  return {
+    items: data.items.map((x) => ({
+      usage_event_id: x.usageEventId,
+      request_id: x.requestId,
+      seller_user_id: x.sellerUserId,
+      seller_username: x.sellerUsername,
+      restaurant_id: x.restaurantId,
+      audio_id: x.audioId,
+      provider: x.provider,
+      action_type: x.actionType,
+      unit_type: x.unitType,
+      input_chars: x.inputChars,
+      output_chars: x.outputChars,
+      billable_units: x.billableUnits,
+      billing_month: x.billingMonth,
+      created_at_utc: x.createdAtUtc,
+    })),
+    total_count: data.totalCount,
+    page: data.page,
+    page_size: data.pageSize,
+    summary: {
+      billing_month: data.summary.billingMonth,
+      event_count: data.summary.eventCount,
+      total_billable_units: data.summary.totalBillableUnits,
     },
   };
 }
