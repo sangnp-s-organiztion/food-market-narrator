@@ -11,6 +11,8 @@ public partial class AudioService
     private PlatformAudioFocusListener? _platformAudioFocusListener;
     private AudioFocusRequestClass? _platformAudioFocusRequest;
 
+
+    // hàm này được dùng để khởi tạo các thành phần liên quan đến quản lý audio trên nền tảng Android, bao gồm AudioManager để quản lý các thiết bị âm thanh và AudioFocusListener để lắng nghe các sự kiện thay đổi về quyền truy cập audio. Hàm này sẽ được gọi khi khởi tạo AudioService để đảm bảo rằng app có thể xử lý các tình huống như cuộc gọi đến hoặc người dùng mở một app khác đang phát audio.
     partial void InitializePlatformInterruptionHandling()
     {
         var context = Android.App.Application.Context;
@@ -18,6 +20,7 @@ public partial class AudioService
         _platformAudioFocusListener = new PlatformAudioFocusListener(this);
     }
 
+    // hàm này được dùng để yêu cầu quyền truy cập audio khi app cần phát audio. Nó sẽ sử dụng AudioManager để yêu cầu quyền truy cập và sẽ xử lý các trường hợp khác nhau dựa trên phiên bản Android. Nếu yêu cầu thành công, app sẽ có quyền phát audio. Nếu không, app có thể cần phải xử lý tình huống khi không có quyền truy cập audio.
     partial void RequestPlatformAudioFocus()
     {
         if (_platformAudioManager == null || _platformAudioFocusListener == null)
@@ -98,6 +101,7 @@ public partial class AudioService
 #pragma warning restore CA1422
     }
 
+    // Nhả audio focus khi dừng phát để ứng dụng khác có thể lấy quyền phát audio.
     partial void ReleasePlatformAudioFocus()
     {
         if (_platformAudioManager == null || _platformAudioFocusListener == null)
@@ -116,6 +120,7 @@ public partial class AudioService
 #pragma warning restore CA1422
     }
 
+    // Xử lý callback mất audio focus: dừng phát để tránh chồng âm thanh với app/hệ thống khác.
     private void HandlePlatformAudioFocusChanged(AudioFocus focusChange)
     {
         if (focusChange is AudioFocus.Loss or AudioFocus.LossTransient or AudioFocus.LossTransientCanDuck)
@@ -128,11 +133,13 @@ public partial class AudioService
     {
         private readonly AudioService _owner;
 
+        // Listener bridge từ Android AudioManager về AudioService.
         public PlatformAudioFocusListener(AudioService owner)
         {
             _owner = owner;
         }
 
+        // Nhận event audio focus thay đổi từ hệ điều hành và chuyển sang owner xử lý.
         public void OnAudioFocusChange(AudioFocus focusChange)
         {
             _owner.HandlePlatformAudioFocusChanged(focusChange);

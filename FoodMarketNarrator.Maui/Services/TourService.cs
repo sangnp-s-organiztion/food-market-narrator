@@ -8,6 +8,7 @@ using System.Text.Json;
 
 namespace food_market_narrator.Services;
 
+// Service lấy dữ liệu tour theo chiến lược cache-first + refresh nền, kèm chuẩn hóa ảnh.
 public class TourService : ITourService
 {
     private const string OfflineCacheFolderName = "offline_cache";
@@ -31,12 +32,14 @@ public class TourService : ITourService
         WriteIndented = false
     };
 
+    // Khởi tạo service tour với HttpClient và LocationService để build endpoint theo vị trí hiện tại.
     public TourService(HttpClient httpClient, ILocationService locationService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
     }
 
+    // Lấy danh sách tour: ưu tiên memory cache -> disk cache -> network.
     public async Task<List<TourModel>> GetToursAsync()
     {
         if (HasFreshMemoryCache())
@@ -65,6 +68,7 @@ public class TourService : ITourService
         return await RefreshToursFromNetworkAsync(new List<TourModel>());
     }
 
+    // Lấy chi tiết 1 tour theo id, vẫn giữ fallback cache nếu mạng lỗi.
     public async Task<TourModel?> GetTourByIdAsync(int tourId)
     {
         var cachedTour = _cachedTours?.FirstOrDefault(x => x.TourId == tourId);
@@ -106,6 +110,7 @@ public class TourService : ITourService
         return cachedTour == null ? null : NormalizeTour(cachedTour);
     }
 
+    // Kiểm tra memory cache còn trong TTL.
     private bool HasFreshMemoryCache()
     {
         return _cachedTours != null
@@ -113,17 +118,20 @@ public class TourService : ITourService
             && DateTime.UtcNow - _memoryCachedAtUtc < CacheTtl;
     }
 
+    // Quyết định có nên refresh từ network hay chưa.
     private bool ShouldRefreshFromNetwork()
     {
         return DateTime.UtcNow - _lastNetworkFetchUtc >= CacheTtl;
     }
 
+    // Ghi đè memory cache bằng dữ liệu đã normalize.
     private void SetMemoryCache(List<TourModel> tours)
     {
         _cachedTours = NormalizeTours(tours);
         _memoryCachedAtUtc = DateTime.UtcNow;
     }
 
+    // Refresh danh sách tour nền, lỗi sẽ bị bỏ qua để không ảnh hưởng luồng UI đang dùng cache.
     private async Task RefreshToursInBackgroundAsync()
     {
         try
@@ -136,6 +144,7 @@ public class TourService : ITourService
         }
     }
 
+    // Điều phối refresh từ network bằng lock để tránh nhiều request đồng thời.
     private async Task<List<TourModel>> RefreshToursFromNetworkAsync(List<TourModel> fallbackTours)
     {
         if (!await _networkRefreshLock.WaitAsync(0))
@@ -158,6 +167,7 @@ public class TourService : ITourService
         }
     }
 
+    // Tải danh sách tour từ nhiều base URL ứng viên, fallback cache nếu tất cả đều lỗi.
     private async Task<List<TourModel>> LoadToursFromNetworkAsync(List<TourModel> fallbackTours)
     {
         var location = _locationService.LastKnownLocation;
@@ -196,6 +206,7 @@ public class TourService : ITourService
         return new List<TourModel>();
     }
 
+    // Build danh sách base URL có ưu tiên endpoint đã thành công gần nhất.
     private IEnumerable<string> BuildBaseUrlCandidates()
     {
         var baseCandidates = new List<string>();
@@ -218,6 +229,7 @@ public class TourService : ITourService
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
+    // Refresh chi tiết 1 tour ở nền khi đang có cache để giữ dữ liệu mới nhất.
     private async Task RefreshTourByIdInBackgroundAsync(int tourId)
     {
         if (!await _networkRefreshLock.WaitAsync(0))
@@ -245,6 +257,7 @@ public class TourService : ITourService
         }
     }
 
+    // Tải chi tiết tour theo id từ network, normalize và merge vào cache khi thành công.
     private async Task<TourModel?> LoadTourByIdFromNetworkAsync(int tourId, Location? location)
     {
         foreach (var baseUrl in BuildBaseUrlCandidates())
@@ -273,6 +286,7 @@ public class TourService : ITourService
         return null;
     }
 
+    // Build endpoint danh sách tour, có gắn lat/lng/radius khi đã có vị trí người dùng.
     private static string BuildTourEndpoint(string baseUrl, Location? location)
     {
         if (location == null)
@@ -286,6 +300,7 @@ public class TourService : ITourService
         return $"{baseUrl}/{AppSettings.TourEndpoint}?latitude={lat}&longitude={lng}&radiusMeters={radius}";
     }
 
+    // Build endpoint gọi chi tiết 1 tour, có kèm vị trí hiện tại khi có.
     private static string BuildTourDetailEndpoint(string baseUrl, int tourId, Location? location)
     {
         if (location == null)
@@ -299,6 +314,7 @@ public class TourService : ITourService
         return $"{baseUrl}/{AppSettings.TourEndpoint}/{tourId}?latitude={lat}&longitude={lng}&radiusMeters={radius}";
     }
 
+    // Resolve URL ảnh hiển thị của tour, ưu tiên ảnh truyền vào, fallback từ stop đầu tiên hợp lệ.
     private string ResolveImageUrl(string? imageUrl, List<TourStopModel>? stops)
     {
         var source = imageUrl;
@@ -337,6 +353,7 @@ public class TourService : ITourService
         return ResolveCachedImagePath(originalSource, resolved);
     }
 
+    // Trả về đường dẫn file cache tours.json và đảm bảo thư mục cache tồn tại.
     private static string GetToursCacheFilePath()
     {
         var cacheDir = Path.Combine(FileSystem.AppDataDirectory, OfflineCacheFolderName);
@@ -344,6 +361,7 @@ public class TourService : ITourService
         return Path.Combine(cacheDir, "tours.json");
     }
 
+    // Đọc tour cache từ disk và normalize dữ liệu trước khi dùng.
     private async Task<List<TourModel>> ReadToursCacheAsync()
     {
         await _cacheFileLock.WaitAsync();
@@ -372,6 +390,7 @@ public class TourService : ITourService
         }
     }
 
+    // Ghi danh sách tour xuống disk theo cơ chế temp file -> replace để tránh hỏng file.
     private async Task SaveToursCacheAsync(List<TourModel> tours)
     {
         await _cacheFileLock.WaitAsync();
@@ -402,6 +421,7 @@ public class TourService : ITourService
         }
     }
 
+    // Merge một tour mới/cập nhật vào cache hiện có rồi ghi xuống disk.
     private async Task MergeTourIntoCacheAsync(TourModel tour)
     {
         var tours = await ReadToursCacheAsync();
@@ -419,6 +439,7 @@ public class TourService : ITourService
         await SaveToursCacheAsync(_cachedTours!);
     }
 
+    // Normalize toàn bộ danh sách tour: stops + ảnh stop + ảnh đại diện tour.
     private List<TourModel> NormalizeTours(List<TourModel> tours)
     {
         NormalizeStops(tours);
@@ -431,6 +452,7 @@ public class TourService : ITourService
         return tours;
     }
 
+    // Normalize một tour đơn lẻ trước khi trả về cho UI.
     private TourModel NormalizeTour(TourModel tour)
     {
         tour.Stops ??= new List<TourStopModel>();
@@ -439,6 +461,7 @@ public class TourService : ITourService
         return tour;
     }
 
+    // Chuẩn hóa URL ảnh cho từng stop trong tour.
     private void NormalizeStopImages(TourModel tour)
     {
         foreach (var stop in tour.Stops)
@@ -447,6 +470,7 @@ public class TourService : ITourService
         }
     }
 
+    // Đảm bảo mọi tour đều có collection Stops không null để tránh null-check lặp lại.
     private static List<TourModel> NormalizeStops(List<TourModel> tours)
     {
         foreach (var tour in tours)
@@ -457,6 +481,7 @@ public class TourService : ITourService
         return tours;
     }
 
+    // Ưu tiên trả path ảnh local/cache nếu có, fallback về nguồn đầu tiên hợp lệ.
     private static string ResolveCachedImagePath(params string?[] sources)
     {
         foreach (var source in sources)
@@ -481,6 +506,7 @@ public class TourService : ITourService
         return sources.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))?.Trim() ?? "dotnet_bot.svg";
     }
 
+    // Sinh path cache ảnh từ hash URL nguồn để dedupe tên file.
     private static string GetImageCachePath(string source)
     {
         var normalized = source.Replace("\\", "/", StringComparison.Ordinal).Trim().ToLowerInvariant();
@@ -494,6 +520,7 @@ public class TourService : ITourService
         return Path.Combine(GetImageCacheRootPath(), $"{hash}{ext}");
     }
 
+    // Lấy thư mục cache ảnh và tạo mới nếu chưa tồn tại.
     private static string GetImageCacheRootPath()
     {
         var path = Path.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName);
@@ -501,6 +528,7 @@ public class TourService : ITourService
         return path;
     }
 
+    // Kiểm tra file ảnh cache có tồn tại và đủ dung lượng tối thiểu.
     private static bool IsValidImageFile(string path)
     {
         if (!File.Exists(path))

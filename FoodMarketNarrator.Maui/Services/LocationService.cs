@@ -3,27 +3,30 @@ using System.Linq;
 
 namespace food_market_narrator.Services;
 
+// Service theo dõi GPS: quản lý quyền, vòng lặp polling và publish event vị trí đã lọc.
 public class LocationService : ILocationService
 {
     private bool _isTracking = false;
+    // CancellationTokenSource dùng khi muốn dừng một task đang chạy (ví dụ vòng lặp tracking nền) một cách an toàn. Khi gọi Cancel() sẽ gửi tín hiệu yêu cầu dừng, và task đó có thể bắt tín hiệu này để dừng lại.
     private CancellationTokenSource? _trackingCts;
     private Task? _trackingTask;
     private Location? _lastKnownLocation;
     private Location? _lastPublishedLocation;
-    private readonly SemaphoreSlim _trackingInitLock = new(1, 1);
-    private readonly SemaphoreSlim _permissionLock = new(1, 1);
+    // Semaphore để đảm bảo chỉ có một luồng thực hiện khởi tạo tracking hoặc yêu cầu quyền tại một thời điểm
+    private readonly SemaphoreSlim _trackingInitLock = new(1, 1); // đảm bảo chỉ có một luồng thực hiện khởi tạo tracking hoặc yêu cầu quyền tại một thời điểm
+    private readonly SemaphoreSlim _permissionLock = new(1, 1); // đảm bảo chỉ có một luồng thực hiện yêu cầu quyền tại một thời điểm
 
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
-    private const double MinPublishDistanceMeters = 6;
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(3); // khoảng thời gian giữa các lần lấy vị trí mới trong vòng lặp tracking. Có thể điều chỉnh để cân bằng giữa độ nhạy và tiết kiệm pin.
+    private const double MinPublishDistanceMeters = 6; // Chỉ khi người dùng di chuyển ít nhất 6 mét thì mới “publish” vị trí mới
     private static readonly GeolocationRequest TrackingRequest =
-        new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
-    private bool _backgroundPermissionExplained;
+        new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10)); // lấy vị trí với độ chính xác cao nhất, timeout 10 giây
+    private bool _backgroundPermissionExplained; // cờ để đảm bảo chỉ giải thích một lần về quyền vị trí nền trên Android 10+
 
     public event EventHandler<Location>? LocationChanged;
     public event EventHandler<Location?>? LocationSampled;
     public Location? LastKnownLocation => _lastKnownLocation;
 
-    // Lay vi tri hien tai cua nguoi dung.
+    // Lấy vị trí hiện tại một lần, có xin quyền foreground nếu cần.
     public async Task<Location?> GetCurrentLocationAsync()
     {
         try
@@ -48,6 +51,7 @@ public class LocationService : ILocationService
         }
     }
 
+    // Bắt đầu tracking nền theo PollInterval và phát event khi vị trí thay đổi đủ ngưỡng.
     public async Task StartTrackingAsync()
     {
         if (_isTracking)
@@ -85,6 +89,7 @@ public class LocationService : ILocationService
         }
     }
 
+    // Yêu cầu quyền background location trên Android 10+ khi tính năng cần theo dõi nền.
     public async Task<bool> RequestBackgroundLocationPermissionAsync()
     {
 #if ANDROID
@@ -136,6 +141,7 @@ public class LocationService : ILocationService
 #endif
     }
 
+    // Kiểm tra trạng thái quyền background location hiện tại.
     public async Task<bool> HasBackgroundLocationPermissionAsync()
     {
 #if ANDROID
@@ -151,6 +157,7 @@ public class LocationService : ILocationService
 #endif
     }
 
+    // Dừng vòng lặp tracking và tắt foreground service (Android) nếu đang chạy.
     public void StopTracking()
     {
         if (!_isTracking) return;
@@ -174,6 +181,7 @@ public class LocationService : ILocationService
         }
     }
 
+    // Vòng lặp tracking: lấy location định kỳ, phát LocationSampled và LocationChanged.
     private async Task RunTrackingLoopAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -219,6 +227,7 @@ public class LocationService : ILocationService
         }
     }
 
+    // Chỉ publish LocationChanged khi di chuyển đủ xa để giảm nhiễu và tiết kiệm pin.
     private bool ShouldPublish(Location location)
     {
         if (_lastPublishedLocation == null)
@@ -234,6 +243,7 @@ public class LocationService : ILocationService
         return distanceMeters >= MinPublishDistanceMeters;
     }
 
+    // Đảm bảo quyền vị trí foreground đã được cấp trước khi tracking.
     private async Task<bool> EnsureForegroundTrackingPermissionAsync()
     {
         await _permissionLock.WaitAsync();
@@ -278,6 +288,7 @@ public class LocationService : ILocationService
         }
     }
 
+    // Hiển thị thông báo 1 nút trên UI thread.
     private static Task ShowInfoAsync(string title, string message)
     {
         return MainThread.InvokeOnMainThreadAsync(async () =>
@@ -290,6 +301,7 @@ public class LocationService : ILocationService
         });
     }
 
+    // Hiển thị confirm dialog trên UI thread và trả về lựa chọn người dùng.
     private static Task<bool> ShowConfirmAsync(
         string title,
         string message,
@@ -308,6 +320,7 @@ public class LocationService : ILocationService
         });
     }
 
+    // Khởi động foreground tracking service trên Android để giảm rủi ro bị kill nền.
     private static void StartForegroundTrackingServiceIfNeeded()
     {
 #if ANDROID
@@ -328,6 +341,7 @@ public class LocationService : ILocationService
 #endif
     }
 
+    // Gửi tín hiệu stop cho foreground tracking service trên Android, tắt khi ng dùng cấp quyền luôn luôn truy cập hoặc khi dừng tracking.
     private static void StopForegroundTrackingServiceIfNeeded()
     {
 #if ANDROID

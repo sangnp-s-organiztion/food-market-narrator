@@ -5,6 +5,7 @@ using System.Diagnostics;
 
 namespace food_market_narrator.Services;
 
+// Service điều phối auto narration theo geofence, queue phát audio và chống lặp/cooldown.
 public class NarrationFlowService : INarrationFlowService
 {
     private readonly IPOIService _poiService;
@@ -31,9 +32,9 @@ public class NarrationFlowService : INarrationFlowService
     private string? _currentPlayingPoiId;
     private readonly object _autoNarrationScopeLock = new();
     private HashSet<string>? _autoNarrationScopedPoiIds;
-    private CancellationTokenSource? _switchCutoffCts;
-    private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3);
-    public bool IsNarrating => _isNarrationEnabled;
+    private CancellationTokenSource? _switchCutoffCts; // Dùng để “hủy (cancel)” một hành động async liên quan tới “switch cutoff”
+    private static readonly TimeSpan PoiSwitchCutoffDelay = TimeSpan.FromSeconds(3); // Thời gian chờ 3 giây trước khi “chuyển” sang POI mới
+    public bool IsNarrating => _isNarrationEnabled; // thuộc tính để kiểm tra xem narration có đang bật hay không
 
     public NarrationFlowService(
         IPOIService poiService,
@@ -51,6 +52,7 @@ public class NarrationFlowService : INarrationFlowService
         _historyService = historyService;
     }
 
+    // Bắt đầu một phiên narration mới: reset state, subscribe location và trigger kiểm tra đầu tiên.
     public void StartNarration()
     {
         if (_isNarrationEnabled) return;
@@ -63,6 +65,7 @@ public class NarrationFlowService : INarrationFlowService
         _lastProcessedLocation = null;
         _poiService.ResetGeofenceState();
 
+        // Subscribe sự kiện thay đổi vị trí để trigger narration theo geofence.
         _locationService.LocationChanged += OnLocationChanged;
         _ = _locationService.StartTrackingAsync();
 
@@ -86,6 +89,7 @@ public class NarrationFlowService : INarrationFlowService
         });
     }
 
+    // Giới hạn auto narration theo danh sách POI scope (thường dùng khi ở map/tour).
     public void SetAutoNarrationPoiScope(IEnumerable<string>? poiIds)
     {
         HashSet<string>? normalizedScope = null;
@@ -110,6 +114,7 @@ public class NarrationFlowService : INarrationFlowService
         _poiService.ResetGeofenceState();
     }
 
+    // Xóa scope auto narration để quay về toàn bộ POI khả dụng.
     public void ClearAutoNarrationPoiScope()
     {
         lock (_autoNarrationScopeLock)
@@ -120,6 +125,7 @@ public class NarrationFlowService : INarrationFlowService
         _poiService.ResetGeofenceState();
     }
 
+    // Dừng hoàn toàn phiên narration hiện tại và dọn state/queue liên quan.
     public void StopNarration()
     {
         if (!_isNarrationEnabled) return;
@@ -146,7 +152,7 @@ public class NarrationFlowService : INarrationFlowService
         _poiService.ResetGeofenceState();
     }
 
-    // Khi thay đổi vị trí thì làm gì đó
+    // Handler khi vị trí thay đổi: debounce theo khoảng cách rồi mới kiểm tra trigger narration. (khoảng cách đủ xa thì mới xử lý để tránh trigger quá nhiều khi người dùng đứng yên hoặc di chuyển trong phạm vi nhỏ)
     private async void OnLocationChanged(object? sender, Location location)
     {
         // Debounce: bỏ qua nếu di chuyển quá ngắn
@@ -167,6 +173,7 @@ public class NarrationFlowService : INarrationFlowService
         await CheckAndNarrateAsync(location);
     }
 
+    // Kiểm tra điều kiện geofence + scope để quyết định có enqueue audio narration hay không.
     public async Task CheckAndNarrateAsync(Location? currentLocation = null, bool force = false)
     {
         if (currentLocation == null)
@@ -450,6 +457,7 @@ public class NarrationFlowService : INarrationFlowService
         return _audioService.IsPlaying;
     }
 
+    // Cho phép reset cơ chế chống lặp theo phiên narration hiện tại.
     public void ResetPlayedPOIs()
     {
         _playedPOIs.Clear();

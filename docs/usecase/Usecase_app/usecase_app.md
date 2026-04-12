@@ -1,328 +1,151 @@
-# Đặc Tả Use Case App (Mobile)
+# ĐẶC TẢ USE CASE (TỔNG HỢP TỪ ẢNH TRONG docs/usecase)
 
-Tài liệu này đặc tả các use case cho ứng dụng mobile dựa trên flow thực tế hiện có trong hệ thống.
+Tài liệu này tổng hợp đặc tả use case theo từng ảnh trong thư mục docs/usecase.
 
-Phạm vi gồm 17 use case từ khởi động ứng dụng, narration theo geofence đến các tab chức năng chính.
+## 1. Usecase App - Tổng quát
 
-## UC-APP-01 - Khởi động ứng dụng
+Ảnh use case: ![Usecase App Tổng quát](TongQuat.png)
 
-Mục tiêu: Khởi tạo giao diện và dịch vụ nền cần thiết khi mở app.
+- Tên use case: Usecase tổng quát App
+- Tác nhân: Người dùng
+- Mô tả: Người dùng sử dụng các chức năng cốt lõi của app mobile để theo dõi vị trí, khám phá POI/tour, nghe thuyết minh và quản lý danh sách/lịch sử cá nhân.
+- Tiền điều kiện: App đã cài đặt và mở thành công.
+- Hậu điều kiện: Người dùng hoàn thành một hoặc nhiều thao tác chính trong hệ thống.
+- Luồng chính:
 
-Tác nhân chính: Người dùng.
+1. Người dùng vào app.
+2. Người dùng theo dõi vị trí.
+3. Người dùng khám phá POI.
+4. Người dùng nghe thuyết minh theo ngôn ngữ.
+5. Người dùng khám phá tour.
+6. Người dùng quản lý lịch sử nghe và danh sách quán yêu thích.
 
-Tiền điều kiện: Ứng dụng được cài đặt và có thể chạy.
+- Luồng thay thế:
 
-Hậu điều kiện: AppShell hiển thị, các dịch vụ warm-up/tracking/sync bắt đầu hoạt động.
+1. Người dùng bỏ qua một số chức năng và chỉ dùng các chức năng cần thiết.
+2. Nếu thiếu quyền vị trí hoặc không có dữ liệu, một số chức năng liên quan sẽ bị hạn chế.
 
-Luồng chính:
-1. Người dùng mở ứng dụng.
-2. App tạo AppShell và hiển thị giao diện tab.
-3. App xử lý deep link đầu vào nếu có.
-4. App khởi động warm-up dữ liệu nền.
-5. App khởi tạo audio library.
-6. App start location log sync và tracking GPS.
+## 2. Usecase App - Khám phá POI
 
-## UC-APP-02 - Warm-up dữ liệu nền
+Ảnh use case: ![Khám phá POI](KhamPhaPOI.png)
 
-Mục tiêu: Tải dữ liệu nền sớm để giảm độ trễ sử dụng.
+- Tên use case: Khám phá POI
+- Tác nhân: Người dùng
+- Mô tả: Người dùng duyệt danh sách POI, tìm kiếm/lọc, xem chi tiết, thao tác với POI như yêu thích, chia sẻ, xem bản đồ, nghe thuyết minh.
+- Tiền điều kiện: Đã mở app và tải được danh sách POI.
+- Hậu điều kiện: Người dùng tìm thấy POI mong muốn và có thể thực hiện thao tác tiếp theo.
+- Luồng chính:
 
-Tác nhân chính: Hệ thống.
+1. Người dùng mở danh sách POI.
+2. Người dùng lọc POI hoặc tìm kiếm POI.
+3. Người dùng chọn POI để xem chi tiết.
+4. Từ màn hình chi tiết, người dùng có thể thêm vào yêu thích, chia sẻ, xem trên bản đồ, nghe thuyết minh.
 
-Tiền điều kiện: App vừa khởi động.
+- Luồng thay thế:
 
-Hậu điều kiện: Language, tour, POI và dữ liệu phụ được làm ấm.
+1. Không có kết quả tìm kiếm/lọc thì hệ thống hiển thị trạng thái rỗng.
+2. Nếu không tải được chi tiết POI, hệ thống thông báo lỗi và cho thử lại.
 
-Luồng chính:
-1. Hệ thống chờ startup delay theo cấu hình.
-2. Hệ thống tải ngôn ngữ.
-3. Hệ thống tải tour.
-4. Hệ thống tải danh sách POI.
-5. Hệ thống khởi chạy warm-up ảnh và món ăn offline.
+## 3. Usecase App - Khám phá Tour
 
-## UC-APP-03 - Bootstrap audio library khi startup
+Ảnh use case: ![Khám phá Tour](KhamPhaTour.png)
 
-Mục tiêu: Chuẩn bị audio sẵn sàng phát ngay khi cần narration.
+- Tên use case: Khám phá Tour
+- Tác nhân: Người dùng
+- Mô tả: Người dùng xem danh sách tour, vào chi tiết tour và tiếp tục xem POI thuộc tour trên bản đồ.
+- Tiền điều kiện: Đã có dữ liệu tour.
+- Hậu điều kiện: Người dùng xác định được tour và POI cần khám phá.
+- Luồng chính:
 
-Tác nhân chính: Hệ thống.
+1. Người dùng xem danh sách tour hiện có.
+2. Người dùng mở chi tiết tour.
+3. Người dùng xem chi tiết POI trong tour.
+4. Người dùng xem POI thuộc tour trên bản đồ.
 
-Tiền điều kiện: App ở giai đoạn startup audio.
+- Luồng thay thế:
 
-Hậu điều kiện: Cờ audio_ready được thiết lập phù hợp; dữ liệu audio được prefetch theo điều kiện mạng.
+1. Nếu không có tour phù hợp, hệ thống hiển thị thông báo không có dữ liệu.
+2. Nếu lỗi tải dữ liệu bản đồ, hệ thống cho phép quay lại màn hình trước.
 
-Luồng chính:
-1. App gọi initialize audio library.
-2. Nếu online và chưa ready, hệ thống tải POI và prefetch audio active.
-3. Hệ thống cập nhật audio_ready khi dữ liệu đủ.
+## 4. Usecase App - Nghe thuyết minh theo ngôn ngữ
 
-Luồng phụ:
-1. Trường hợp offline.
-2. Hệ thống bỏ qua prefetch mạng và giữ trạng thái chờ sync khi có mạng.
+Ảnh use case: ![Nghe thuyết minh theo ngôn ngữ](NgheThuyetMinhTheoNgonNgu.png)
 
-## UC-APP-04 - Theo dõi vị trí và quyền truy cập
+- Tên use case: Nghe thuyết minh theo ngôn ngữ
+- Tác nhân: Người dùng
+- Mô tả: Người dùng nghe nội dung thuyết minh theo ngôn ngữ đã chọn và có thể bật thuyết minh tự động.
+- Tiền điều kiện: Đã có audio cho POI theo ngôn ngữ tương ứng.
+- Hậu điều kiện: Audio được phát đúng ngôn ngữ hoặc hệ thống báo không có audio phù hợp.
+- Luồng chính:
 
-Mục tiêu: Bật tracking vị trí theo đúng quyền và ràng buộc hệ điều hành.
+1. Người dùng bật tính năng nghe thuyết minh theo ngôn ngữ.
+2. Người dùng chọn ngôn ngữ thuyết minh.
+3. Hệ thống tìm audio phù hợp với ngôn ngữ.
+4. Hệ thống phát audio.
+5. Người dùng có thể bật thuyết minh tự động.
 
-Tác nhân chính: Người dùng, Hệ thống.
+- Luồng thay thế:
 
-Tiền điều kiện: App cần dữ liệu vị trí để narration.
+1. Không tìm thấy audio theo ngôn ngữ thì thông báo và bỏ qua.
+2. Nếu chế độ tự động tắt, người dùng vẫn có thể phát thủ công.
 
-Hậu điều kiện: Tracking loop chạy định kỳ hoặc bị chặn nếu từ chối quyền.
+## 5. Usecase App - Quản lí danh sách yêu thích
 
-Luồng chính:
-1. App yêu cầu quyền location khi sử dụng.
-2. Nếu được cấp, app yêu cầu notification (Android 13+) khi cần.
-3. App bật foreground service tracking.
-4. App chạy vòng lặp lấy vị trí định kỳ.
-5. App publish LocationChanged khi di chuyển đạt ngưỡng.
+Ảnh use case: ![Quản lí danh sách yêu thích](QuanLiDanhSachYeuThich.png)
 
-Luồng phụ:
-1. Người dùng từ chối quyền.
-2. App không thể tracking và thông báo trạng thái phù hợp.
+- Tên use case: Quản lí danh sách quán yêu thích
+- Tác nhân: Người dùng
+- Mô tả: Người dùng theo dõi danh sách quán yêu thích, xem chi tiết và xóa khỏi danh sách.
+- Tiền điều kiện: Người dùng đã có ít nhất một quán trong danh sách yêu thích.
+- Hậu điều kiện: Danh sách yêu thích được cập nhật theo thao tác của người dùng.
+- Luồng chính:
 
-## UC-APP-05 - Đồng bộ session và location logs
+1. Người dùng mở danh sách các quán yêu thích.
+2. Người dùng xem chi tiết quán.
+3. Người dùng có thể xóa quán khỏi danh sách yêu thích.
 
-Mục tiêu: Ghi nhận và đồng bộ nhật ký vị trí theo batch an toàn.
+- Luồng thay thế:
 
-Tác nhân chính: Hệ thống.
+1. Danh sách rỗng thì hiển thị thông báo chưa có dữ liệu.
+2. Xóa thất bại thì giữ nguyên danh sách và thông báo lỗi.
 
-Tiền điều kiện: Dịch vụ sync đã được start.
+## 6. Usecase App - Quản lí lịch sử
 
-Hậu điều kiện: Session được mở và batch logs được gửi/retry theo trạng thái mạng.
+Ảnh use case: ![Quản lí lịch sử POI](QuanLiLichSu.png)
 
-Luồng chính:
-1. App gọi start location log sync service.
-2. Service gọi API mở phiên người dùng.
-3. Theo chu kỳ, service gửi batch location logs.
-4. Khi gửi thành công, batch đã gửi được xóa khỏi buffer.
+- Tên use case: Quản lí lịch sử POI
+- Tác nhân: Người dùng
+- Mô tả: Người dùng xem lại danh sách lịch sử đã nghe và mở lại chi tiết POI từ lịch sử.
+- Tiền điều kiện: Đã phát sinh lịch sử nghe trước đó.
+- Hậu điều kiện: Người dùng xem được thông tin lịch sử và POI liên quan.
+- Luồng chính:
 
-Luồng phụ:
-1. Gửi batch lỗi.
-2. Service hoàn trả batch vào buffer để retry lần sau.
+1. Người dùng mở danh sách lịch sử đã nghe.
+2. Người dùng chọn một mục lịch sử.
+3. Hệ thống mở chi tiết POI tương ứng.
 
-## UC-APP-06 - Geofence enter/exit/switch
+- Luồng thay thế:
 
-Mục tiêu: Xác định trạng thái vào/ra/chuyển POI từ dữ liệu vị trí.
+1. Không có lịch sử thì hiển thị trạng thái rỗng.
+2. Chi tiết POI không còn tồn tại thì thông báo và loại bỏ mục lịch sử lỗi nếu cần.
 
-Tác nhân chính: Hệ thống.
+## 7. Usecase App - Theo dõi vị trí
 
-Tiền điều kiện: Có sự kiện LocationChanged hợp lệ.
+Ảnh use case: ![Theo dõi vị trí](TheoDoiViTri.png)
 
-Hậu điều kiện: Trả về POI cần trigger narration hoặc không thay đổi trạng thái.
+- Tên use case: Theo dõi vị trí
+- Tác nhân: Người dùng
+- Mô tả: App theo dõi vị trí người dùng để phục vụ geofence và thuyết minh tự động.
+- Tiền điều kiện: Thiết bị hỗ trợ GPS, người dùng đồng ý cấp quyền vị trí.
+- Hậu điều kiện: Vị trí được cập nhật theo chu kỳ hoặc bị tạm dừng nếu không đủ điều kiện.
+- Luồng chính:
 
-Luồng chính:
-1. NarrationFlow nhận vị trí mới.
-2. Hệ thống debounce các mẫu di chuyển nhỏ.
-3. Hệ thống gọi updateNearestPOI.
-4. Hệ thống áp dụng enter/exit radius với hysteresis.
-5. Nếu enter/switch thì trả POI mục tiêu.
+1. Người dùng bật tính năng theo dõi vị trí.
+2. Hệ thống yêu cầu cấp quyền vị trí (include).
+3. Người dùng chấp nhận quyền.
+4. Hệ thống bắt đầu lấy vị trí và cập nhật theo chu kỳ.
 
-Luồng phụ:
-1. Không có thay đổi geofence.
-2. Hệ thống không trigger narration.
+- Luồng thay thế:
 
-## UC-APP-07 - Bật hoặc tắt narration tự động
-
-Mục tiêu: Quản lý vòng đời chế độ thuyết minh tự động.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng đang ở app và có thể thao tác nút narration.
-
-Hậu điều kiện: Narration được bật với state sạch hoặc tắt hoàn toàn.
-
-Luồng chính:
-1. Người dùng bấm nút thuyết minh.
-2. Nếu đang tắt, app gọi StartNarration.
-3. Hệ thống reset state played/cooldown/geofence.
-4. Hệ thống subscribe location và bắt đầu tracking.
-5. Hệ thống kiểm tra trigger narration ban đầu.
-
-Luồng phụ:
-1. Nếu đang bật narration.
-2. App gọi StopNarration, hủy subscribe, xóa queue và dừng audio.
-
-## UC-APP-08 - Trigger phát audio theo POI
-
-Mục tiêu: Tự động phát audio đúng POI, đúng ngôn ngữ, tránh lặp.
-
-Tác nhân chính: Hệ thống.
-
-Tiền điều kiện: Có POI target từ geofence transition.
-
-Hậu điều kiện: Audio được enqueue/phát và trạng thái chống lặp được cập nhật.
-
-Luồng chính:
-1. Hệ thống kiểm tra khoảng cách trigger.
-2. Hệ thống kiểm tra cooldown theo POI.
-3. Hệ thống kiểm tra danh sách POI đã phát trong phiên.
-4. Hệ thống resolve audio active theo ngôn ngữ hiện tại.
-5. Hệ thống enqueue và phát audio.
-6. Hệ thống ghi nhận last played time và played POIs.
-
-Luồng phụ:
-1. Không thỏa một trong các điều kiện trigger hoặc không có audio phù hợp.
-2. Hệ thống bỏ qua lần phát tự động.
-
-## UC-APP-09 - Playback audio và cache
-
-Mục tiêu: Phát audio ổn định với ưu tiên cache local.
-
-Tác nhân chính: Hệ thống.
-
-Tiền điều kiện: Có yêu cầu phát audio hợp lệ.
-
-Hậu điều kiện: Audio phát từ cache hoặc tải mạng và lưu cache theo chính sách.
-
-Luồng chính:
-1. AudioService tìm file trong audio cache.
-2. Nếu cache hit, phát stream local.
-3. Nếu cache miss, tải audio từ network.
-4. Hệ thống lưu file vào cache.
-5. Hệ thống dọn cache theo LRU khi cần.
-
-## UC-APP-10 - Ghi audio logs khi phát
-
-Mục tiêu: Lưu lịch sử phát audio phục vụ thống kê.
-
-Tác nhân chính: Hệ thống.
-
-Tiền điều kiện: Một audio bắt đầu và kết thúc playback.
-
-Hậu điều kiện: Bản ghi audio log được gửi backend hoặc retry nếu tạm lỗi.
-
-Luồng chính:
-1. Hệ thống ghi nhận thời điểm bắt đầu phát.
-2. Khi kết thúc, hệ thống tính duration.
-3. Hệ thống gọi AudioLogSyncService gửi log.
-4. Service gửi POST /api/audio-logs.
-
-Luồng phụ:
-1. Backend chưa có session hoặc gửi log lỗi.
-2. Service tạo session mới và retry gửi log.
-
-## UC-APP-11 - MainPage: danh sách POI và điều hướng chi tiết
-
-Mục tiêu: Xem POI trên trang chủ và vào trang chi tiết nhanh.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng mở tab Trang chủ.
-
-Hậu điều kiện: Danh sách POI hiển thị theo filter và có thể điều hướng chi tiết.
-
-Luồng chính:
-1. MainPage load map một lần.
-2. MainPage tải danh sách POI.
-3. MainPage bind danh sách theo filter (All/Nearby/Favorite/Open).
-4. Người dùng chọn POI.
-5. App điều hướng tới POIDetailPage.
-
-## UC-APP-12 - MapPage: lọc hoặc scope POI và tương tác bản đồ
-
-Mục tiêu: Khám phá POI trực quan trên bản đồ theo tìm kiếm và phạm vi tour.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng mở tab Bản đồ.
-
-Hậu điều kiện: Marker/callout/chi tiết POI phản ánh thao tác hiện tại.
-
-Luồng chính:
-1. MapPage tải POI nếu chưa có dữ liệu.
-2. MapPage áp dụng scope theo tourPoiIds (nếu có).
-3. Người dùng search/filter hoặc chạm marker.
-4. MapPage highlight POI và hiển thị card chi tiết.
-5. Người dùng bấm chi tiết để vào POIDetailPage.
-
-## UC-APP-13 - POIDetail: phát thủ công, yêu thích, chỉ đường
-
-Mục tiêu: Cung cấp thao tác trực tiếp trên một POI cụ thể.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng đã vào POIDetailPage.
-
-Hậu điều kiện: Audio có thể phát thủ công, trạng thái favorite cập nhật, và map ngoài được mở khi cần.
-
-Luồng chính:
-1. Trang chi tiết tải thông tin POI và món ăn.
-2. Người dùng bấm Play/Pause audio thủ công.
-3. Trang gọi AudioService phát hoặc tạm dừng.
-4. Người dùng bấm yêu thích.
-5. Trang gọi FavoriteService thêm hoặc bỏ yêu thích.
-6. Người dùng bấm Đường đi.
-7. App mở launcher bản đồ với tọa độ đích.
-
-## UC-APP-14 - Tour flow
-
-Mục tiêu: Xem danh sách tour và bắt đầu hành trình theo tour.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng mở tab Hành trình.
-
-Hậu điều kiện: Tour hiển thị và người dùng có thể vào map theo tour hoặc xem chi tiết tour.
-
-Luồng chính:
-1. TourPage gọi TourService lấy danh sách tour.
-2. Service dùng cache memory/disk và refresh mạng khi cần.
-3. Trang hiển thị tour active.
-4. Người dùng bấm Bắt đầu hoặc Xem chi tiết.
-5. App điều hướng MapPage theo tour hoặc vào TourDetailPage.
-
-## UC-APP-15 - Favorites và History flow
-
-Mục tiêu: Hiển thị danh sách yêu thích và lịch sử sử dụng.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng mở tab Yêu thích hoặc Lịch sử.
-
-Hậu điều kiện: Danh sách favorite/history hiển thị với thông tin POI đầy đủ.
-
-Luồng chính:
-1. FavoritePage đọc danh sách favorite từ Preferences.
-2. FavoritePage tải danh sách POI để map dữ liệu hiển thị.
-3. HistoryPage đọc dữ liệu history in-memory.
-4. HistoryPage tải POI để render thông tin liên quan.
-
-## UC-APP-16 - Settings flow
-
-Mục tiêu: Quản lý cấu hình và dữ liệu cục bộ của ứng dụng.
-
-Tác nhân chính: Người dùng.
-
-Tiền điều kiện: Người dùng mở tab Cài đặt.
-
-Hậu điều kiện: Cài đặt được cập nhật, quyền được yêu cầu, cache và dữ liệu cục bộ được dọn theo thao tác.
-
-Luồng chính:
-1. Trang cài đặt tải danh sách ngôn ngữ và thông tin dung lượng cache.
-2. Người dùng đổi ngôn ngữ.
-3. Trang gọi LanguageService đổi culture.
-4. Người dùng yêu cầu quyền vị trí nền.
-5. Trang gọi LocationService request quyền nền.
-6. Người dùng xóa cache audio hoặc toàn bộ dữ liệu cục bộ.
-7. Người dùng xóa lịch sử và yêu thích.
-
-## UC-APP-17 - Deep link QR flow
-
-Mục tiêu: Nhận và xử lý link QR mở app đúng ngữ cảnh.
-
-Tác nhân chính: Người dùng, Hệ thống Android.
-
-Tiền điều kiện: Thiết bị nhận được deep link hợp lệ.
-
-Hậu điều kiện: Link được validate và áp dụng vào app qua QrAccessService.
-
-Luồng chính:
-1. Android intent chuyển deep link vào MainActivity.
-2. AppLinkDispatcher kiểm tra scheme/host hợp lệ.
-3. Dispatcher chuyển payload sang lớp xử lý trong app.
-4. QrAccessService áp dụng dữ liệu deep link.
-5. App điều hướng hoặc cập nhật trạng thái theo payload.
-
-Luồng phụ:
-1. Link không hợp lệ hoặc payload thiếu.
-2. Hệ thống bỏ qua deep link và giữ luồng app bình thường.
-
+1. Người dùng từ chối quyền vị trí thì hệ thống dừng theo dõi và thông báo.
+2. Mất tín hiệu GPS tạm thời thì hệ thống thử lại ở chu kỳ tiếp theo.

@@ -25,6 +25,7 @@ public class LanguageService : ILanguageService
         _httpClient = httpClient;
     }
 
+    // 
     public string CurrentLanguage
     {
         get
@@ -35,6 +36,7 @@ public class LanguageService : ILanguageService
         }
     }
 
+    // Hàm này được dùng để lấy danh sách tất cả ngôn ngữ hỗ trợ từ backend. Nó sẽ thử gọi API với nhiều base URL khác nhau (bao gồm cả fallback) để đảm bảo có thể lấy được dữ liệu ngay cả khi một số endpoint không khả dụng. Kết quả sẽ được lưu vào cache để sử dụng cho các lần gọi sau, giúp giảm thiểu việc gọi API và cải thiện hiệu suất. Nếu không thể lấy dữ liệu từ API nào, nó sẽ cố gắng đọc từ cache cũ nếu có.
     public async Task<List<LanguageModel>> GetAllLanguagesAsync()
     {
         if (_cachedLanguages != null && _cachedLanguages.Count > 0)
@@ -90,6 +92,7 @@ public class LanguageService : ILanguageService
         return new List<LanguageModel>();
     }
 
+    // Trả về đường dẫn file cache languages.json trong bộ nhớ app (và đảm bảo thư mục tồn tại)
     private static string GetLanguagesCacheFilePath()
     {
         var cacheDir = Path.Combine(FileSystem.AppDataDirectory, "offline_cache");
@@ -97,6 +100,7 @@ public class LanguageService : ILanguageService
         return Path.Combine(cacheDir, "languages.json");
     }
 
+    // Lấy danh sách LanguageModel từ file languages.json trong máy
     private static async Task<List<LanguageModel>> ReadLanguagesCacheAsync()
     {
         var path = GetLanguagesCacheFilePath();
@@ -118,6 +122,7 @@ public class LanguageService : ILanguageService
         }
     }
 
+    // Lưu danh sách LanguageModel vào file languages.json trong máy để dùng cho lần sau khi không thể gọi API
     private static async Task SaveLanguagesCacheAsync(List<LanguageModel> languages)
     {
         try
@@ -143,6 +148,7 @@ public class LanguageService : ILanguageService
         }
     }
 
+    // lấy thông tin chi tiết của một ngôn ngữ dựa trên mã ngôn ngữ (language code) như "en-US" hoặc "vi-VN". Hàm này sẽ gọi GetAllLanguagesAsync để lấy danh sách tất cả ngôn ngữ và sau đó tìm kiếm trong danh sách đó để trả về thông tin của ngôn ngữ có mã trùng khớp. Nếu không tìm thấy hoặc nếu mã ngôn ngữ không hợp lệ, nó sẽ trả về null.
     public async Task<LanguageModel?> GetLanguageByCodeAsync(string languageCode)
     {
         if (string.IsNullOrWhiteSpace(languageCode))

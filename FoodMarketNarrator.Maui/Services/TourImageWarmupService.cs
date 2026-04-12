@@ -25,6 +25,7 @@ public class TourImageWarmupService
     private readonly SemaphoreSlim _downloadLimiter = new(1, 1);
     private Task? _warmupTask;
 
+    // Khởi tạo service warm-up ảnh tour với HttpClient dùng chung của app.
     public TourImageWarmupService(HttpClient httpClient)
     {
         _httpClient = httpClient;
@@ -100,6 +101,7 @@ public class TourImageWarmupService
         _warmupTask = Task.Run(() => RunWarmupAsync(phaseAImages, phaseBImages));
     }
 
+    // Chạy warm-up theo 2 pha: pha A tải sớm ảnh ưu tiên, pha B tải phần còn lại sau delay.
     private async Task RunWarmupAsync(List<string> phaseAImages, List<string> phaseBImages)
     {
         try
@@ -138,6 +140,7 @@ public class TourImageWarmupService
         }
     }
 
+    // Đảm bảo một nguồn ảnh chỉ có một luồng warm-up active tại một thời điểm.
     private async Task<string?> EnsureImageCachedAsync(string imageUrl)
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
@@ -180,6 +183,7 @@ public class TourImageWarmupService
         }
     }
 
+    // Tải ảnh vào cache local bằng danh sách URL ứng viên và trả path cache nếu thành công.
     private async Task<string?> DownloadImageToCacheAsync(string imageUrl, string cachePath)
     {
         // Skip if file already exists and is valid
@@ -248,11 +252,13 @@ public class TourImageWarmupService
         return null;
     }
 
+    // Chuẩn hóa chuỗi URL ảnh để so sánh dedupe ổn định.
     private static string NormalizeImageUrl(string imageUrl)
     {
         return imageUrl.Replace("\\", "/", StringComparison.Ordinal).Trim().ToLowerInvariant();
     }
 
+    // Sinh path cache ảnh từ hash URL nguồn để tránh trùng tên file.
     private static string GetImageCachePath(string source)
     {
         var normalized = NormalizeImageUrl(source);
@@ -266,6 +272,7 @@ public class TourImageWarmupService
         return Path.Combine(GetImageCacheRootPath(), $"{hash}{ext}");
     }
 
+    // Lấy thư mục cache ảnh dùng chung và tạo mới nếu chưa tồn tại.
     private static string GetImageCacheRootPath()
     {
         var path = Path.Combine(FileSystem.AppDataDirectory, ImageCacheFolderName);
@@ -273,6 +280,7 @@ public class TourImageWarmupService
         return path;
     }
 
+    // Kiểm tra file cache ảnh có hợp lệ theo ngưỡng dung lượng tối thiểu.
     private static bool IsValidImageFile(string path)
     {
         if (!File.Exists(path))
@@ -290,6 +298,7 @@ public class TourImageWarmupService
         }
     }
 
+    // Xác định ảnh có phải nguồn remote hợp lệ để đưa vào warm-up.
     private static bool IsRemoteImageCandidate(string imageUrl)
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
@@ -334,6 +343,7 @@ public class TourImageWarmupService
         return false;
     }
 
+    // Kiểm tra extension có thuộc nhóm định dạng ảnh hỗ trợ hay không.
     private static bool HasImageLikeExtension(string path)
     {
         var ext = Path.GetExtension(path);
@@ -349,6 +359,7 @@ public class TourImageWarmupService
             || ext.Equals(".gif", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Dựng danh sách URL ứng viên từ base URL hiện tại và các fallback base URL.
     private IEnumerable<string> BuildImageUrlCandidates(string imageUrl)
     {
         if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var absoluteUri)

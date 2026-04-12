@@ -194,6 +194,42 @@ public class AdminTranslationBillingService
         var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
         var resolvedSellerUserId = await ResolveSellerUserIdByUsernameAsync(sellerUsername);
 
+        return await BuildAudioUsageLedgerResponseAsync(
+            normalizedMonth,
+            resolvedSellerUserId,
+            normalizedPage,
+            normalizedPageSize);
+    }
+
+    public async Task<AudioUsageLedgerListResponse> GetAudioUsageLedgerBySellerUserIdAsync(
+        string? billingMonth,
+        int sellerUserId,
+        int page,
+        int pageSize)
+    {
+        if (sellerUserId <= 0)
+        {
+            throw new ArgumentException("sellerUserId must be greater than zero.");
+        }
+
+        var normalizedMonth = NormalizeBillingMonthOrThrow(billingMonth);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        return await BuildAudioUsageLedgerResponseAsync(
+            normalizedMonth,
+            sellerUserId,
+            normalizedPage,
+            normalizedPageSize);
+    }
+
+    private async Task<AudioUsageLedgerListResponse> BuildAudioUsageLedgerResponseAsync(
+        string? normalizedMonth,
+        int? resolvedSellerUserId,
+        int normalizedPage,
+        int normalizedPageSize)
+    {
+
         var (items, totalCount) = await _translationHistoryRepository.GetAudioUsageLedgerAsync(
             normalizedMonth,
             resolvedSellerUserId,

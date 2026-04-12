@@ -146,7 +146,7 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 - Quản lý tài khoản người dùng: tạo mới, khóa/mở khóa.
 - Quản lý toàn bộ nhà hàng ở mức hệ thống và kiểm soát trạng thái hoạt động.
 - Theo dõi dashboard vận hành: Nhật ký hoạt động, tuyến di chuyển và heatmap.
-- Quản lý hành trình (tour), cấu hình QR mở app và theo dõi chi phí dịch/tạo tệp thuyết minh.
+- Quản lý hành trình (tour), cấu hình QR mở app và theo dõi mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
 - Quản lý tài khoản admin (thông tin cá nhân, mật khẩu) một cách an toàn.
 
 **Pain points:**
@@ -173,7 +173,7 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 
 - Đăng nhập an toàn, chọn đúng nhà hàng cần thao tác.
 - Cập nhật thông tin nhà hàng, menu món ăn và hình ảnh.
-- Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử thuyết minh.
+- Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
 - Cập nhật thông tin tài khoản cá nhân để sử dụng dashboard ổn định.
 
 **Pain points:**
@@ -313,6 +313,12 @@ Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu
 Với vai trò là chủ quán  
 Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập  
 Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
+
+**Story S9 - Xem lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh**
+
+Với vai trò là chủ quán  
+Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng  
+Để tôi có thể theo dõi mức sử dụng, đối chiếu chi phí và tối ưu nội dung cần dịch/tạo audio.
 
 ---
 
@@ -537,6 +543,22 @@ Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng
   - -> API xử lý
   - -> cập nhật danh sách audio
 
+**Feature S-07: Theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh**
+
+- Mô tả: Seller xem lịch sử mức sử dụng theo tháng cho cả dịch thuật văn bản và tạo tệp thuyết minh.
+- Actor: Seller.
+- Functional requirements:
+  - Hiển thị KPI tổng mức sử dụng theo tháng cho dịch thuật và tạo tệp thuyết minh.
+  - Hiển thị bảng lịch sử dịch thuật gồm thời gian, hành động, ký tự đầu vào, mức sử dụng.
+  - Hiển thị bảng lịch sử tạo tệp thuyết minh gồm thời gian, nhà hàng, ngôn ngữ, hành động, ký tự đầu vào, mức sử dụng.
+  - Hỗ trợ lọc theo tháng và phân trang dữ liệu mức sử dụng.
+- Flow:
+  - Mở tab Lịch sử thuyết minh
+  - -> chọn tháng cần xem
+  - -> gọi API mức sử dụng dịch thuật và mức sử dụng tạo tệp thuyết minh
+  - -> hiển thị KPI + bảng lịch sử
+  - -> đổi trang để xem thêm dữ liệu
+
 ### 10.3 Admin Features (Quản trị hệ thống)
 
 Ghi chú phạm vi:
@@ -679,10 +701,10 @@ Ghi chú phạm vi:
 - FR-02: Visitor xem bản đồ POI và chi tiết quán (ảnh, món, audio).
 - FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
 - FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
-- FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu.
+- FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
 - FR-06: Admin quản lý user/role, restaurants, tours, analytics và logs để vận hành hệ thống.
 - FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
-- FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và translation billing.
+- FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
 - FR-09: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
 
 ## 11. Technical Requirements

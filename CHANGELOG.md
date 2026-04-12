@@ -3,6 +3,49 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-12
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Bổ sung hiển thị lịch sử tạo audio cho saler và cập nhật giao diện saler.
+  - Điều chỉnh logic thêm audio ở backend.
+  - Thêm/chuẩn hóa comment mô tả tác dụng của hàm.
+  - Cập nhật tài liệu use case, activity và testing.
+- Merged:
+  - Merge pull request #208 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #206 từ nhánh `main`.
+  - Merge pull request #205 từ nhánh `release`.
+  - Merge pull request #204 từ nhánh `develop`.
+  - Merge pull request #203 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #202 từ nhánh `fix/bug-before-submit`.
+  - Merge branch `fix/bug-before-submit` vào `fix/bug-before-submit`.
+
+### Nguyen Phuoc Sang (6 commits)
+
+- [94c640b] Merge pull request #208 from sangnp-s-organiztion/fix/bug-giathieu
+- [9a1c582] Merge pull request #206 from sangnp-s-organiztion/main
+- [eb51166] Merge pull request #205 from sangnp-s-organiztion/release
+- [7bbcf34] Merge pull request #204 from sangnp-s-organiztion/develop
+- [4a4e2b3] Merge pull request #203 from sangnp-s-organiztion/fix/bug-giathieu
+- [985ebc4] Merge pull request #202 from sangnp-s-organiztion/fix/bug-before-submit
+
+### sangnpdev (7 commits)
+
+- [636c6e0] cập nhật giao diện saler
+- [d4a833a] Merge branch 'fix/bug-before-submit' of https://github.com/sangnp-s-organiztion/food-market-narrator into fix/bug-before-submit
+- [7cd0ccc] thêm comment tác dụng tác dụng của hàm
+- [eb315e8] thêm hiển thị lịch sử tạo audio của saler
+- [d3173c7] thêm useccase cho app và đặc tả
+- [dfa6407] thêm usecase cho app
+- [d52bd03] cập nhật tài liệu testing
+
+### giathieu0311 (3 commits)
+
+- [1c6fe7c] chỉnh sửa logic thêm audio
+- [815cdac] Sua UseCase
+- [8bbbc1d] cập nhật activity
+
 ## 2026-04-11
 
 ### Tóm tắt trong ngày

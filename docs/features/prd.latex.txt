@@ -1,0 +1,1097 @@
+﻿\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\else
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\fi
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[itemize]{itemsep=0.3em, topsep=0.3em}
+\setlist[enumerate]{itemsep=0.3em, topsep=0.3em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\begin{document}
+\sloppy
+\section*{Tổng quan ứng dụng thuyết minh tự động – Phố ẩm thực Vĩnh Khánh}
+
+\section{Giới thiệu}
+
+Phố ẩm thực Vĩnh Khánh (đường Vĩnh Khánh, Quận 4, TP. Hồ Chí Minh) là một trong những khu vực nổi tiếng với nhiều món ăn đặc trưng và thu hút đông đảo du khách. Tuy nhiên, phần lớn khách tham quan chỉ trải nghiệm ẩm thực mà chưa có nhiều thông tin về nguồn gốc món ăn, lịch sử quán, hay các điểm đặc sắc của khu phố.
+
+Ứng dụng \textbf{Food Market Narrator} được xây dựng nhằm cung cấp hệ thống \textbf{thuyết minh tự động} cho du khách khi tham quan phố ẩm thực Vĩnh Khánh. Khi người dùng di chuyển đến các vị trí nhất định trong khu vực, ứng dụng sẽ tự động phát nội dung thuyết minh về địa điểm, quán ăn hoặc món đặc trưng tại vị trí đó.
+
+Hệ thống giúp nâng cao trải nghiệm du lịch, giúp người dùng vừa khám phá ẩm thực vừa hiểu thêm về văn hóa và lịch sử của khu phố.
+
+\medskip\hrule\medskip
+
+\section{Mục tiêu của hệ thống}
+
+Ứng dụng được xây dựng nhằm đạt các mục tiêu sau:
+
+\begin{itemize}
+\item Cung cấp \textbf{thông tin thuyết minh tự động} khi người dùng đến gần các địa điểm trong phố ẩm thực.
+\item Giúp du khách \textbf{khám phá các quán ăn nổi bật} một cách thuận tiện.
+\item Tăng trải nghiệm du lịch thông qua \textbf{nội dung audio thuyết minh}.
+\item Hỗ trợ quản lý nội dung thuyết minh cho từng địa điểm thông qua hệ thống quản trị.
+
+\end{itemize}
+\medskip\hrule\medskip
+
+\section{Phạm vi hệ thống}
+
+Hệ thống tập trung vào khu vực \textbf{phố ẩm thực Vĩnh Khánh, Quận 4} và bao gồm các chức năng chính:
+
+\begin{itemize}
+\item Xác định vị trí người dùng thông qua GPS.
+\item Tự động kích hoạt thuyết minh khi người dùng đi vào vùng địa lý của một địa điểm.
+\item Phát nội dung thuyết minh (sử dụng file audio).
+\item Hiển thị thông tin cơ bản về quán ăn hoặc địa điểm.
+\item Quản lý dữ liệu địa điểm và nội dung thuyết minh.
+
+\end{itemize}
+\medskip\hrule\medskip
+
+\section{Đối tượng sử dụng}
+
+\subsection{Du khách}
+
+\begin{itemize}
+\item Khám phá các địa điểm ăn uống trong khu phố.
+\item Nghe thuyết minh tự động khi đi qua các vị trí.
+
+\end{itemize}
+\subsection{Người quản trị / quản lý nội dung}
+
+\begin{itemize}
+\item Thêm, chỉnh sửa và quản lý thông tin địa điểm.
+\item Quản lý nội dung thuyết minh (audio, văn bản).
+\item Thống kê dữ liệu phục vụ cho việc phân tích
+
+\end{itemize}
+\medskip\hrule\medskip
+
+\section{Giá trị mang lại}
+
+Ứng dụng mang lại các giá trị sau:
+
+\begin{itemize}
+\item Giúp du khách có trải nghiệm khám phá ẩm thực \textbf{tương tác và sinh động hơn}.
+\item Tạo một \textbf{hệ thống hướng dẫn tự động} mà không cần hướng dẫn viên.
+\item Góp phần quảng bá \textbf{văn hóa ẩm thực địa phương}.
+\item Hỗ trợ quản lý và cập nhật nội dung một cách linh hoạt.
+
+\end{itemize}
+\section{Problem Statement (Vấn đề cần giải quyết)}
+
+Phố ẩm thực Vĩnh Khánh là một địa điểm nổi tiếng thu hút nhiều du khách trong và ngoài nước. Tuy nhiên, khi đến tham quan và trải nghiệm ẩm thực tại đây, người dùng thường gặp một số khó khăn trong việc tìm kiếm thông tin và khám phá các quầy bán hàng.
+
+Hiện nay, phần lớn thông tin về các quán ăn, món đặc trưng hoặc vị trí quầy bán chưa được cung cấp một cách trực quan và thuận tiện cho du khách. Điều này dẫn đến trải nghiệm tham quan và thưởng thức ẩm thực chưa được tối ưu.
+
+Một số vấn đề phổ biến mà người dùng thường gặp:
+
+\begin{itemize}
+\item \textbf{Khó tìm quầy bán mong muốn}
+\end{itemize}
+  Khu phố có nhiều quầy bán và hàng quán nằm gần nhau, khiến du khách khó xác định vị trí của quán ăn nổi tiếng hoặc quầy bán món mình muốn thử.
+
+\begin{itemize}
+\item \textbf{Không biết thông tin về menu hoặc món đặc trưng}
+\end{itemize}
+  Nhiều du khách không biết quán nào nổi tiếng với món gì hoặc món nào đáng thử khi đến khu phố.
+
+\begin{itemize}
+\item \textbf{Thiếu thông tin giới thiệu về quán ăn}
+\end{itemize}
+  Người dùng không biết lịch sử, đặc điểm nổi bật hoặc điểm đặc trưng của từng quán ăn.
+
+\begin{itemize}
+\item \textbf{Trải nghiệm khám phá ẩm thực còn bị động}
+\end{itemize}
+  Du khách thường chỉ đi dọc khu phố và chọn quán ngẫu nhiên, thiếu thông tin hướng dẫn hoặc gợi ý.
+
+Do đó, cần có một hệ thống hỗ trợ cung cấp thông tin và thuyết minh tự động khi người dùng di chuyển trong khu vực phố ẩm thực, giúp họ dễ dàng khám phá các quán ăn và món đặc trưng một cách thuận tiện hơn.
+
+\section{Goals / Objectives (Mục tiêu sản phẩm)}
+
+Ứng dụng thuyết minh tự động về phố ẩm thực Vĩnh Khánh được xây dựng nhằm cải thiện trải nghiệm khám phá ẩm thực của du khách, đồng thời hỗ trợ quảng bá các quán ăn trong khu phố. Các mục tiêu chính của sản phẩm bao gồm:
+
+\begin{itemize}
+\item \textbf{Giảm thời gian tìm kiếm quán ăn}
+\end{itemize}
+  Giúp người dùng nhanh chóng xác định vị trí các quán ăn hoặc điểm nổi bật trong khu phố thông qua hệ thống định vị và gợi ý.
+
+\begin{itemize}
+\item \textbf{Cung cấp thông tin món ăn rõ ràng và dễ tiếp cận}
+\end{itemize}
+  Giúp người dùng biết được menu, món đặc trưng và thông tin cơ bản của quán trước khi quyết định trải nghiệm.
+
+\begin{itemize}
+\item \textbf{Tăng tốc độ ra quyết định của khách hàng}
+\end{itemize}
+  Khi có thông tin thuyết minh và giới thiệu món ăn, người dùng có thể lựa chọn quán ăn hoặc món ăn nhanh hơn.
+
+\begin{itemize}
+\item \textbf{Nâng cao trải nghiệm tham quan và khám phá ẩm thực}
+\end{itemize}
+  Cung cấp nội dung thuyết minh tự động giúp người dùng hiểu thêm về món ăn, quán ăn và văn hóa ẩm thực của khu phố.
+
+\begin{itemize}
+\item \textbf{Hỗ trợ quảng bá các quán ăn địa phương}
+\end{itemize}
+  Tăng khả năng tiếp cận của các quán ăn với du khách thông qua hệ thống giới thiệu và thuyết minh tự động.
+
+\begin{itemize}
+\item \textbf{Góp phần tăng lượng khách và doanh thu cho các quán ăn}
+\end{itemize}
+  Khi du khách dễ dàng tiếp cận thông tin và được gợi ý quán ăn, khả năng ghé thăm và sử dụng dịch vụ tại các quán sẽ tăng lên.
+
+\section{User Personas}
+
+Phần này mô tả các nhóm người dùng chính của hệ thống và nhu cầu của họ khi sử dụng ứng dụng thuyết minh tự động tại phố ẩm thực Vĩnh Khánh.
+
+\subsection{Du khách / Khách tham quan (Visitor)}
+
+\textbf{Độ tuổi:} 13+  
+\textbf{Thiết bị sử dụng:} Smartphone (Android)
+
+\textbf{Đặc điểm:}
+
+\begin{itemize}
+\item Thường là khách du lịch hoặc người lần đầu đến phố ẩm thực Vĩnh Khánh.
+\item Thích khám phá các món ăn mới và các quán nổi tiếng.
+\item Di chuyển trong khu phố và tìm kiếm các quán ăn đáng thử.
+
+\end{itemize}
+\textbf{Nhu cầu:}
+
+\begin{itemize}
+\item Biết được quán ăn nào nổi bật trong khu vực.
+\item Nghe giới thiệu nhanh về món ăn hoặc quán khi đi ngang qua.
+\item Có thông tin cơ bản như món đặc trưng, giá, vị trí.
+
+\end{itemize}
+\textbf{Pain points:}
+
+\begin{itemize}
+\item Không biết quán nào ngon hoặc đáng thử.
+\item Khó tìm vị trí quán nổi tiếng trong khu phố đông đúc.
+\item Thiếu thông tin về món ăn trước khi quyết định mua.
+
+\end{itemize}
+\medskip\hrule\medskip
+
+\subsection{Người quản lý / Admin}
+
+\textbf{Độ tuổi:} 22 – 40+  
+\textbf{Thiết bị sử dụng:} Máy tính
+
+\textbf{Đặc điểm:}
+
+\begin{itemize}
+\item Là quản trị viên vận hành hệ thống ở cấp toàn cục.
+\item Theo dõi hoạt động người dùng và chất lượng dữ liệu trên toàn nền tảng.
+\item Sử dụng web admin để quản lý quyền truy cập, nhà hàng, tour và các chỉ số vận hành.
+
+\end{itemize}
+\textbf{Nhu cầu:}
+
+\begin{itemize}
+\item Quản lý tài khoản người dùng: tạo mới, khóa/mở khóa.
+\item Quản lý toàn bộ nhà hàng ở mức hệ thống và kiểm soát trạng thái hoạt động.
+\item Theo dõi dashboard vận hành: Nhật ký hoạt động, tuyến di chuyển và heatmap.
+\item Quản lý hành trình (tour), cấu hình QR mở app và theo dõi mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+\item Quản lý tài khoản admin (thông tin cá nhân, mật khẩu) một cách an toàn.
+
+\end{itemize}
+\textbf{Pain points:}
+
+\begin{itemize}
+\item Cần một giao diện quản trị thống nhất để thao tác nhanh trên nhiều nhóm dữ liệu.
+\item Khó phát hiện sớm bất thường nếu thiếu log và số liệu vận hành theo thời gian thực.
+\item Rủi ro phân quyền sai có thể làm lộ hoặc sai lệch dữ liệu vận hành.
+\item Cần đảm bảo dữ liệu hiển thị cho visitor luôn nhất quán, chính xác và cập nhật.
+
+\end{itemize}
+\medskip\hrule\medskip
+
+\subsection{Chủ quán / Người bán (Seller)}
+
+\textbf{Độ tuổi:} 20 – 50+  
+\textbf{Thiết bị sử dụng:} Máy tính
+
+\textbf{Đặc điểm:}
+
+\begin{itemize}
+\item Là chủ quán hoặc người quản lý quán ăn trong khu phố.
+\item Tập trung vận hành dữ liệu nhà hàng của chính mình thay vì quản trị toàn hệ thống.
+\item Thao tác chủ yếu qua saler dashboard theo từng nhà hàng được phân quyền.
+
+\end{itemize}
+\textbf{Nhu cầu:}
+
+\begin{itemize}
+\item Đăng nhập an toàn, chọn đúng nhà hàng cần thao tác.
+\item Cập nhật thông tin nhà hàng, menu món ăn và hình ảnh.
+\item Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+\item Cập nhật thông tin tài khoản cá nhân để sử dụng dashboard ổn định.
+
+\end{itemize}
+\textbf{Pain points:}
+
+\begin{itemize}
+\item Dễ chỉnh nhầm dữ liệu nếu thao tác sai nhà hàng trong trường hợp quản lý nhiều cơ sở.
+\item Mất nhiều thời gian khi cập nhật menu/ảnh/audio nếu quy trình không tập trung.
+\item Cần đồng bộ nội dung nhanh để thông tin hiển thị cho visitor luôn chính xác.
+
+\end{itemize}
+\section{User Stories}
+
+Phần này mô tả các hành vi chính của người dùng khi sử dụng ứng dụng thuyết minh tự động tại phố ẩm thực Vĩnh Khánh.
+
+Format chuẩn:
+
+\textbf{Với vai trò là [user]}\\
+\textbf{Tôi muốn [action]}\\
+\textbf{Để [goal]}
+
+\medskip\hrule\medskip
+
+\subsection{Visitor / Du khách}
+
+\textbf{Story V1 - Mở ứng dụng nhanh}
+
+Với vai trò là du khách\\
+Tôi muốn quét mã QR\\
+Để có thể mở nhanh ứng dụng thuyết minh về phố ẩm thực.
+
+\textbf{Story V2 - Cấp quyền vị trí}
+
+Với vai trò là du khách\\
+Tôi muốn ứng dụng xin quyền vị trí một cách rõ ràng\\
+Để tôi hiểu vì sao vị trí là cần thiết cho tính năng thuyết minh.
+
+\textbf{Story V3 - Xem bản đồ POI}
+
+Với vai trò là du khách\\
+Tôi muốn xem tất cả POI ẩm thực lân cận trên bản đồ\\
+Để tôi có thể chọn nơi sẽ đi tiếp theo.
+
+\textbf{Story V4 - Xem chi tiết quán}
+
+Với vai trò là du khách\\
+Tôi muốn xem chi tiết một quán ăn đã chọn\\
+Để tôi có thể quyết định quán đó có phù hợp với sở thích của mình hay không.
+
+\textbf{Story V5 - Nghe thuyết minh tự động}
+
+Với vai trò là du khách\\
+Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI\\
+Để tôi có thể tìm hiểu thông tin mà không cần tự tìm thủ công.
+
+\textbf{Story V6 - Đổi ngôn ngữ thuyết minh}
+
+Với vai trò là du khách\\
+Tôi muốn đổi ngôn ngữ nghe thuyết minh\\
+Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
+
+\textbf{Story V7 - Phát lại thủ công}
+
+Với vai trò là du khách\\
+Tôi muốn phát lại thủ công audio của POI\\
+Để tôi có thể nghe lại những thông tin đã bỏ lỡ.
+
+\textbf{Story V8 - Hoạt động khi mạng yếu}
+
+Với vai trò là du khách\\
+Tôi muốn ứng dụng dùng dữ liệu POI/audio đã cache khi mạng không ổn định\\
+Để trải nghiệm của tôi không bị gián đoạn.
+
+\textbf{Story V9 - Nhận gợi ý quán gần nhất}
+
+Với vai trò là du khách\\
+Tôi muốn thấy POI gần nhất được làm nổi bật\\
+Để tôi có thể nhanh chóng khám phá các địa điểm xung quanh.
+
+\textbf{Story V10 - Không phát lặp gây phiền}
+
+Với vai trò là du khách\\
+Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên\\
+Để tôi không bị khó chịu vì âm thanh lặp lại.
+
+\textbf{Story V11 – Tham quan theo tour}
+
+Với vai trò là du khách\\
+Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn\\
+Để tôi được hướng dẫn theo lộ trình tối ưu và không bỏ sót các điểm quan trọng
+
+\medskip\hrule\medskip
+
+\subsection{Seller / Chủ quán}
+
+\textbf{Story S1 - Đăng nhập quản lý quán}
+
+Với vai trò là chủ quán\\
+Tôi muốn đăng nhập vào cổng quản lý của mình\\
+Để tôi có thể quản lý dữ liệu nhà hàng một cách an toàn.
+
+\textbf{Story S2 - Cập nhật thông tin quán}
+
+Với vai trò là chủ quán\\
+Tôi muốn chỉnh sửa thông tin hồ sơ nhà hàng\\
+Để du khách luôn thấy thông tin chính xác.
+
+\textbf{Story S3 - Quản lý menu món ăn}
+
+Với vai trò là chủ quán\\
+Tôi muốn tạo, cập nhật và xóa món ăn\\
+Để menu phản ánh đúng các món đang phục vụ.
+
+\textbf{Story S4 - Quản lý hình ảnh quán}
+
+Với vai trò là chủ quán\\
+Tôi muốn tải lên và sắp xếp lại hình ảnh nhà hàng\\
+Để quán của tôi trông hấp dẫn và cung cấp thông tin tốt hơn.
+
+\textbf{Story S5 - Quản lý audio thuyết minh}
+
+Với vai trò là chủ quán\\
+Tôi muốn tải lên audio thuyết minh theo từng ngôn ngữ\\
+Để du khách có thể nghe phần giới thiệu của quán.
+
+\textbf{Story S6 - Bật/tắt nội dung không còn phù hợp}
+
+Với vai trò là chủ quán\\
+Tôi muốn bật hoặc tắt các bản ghi audio\\
+Để nội dung đã lỗi thời không bị phát cho du khách.
+
+\textbf{Story S7 - Chọn nhà hàng cần thao tác}
+
+Với vai trò là chủ quán\\
+Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu\\
+Để tránh cập nhật nhầm địa điểm.
+
+\textbf{Story S8 - Quản lý tài khoản saler}
+
+Với vai trò là chủ quán\\
+Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập\\
+Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
+
+\textbf{Story S9 - Xem lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh}
+
+Với vai trò là chủ quán\\
+Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng\\
+Để tôi có thể theo dõi mức sử dụng, đối chiếu chi phí và tối ưu nội dung cần dịch/tạo audio.
+
+\medskip\hrule\medskip
+
+\subsection{Admin / Quản trị hệ thống}
+
+\textbf{Story A1 - Quản lý tài khoản người dùng}
+
+Với vai trò là quản trị viên\\
+Tôi muốn quản lý tài khoản người dùng và vai trò\\
+Để quyền truy cập được kiểm soát đúng.
+
+\textbf{Story A2 - Quản lý toàn bộ nhà hàng}
+
+Với vai trò là quản trị viên\\
+Tôi muốn xem và cập nhật toàn bộ nhà hàng\\
+Để chất lượng dữ liệu được đồng nhất trong toàn hệ thống.
+
+\textbf{Story A3 - Theo dõi vận hành hệ thống}
+
+Với vai trò là quản trị viên\\
+Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung\\
+Để có thể phát hiện và xử lý vấn đề sớm.
+
+\textbf{Story A4 - Khóa/mở trạng thái nhà hàng}
+
+Với vai trò là quản trị viên\\
+Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng\\
+Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
+
+\textbf{Story A5 - Quản lý hành trình (Tour)}
+
+Với vai trò là quản trị viên\\
+Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng\\
+Để du khách có thể khám phá theo tuyến gợi ý có cấu trúc.
+
+\section{Features / Functional Requirements}
+
+Đây là phần đặc tả chức năng chi tiết của sản phẩm theo 3 nhóm người dùng: Visitor, Seller, Admin.
+
+\subsection{Visitor Features (Du khách)}
+
+\textbf{Feature V-01: Scan QR mở ứng dụng}
+
+\begin{itemize}
+\item Mô tả: Người dùng quét QR để mở nhanh ứng dụng tại khu phố ẩm thực.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Hệ thống hỗ trợ deep link mở đúng màn hình khởi động app.
+\item Nếu app chưa cài, điều hướng đến trang cài đặt phù hợp nền tảng.
+\item Ghi nhận sự kiện mở app từ QR để đo hiệu quả onboarding.
+\item Flow:
+\item Quét QR
+\item -> mở app
+\item -> kiểm tra trạng thái đăng nhập/quyền vị trí
+\item -> hiển thị bản đồ POI
+\item -> phát audio nếu ở gần POI
+
+\end{itemize}
+\textbf{Feature V-02: Hiển thị bản đồ và POI}
+
+\begin{itemize}
+\item Mô tả: Hiển thị danh sách điểm ăn uống trên bản đồ theo dữ liệu API.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Tải danh sách POI từ endpoint công khai.
+\item Hiển thị marker POI và vị trí hiện tại của người dùng.
+\item Cho phép chọn marker để mở thông tin tóm tắt.
+\item Hỗ trợ fallback cache POI khi mất mạng.
+\item Flow:
+\item Mở app
+\item -> gọi API lấy POI
+\item -> render marker
+\item -> người dùng chạm marker
+\item -> hiển thị card thông tin
+
+\end{itemize}
+\textbf{Feature V-03: Xem chi tiết quán và menu}
+
+\begin{itemize}
+\item Mô tả: Người dùng xem thông tin đầy đủ của quán trước khi quyết định trải nghiệm.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Hiển thị tên quán, mô tả, địa chỉ.
+\item Hiển thị danh sách ảnh quán.
+\item Hiển thị danh sách món ăn (menu) theo quán.
+\item Hiển thị audio có sẵn theo ngôn ngữ.
+\item Flow:
+\item Chọn POI
+\item -> mở trang chi tiết
+\item -> gọi API ảnh + món + audio
+\item -> hiển thị nội dung đầy đủ
+
+\end{itemize}
+\textbf{Feature V-04: Thuyết minh tự động theo vị trí}
+
+\begin{itemize}
+\item Mô tả: App tự phát audio khi người dùng vào vùng kích hoạt của POI.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Theo dõi vị trí theo chu kỳ khi bật narration.
+\item Tính khoảng cách đến POI gần nhất.
+\item Tự phát audio nếu khoảng cách \(\leq\) ngưỡng trigger.
+\item Không tự phát lặp lại cùng POI trong một phiên.
+\item Hỗ trợ phát lại thủ công theo yêu cầu người dùng.
+\item Flow:
+\item Bật narration
+\item -> nhận cập nhật vị trí
+\item -> tìm POI gần nhất
+\item -> kiểm tra điều kiện trigger
+\item -> phát audio
+
+\end{itemize}
+\textbf{Feature V-05: Chọn ngôn ngữ thuyết minh}
+
+\begin{itemize}
+\item Mô tả: Visitor chọn ngôn ngữ nghe nội dung audio.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Tải danh sách ngôn ngữ khả dụng từ API.
+\item Lưu lựa chọn ngôn ngữ hiện tại trong phiên.
+\item Khi phát audio, ưu tiên file theo ngôn ngữ đã chọn.
+\item Nếu thiếu audio ngôn ngữ tương ứng, hiển thị thông báo phù hợp.
+\item Flow:
+\item Mở cài đặt ngôn ngữ
+\item -> chọn ngôn ngữ
+\item -> lưu cấu hình
+\item -> lần phát tiếp theo dùng ngôn ngữ mới
+
+\end{itemize}
+\textbf{Feature V-06: Offline cache cho trải nghiệm liên tục}
+
+\begin{itemize}
+\item Mô tả: Dữ liệu đã tải được cache để dùng khi mạng yếu.
+\item Actor: Visitor.
+\item Functional requirements:
+\item Cache POI vào bộ nhớ cục bộ.
+\item Cache audio đã phát theo khóa định danh.
+\item Khi API lỗi/timeout, tự fallback sang cache.
+\item Không chặn toàn bộ UI khi chỉ một endpoint lỗi.
+\item Flow:
+\item App gọi API
+\item -> nếu thành công thì cập nhật cache
+\item -> nếu thất bại thì đọc cache
+\item -> hiển thị dữ liệu khả dụng
+
+\end{itemize}
+\subsection{Seller Features (Chủ quán)}
+
+\textbf{Feature S-01: Đăng nhập Seller Portal}
+
+\begin{itemize}
+\item Mô tả: Seller đăng nhập để quản lý dữ liệu quán của mình.
+\item Actor: Seller.
+\item Functional requirements:
+\item Hỗ trợ đăng nhập bằng username/password.
+\item Duy trì phiên làm việc bằng cookie auth.
+\item Chặn truy cập route quản trị khi chưa đăng nhập.
+\item Flow:
+\item Mở trang seller
+\item -> nhập tài khoản
+\item -> xác thực thành công
+\item -> vào dashboard
+
+\end{itemize}
+\textbf{Feature S-02: Chọn nhà hàng cần quản lý}
+
+\begin{itemize}
+\item Mô tả: Seller chọn đúng nhà hàng trước khi thao tác.
+\item Actor: Seller.
+\item Functional requirements:
+\item Hiển thị danh sách nhà hàng thuộc quyền seller.
+\item Lưu nhà hàng đang chọn cho các màn hình chức năng.
+\item Cảnh báo nếu seller thao tác khi chưa chọn nhà hàng.
+\item Flow:
+\item Đăng nhập
+\item -> chọn nhà hàng
+\item -> chuyển vào dashboard theo ngữ cảnh nhà hàng
+
+\end{itemize}
+\textbf{Feature S-03: Quản lý thông tin quán (Restaurant Profile)}
+
+\begin{itemize}
+\item Mô tả: Seller cập nhật thông tin hồ sơ quán.
+\item Actor: Seller.
+\item Functional requirements:
+\item Cho phép sửa tên, mô tả, địa chỉ, trạng thái hoạt động.
+\item Validate dữ liệu đầu vào trước khi lưu.
+\item Sau khi lưu thành công, hiển thị dữ liệu mới ngay trên giao diện.
+\item Flow:
+\item Mở tab Restaurant
+\item -> chỉnh thông tin
+\item -> lưu
+\item -> API cập nhật
+\item -> hiển thị kết quả mới
+
+\end{itemize}
+\textbf{Feature S-04: Quản lý menu món ăn}
+
+\begin{itemize}
+\item Mô tả: Seller quản lý danh sách món ăn theo quán.
+\item Actor: Seller.
+\item Functional requirements:
+\item Tạo món mới.
+\item Sửa thông tin món hiện có.
+\item Xóa món không còn kinh doanh.
+\item Hỗ trợ phân trang khi danh sách món lớn.
+\item Flow:
+\item Mở tab Dishes
+\item -> thêm/sửa/xóa món
+\item -> xác nhận thao tác
+\item -> cập nhật danh sách
+
+\end{itemize}
+\textbf{Feature S-05: Quản lý hình ảnh quán}
+
+\begin{itemize}
+\item Mô tả: Seller upload và sắp xếp ảnh hiển thị cho quán.
+\item Actor: Seller.
+\item Functional requirements:
+\item Upload ảnh mới theo nhà hàng.
+\item Đặt ảnh đại diện (primary image).
+\item Sắp xếp thứ tự hiển thị ảnh.
+\item Xóa ảnh không còn phù hợp.
+\item Flow:
+\item Mở tab Images
+\item -> upload/chọn ảnh
+\item -> đặt primary hoặc reorder
+\item -> lưu
+\item -> đồng bộ hiển thị
+
+\end{itemize}
+\textbf{Feature S-06: Quản lý audio thuyết minh}
+
+\begin{itemize}
+\item Mô tả: Seller quản lý audio giới thiệu quán theo ngôn ngữ.
+\item Actor: Seller.
+\item Functional requirements:
+\item Upload audio theo language.
+\item Bật/tắt trạng thái hoạt động của audio.
+\item Xóa audio lỗi hoặc không còn dùng.
+\item Hạn chế kích thước file upload theo cấu hình hệ thống.
+\item Flow:
+\item Mở tab Audio
+\item -> upload/chỉnh trạng thái/xóa
+\item -> API xử lý
+\item -> cập nhật danh sách audio
+
+\end{itemize}
+\textbf{Feature S-07: Theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh}
+
+\begin{itemize}
+\item Mô tả: Seller xem lịch sử mức sử dụng theo tháng cho cả dịch thuật văn bản và tạo tệp thuyết minh.
+\item Actor: Seller.
+\item Functional requirements:
+\item Hiển thị KPI tổng mức sử dụng theo tháng cho dịch thuật và tạo tệp thuyết minh.
+\item Hiển thị bảng lịch sử dịch thuật gồm thời gian, hành động, ký tự đầu vào, mức sử dụng.
+\item Hiển thị bảng lịch sử tạo tệp thuyết minh gồm thời gian, nhà hàng, ngôn ngữ, hành động, ký tự đầu vào, mức sử dụng.
+\item Hỗ trợ lọc theo tháng và phân trang dữ liệu mức sử dụng.
+\item Flow:
+\item Mở tab Lịch sử thuyết minh
+\item -> chọn tháng cần xem
+\item -> gọi API mức sử dụng dịch thuật và mức sử dụng tạo tệp thuyết minh
+\item -> hiển thị KPI + bảng lịch sử
+\item -> đổi trang để xem thêm dữ liệu
+
+\end{itemize}
+\subsection{Admin Features (Quản trị hệ thống)}
+
+Ghi chú phạm vi:
+
+\begin{itemize}
+\item Nhóm A-01 đến A-06 là phạm vi đã có trong trạng thái hiện tại.
+\item Nhóm A-07 đến A-09 là roadmap, chưa phải module hoàn chỉnh trên admin web.
+
+\end{itemize}
+\textbf{Feature A-01: Đăng nhập quản trị}
+
+\begin{itemize}
+\item Mô tả: Admin đăng nhập để truy cập các chức năng quản trị hệ thống.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xác thực bằng tài khoản admin.
+\item Dùng cookie auth cho phiên quản trị.
+\item Từ chối truy cập khi user không đủ role.
+\item Flow:
+\item Mở trang admin
+\item -> đăng nhập
+\item -> kiểm tra role
+\item -> vào trang quản trị
+
+\end{itemize}
+\textbf{Feature A-02: Quản lý user và role}
+
+\begin{itemize}
+\item Mô tả: Admin quản lý tài khoản người dùng nội bộ hệ thống.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem danh sách user.
+\item Cập nhật role user theo chính sách phân quyền.
+\item Khóa/mở trạng thái tài khoản khi cần.
+\item Flow:
+\item Mở module Users
+\item -> chọn user
+\item -> chỉnh role/trạng thái
+\item -> lưu thay đổi
+
+\end{itemize}
+\textbf{Feature A-03: Quản lý toàn cục nhà hàng}
+
+\begin{itemize}
+\item Mô tả: Admin giám sát và cập nhật trạng thái nhà hàng trên toàn hệ thống.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem toàn bộ nhà hàng không phụ thuộc owner.
+\item Cập nhật trạng thái hoạt động của nhà hàng.
+\item Kiểm tra tính đầy đủ dữ liệu cơ bản để phục vụ vận hành.
+\item Flow:
+\item Mở module Restaurants
+\item -> lọc/chọn nhà hàng
+\item -> chỉnh trạng thái hoặc dữ liệu
+\item -> lưu
+
+\end{itemize}
+\textbf{Feature A-04: Dashboard analytics vận hành}
+
+\begin{itemize}
+\item Mô tả: Admin theo dõi chỉ số vận hành và hành vi nghe để ra quyết định.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem KPI tổng quan, heatmap, top restaurants, movement paths.
+\item Hỗ trợ session limit cho movement paths (bao gồm chế độ all).
+\item Tự refresh dữ liệu analytics theo chu kỳ phù hợp.
+\item Flow:
+\item Mở dashboard
+\item -> gọi analytics APIs
+\item -> render widgets/charts
+\item -> lưu
+
+\end{itemize}
+\textbf{Feature A-05: Theo dõi recent activity và audit logs}
+
+\begin{itemize}
+\item Mô tả: Admin theo dõi hoạt động gần đây để phát hiện bất thường sớm.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem danh sách recent activity từ analytics.
+\item Xem audit logs phục vụ truy vết thao tác hệ thống.
+\item Hỗ trợ phân loại nhanh hành vi để điều tra khi cần.
+\item Flow:
+\item Mở module Logs
+\item -> lấy recent activity/audit logs
+\item -> lọc theo nhu cầu
+\item -> đối chiếu sự kiện
+
+\end{itemize}
+\textbf{Feature A-06: Quản lý hành trình (Tour Management)}
+
+\begin{itemize}
+\item Mô tả: Admin tạo và quản lý tuyến hành trình du lịch theo nhiều điểm dừng.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem danh sách tour và chi tiết từng tour.
+\item Tạo/sửa thông tin tour (name, description, estimated duration, isActive).
+\item Thêm/xóa nhà hàng trong tour.
+\item Sắp xếp lại thứ tự stop trong tour.
+\item Upload ảnh đại diện cho tour.
+\item Flow:
+\item Mở module Tours
+\item -> tạo/chỉnh sửa tour
+\item -> thêm hoặc xóa nhà hàng
+\item -> sắp xếp thứ tự điểm dừng
+\item -> lưu thay đổi
+
+\end{itemize}
+\textbf{Feature A-07 (Roadmap): Quản lý ngôn ngữ hệ thống}
+
+\begin{itemize}
+\item Mô tả: Duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
+\item Actor: Admin.
+\item Functional requirements:
+\item Xem danh sách ngôn ngữ hiện có.
+\item Thêm/sửa thông tin ngôn ngữ.
+\item Ngăn trùng mã ngôn ngữ.
+\item Flow:
+\item Mở module Languages
+\item -> thêm/sửa ngôn ngữ
+\item -> validate
+\item -> lưu
+
+\end{itemize}
+\textbf{Feature A-08 (Roadmap): Kiểm duyệt media và chất lượng nội dung}
+
+\begin{itemize}
+\item Mô tả: Admin kiểm duyệt nội dung media để đảm bảo chất lượng trải nghiệm visitor.
+\item Actor: Admin.
+\item Functional requirements:
+\item Rà soát ảnh/audio bị lỗi hoặc không phù hợp.
+\item Gỡ hoặc vô hiệu hóa media vi phạm.
+\item Ghi nhận lịch sử thao tác kiểm duyệt.
+\item Flow:
+\item Mở module Media Review
+\item -> xem danh sách media
+\item -> duyệt hoặc từ chối
+\item -> cập nhật trạng thái
+
+\end{itemize}
+\textbf{Feature A-09 (Roadmap): Cấu hình chính sách bảo mật endpoint}
+
+\begin{itemize}
+\item Mô tả: Admin kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
+\item Actor: Admin.
+\item Functional requirements:
+\item Theo dõi danh sách endpoint công khai.
+\item Đảm bảo endpoint nhạy cảm luôn yêu cầu xác thực.
+\item Kiểm tra phản hồi 401/403 đúng chuẩn API khi không đủ quyền.
+\item Flow:
+\item Mở module Security
+\item -> xem cấu hình endpoint
+\item -> cập nhật chính sách
+\item -> kiểm tra lại phân quyền truy cập
+
+\end{itemize}
+\subsection{Functional Requirement Summary}
+
+\begin{itemize}
+\item FR-01: Visitor có thể mở app nhanh bằng QR/deep link.
+\item FR-02: Visitor xem bản đồ POI và chi tiết quán (ảnh, món, audio).
+\item FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
+\item FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
+\item FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+\item FR-06: Admin quản lý user/role, restaurants, tours, analytics và logs để vận hành hệ thống.
+\item FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
+\item FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+\item FR-09: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
+
+\end{itemize}
+\section{Technical Requirements}
+
+Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển khai hệ thống thống nhất.
+
+\subsection{Tech stack chính}
+
+\begin{itemize}
+\item Backend: ASP.NET Core Web API (.NET 10.0), kiến trúc Model - Controller - Service - Repository.
+\item Database: SQL Server, truy cập qua Entity Framework Core.
+\item Mobile app (Visitor): .NET MAUI (Android), hỗ trợ bản đồ và audio playback.
+\item Web app Seller: React + Vite + TypeScript.
+\item Web app Admin: React + Vite + TypeScript.
+\item API format: REST (JSON request/response).
+\item Authentication: Cookie-based authentication + role claims.
+
+\end{itemize}
+\subsection{API và tích hợp}
+
+\begin{itemize}
+\item Public APIs cho Visitor:
+\item GET /Restaurant
+\item GET /Restaurant/\{id\}
+\item GET /Language
+\item GET /Restaurant/\{restaurantId\}/images
+\item GET /Restaurant/\{restaurantId\}/dishes
+\item GET /Restaurant/\{restaurantId\}/audios
+\item GET /public/Restaurant/\{restaurantId\}/dishes
+\item GET /public/Restaurant/\{restaurantId\}/audios
+\item Protected APIs cho Seller/Admin:
+\item CRUD Restaurant, Dish, Image, Audio
+\item User/Role management
+\item Tour management (GET/POST/PATCH tour, add/remove stop, reorder stops, upload image)
+\item Chuẩn dữ liệu:
+\item JSON UTF-8
+\item HTTP status code rõ ràng (200/400/401/403/404/500)
+
+\end{itemize}
+\subsection{Data và media}
+
+\begin{itemize}
+\item Dữ liệu nghiệp vụ lưu trên SQL Server.
+\item Ảnh và audio lưu dưới dạng file .mp3, truy cập bằng URL media do API cung cấp.
+\item Mobile cần cơ chế cache POI và cache audio để hỗ trợ mạng yếu/mất mạng.
+
+\end{itemize}
+\subsection{Môi trường triển khai}
+
+\begin{itemize}
+\item Môi trường tối thiểu:
+\item Dev: local API + SQL Server
+\item Staging: kiểm thử tích hợp end-to-end
+\item Production: API ổn định, backup dữ liệu định kỳ
+\item CORS cho frontend web tại localhost ở môi trường phát triển.
+
+\end{itemize}
+\subsection{Kiến trúc hệ thống (Architecture)}
+
+\begin{verbatim}
++----------------------------------------------------------------------------------+
+|                                   FRONTEND LAYER                                 |
+|  Mobile MAUI (Visitor) | Seller Web (React + Vite) | Admin Web (React + Vite)  |
+|  UI + Services + Local Cache (POI/Audio)                                          |
++----------------------------------------------------------------------------------+
+                                      |
+                                      | HTTPS REST + Cookie Auth
+                                      v
++----------------------------------------------------------------------------------+
+|                                 BACKEND LAYER                                    |
+|                         ASP.NET Core Web API (.NET 10)                           |
+|              Controllers -> Services -> Repositories -> EF Core                  |
+|  Security: Fallback Auth Policy + Public Endpoint Convention + RBAC             |
++----------------------------------------------------------------------------------+
+                    |                                           |
+                    | SQL                                       | Static files
+                    v                                           v
+         +----------------------------+            +--------------------------------+
+         | SQL Server                 |            | Media Storage                  |
+         | Restaurant, Dish, Audio,   |            | /maui-images, /maui-audios,   |
+         | Language, User, Image      |            | /uploads/audios               |
+         +----------------------------+            +--------------------------------+
+\end{verbatim}
+
+\subsection{Luồng dữ liệu hoạt động (How Data Works)}
+
+\begin{verbatim}
+Visitor App Open
+  -> GET /Restaurant
+  -> API đọc SQL Server
+  -> trả JSON POI
+  -> render bản đồ + lưu offline_cache
+
+Visitor Tap POI
+  -> GET /Restaurant/{restaurantId}/images
+  -> GET /public/Restaurant/{restaurantId}/dishes
+  -> GET /public/Restaurant/{restaurantId}/audios
+  -> hiển thị ảnh + menu + audio
+
+Visitor Start Narration
+  -> LocationService cập nhật GPS
+  -> NarrationFlowService tính khoảng cách
+  -> nếu đủ gần thì chọn audio theo language
+  -> AudioService phát từ cache
+  -> nếu chưa có cache: tải từ API -> lưu cache -> phát
+
+Seller/Admin Data Update
+  -> login (cookie auth)
+  -> gọi protected APIs (CRUD)
+  -> API ghi SQL + cập nhật media storage
+  -> Visitor phiên sau nhận dữ liệu mới khi sync
+
+Network Failure Fallback
+  -> API timeout / mất mạng
+  -> app đọc POI/audio từ cache local
+  -> UI vẫn hoạt động ở chế độ offline cơ bản
+\end{verbatim}
+
+\section{Non-functional Requirements}
+
+\subsection{Performance}
+
+\begin{itemize}
+\item API read phổ biến (Restaurant/Language/public data) có thời gian phản hồi trung bình < 500ms ở điều kiện bình thường.
+\item API ghi dữ liệu (create/update/delete) có thời gian phản hồi trung bình < 800ms.
+\item Thời gian tải màn hình bản đồ ban đầu trên mobile < 3 giây với mạng ổn định.
+\item Thời gian bắt đầu phát audio:
+\item < 2 giây với audio đã cache.
+\item < 5 giây với audio tải từ mạng.
+
+\end{itemize}
+\subsection{Security}
+
+\begin{itemize}
+\item Mọi endpoint mặc định yêu cầu xác thực, chỉ public các endpoint được khai báo rõ ràng.
+\item Role-based access control cho Seller và Admin.
+\item Trả về 401/403 đúng chuẩn API khi chưa đăng nhập hoặc không đủ quyền.
+\item Không trả dữ liệu nhạy cảm (mật khẩu, hash) trong response.
+
+\end{itemize}
+\subsection{Scalability}
+
+\begin{itemize}
+\item Hệ thống hỗ trợ tối thiểu 1.000 người dùng hoạt động/ngày ở giai đoạn đầu.
+\item Cho phép mở rộng ngang API khi tăng tải (scale out).
+\item Thiết kế module cho phép mở rộng thêm khu ẩm thực ngoài Vĩnh Khánh.
+
+\end{itemize}
+\subsection{Reliability và Availability}
+
+\begin{itemize}
+\item Uptime mục tiêu cho API: \(\geq\) 99.5\%/tháng.
+\item Có fallback cache trên mobile khi API tạm thời không khả dụng.
+\item Upload media cần cơ chế retry hợp lý khi mạng gián đoạn.
+
+\end{itemize}
+\subsection{Maintainability}
+
+\begin{itemize}
+\item Tài liệu API và PRD phải cập nhật theo phiên bản phát hành.
+\item Coding convention thống nhất cho backend và frontend.
+\item Mỗi thay đổi lớn phải có test case chức năng tương ứng.
+
+\end{itemize}
+\subsection{Observability}
+
+\begin{itemize}
+\item Ghi log cho các sự kiện quan trọng: login, upload media, lỗi API, trigger narration.
+\item Có dashboard theo dõi các chỉ số vận hành chính (API latency, error rate, audio success rate).
+
+\end{itemize}
+\section{Edge Cases (Xử lý lỗi)}
+
+Phần này mô tả các tình huống lỗi hoặc trạng thái biên quan trọng mà sản phẩm cần xử lý ổn định để không làm gián đoạn trải nghiệm visitor và không gây sai lệch vận hành.
+
+\subsection{Quyền vị trí và tracking}
+
+\begin{itemize}
+\item Nếu visitor từ chối quyền vị trí foreground, ứng dụng vẫn phải mở được bản đồ, danh sách POI và trang chi tiết; chỉ các tính năng auto narration và tracking theo vị trí bị vô hiệu cho đến khi người dùng cấp quyền.
+\item Trên Android, nếu chưa có quyền background location, hệ thống vẫn cho phép trải nghiệm foreground bình thường nhưng phải hạ cấp rõ ràng với background tracking, đồng thời hướng dẫn người dùng mở \texttt{Settings} để cấp quyền khi cần.
+\item Nếu GPS chưa bắt được tín hiệu, timeout hoặc trả về location \texttt{null}, ứng dụng không được crash và không được tự phát audio sai; hệ thống sẽ chờ lần sample tiếp theo và giữ UI ở trạng thái ổn định.
+\item Hệ thống cần giảm false trigger khi người dùng đứng gần ranh giới POI bằng cơ chế debounce/hysteresis: chỉ phát khi đủ gần, không phát lặp khi dao động nhẹ quanh mép geofence, và phải có ngưỡng enter/exit tách biệt.
+
+\end{itemize}
+\subsection{Mạng yếu, cache và dữ liệu thiếu}
+
+\begin{itemize}
+\item Nếu API public cho POI, ngôn ngữ hoặc dishes lỗi/timeout, mobile phải fallback về cache cục bộ/in-memory nếu có; nếu chưa từng cache thì hiển thị trạng thái degraded hoặc empty state rõ ràng thay vì lỗi chặn toàn bộ màn hình.
+\item Nếu audio đúng ngôn ngữ không tồn tại, hệ thống ưu tiên audio active mới nhất theo ngôn ngữ đã chọn; nếu vẫn không có thì có thể fallback sang audio active hợp lệ khác hoặc bỏ qua autoplay một cách an toàn.
+\item Nếu audio file bị hỏng, quá nhỏ, không tải được hoặc không còn truy cập được từ remote URL, ứng dụng không được treo luồng narration; chỉ bỏ qua lượt phát đó và tiếp tục hoạt động với các POI khác.
+\item Nếu người dùng mở app lần đầu trong trạng thái offline và thư viện audio chưa sẵn sàng, hệ thống vẫn cho phép xem POI/nội dung đã có nhưng phải thông báo rõ rằng audio có thể chưa phát được cho tới khi có mạng để đồng bộ.
+\item Nếu bộ nhớ cache audio chạm quota hoặc thiết bị thiếu dung lượng trống, hệ thống cần dọn cache theo LRU trước; nếu vẫn không đủ chỗ thì từ chối cache mới một cách an toàn và không làm hỏng dữ liệu đang có.
+
+\end{itemize}
+\subsection{QR session, sync log và telemetry}
+
+\begin{itemize}
+\item Nếu phiên truy cập từ QR bị hết hạn theo local expiry hoặc backend trả trạng thái không còn hợp lệ, ứng dụng phải dừng narration, flush log theo best effort và yêu cầu người dùng quét lại QR để tiếp tục.
+\item Nếu kiểm tra QR với server lỗi do mất mạng tạm thời, hệ thống không được cắt narration ngay khi local expiry vẫn còn hiệu lực; thay vào đó tiếp tục chạy theo trạng thái local và retry check ở vòng sau.
+\item Nếu audio log gặp race condition \texttt{Session not found}, mobile phải tự khởi tạo lại session, flush location logs ngay và retry gửi audio log 1 lần trước khi bỏ qua.
+\item Nếu đồng bộ location logs thất bại, batch phải được giữ lại trong buffer memory để retry theo chu kỳ; cần có giới hạn buffer để tránh tràn bộ nhớ và chấp nhận chiến lược drop oldest khi quá ngưỡng.
+\item Nếu app bị sleep/terminate trước khi flush log thành công, PRD phải chấp nhận rủi ro mất một phần telemetry chưa đồng bộ và không coi đây là lỗi chặn trải nghiệm chính của visitor.
+
+\end{itemize}
+\section{Privacy (Bảo mật vị trí)}
+
+Phần này mô tả cách sản phẩm xử lý dữ liệu vị trí và telemetry visitor theo nguyên tắc tối thiểu hóa dữ liệu, kiểm soát truy cập và minh bạch với người dùng.
+
+\subsection{Dữ liệu được thu thập trong phiên visitor}
+
+\begin{itemize}
+\item Hệ thống hiện ghi nhận \texttt{sessionId} cho từng phiên visitor, \texttt{deviceId} dạng định danh nội bộ lưu cục bộ trên thiết bị, \texttt{deviceInfo} cơ bản và thời điểm hết hạn QR nếu phiên có giới hạn thời gian.
+\item Location telemetry gửi lên backend gồm thời gian ghi nhận và tọa độ \texttt{GeoJSON Point} \texttt{[longitude, latitude]}; audio telemetry gồm \texttt{restaurantId}, \texttt{audioId}, thời gian bắt đầu/kết thúc và thời lượng nghe.
+\item Trên thiết bị, ứng dụng có thể lưu cache POI, ngôn ngữ, dishes, audio, favorites, history và preference ngôn ngữ để phục vụ trải nghiệm offline/liền mạch.
+
+\end{itemize}
+\subsection{Nguyên tắc bảo mật và phân quyền}
+
+\begin{itemize}
+\item Ứng dụng phải giải thích rõ lý do cần quyền vị trí trước hoặc trong lúc xin quyền; quyền background location trên Android phải được xin tách biệt với quyền foreground.
+\item Dữ liệu movement path dùng cho analytics phải được hiển thị cho Admin dưới dạng đường đi theo session ẩn danh; Seller và người dùng public không được truy cập dữ liệu vị trí thô của visitor.
+\item Tất cả analytics, audit logs, quản trị user và quản lý vận hành phải nằm sau lớp xác thực và role-based access control; nguyên tắc mặc định là protected-by-default, chỉ mở public cho các endpoint được khai báo tường minh.
+\item API không được trả về dữ liệu nhạy cảm như password/hash hoặc thông tin định danh quản trị không cần thiết trong response.
+\item Môi trường production bắt buộc dùng HTTPS và chính sách xác thực chứng chỉ phù hợp; các cấu hình chấp nhận mọi certificate chỉ được chấp nhận trong môi trường dev/test nội bộ.
+
+\end{itemize}
+\subsection{Quyền kiểm soát của người dùng và vòng đời dữ liệu}
+
+\begin{itemize}
+\item Visitor phải có khả năng dừng narration bất kỳ lúc nào; hệ thống không được ép phát lặp liên tục trong cùng phiên chỉ vì dữ liệu vị trí dao động.
+\item Ứng dụng nên cung cấp khả năng quản lý dữ liệu cục bộ như xóa audio cache, xóa history, xóa favorites và kiểm tra/truy cập phần cấp quyền tracking nền trong phần settings.
+\item Sản phẩm cần có privacy notice ngắn gọn ở onboarding hoặc luồng QR entry, nêu rõ vì sao vị trí được thu thập, loại telemetry nào được gửi lên server và dữ liệu analytics được xử lý theo session ẩn danh.
+\item Cần xác định retention policy riêng cho location logs, audio logs và audit data để tránh lưu dữ liệu hành vi lâu hơn mức cần thiết cho vận hành và phân tích.
+
+\end{itemize}
+\section{Success Metrics}
+
+Phần này dùng để đo mức độ thành công của sản phẩm sau khi triển khai.
+
+\subsection{Visitor metrics}
+
+\begin{itemize}
+\item > = 80\% phiên mở app bắt đầu từ QR/deep link tại điểm tham quan.
+\item > = 70\% visitor bật narration ít nhất 1 lần trong phiên.
+\item > = 60\% visitor nghe ít nhất 1 audio hoàn chỉnh (\(\geq\) 80\% thời lượng file).
+\item Tỷ lệ lỗi phát audio < 3\% tổng số lượt phát.
+\item Tỷ lệ dùng cache thành công khi offline \(\geq\) 90\% với dữ liệu đã từng tải.
+
+\end{itemize}
+\subsection{Seller metrics}
+
+\begin{itemize}
+\item > = 70\% seller cập nhật nội dung quán (món/ảnh/audio) ít nhất 1 lần mỗi tuần.
+\item > = 90\% thao tác CRUD từ seller thành công ngay lần đầu.
+\item Thời gian trung bình cập nhật một mục nội dung < 2 phút.
+
+\end{itemize}
+\subsection{Admin metrics}
+
+\begin{itemize}
+\item 100\% tài khoản quản trị được gán role hợp lệ.
+\item > = 95\% bản ghi bất thường trong recent activity/audit logs được phát hiện và xử lý trong vòng 24 giờ.
+\item Tỷ lệ sự cố phân quyền (truy cập sai quyền) < 1\% tổng request protected.
+
+\end{itemize}
+\subsection{System/business metrics tổng hợp}
+
+\begin{itemize}
+\item API error rate (5xx) < 1\% theo ngày.
+\item P95 API latency cho endpoint public < 800ms.
+\item Số phiên sử dụng thành công mỗi ngày tăng trưởng đều theo tháng.
+\item Mục tiêu giai đoạn đầu: đạt tối thiểu 500 phiên trải nghiệm/ngày trong khu vực triển khai.
+\end{itemize}
+\end{document}
+
