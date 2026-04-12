@@ -7,18 +7,20 @@ namespace food_market_narrator.Services;
 public class LocationService : ILocationService
 {
     private bool _isTracking = false;
+    // CancellationTokenSource dùng khi muốn dừng một task đang chạy (ví dụ vòng lặp tracking nền) một cách an toàn. Khi gọi Cancel() sẽ gửi tín hiệu yêu cầu dừng, và task đó có thể bắt tín hiệu này để dừng lại.
     private CancellationTokenSource? _trackingCts;
     private Task? _trackingTask;
     private Location? _lastKnownLocation;
     private Location? _lastPublishedLocation;
-    private readonly SemaphoreSlim _trackingInitLock = new(1, 1);
-    private readonly SemaphoreSlim _permissionLock = new(1, 1);
+    // Semaphore để đảm bảo chỉ có một luồng thực hiện khởi tạo tracking hoặc yêu cầu quyền tại một thời điểm
+    private readonly SemaphoreSlim _trackingInitLock = new(1, 1); // đảm bảo chỉ có một luồng thực hiện khởi tạo tracking hoặc yêu cầu quyền tại một thời điểm
+    private readonly SemaphoreSlim _permissionLock = new(1, 1); // đảm bảo chỉ có một luồng thực hiện yêu cầu quyền tại một thời điểm
 
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
-    private const double MinPublishDistanceMeters = 6;
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(3); // khoảng thời gian giữa các lần lấy vị trí mới trong vòng lặp tracking. Có thể điều chỉnh để cân bằng giữa độ nhạy và tiết kiệm pin.
+    private const double MinPublishDistanceMeters = 6; // Chỉ khi người dùng di chuyển ít nhất 6 mét thì mới “publish” vị trí mới
     private static readonly GeolocationRequest TrackingRequest =
-        new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10));
-    private bool _backgroundPermissionExplained;
+        new(GeolocationAccuracy.Best, TimeSpan.FromSeconds(10)); // lấy vị trí với độ chính xác cao nhất, timeout 10 giây
+    private bool _backgroundPermissionExplained; // cờ để đảm bảo chỉ giải thích một lần về quyền vị trí nền trên Android 10+
 
     public event EventHandler<Location>? LocationChanged;
     public event EventHandler<Location?>? LocationSampled;
@@ -339,7 +341,7 @@ public class LocationService : ILocationService
 #endif
     }
 
-    // Gửi tín hiệu stop cho foreground tracking service trên Android.
+    // Gửi tín hiệu stop cho foreground tracking service trên Android, tắt khi ng dùng cấp quyền luôn luôn truy cập hoặc khi dừng tracking.
     private static void StopForegroundTrackingServiceIfNeeded()
     {
 #if ANDROID

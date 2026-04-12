@@ -88,8 +88,11 @@ export default function AudioPage() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState("");
-  const [generatedAudioId, setGeneratedAudioId] = useState<number | null>(null);
-  const [translateMeta, setTranslateMeta] = useState<{
+  const [lastTranslatedKey, setLastTranslatedKey] = useState<string | null>(
+    null,
+  );
+  const [, setGeneratedAudioId] = useState<number | null>(null);
+  const [, setTranslateMeta] = useState<{
     inputChars: number;
     outputChars: number;
     estimatedCost: number;
@@ -147,6 +150,20 @@ export default function AudioPage() {
         return a.languageName.localeCompare(b.languageName);
       });
   }, [audios, languages]);
+
+  const sourceTextTrimmed = useMemo(() => sourceText.trim(), [sourceText]);
+  const isSameSourceTargetLanguage = sourceLangCode === targetLangCode;
+  const currentTranslationKey = useMemo(
+    () => `${sourceLangCode}|${targetLangCode}|${sourceTextTrimmed}`,
+    [sourceLangCode, targetLangCode, sourceTextTrimmed],
+  );
+  const hasFreshTranslatedText =
+    !isSameSourceTargetLanguage &&
+    translatedText.trim().length > 0 &&
+    lastTranslatedKey === currentTranslationKey;
+  const canCreateAudio =
+    sourceTextTrimmed.length > 0 &&
+    (isSameSourceTargetLanguage || hasFreshTranslatedText);
 
   const fetchAudioData = useCallback(async () => {
     if (!selectedRestaurant) {
@@ -344,7 +361,7 @@ export default function AudioPage() {
   const handleTranslateText = async () => {
     if (!selectedRestaurant) return;
 
-    const text = sourceText.trim();
+    const text = sourceTextTrimmed;
     if (!text) {
       toast.error("Vui lòng nhập nội dung cần dịch");
       return;
@@ -368,6 +385,7 @@ export default function AudioPage() {
         estimatedCost: result.estimated_cost,
         currency: result.currency,
       });
+      setLastTranslatedKey(currentTranslationKey);
       setGeneratedAudioUrl("");
       setGeneratedAudioId(null);
       toast.success("Dịch văn bản thành công");
@@ -381,11 +399,21 @@ export default function AudioPage() {
   const handleCreateAudioFromText = async () => {
     if (!selectedRestaurant) return;
 
-    const textForAudio = (translatedText || sourceText).trim();
-    if (!textForAudio) {
-      toast.error("Vui lòng nhập hoặc dịch nội dung trước khi tạo âm thanh");
+    if (!sourceTextTrimmed) {
+      toast.error("Vui lòng nhập nội dung trước khi tạo âm thanh");
       return;
     }
+
+    if (!isSameSourceTargetLanguage && !hasFreshTranslatedText) {
+      toast.error(
+        "Ngôn ngữ đích khác ngôn ngữ nguồn. Vui lòng bấm Dịch trước khi tạo âm thanh.",
+      );
+      return;
+    }
+
+    const textForAudio = isSameSourceTargetLanguage
+      ? sourceTextTrimmed
+      : translatedText.trim();
 
     try {
       setIsGenerating(true);
@@ -394,7 +422,7 @@ export default function AudioPage() {
         {
           text: textForAudio,
           language_code: targetLangCode,
-          source_text: sourceText.trim() || undefined,
+          source_text: sourceTextTrimmed || undefined,
         },
       );
 
@@ -407,7 +435,9 @@ export default function AudioPage() {
       await fetchAudioData();
       toast.success("Đã tạo âm thanh thành công");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Không thể tạo âm thanh từ văn bản"));
+      toast.error(
+        extractErrorMessage(error, "Không thể tạo âm thanh từ văn bản"),
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -451,19 +481,21 @@ export default function AudioPage() {
         <div>
           <h1 className="page-title">Mô tả âm thanh</h1>
           <p className="page-description">
-            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo âm thanh bằng Edge TTS
-            và quản lý phiên bản âm thanh của nhà hàng.
+            Nhập nội dung, dịch sang ngôn ngữ mong muốn, tạo âm thanh bằng Edge
+            TTS và quản lý phiên bản âm thanh của nhà hàng.
           </p>
         </div>
         <Button onClick={() => openUploadDialog()}>
-          <Plus className="w-4 h-4 mr-2" /> Tải lên âm thanh
+          <Plus className="w-4 h-4 mr-2" /> Tải lên tệp âm thanh
         </Button>
       </div>
 
       <section className="dashboard-card space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-base">Dịch văn bản và tạo âm thanh</h2>
+          <h2 className="font-semibold text-base">
+            Dịch văn bản và tạo âm thanh
+          </h2>
         </div>
 
         <div className="space-y-2">
@@ -471,7 +503,10 @@ export default function AudioPage() {
           <Textarea
             id="source-text"
             value={sourceText}
-            onChange={(e) => setSourceText(e.target.value)}
+            onChange={(e) => {
+              setSourceText(e.target.value);
+              setLastTranslatedKey(null);
+            }}
             placeholder="Nhập nội dung mô tả nhà hàng để dịch và tạo âm thanh..."
             className="min-h-36"
           />
@@ -480,7 +515,13 @@ export default function AudioPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label>Ngôn ngữ nguồn</Label>
-            <Select value={sourceLangCode} onValueChange={setSourceLangCode}>
+            <Select
+              value={sourceLangCode}
+              onValueChange={(value) => {
+                setSourceLangCode(value);
+                setLastTranslatedKey(null);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Chọn ngôn ngữ nguồn" />
               </SelectTrigger>
@@ -496,7 +537,13 @@ export default function AudioPage() {
 
           <div className="space-y-2">
             <Label>Ngôn ngữ đích</Label>
-            <Select value={targetLangCode} onValueChange={setTargetLangCode}>
+            <Select
+              value={targetLangCode}
+              onValueChange={(value) => {
+                setTargetLangCode(value);
+                setLastTranslatedKey(null);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Chọn ngôn ngữ đích" />
               </SelectTrigger>
@@ -525,7 +572,7 @@ export default function AudioPage() {
             type="button"
             variant="secondary"
             onClick={handleCreateAudioFromText}
-            disabled={isGenerating}
+            disabled={isGenerating || !canCreateAudio}
           >
             {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Tạo âm thanh
@@ -554,18 +601,6 @@ export default function AudioPage() {
             placeholder="Kết quả dịch sẽ hiển thị ở đây"
             className="min-h-32"
           />
-          {translateMeta && (
-            <p className="text-xs text-muted-foreground">
-              Đầu vào: {translateMeta.inputChars} ký tự - Đầu ra:{" "}
-              {translateMeta.outputChars} ký tự - Chi phí ước tính:{" "}
-              {translateMeta.estimatedCost.toFixed(6)} {translateMeta.currency}
-            </p>
-          )}
-          {generatedAudioId && (
-            <p className="text-xs text-muted-foreground">
-              Âm thanh đã tạo với mã: {generatedAudioId}
-            </p>
-          )}
         </div>
       </section>
 
@@ -578,7 +613,7 @@ export default function AudioPage() {
           {languageGroups.length === 0 && (
             <div className="form-section text-center py-12">
               <p className="text-muted-foreground">
-                Chưa có tệp âm thanh nào. Tải lên mô tả âm thanh đầu tiên.
+                Chưa có tệp âm thanh nào. Tải lên tệp âm thanh đầu tiên.
               </p>
             </div>
           )}
@@ -686,7 +721,7 @@ export default function AudioPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tải lên mô tả âm thanh</DialogTitle>
+            <DialogTitle>Tải lên tệp âm thanh</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">

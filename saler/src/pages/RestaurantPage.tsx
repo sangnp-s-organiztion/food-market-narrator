@@ -74,7 +74,9 @@ function extractCoordinatesFromGoogleMapsUrl(
 
 export default function RestaurantPage() {
   const { selectedRestaurant, refreshRestaurants } = useRestaurant();
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(selectedRestaurant ? { ...selectedRestaurant } : null);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(
+    selectedRestaurant ? { ...selectedRestaurant } : null,
+  );
   const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
@@ -87,14 +89,24 @@ export default function RestaurantPage() {
     }
   }, [selectedRestaurant]);
 
-  const updateField = <K extends keyof Restaurant>(key: K, value: Restaurant[K]) => {
+  const updateField = <K extends keyof Restaurant>(
+    key: K,
+    value: Restaurant[K],
+  ) => {
     setRestaurant((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
   const updateAutoStatus = useCallback(() => {
     if (!autoMode || !restaurant) return;
-    const shouldBeActive = isWithinSchedule(restaurant.open_time, restaurant.close_time);
-    setRestaurant((prev) => (prev && prev.is_active !== shouldBeActive ? { ...prev, is_active: shouldBeActive } : prev));
+    const shouldBeActive = isWithinSchedule(
+      restaurant.open_time,
+      restaurant.close_time,
+    );
+    setRestaurant((prev) =>
+      prev && prev.is_active !== shouldBeActive
+        ? { ...prev, is_active: shouldBeActive }
+        : prev,
+    );
   }, [autoMode, restaurant?.open_time, restaurant?.close_time]);
 
   useEffect(() => {
@@ -112,7 +124,10 @@ export default function RestaurantPage() {
     setAutoMode(value);
     if (!restaurant) return;
     if (value) {
-      const shouldBeActive = isWithinSchedule(restaurant.open_time, restaurant.close_time);
+      const shouldBeActive = isWithinSchedule(
+        restaurant.open_time,
+        restaurant.close_time,
+      );
       updateField("is_active", shouldBeActive);
     }
   };
@@ -122,8 +137,14 @@ export default function RestaurantPage() {
 
     setSaving(true);
     try {
-      const updatedRestaurant = await updateRestaurantApi(restaurant.restaurant_id, restaurant);
-      await updateRestaurantStatusApi(restaurant.restaurant_id, restaurant.is_active);
+      const updatedRestaurant = await updateRestaurantApi(
+        restaurant.restaurant_id,
+        restaurant,
+      );
+      await updateRestaurantStatusApi(
+        restaurant.restaurant_id,
+        restaurant.is_active,
+      );
       setRestaurant(updatedRestaurant);
       await refreshRestaurants();
       toast.success("Lưu thay đổi thành công!");
@@ -173,14 +194,18 @@ export default function RestaurantPage() {
     <div className="max-w-3xl mx-auto animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Thông tin nhà hàng</h1>
-        <p className="page-description">Quản lý hồ sơ và thông tin liên hệ của nhà hàng</p>
+        <p className="page-description">
+          Quản lý hồ sơ và thông tin liên hệ của nhà hàng
+        </p>
       </div>
 
       <div className="space-y-6">
         <div className="form-section">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium text-foreground">Trạng thái nhà hàng</h3>
+              <h3 className="font-medium text-foreground">
+                Trạng thái nhà hàng
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {restaurant.is_active
                   ? "Nhà hàng của bạn hiện đang mở cửa"
@@ -188,37 +213,59 @@ export default function RestaurantPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className={`text-sm font-medium ${restaurant.is_active ? "text-success" : "text-muted-foreground"}`}>
+              <span
+                className={`text-sm font-medium ${restaurant.is_active ? "text-success" : "text-muted-foreground"}`}
+              >
                 {restaurant.is_active ? "Mở cửa" : "Đóng cửa"}
               </span>
-              <Switch checked={restaurant.is_active} onCheckedChange={handleManualToggle} />
+              <Switch
+                checked={restaurant.is_active}
+                onCheckedChange={handleManualToggle}
+              />
             </div>
           </div>
         </div>
 
         <div className="form-section space-y-4">
           <h3 className="font-medium text-foreground flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" /> Giờ hoạt động của nhà hàng
+            <Clock className="w-4 h-4 text-primary" /> Giờ hoạt động của nhà
+            hàng
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="open_time">Giờ mở cửa</Label>
-              <Input id="open_time" type="time" value={restaurant.open_time} onChange={(e) => updateField("open_time", e.target.value)} />
+              <Input
+                id="open_time"
+                type="time"
+                value={restaurant.open_time}
+                onChange={(e) => updateField("open_time", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="close_time">Giờ đóng cửa</Label>
-              <Input id="close_time" type="time" value={restaurant.close_time} onChange={(e) => updateField("close_time", e.target.value)} />
+              <Input
+                id="close_time"
+                type="time"
+                value={restaurant.close_time}
+                onChange={(e) => updateField("close_time", e.target.value)}
+              />
             </div>
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
-              <p className="text-sm font-medium text-foreground">Bật chế độ tự động</p>
-              <p className="text-xs text-muted-foreground">Tự động cập nhật trạng thái theo lịch trình</p>
+              <p className="text-sm font-medium text-foreground">
+                Bật chế độ tự động
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tự động cập nhật trạng thái theo lịch trình
+              </p>
             </div>
             <Switch checked={autoMode} onCheckedChange={handleAutoModeToggle} />
           </div>
           {!autoMode && (
-            <p className="text-xs text-muted-foreground italic">Chế độ thủ công đang bật, lịch trình tạm thời bị bỏ qua.</p>
+            <p className="text-xs text-muted-foreground italic">
+              Chế độ thủ công đang bật, lịch trình tạm thời bị bỏ qua.
+            </p>
           )}
         </div>
 
@@ -226,11 +273,20 @@ export default function RestaurantPage() {
           <h3 className="font-medium text-foreground">Thông tin cơ bản</h3>
           <div className="space-y-2">
             <Label htmlFor="name">Tên nhà hàng</Label>
-            <Input id="name" value={restaurant.name} onChange={(e) => updateField("name", e.target.value)} />
+            <Input
+              id="name"
+              value={restaurant.name}
+              onChange={(e) => updateField("name", e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Mô tả</Label>
-            <Textarea id="description" value={restaurant.description} onChange={(e) => updateField("description", e.target.value)} rows={4} />
+            <Textarea
+              id="description"
+              value={restaurant.description}
+              onChange={(e) => updateField("description", e.target.value)}
+              rows={4}
+            />
           </div>
         </div>
 
@@ -240,11 +296,19 @@ export default function RestaurantPage() {
           </h3>
           <div className="space-y-2">
             <Label htmlFor="phone">Số điện thoại</Label>
-            <Input id="phone" value={restaurant.phone} onChange={(e) => updateField("phone", e.target.value)} />
+            <Input
+              id="phone"
+              value={restaurant.phone}
+              onChange={(e) => updateField("phone", e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="address">Địa chỉ</Label>
-            <Input id="address" value={restaurant.address} onChange={(e) => updateField("address", e.target.value)} />
+            <Input
+              id="address"
+              value={restaurant.address}
+              onChange={(e) => updateField("address", e.target.value)}
+            />
           </div>
         </div>
 
@@ -253,23 +317,39 @@ export default function RestaurantPage() {
             <MapPin className="w-4 h-4 text-primary" /> Vị trí
           </h3>
           <div className="space-y-2">
-            <Label htmlFor="google_maps_url">Link Google Maps</Label>
+            <Label htmlFor="google_maps_url">Đường dẫn Google Maps</Label>
             <Input
               id="google_maps_url"
               value={googleMapsUrl}
               onChange={(e) => handleGoogleMapsUrlChange(e.target.value)}
               onBlur={handleGoogleMapsUrlBlur}
-              placeholder="Dán link Google Maps..."
+              placeholder="Dán đường dẫn Google Maps để tự động điền tọa độ"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lat">Vĩ độ</Label>
-              <Input id="lat" type="number" step="any" value={restaurant.latitude} onChange={(e) => updateField("latitude", parseFloat(e.target.value) || 0)} />
+              <Input
+                id="lat"
+                type="number"
+                step="any"
+                value={restaurant.latitude}
+                onChange={(e) =>
+                  updateField("latitude", parseFloat(e.target.value) || 0)
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lng">Kinh độ</Label>
-              <Input id="lng" type="number" step="any" value={restaurant.longitude} onChange={(e) => updateField("longitude", parseFloat(e.target.value) || 0)} />
+              <Input
+                id="lng"
+                type="number"
+                step="any"
+                value={restaurant.longitude}
+                onChange={(e) =>
+                  updateField("longitude", parseFloat(e.target.value) || 0)
+                }
+              />
             </div>
           </div>
           <div className="rounded-lg overflow-hidden border aspect-video">
