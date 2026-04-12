@@ -229,7 +229,9 @@ export default function AudioHistoryPage() {
         </div>
 
         <div className="dashboard-card">
-          <span className="stat-label">Thời gian trung bình nghe 1 POI</span>
+          <span className="stat-label">
+            Thời gian trung bình nghe thuyết minh
+          </span>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="stat-value mono">{formattedAvgTime}</span>
             {avgTime > 0 && (
