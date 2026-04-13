@@ -9,6 +9,7 @@ import React, {
 import type { Restaurant } from "@/types";
 import { getRestaurantsApi } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
@@ -47,6 +48,7 @@ export function RestaurantProvider({
     async function load() {
       if (!user) {
         setRestaurants([]);
+        setSelectedId(null);
         return;
       }
       try {
@@ -64,6 +66,39 @@ export function RestaurantProvider({
       mounted = false;
     };
   }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refreshRestaurants().catch(() => {
+        // Ignore polling errors; next tick may recover.
+      });
+    }, 30_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [user, refreshRestaurants]);
+
+  useEffect(() => {
+    if (!user || !selectedId) {
+      return;
+    }
+
+    const stillAvailable = restaurants.some(
+      (r) => r.restaurant_id === selectedId,
+    );
+
+    if (stillAvailable) {
+      return;
+    }
+
+    setSelectedId(null);
+    toast.error("Nhà hàng đang quản lý đã bị khóa hoặc không còn khả dụng.");
+  }, [restaurants, selectedId, user]);
 
   const selectedRestaurant = useMemo(
     () => restaurants.find((r) => r.restaurant_id === selectedId) ?? null,
