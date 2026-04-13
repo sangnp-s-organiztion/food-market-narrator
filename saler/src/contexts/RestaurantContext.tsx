@@ -36,7 +36,9 @@ export function RestaurantProvider({
     }
 
     const allRestaurants = await getRestaurantsApi();
-    const userRestaurants = allRestaurants.filter((r) => r.user_id === user.user_id);
+    const userRestaurants = allRestaurants.filter(
+      (r) => r.user_id === user.user_id && r.is_active,
+    );
     setRestaurants(userRestaurants);
   }, [user]);
 
@@ -49,7 +51,9 @@ export function RestaurantProvider({
       }
       try {
         const allRestaurants = await getRestaurantsApi();
-        const data = allRestaurants.filter((r) => r.user_id === user.user_id);
+        const data = allRestaurants.filter(
+          (r) => r.user_id === user.user_id && r.is_active,
+        );
         if (mounted) setRestaurants(data ?? []);
       } catch {
         if (mounted) setRestaurants([]);
