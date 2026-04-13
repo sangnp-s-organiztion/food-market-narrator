@@ -20,7 +20,25 @@ export default function SelectRestaurantPage() {
     navigate("/dashboard/restaurant", { replace: true });
   };
 
-  if (restaurants.length <= 1) return null;
+  if (restaurants.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+            <Store className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-display font-semibold text-foreground">
+            Không có nhà hàng đang hoạt động
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Tài khoản của bạn hiện không có nhà hàng khả dụng để quản lý.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (restaurants.length === 1) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -33,7 +51,8 @@ export default function SelectRestaurantPage() {
             Chọn nhà hàng để quản lý
           </h1>
           <p className="text-muted-foreground mt-2">
-            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để tiếp tục.
+            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để
+            tiếp tục.
           </p>
         </div>
 
