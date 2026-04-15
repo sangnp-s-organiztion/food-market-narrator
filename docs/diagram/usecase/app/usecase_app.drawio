@@ -610,6 +610,9 @@
         <mxCell id="pre1" parent="1" style="text;html=1;strokeColor=#555555;fillColor=#e8f4f8;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#2C3E50;fontStyle=2;spacing=4;spacingTop=4;spacingBottom=4;spacingLeft=6;spacingRight=6;" value="Tiền điều kiện:&#xa;- Người dùng đã đăng nhập (nếu cần)&#xa;- App đang mở trang Cài đặt" vertex="1">
           <mxGeometry height="60" width="220" x="30" y="530" as="geometry" />
         </mxCell>
+        <mxCell id="8c42Tex5mtov6pFdSaWm-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=#e1d5e7;strokeColor=#6B3A6B;verticalAlign=top;spacing=4;spacingTop=8;spacingBottom=8;spacingLeft=8;spacingRight=8;fontSize=11;fontStyle=0;labelBackgroundColor=none;" value="Bật/tắt quyền vị trí nền" vertex="1">
+          <mxGeometry height="55" width="180" x="490" y="330" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
