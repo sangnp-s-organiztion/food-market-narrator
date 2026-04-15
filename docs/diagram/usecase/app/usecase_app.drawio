@@ -5,13 +5,13 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="boundary" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FFFFFF;strokeWidth=2;" value="" vertex="1">
-          <mxGeometry height="990" width="1500" x="220" y="40" as="geometry" />
+          <mxGeometry height="1050" width="1500" x="220" y="40" as="geometry" />
         </mxCell>
         <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=46;fontColor=#FFFFFF;fontStyle=0;" value="Usecase tổng quát" vertex="1">
           <mxGeometry height="70" width="420" x="760" y="70" as="geometry" />
         </mxCell>
         <mxCell id="actor" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#FFFFFF;fillColor=none;fontColor=#FFFFFF;fontSize=26;" value="Người dùng" vertex="1">
-          <mxGeometry height="130" width="60" x="55" y="390" as="geometry" />
+          <mxGeometry height="130" width="60" x="70" y="390" as="geometry" />
         </mxCell>
         <mxCell id="uc1" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#000000;strokeColor=#FFFFFF;fontColor=#FFFFFF;fontSize=32;" value="Quản lí lịch sử nghe audio" vertex="1">
           <mxGeometry height="140" width="300" x="610" y="150" as="geometry" />
