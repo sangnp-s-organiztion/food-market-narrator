@@ -31,7 +31,9 @@
       "Bash(Get-ChildItem -Path \"D:\\\\Program\\\\food-market-narrator\" -Force)",
       "Bash(Select-Object Name, Mode)",
       "Bash(find D:Programfood-market-narratorsalersrcpages -name *.tsx)",
-      "Bash(find D:Programfood-market-narratoradminsrcpages -name *.tsx)"
+      "Bash(find D:Programfood-market-narratoradminsrcpages -name *.tsx)",
+      "Bash(dir /s /b \"D:\\\\Program\\\\food-market-narrator\\\\FoodMarketNarrator.Maui\\\\*.cs\")",
+      "Bash(findstr /v \"\\\\\\\\obj\\\\\\\\\")"
     ]
   }
 }
