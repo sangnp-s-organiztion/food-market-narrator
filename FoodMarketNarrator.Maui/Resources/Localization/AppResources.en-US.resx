@@ -113,6 +113,12 @@
   <data name="Status" xml:space="preserve">
     <value>Status: </value>
   </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>Open now</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>Closed</value>
+  </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>Prev</value>
   </data>
@@ -231,6 +237,18 @@
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>Start journey</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0} stops</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>This journey has no detailed description yet.</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>Address is being updated</value>
   </data>
 
   <!-- FavoritePage -->

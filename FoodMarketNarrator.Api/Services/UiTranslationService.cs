@@ -8,7 +8,8 @@ public class UiTranslationService
     private static readonly HashSet<string> SupportedEntityTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "restaurant",
-        "dish"
+        "dish",
+        "tour"
     };
 
     private static readonly HashSet<string> SupportedFieldNames = new(StringComparer.OrdinalIgnoreCase)
@@ -74,7 +75,7 @@ public class UiTranslationService
         var normalized = entityType.Trim().ToLowerInvariant();
         if (!SupportedEntityTypes.Contains(normalized))
         {
-            throw new ArgumentException("entityType only supports 'restaurant' or 'dish'.");
+            throw new ArgumentException("entityType only supports 'restaurant', 'dish' or 'tour'.");
         }
 
         return normalized;

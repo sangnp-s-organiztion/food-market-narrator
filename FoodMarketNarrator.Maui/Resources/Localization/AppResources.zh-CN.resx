@@ -113,6 +113,12 @@
   <data name="Status" xml:space="preserve">
     <value>状态：</value>
   </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>营业中</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>已打烊</value>
+  </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>上一页</value>
   </data>
@@ -231,6 +237,18 @@
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>开始旅程</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0} 分钟</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0} 个站点</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>该旅程暂无详细描述。</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>地址正在更新</value>
   </data>
 
   <!-- FavoritePage -->

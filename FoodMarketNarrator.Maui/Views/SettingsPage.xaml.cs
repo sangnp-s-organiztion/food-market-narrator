@@ -95,6 +95,7 @@ public partial class SettingsPage : ContentPage
 
         var poiFilePath = IOPath.Combine(offlineCacheRoot, "pois.json");
         var languageFilePath = IOPath.Combine(offlineCacheRoot, "languages.json");
+        var translationsDirPath = IOPath.Combine(offlineCacheRoot, "translations");
         var dishesDirPath = IOPath.Combine(offlineCacheRoot, "dishes");
 
         var audioBytes = _audioService != null
@@ -102,7 +103,7 @@ public partial class SettingsPage : ContentPage
             : GetDirectorySizeSafe(IOPath.Combine(appData, "audio_cache"));
 
         var poiBytes = GetFileSizeSafe(poiFilePath);
-        var languageBytes = GetFileSizeSafe(languageFilePath);
+        var languageBytes = GetFileSizeSafe(languageFilePath) + GetDirectorySizeSafe(translationsDirPath);
         var dishesBytes = GetDirectorySizeSafe(dishesDirPath);
         var imageBytes = GetDirectorySizeSafe(imageCacheRoot);
         var mapBytes = GetDirectorySizeSafe(mapCacheRoot);
@@ -305,12 +306,29 @@ public partial class SettingsPage : ContentPage
 
     private async Task ShowLanguagePopupAsync()
     {
+        if (_languagePopupOverlay != null)
+        {
+            return;
+        }
+
         // Tạo overlay
         _languagePopupOverlay = new Grid
         {
-            BackgroundColor = Color.FromArgb("#80000000"),
+            BackgroundColor = Color.FromArgb("#4D000000"),
             InputTransparent = false
         };
+
+        // Tap vào vùng nền tối sẽ đóng popup như nút X.
+        var dismissBackdrop = new BoxView
+        {
+            Color = Colors.Transparent,
+            InputTransparent = false
+        };
+        dismissBackdrop.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await HideLanguagePopupAsync())
+        });
+        _languagePopupOverlay.Children.Add(dismissBackdrop);
 
         // Tạo nội dung popup
         var popupContent = new Border
@@ -374,7 +392,7 @@ public partial class SettingsPage : ContentPage
         var mainStack = new VerticalStackLayout { VerticalOptions = LayoutOptions.End };
         mainStack.Add(popupContent);
 
-        _languagePopupOverlay.Add(mainStack, 0, 1);
+        _languagePopupOverlay.Children.Add(mainStack);
 
         // Thêm vào page
         if (Content is Grid mainGrid)
