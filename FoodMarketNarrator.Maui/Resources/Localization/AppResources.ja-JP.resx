@@ -113,6 +113,12 @@
   <data name="Status" xml:space="preserve">
     <value>ステータス：</value>
   </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>営業中</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>営業終了</value>
+  </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>前へ</value>
   </data>
@@ -231,6 +237,18 @@
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>旅程を開始</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0}分</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0}か所</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>この旅程にはまだ詳細な説明がありません。</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>住所を更新中</value>
   </data>
 
   <!-- FavoritePage -->

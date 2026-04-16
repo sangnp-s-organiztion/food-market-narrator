@@ -1,5 +1,6 @@
 using SQLite;
 using System.Globalization;
+using food_market_narrator;
 
 namespace food_market_narrator.Models;
 
@@ -48,7 +49,9 @@ public class POI
     }
 
     [Ignore]
-    public string StatusText => IsCurrentlyOpen ? "Đang mở cửa" : "Đóng cửa";
+    public string StatusText => IsCurrentlyOpen
+        ? LocalizationResourceManager.Instance["StatusOpenNow"]
+        : LocalizationResourceManager.Instance["StatusClosedNow"];
     
     public DateTime CreatedAt { get; set; }
     public string AudioFile { get; set; } = string.Empty;

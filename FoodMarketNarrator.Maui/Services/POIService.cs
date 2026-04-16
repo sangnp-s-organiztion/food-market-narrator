@@ -64,6 +64,7 @@ public class POIService : IPOIService
 
     // Hằng số cache/warm-up dùng chung trong toàn bộ lifecycle của service.
     private const string ImageCacheFolderName = "image_cache"; // tên thư mục lưu cache ảnh đã tải về, nằm trong thư mục app data của ứng dụng
+    private const string TranslationCacheFolderName = "translations"; // tên thư mục lưu cache bản dịch UI theo ngôn ngữ và loại entity
     private const int MinValidImageBytes = 128; // kích thước tối thiểu của một file ảnh hợp lệ sau khi tải về, dùng để xác định xem ảnh đã tải có thành công và có nội dung hay không (tránh cache các file lỗi hoặc trống)
     private const int WarmupWorkerCount = 2; // số lượng worker nền xử lý queue warm-up, có thể điều chỉnh để cân bằng giữa tốc độ warm-up và tài nguyên hệ thống (CPU, mạng, I/O)
     private const int WarmupPhaseATopCount = 6; // số lượng POI ưu tiên trong phase A của warm-up, thường là các POI có nhiều audio hoặc lượt truy cập để đảm bảo trải nghiệm mượt mà cho phần lớn người dùng ngay sau khi load POI từ cache hoặc network. Các POI còn lại sẽ được xếp vào phase B để warm-up sau đó nhằm tối ưu tài nguyên và tránh quá tải khi mới load POI.
@@ -182,6 +183,154 @@ public class POIService : IPOIService
         }
     }
 
+    private static string GetTranslationCacheFilePath(string languageCode, string entityType)
+    {
+        var translationsDir = Path.Combine(GetOfflineCacheRootPath(), TranslationCacheFolderName);
+        Directory.CreateDirectory(translationsDir);
+
+        var safeLanguage = ToSafeFileSegment(languageCode);
+        var safeEntityType = ToSafeFileSegment(entityType);
+        return Path.Combine(translationsDir, $"{safeLanguage}_{safeEntityType}.json");
+    }
+
+    private static string ToSafeFileSegment(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "unknown";
+        }
+
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var cleaned = value.Trim();
+
+        foreach (var invalid in invalidChars)
+        {
+            cleaned = cleaned.Replace(invalid, '_');
+        }
+
+        return cleaned.Replace(' ', '_').ToLowerInvariant();
+    }
+
+    private static async Task<List<UiTranslationModel>> ReadTranslationsCacheAsync(string languageCode, string entityType)
+    {
+        var path = GetTranslationCacheFilePath(languageCode, entityType);
+        if (!File.Exists(path))
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            var data = await JsonSerializer.DeserializeAsync<List<UiTranslationModel>>(stream, JsonOptions);
+            return data ?? new List<UiTranslationModel>();
+        }
+        catch
+        {
+            return new List<UiTranslationModel>();
+        }
+    }
+
+    private static List<UiTranslationModel> NormalizeTranslationItems(
+        IEnumerable<UiTranslationModel> items,
+        string defaultEntityType)
+    {
+        return items
+            .Where(x => !string.IsNullOrWhiteSpace(x.EntityId)
+                && !string.IsNullOrWhiteSpace(x.FieldName)
+                && !string.IsNullOrWhiteSpace(x.TranslatedText))
+            .Select(x => new UiTranslationModel
+            {
+                EntityType = string.IsNullOrWhiteSpace(x.EntityType)
+                    ? defaultEntityType
+                    : x.EntityType.Trim().ToLowerInvariant(),
+                EntityId = x.EntityId.Trim(),
+                LanguageId = x.LanguageId,
+                FieldName = x.FieldName.Trim().ToLowerInvariant(),
+                TranslatedText = x.TranslatedText
+            })
+            .ToList();
+    }
+
+    private static List<UiTranslationModel> MergeTranslationItems(
+        IEnumerable<UiTranslationModel> existing,
+        IEnumerable<UiTranslationModel> incoming,
+        string entityType)
+    {
+        var merged = new Dictionary<string, UiTranslationModel>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in NormalizeTranslationItems(existing, entityType))
+        {
+            var key = BuildTranslationKey(item.EntityId, item.FieldName);
+            merged[key] = item;
+        }
+
+        foreach (var item in NormalizeTranslationItems(incoming, entityType))
+        {
+            var key = BuildTranslationKey(item.EntityId, item.FieldName);
+            merged[key] = item;
+        }
+
+        return merged.Values
+            .OrderBy(x => x.EntityId, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(x => x.FieldName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private async Task SaveTranslationsCacheAsync(
+        string languageCode,
+        string entityType,
+        List<UiTranslationModel> incomingItems)
+    {
+        var path = GetTranslationCacheFilePath(languageCode, entityType);
+        var fileLock = GetFileWriteLock(path);
+        await fileLock.WaitAsync();
+        try
+        {
+            var existingItems = await ReadTranslationsCacheAsync(languageCode, entityType);
+            var mergedItems = MergeTranslationItems(existingItems, incomingItems, entityType);
+
+            var tempPath = $"{path}.tmp";
+            await using (var stream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(stream, mergedItems, JsonOptions);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            File.Move(tempPath, path);
+        }
+        catch
+        {
+            // Ignore translation cache-write failures.
+        }
+        finally
+        {
+            fileLock.Release();
+        }
+    }
+
+    private static List<UiTranslationModel> FilterTranslationsByEntityIds(
+        IEnumerable<UiTranslationModel> translations,
+        IReadOnlyCollection<string> entityIds)
+    {
+        var normalizedIds = entityIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (normalizedIds.Count == 0)
+        {
+            return translations.ToList();
+        }
+
+        return translations
+            .Where(x => !string.IsNullOrWhiteSpace(x.EntityId) && normalizedIds.Contains(x.EntityId))
+            .ToList();
+    }
+
     private async Task<List<UiTranslationModel>> FetchUiTranslationsAsync(
         string languageCode,
         string entityType,
@@ -212,6 +361,9 @@ public class POIService : IPOIService
             return new List<UiTranslationModel>();
         }
 
+        var normalizedLanguage = NormalizeLanguageCode(languageCode);
+        var normalizedEntityType = entityType.Trim().ToLowerInvariant();
+
         var relativePath = $"{AppSettings.PublicTranslationsEndpoint}?languageCode={Uri.EscapeDataString(languageCode)}&entityType={Uri.EscapeDataString(entityType)}&entityIds={Uri.EscapeDataString(entityIdsRaw)}";
 
         foreach (var baseUrl in uniqueBases)
@@ -222,6 +374,7 @@ public class POIService : IPOIService
                 var data = await _httpClient.GetFromJsonAsync<List<UiTranslationModel>>(requestUrl);
                 if (data != null)
                 {
+                    await SaveTranslationsCacheAsync(normalizedLanguage, normalizedEntityType, data);
                     return data;
                 }
             }
@@ -229,6 +382,14 @@ public class POIService : IPOIService
             {
                 Log($"[POIService][Translation] Request failed: {baseUrl} -> {FormatException(ex)}");
             }
+        }
+
+        var cachedTranslations = await ReadTranslationsCacheAsync(normalizedLanguage, normalizedEntityType);
+        if (cachedTranslations.Count > 0)
+        {
+            var filteredCached = FilterTranslationsByEntityIds(cachedTranslations, entityIds);
+            Log($"[POIService][Translation] Using offline translation cache: language={normalizedLanguage}, entityType={normalizedEntityType}, count={filteredCached.Count}");
+            return filteredCached;
         }
 
         return new List<UiTranslationModel>();

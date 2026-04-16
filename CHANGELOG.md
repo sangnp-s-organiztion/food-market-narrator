@@ -3,6 +3,46 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-17
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Mở rộng hỗ trợ translation động cho `tour` ở API public translations để mobile có thể lấy tên/mô tả tour theo ngôn ngữ.
+  - Cập nhật MAUI `TourService` để áp dụng translation theo ngôn ngữ hiện tại cho:
+    - Tên + mô tả tour.
+    - Tên quán + địa chỉ trong danh sách điểm dừng (tour stops).
+  - Bổ sung cache translation offline theo `language + entityType` cho Tour flow, có fallback khi mất mạng.
+  - Localize toàn bộ metric và fallback text ở Tour Detail (ví dụ: số phút, số điểm dừng, mô tả/địa chỉ mặc định) qua RESX.
+  - Sửa popup chọn ngôn ngữ ở Settings:
+    - Tap vào overlay để đóng popup như nút X.
+    - Giảm độ tối overlay để UX nhẹ hơn.
+    - Chặn mở chồng nhiều popup.
+  - Cập nhật thống kê dung lượng offline trong Settings để tính luôn thư mục cache translation.
+  - Localize trạng thái mở/đóng quán ở Main/Favorite theo ngôn ngữ (`StatusOpenNow`, `StatusClosedNow`), bỏ hardcode tiếng Việt.
+  - Localize tiêu đề và empty-state của trang Favorite (bỏ hardcode "Yêu thích").
+- Xác minh:
+  - Build MAUI `food-market-narrator.csproj` thành công sau các thay đổi.
+  - API có cập nhật code hỗ trợ `tour` translation; build API có lúc bị lock file do process đang chạy, không phải lỗi compile logic.
+
+### Local Workspace (chưa ghi nhận commit)
+
+- FoodMarketNarrator.Api
+  - `Services/UiTranslationService.cs`
+- FoodMarketNarrator.Maui
+  - `Models/POI.cs`
+  - `Models/TourModel.cs`
+  - `Services/TourService.cs`
+  - `Views/TourDetailPage.xaml.cs`
+  - `Views/SettingsPage.xaml.cs`
+  - `Views/FavoritePage.xaml`
+  - `Views/FavoritePage.xaml.cs`
+  - `Resources/Localization/AppResources.resx`
+  - `Resources/Localization/AppResources.en-US.resx`
+  - `Resources/Localization/AppResources.ja-JP.resx`
+  - `Resources/Localization/AppResources.ko-KR.resx`
+  - `Resources/Localization/AppResources.zh-CN.resx`
+
 ## 2026-04-12
 
 ### Tóm tắt trong ngày

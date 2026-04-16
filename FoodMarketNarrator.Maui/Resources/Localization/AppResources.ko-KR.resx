@@ -113,6 +113,12 @@
   <data name="Status" xml:space="preserve">
     <value>상태：</value>
   </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>영업 중</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>영업 종료</value>
+  </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>이전</value>
   </data>
@@ -231,6 +237,18 @@
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>여행 시작</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0}분</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0}개 정류장</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>이 여행에는 아직 상세 설명이 없습니다.</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>주소를 업데이트 중</value>
   </data>
 
   <!-- FavoritePage -->

@@ -113,6 +113,12 @@
   <data name="Status" xml:space="preserve">
     <value>Trạng thái: </value>
   </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>Đang mở cửa</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>Đóng cửa</value>
+  </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>Trước</value>
   </data>
@@ -231,6 +237,18 @@
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>Bắt đầu hành trình</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0} phút</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0} điểm dừng</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>Hành trình này chưa có mô tả chi tiết.</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>Đang cập nhật địa chỉ</value>
   </data>
 
   <!-- FavoritePage -->
