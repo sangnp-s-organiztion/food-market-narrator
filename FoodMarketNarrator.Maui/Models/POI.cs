@@ -10,6 +10,16 @@ public class POI
 
     public string? Name { get; set; }
     public string? Description { get; set; }
+
+    [Ignore]
+    public string? OriginalName { get; set; }
+
+    [Ignore]
+    public string? OriginalDescription { get; set; }
+
+    [Ignore]
+    public string? OriginalAddress { get; set; }
+
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string? Category { get; set; }

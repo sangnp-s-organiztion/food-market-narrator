@@ -12,15 +12,54 @@ namespace food_market_narrator_api.Repositories
             _context = context;
         }
 
-        public async Task<List<DishModel>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize)
+        public async Task<List<DishModel>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize, int? languageId = null)
         {
-            return await _context.Dish
-                .Where(d => d.RestaurantId == restaurantId)
-                .Include(d => d.Image)
-                .OrderByDescending(d => d.CreatedAt)
+            if (!languageId.HasValue)
+            {
+                return await _context.Dish
+                    .Where(d => d.RestaurantId == restaurantId)
+                    .Include(d => d.Image)
+                    .OrderByDescending(d => d.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+            }
+
+            var dishTranslations = _context.Translation
+                .AsNoTracking()
+                .Where(t => t.EntityType == "dish"
+                    && t.LanguageId == languageId.Value
+                    && t.FieldName == "name");
+
+            var query =
+                from d in _context.Dish.AsNoTracking()
+                where d.RestaurantId == restaurantId
+                join t in dishTranslations
+                    on d.DishId.ToString() equals t.EntityId into translationGroup
+                from translation in translationGroup.DefaultIfEmpty()
+                join img in _context.RestaurantImage.AsNoTracking()
+                    on d.ImageId equals img.ImageId into imageGroup
+                from image in imageGroup.DefaultIfEmpty()
+                orderby d.CreatedAt descending
+                select new DishModel
+                {
+                    DishId = d.DishId,
+                    Name = translation != null && !string.IsNullOrEmpty(translation.TranslatedText)
+                        ? translation.TranslatedText
+                        : d.Name,
+                    Price = d.Price,
+                    CreatedAt = d.CreatedAt,
+                    RestaurantId = d.RestaurantId,
+                    IsActive = d.IsActive,
+                    ImageId = d.ImageId,
+                    Image = image
+                };
+
+            return await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
         }
 
         public async Task<int> CountAsync()

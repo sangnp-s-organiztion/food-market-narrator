@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.SettingsPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#FFFCF8">
@@ -24,7 +25,7 @@
             -->
 
             <Label Grid.Column="0"
-                   Text="Cài đặt"
+                     Text="{local:Translate Settings}"
                    FontSize="30"
                    FontFamily="OpenSansSemibold"
                    TextColor="#1F2937"
@@ -64,25 +65,25 @@
                                            HorizontalOptions="Center"
                                            VerticalOptions="Center"/>
                                 </Border>
-                                <Label Text="MẸO HÔM NAY"
+                                <Label Text="{local:Translate TodaysTip}"
                                        FontSize="13"
                                        FontAttributes="Bold"
                                        TextColor="#FFE4BF"
                                        VerticalOptions="Center"/>
                             </HorizontalStackLayout>
 
-                            <Label Text="Trải nghiệm hành trình khám phá"
+                            <Label Text="{local:Translate TipTitle}"
                                 FontSize="19"
                                    FontFamily="OpenSansSemibold"
                                    TextColor="White"
                                    LineHeight="1.15"/>
 
-                            <Label Text="Bật thuyết minh tự động và tận hưởng những câu chuyện thú vị tại mỗi điểm dừng."
+                            <Label Text="{local:Translate TipDescription}"
                                    FontSize="15"
                                    TextColor="#FFE7C9"
                                    LineBreakMode="WordWrap"/>
 
-                            <Button Text="Trải nghiệm ngay  ->"
+                            <Button Text="{local:Translate ExperienceNow}"
                                     BackgroundColor="White"
                                     TextColor="#E07400"
                                     FontSize="16"
@@ -96,7 +97,7 @@
                     </Grid>
                 </Border>
 
-                <Label Text="ỨNG DỤNG"
+                  <Label Text="{local:Translate AppSection}"
                        FontSize="12"
                        FontAttributes="Bold"
                        TextColor="#A8B3C3"
@@ -112,8 +113,8 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf57d;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Ngôn ngữ thuyết minh" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
-                            <Label Grid.Column="2" x:Name="CurrentLanguageLabel" Text="Tiếng Việt" FontSize="14" TextColor="#F48C06" VerticalOptions="Center" HorizontalOptions="End"/>
+                            <Label Grid.Column="1" Text="{local:Translate NarrationLanguage}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" x:Name="CurrentLanguageLabel" Text="{local:Translate Vietnamese}" FontSize="14" TextColor="#F48C06" VerticalOptions="Center" HorizontalOptions="End"/>
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLanguageTapped"/>
                             </Grid.GestureRecognizers>
@@ -125,7 +126,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf0f3;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Thông báo" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate Notifications}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Switch Grid.Column="2" IsToggled="True" OnColor="#F48C06" ThumbColor="White" VerticalOptions="Center"/>
                         </Grid>
 
@@ -135,10 +136,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf3c5;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                <Label Text="Vị trí nền" FontSize="15" TextColor="#1F2937"/>
-                                <Label x:Name="BackgroundPermissionStatusLabel" Text="Chưa kiểm tra" FontSize="12" TextColor="#94A3B8"/>
-                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="{local:Translate BackgroundLocation}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Switch x:Name="BackgroundPermissionSwitch"
                                     Grid.Column="2"
                                     IsToggled="False"
@@ -154,13 +152,13 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf186;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Chế độ tối" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate DarkMode}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Switch Grid.Column="2" IsToggled="False" OnColor="#F48C06" ThumbColor="White" VerticalOptions="Center"/>
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
 
-                <Label Text="DỮ LIỆU"
+                <Label Text="{local:Translate DataSection}"
                        FontSize="12"
                        FontAttributes="Bold"
                        TextColor="#A8B3C3"
@@ -180,11 +178,11 @@
                             <VerticalStackLayout Spacing="12">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                     <VerticalStackLayout Spacing="2">
-                                        <Label Text="Quản lý bộ nhớ"
+                                                                                <Label Text="{local:Translate StorageManagement}"
                                                FontSize="18"
                                                FontFamily="OpenSansSemibold"
                                                TextColor="#1F2937"/>
-                                        <Label Text="Bao gồm bản đồ ngoại tuyến, hình ảnh và dữ liệu âm thanh."
+                                             <Label Text="{local:Translate StorageDescription}"
                                                FontSize="13"
                                                TextColor="#6B7280"
                                                LineBreakMode="WordWrap"/>
@@ -197,7 +195,7 @@
                                                FontFamily="OpenSansSemibold"
                                                TextColor="#8A5A00"
                                                HorizontalTextAlignment="End"/>
-                                        <Label Text="ĐÃ SỬ DỤNG"
+                                             <Label Text="{local:Translate Used}"
                                                FontSize="11"
                                                FontAttributes="Bold"
                                                TextColor="#9CA3AF"
@@ -227,21 +225,21 @@
                                 <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="18">
                                     <HorizontalStackLayout Spacing="6">
                                         <Label Text="●" TextColor="#F2A315" FontSize="12" VerticalTextAlignment="Center"/>
-                                        <Label x:Name="StorageMapLegendLabel" Text="Bản đồ" FontSize="13" TextColor="#6B7280"/>
+                                        <Label x:Name="StorageMapLegendLabel" Text="{local:Translate MapLegend}" FontSize="13" TextColor="#6B7280"/>
                                     </HorizontalStackLayout>
                                     <HorizontalStackLayout Grid.Column="1" Spacing="6">
                                         <Label Text="●" TextColor="#8A5A00" FontSize="12" VerticalTextAlignment="Center"/>
-                                        <Label x:Name="StorageImageLegendLabel" Text="Ảnh" FontSize="13" TextColor="#6B7280"/>
+                                        <Label x:Name="StorageImageLegendLabel" Text="{local:Translate ImageLegend}" FontSize="13" TextColor="#6B7280"/>
                                     </HorizontalStackLayout>
                                     <HorizontalStackLayout Grid.Column="2" Spacing="6">
                                         <Label Text="●" TextColor="#E2C9A3" FontSize="12" VerticalTextAlignment="Center"/>
-                                        <Label x:Name="StorageOtherLegendLabel" Text="Khác" FontSize="13" TextColor="#6B7280"/>
+                                        <Label x:Name="StorageOtherLegendLabel" Text="{local:Translate OtherLegend}" FontSize="13" TextColor="#6B7280"/>
                                     </HorizontalStackLayout>
                                 </Grid>
 
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                                    <Button Grid.Column="0"
-                                            Text="&#xf2ed;  Xóa tất cả"
+                                        <Button Grid.Column="0"
+                                            Text="{local:Translate ClearAll}"
                                             FontFamily="FASolid"
                                             FontSize="14"
                                             FontAttributes="Bold"
@@ -250,8 +248,8 @@
                                             TextColor="#7F1D1D"
                                             CornerRadius="20"
                                             HeightRequest="44"/>
-                                    <Button Grid.Column="1"
-                                            Text="Chi tiết"
+                                        <Button Grid.Column="1"
+                                            Text="{local:Translate Details}"
                                             FontSize="14"
                                             FontAttributes="Bold"
                                             Clicked="OnStorageDetailsClicked"
@@ -272,7 +270,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Lịch sử đã nghe" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate ListeningHistory}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
                         </Grid>
 
@@ -282,8 +280,8 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf1da;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Xóa lịch sử đã nghe" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
-                            <Button Grid.Column="2" Text="Xóa" Clicked="OnClearHistoryClicked"
+                                <Label Grid.Column="1" Text="{local:Translate ClearListeningHistory}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                                <Button Grid.Column="2" Text="{local:Translate BtnClear}" Clicked="OnClearHistoryClicked"
                                     BackgroundColor="#FFE8EA" TextColor="#E57373" FontSize="12"
                                     CornerRadius="12" HeightRequest="32" Padding="12,0" VerticalOptions="Center"/>
                         </Grid>
@@ -294,15 +292,15 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf004;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Xóa yêu thích" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
-                            <Button Grid.Column="2" Text="Xóa" Clicked="OnClearFavoritesClicked"
+                            <Label Grid.Column="1" Text="{local:Translate ClearFavorites}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Button Grid.Column="2" Text="{local:Translate BtnClear}" Clicked="OnClearFavoritesClicked"
                                     BackgroundColor="#FFE8EA" TextColor="#E57373" FontSize="12"
                                     CornerRadius="12" HeightRequest="32" Padding="12,0" VerticalOptions="Center"/>
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
 
-                <Label Text="HỖ TRỢ"
+                <Label Text="{local:Translate SupportSection}"
                        FontSize="12"
                        FontAttributes="Bold"
                        TextColor="#A8B3C3"
@@ -318,7 +316,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf059;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Trung tâm trợ giúp" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate HelpCenter}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
                         </Grid>
 
@@ -328,7 +326,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf3ed;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Chính sách bảo mật" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate PrivacyPolicy}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
                         </Grid>
 
@@ -338,7 +336,7 @@
                             <Border StrokeThickness="0" BackgroundColor="#FFF1E3" HeightRequest="30" WidthRequest="30" StrokeShape="RoundRectangle 15" VerticalOptions="Center">
                                 <Label Text="&#xf15c;" FontFamily="FASolid" FontSize="12" TextColor="#F48C06" HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Grid.Column="1" Text="Điều khoản sử dụng" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{local:Translate TermsOfService}" FontSize="15" TextColor="#1F2937" VerticalOptions="Center"/>
                             <Label Grid.Column="2" Text="&#xf054;" FontFamily="FASolid" FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
                         </Grid>
                     </VerticalStackLayout>

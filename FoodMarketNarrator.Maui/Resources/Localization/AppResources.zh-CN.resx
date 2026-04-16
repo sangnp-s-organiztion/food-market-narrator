@@ -58,34 +58,381 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="StreetName">
+
+  <!-- Shell -->
+  <data name="AppTitle" xml:space="preserve">
     <value>永庆美食街</value>
   </data>
-  <data name="GettingLocation">
-    <value>获取位置中 ...</value>
+  <data name="TabHome" xml:space="preserve">
+    <value>首页</value>
   </data>
-  <data name="Lock">
-    <value>锁定</value>
-  </data>
-  <data name="Language">
-    <value>语言</value>
-  </data>
-  <data name="QRCode">
-    <value>二维码</value>
-  </data>
-  <data name="Story">
-    <value>故事</value>
-  </data>
-  <data name="Map">
+  <data name="TabMap" xml:space="preserve">
     <value>地图</value>
   </data>
-  <data name="SelectLanguage">
+  <data name="TabTour" xml:space="preserve">
+    <value>旅程</value>
+  </data>
+  <data name="TabFavorite" xml:space="preserve">
+    <value>收藏</value>
+  </data>
+  <data name="TabHistory" xml:space="preserve">
+    <value>历史</value>
+  </data>
+  <data name="TabSettings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+
+  <!-- MainPage -->
+  <data name="MainTitle" xml:space="preserve">
+    <value>永庆美食</value>
+  </data>
+  <data name="MainSubtitle" xml:space="preserve">
+    <value>探索美食天堂</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>搜索螺、卤肉、烧烤...</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="FilterNear" xml:space="preserve">
+    <value>附近</value>
+  </data>
+  <data name="FilterFavorite" xml:space="preserve">
+    <value>收藏</value>
+  </data>
+  <data name="FilterOpen" xml:space="preserve">
+    <value>营业中</value>
+  </data>
+  <data name="FeaturedRestaurants" xml:space="preserve">
+    <value>精选餐厅</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>查看全部</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="BtnPrevious" xml:space="preserve">
+    <value>上一页</value>
+  </data>
+  <data name="BtnNext" xml:space="preserve">
+    <value>下一页</value>
+  </data>
+  <data name="PageIndicator" xml:space="preserve">
+    <value>第 1/1 页</value>
+  </data>
+  <data name="StartNarration" xml:space="preserve">
+    <value>开始自动讲解</value>
+  </data>
+  <data name="StopNarration" xml:space="preserve">
+    <value>停止讲解</value>
+  </data>
+
+  <!-- MapPage -->
+  <data name="MapSearchPlaceholder" xml:space="preserve">
+    <value>搜索菜品或餐厅...</value>
+  </data>
+  <data name="TourFilterActive" xml:space="preserve">
+    <value>按旅程查看</value>
+  </data>
+  <data name="TourFilterHint" xml:space="preserve">
+    <value>仅显示所选旅程中的景点</value>
+  </data>
+  <data name="TourFilterWithName" xml:space="preserve">
+    <value>行程：{0}</value>
+  </data>
+  <data name="ShowAll" xml:space="preserve">
+    <value>显示全部</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>目的地</value>
+  </data>
+  <data name="AddressUpdating" xml:space="preserve">
+    <value>正在更新地址</value>
+  </data>
+  <data name="ViewDetail" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
+
+  <!-- POIDetailPage -->
+  <data name="AudioNarration" xml:space="preserve">
+    <value>语音讲解</value>
+  </data>
+  <data name="AudioHintLine1" xml:space="preserve">
+    <value>- 聆听讲解，了解餐厅、环境和招牌菜。享受生动的探索体验。</value>
+  </data>
+  <data name="AudioHintLine2" xml:space="preserve">
+    <value>- 内容支持越南语、英语、汉语、日语、韩语。</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="AboutUs" xml:space="preserve">
+    <value>关于我们</value>
+  </data>
+  <data name="OpenedDate" xml:space="preserve">
+    <value>开业日期：{0}</value>
+  </data>
+  <data name="GetDirections" xml:space="preserve">
+    <value>路线</value>
+  </data>
+  <data name="CallNow" xml:space="preserve">
+    <value>立即拨打</value>
+  </data>
+
+  <!-- TourPage -->
+  <data name="ExploreToday" xml:space="preserve">
+    <value>今天探索什么？</value>
+  </data>
+  <data name="CulinaryJourney" xml:space="preserve">
+    <value>永庆美食街美食之旅</value>
+  </data>
+  <data name="NoTourAvailable" xml:space="preserve">
+    <value>暂无可用旅程</value>
+  </data>
+  <data name="NoTourHint" xml:space="preserve">
+    <value>请检查网络连接或服务器旅程数据</value>
+  </data>
+  <data name="BtnViewDetail" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
+
+  <!-- TourDetailPage -->
+  <data name="JourneyDetail" xml:space="preserve">
+    <value>旅程详情</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>时长</value>
+  </data>
+  <data name="Locations" xml:space="preserve">
+    <value>地点</value>
+  </data>
+  <data name="ExploreJourney" xml:space="preserve">
+    <value>探索旅程</value>
+  </data>
+  <data name="DetailedSchedule" xml:space="preserve">
+    <value>详细行程</value>
+  </data>
+  <data name="NoStopsYet" xml:space="preserve">
+    <value>此旅程暂无停留点。</value>
+  </data>
+  <data name="LoadingTourDetail" xml:space="preserve">
+    <value>正在加载旅程详情...</value>
+  </data>
+  <data name="LoadTourDetailFailed" xml:space="preserve">
+    <value>无法加载旅程详情。</value>
+  </data>
+  <data name="TryAgainLater" xml:space="preserve">
+    <value>请稍后重试。</value>
+  </data>
+  <data name="BtnRetry" xml:space="preserve">
+    <value>重试</value>
+  </data>
+  <data name="StartJourney" xml:space="preserve">
+    <value>开始旅程</value>
+  </data>
+
+  <!-- FavoritePage -->
+  <data name="Favorites" xml:space="preserve">
+    <value>收藏</value>
+  </data>
+  <data name="NoFavoritesYet" xml:space="preserve">
+    <value>暂无收藏餐厅</value>
+  </data>
+  <data name="NoFavoritesHint" xml:space="preserve">
+    <value>点击心形图标添加收藏</value>
+  </data>
+
+  <!-- HistoryPage -->
+  <data name="History" xml:space="preserve">
+    <value>历史</value>
+  </data>
+  <data name="NoHistoryYet" xml:space="preserve">
+    <value>暂无收听历史</value>
+  </data>
+  <data name="NoHistoryHint" xml:space="preserve">
+    <value>收听讲解后将显示历史记录</value>
+  </data>
+
+  <!-- SettingsPage -->
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="TodaysTip" xml:space="preserve">
+    <value>今日提示</value>
+  </data>
+  <data name="TipTitle" xml:space="preserve">
+    <value>体验探索之旅</value>
+  </data>
+  <data name="TipDescription" xml:space="preserve">
+    <value>开启自动讲解，在每个停靠点享受有趣的故事。</value>
+  </data>
+  <data name="ExperienceNow" xml:space="preserve">
+    <value>立即体验  -&gt;</value>
+  </data>
+  <data name="AppSection" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="NarrationLanguage" xml:space="preserve">
+    <value>讲解语言</value>
+  </data>
+  <data name="SelectNarrationLanguage" xml:space="preserve">
+    <value>选择讲解语言</value>
+  </data>
+  <data name="Vietnamese" xml:space="preserve">
+    <value>越南语</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>英语</value>
+  </data>
+  <data name="Japanese" xml:space="preserve">
+    <value>日语</value>
+  </data>
+  <data name="Korean" xml:space="preserve">
+    <value>韩语</value>
+  </data>
+  <data name="Chinese" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="BackgroundLocation" xml:space="preserve">
+    <value>后台位置</value>
+  </data>
+  <data name="NotCheckedYet" xml:space="preserve">
+    <value>未检查</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>深色模式</value>
+  </data>
+  <data name="DataSection" xml:space="preserve">
+    <value>数据</value>
+  </data>
+  <data name="StorageManagement" xml:space="preserve">
+    <value>存储管理</value>
+  </data>
+  <data name="StorageDescription" xml:space="preserve">
+    <value>包含离线地图、图片和音频数据。</value>
+  </data>
+  <data name="Used" xml:space="preserve">
+    <value>已使用</value>
+  </data>
+  <data name="MapLegend" xml:space="preserve">
+    <value>地图</value>
+  </data>
+  <data name="ImageLegend" xml:space="preserve">
+    <value>图片</value>
+  </data>
+  <data name="OtherLegend" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value> 清除全部</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="StorageDetailsTitle" xml:space="preserve">
+    <value>存储详情</value>
+  </data>
+  <data name="StorageDetailTotal" xml:space="preserve">
+    <value>总数据: {0}</value>
+  </data>
+  <data name="StorageDetailMap" xml:space="preserve">
+    <value>地图: {0} ({1} 个文件)</value>
+  </data>
+  <data name="StorageDetailImage" xml:space="preserve">
+    <value>图片: {0} ({1} 个文件)</value>
+  </data>
+  <data name="StorageDetailAudio" xml:space="preserve">
+    <value>音频: {0}</value>
+  </data>
+  <data name="StorageDetailPoi" xml:space="preserve">
+    <value>POI: {0}</value>
+  </data>
+  <data name="StorageDetailDish" xml:space="preserve">
+    <value>菜品: {0} ({1} 个文件)</value>
+  </data>
+  <data name="StorageDetailLanguage" xml:space="preserve">
+    <value>语言: {0}</value>
+  </data>
+  <data name="ListeningHistory" xml:space="preserve">
+    <value>收听历史</value>
+  </data>
+  <data name="ClearListeningHistory" xml:space="preserve">
+    <value>清除收听历史</value>
+  </data>
+  <data name="ClearFavorites" xml:space="preserve">
+    <value>清除收藏</value>
+  </data>
+  <data name="BtnClear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="SupportSection" xml:space="preserve">
+    <value>支持</value>
+  </data>
+  <data name="HelpCenter" xml:space="preserve">
+    <value>帮助中心</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>隐私政策</value>
+  </data>
+  <data name="TermsOfService" xml:space="preserve">
+    <value>服务条款</value>
+  </data>
+
+  <!-- Common -->
+  <data name="StreetName" xml:space="preserve">
+    <value>永庆美食街</value>
+  </data>
+  <data name="GettingLocation" xml:space="preserve">
+    <value>正在获取位置...</value>
+  </data>
+  <data name="Lock" xml:space="preserve">
+    <value>锁定</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="QRCode" xml:space="preserve">
+    <value>二维码</value>
+  </data>
+  <data name="Story" xml:space="preserve">
+    <value>故事</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>地图</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
     <value>选择语言</value>
   </data>
-  <data name="Close">
+  <data name="Close" xml:space="preserve">
     <value>关闭</value>
   </data>
-  <data name="PhoneNumber">
+  <data name="NoticeTitle" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="AudioInternetRequiredMessage" xml:space="preserve">
+    <value>请连接互联网以下载音频数据。</value>
+  </data>
+  <data name="MapCannotGetLocation" xml:space="preserve">
+    <value>无法获取当前位置。</value>
+  </data>
+  <data name="SearchNoResultsTitle" xml:space="preserve">
+    <value>未找到结果</value>
+  </data>
+  <data name="SearchNoResultsMessage" xml:space="preserve">
+    <value>没有与 {0} 匹配的餐厅。</value>
+  </data>
+  <data name="OfflineMapTitle" xml:space="preserve">
+    <value>离线地图</value>
+  </data>
+  <data name="OfflineMapUnavailableMessage" xml:space="preserve">
+    <value>当前无网络，且没有已缓存的地图底图数据。你仍可查看和交互地点，但地图底图可能无法显示。</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
     <value>电话号码</value>
   </data>
 </root>

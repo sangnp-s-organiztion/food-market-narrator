@@ -19,5 +19,7 @@ namespace food_market_narrator_api.Models
         [Column("language_code")]
         [MaxLength(10)]
         public string LanguageCode { get; set; } = string.Empty;
+
+        public ICollection<TranslationModel> Translations { get; set; } = new List<TranslationModel>();
     }
 }

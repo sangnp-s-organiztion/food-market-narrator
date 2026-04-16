@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.MapPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#F5F5F5">
@@ -30,7 +31,7 @@
 
                                     <Entry x:Name="SearchEntry"
                            Grid.Column="1"
-                           Placeholder="Tìm món ăn hoặc quán..."
+                           Placeholder="{local:Translate MapSearchPlaceholder}"
                            VerticalOptions="Center"
                            BackgroundColor="Transparent"
                            ClearButtonVisibility="WhileEditing"
@@ -106,15 +107,15 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <VerticalStackLayout Spacing="0">
                             <Label x:Name="TourFilterTitle"
-                                Text="Đang xem theo hành trình"
+                                Text="{local:Translate TourFilterActive}"
                                    FontSize="12"
                                    FontAttributes="Bold"
                                    TextColor="#9A3412" />
-                            <Label Text="Chỉ hiển thị các POI thuộc hành trình đã chọn"
+                            <Label Text="{local:Translate TourFilterHint}"
                                    FontSize="11"
                                    TextColor="#C2410C" />
                         </VerticalStackLayout>
-                        <Button Text="Hiện tất cả"
+                        <Button Text="{local:Translate ShowAll}"
                             Grid.Column="1"
                                 Clicked="OnClearTourFilterClicked"
                             BackgroundColor="White"
@@ -143,7 +144,7 @@
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                 <Label x:Name="MapFilterAllIcon" Text="&#xf00c;" FontFamily="FASolid" TextColor="White" VerticalOptions="Center" FontSize="12"/>
-                                <Label x:Name="MapFilterAllLabel" Text="Tất cả" TextColor="White" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterAllLabel" Text="{local:Translate FilterAll}" TextColor="White" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
                          <!-- Near You -->
@@ -156,7 +157,7 @@
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                 <Label x:Name="MapFilterNearIcon" Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label x:Name="MapFilterNearLabel" Text="Gần bạn" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterNearLabel" Text="{local:Translate FilterNear}" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
 
@@ -170,7 +171,7 @@
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                 <Label x:Name="MapFilterFavoriteIcon" Text="&#xf004;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label x:Name="MapFilterFavoriteLabel" Text="Yêu thích" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterFavoriteLabel" Text="{local:Translate FilterFavorite}" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
 
@@ -184,7 +185,7 @@
                             </Border.Shadow>
                             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                 <Label x:Name="MapFilterOpenIcon" Text="&#xf017;" FontFamily="FASolid" TextColor="#3C4043" VerticalOptions="Center" FontSize="12"/>
-                                <Label x:Name="MapFilterOpenLabel" Text="Đang mở" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
+                                <Label x:Name="MapFilterOpenLabel" Text="{local:Translate FilterOpen}" TextColor="#3C4043" VerticalOptions="Center" FontSize="13" FontAttributes="Bold"/>
                             </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>
@@ -238,7 +239,7 @@
                     <!-- Info -->
                     <VerticalStackLayout Grid.Column="1" Spacing="3">
                         <Grid ColumnDefinitions="*, Auto">
-                            <Label x:Name="SelectedPoiName" Text="Điểm đến" FontAttributes="Bold" FontSize="16" TextColor="Black" VerticalOptions="Center"/>
+                            <Label x:Name="SelectedPoiName" Text="{local:Translate Destination}" FontAttributes="Bold" FontSize="16" TextColor="Black" VerticalOptions="Center"/>
                              <!-- Nút thuyết minh âm thanh -->
                             <!--<Border BackgroundColor="#F48C06" StrokeThickness="0" StrokeShape="RoundRectangle 15" Padding="12,6" HorizontalOptions="End">
                                 <HorizontalStackLayout Spacing="5">
@@ -251,14 +252,14 @@
                         <HorizontalStackLayout Spacing="10" Margin="0,5,0,0">
                              <HorizontalStackLayout Spacing="4">
                                   <Label Text="&#xf124;" FontFamily="FASolid" TextColor="#5F6368" FontSize="12" VerticalOptions="Center"/>
-                                  <Label x:Name="SelectedPoiAddress" Text="Đang cập nhật địa chỉ" TextColor="#5F6368" FontSize="12" VerticalOptions="Center" />
+                                  <Label x:Name="SelectedPoiAddress" Text="{local:Translate AddressUpdating}" TextColor="#5F6368" FontSize="12" VerticalOptions="Center" />
                              </HorizontalStackLayout>
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
                     <!-- Buttons -->
                     <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*" ColumnSpacing="10" VerticalOptions="End">
-                        <Button x:Name="ViewDetailButton" Clicked="OnViewDetailClicked" Text="Xem chi tiết" BackgroundColor="#F48C06" TextColor="White" FontSize="12" CornerRadius="18" HeightRequest="36" Padding="0" FontAttributes="Bold"/>
+                        <Button x:Name="ViewDetailButton" Clicked="OnViewDetailClicked" Text="{local:Translate ViewDetail}" BackgroundColor="#F48C06" TextColor="White" FontSize="12" CornerRadius="18" HeightRequest="36" Padding="0" FontAttributes="Bold"/>
                     </Grid>
                 </Grid>
             </Border>

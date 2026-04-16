@@ -41,6 +41,8 @@ public class Program
         builder.Services.AddScoped<AudioLogService>();
         builder.Services.AddScoped<TourRepository>();
         builder.Services.AddScoped<TourService>();
+        builder.Services.AddScoped<UiTranslationRepository>();
+        builder.Services.AddScoped<UiTranslationService>();
         builder.Services.AddScoped<TranslationHistoryRepository>();
         builder.Services.AddScoped<TranslationService>();
         builder.Services.AddScoped<AdminTranslationBillingService>();

@@ -39,6 +39,7 @@ public partial class MapPage : ContentPage
     private readonly ILocationService _locationService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly IFavoriteService _favoriteService;
+    private readonly ILanguageService _languageService;
     private List<POI> _pois = new();
     private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
@@ -53,6 +54,7 @@ public partial class MapPage : ContentPage
     private bool _hasShownOfflineMapUnavailableNotice;
     private CancellationTokenSource? _searchDebounceCts;
     private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All;
+    private string _lastAppliedLanguageCode = string.Empty;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -94,13 +96,15 @@ public partial class MapPage : ContentPage
         IPOIService poiService,
         ILocationService locationService,
         NarrationFlowService narrationFlowService,
-        IFavoriteService favoriteService)
+        IFavoriteService favoriteService,
+        ILanguageService languageService)
     {
         InitializeComponent();
         _poiService = poiService;
         _locationService = locationService;
         _narrationFlowService = narrationFlowService;
         _favoriteService = favoriteService;
+        _languageService = languageService;
     }
 
     // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
@@ -127,9 +131,22 @@ public partial class MapPage : ContentPage
 
         await ShowOfflineMapNoticeIfNeededAsync();
 
-        if (_pois.Count == 0)
+        var currentLanguage = _languageService.CurrentLanguage;
+        var languageChanged = !string.Equals(_lastAppliedLanguageCode, currentLanguage, StringComparison.OrdinalIgnoreCase);
+        if (_pois.Count == 0 || languageChanged)
         {
             _pois = await _poiService.GetAllPOIsAsync();
+            _lastAppliedLanguageCode = currentLanguage;
+
+            if (_isMapLoaded)
+            {
+                await MapHelper.LoadMapAsync(
+                    mapControl,
+                    _poiService,
+                    _locationService,
+                    initialLocation: _lastKnownLocation ?? _locationService.LastKnownLocation,
+                    initialZoomLevel: DefaultZoomLevel);
+            }
         }
 
         mapControl.MapTapped -= OnMapTapped;
@@ -194,7 +211,7 @@ public partial class MapPage : ContentPage
         var currentLocation = await _locationService.GetCurrentLocationAsync();
         if (currentLocation == null)
         {
-            await DisplayAlertAsync("Thông báo", "Không thể lấy vị trí hiện tại.", "Đóng");
+            await DisplayAlertAsync(L("NoticeTitle"), L("MapCannotGetLocation"), L("Close"));
             return;
         }
 
@@ -318,7 +335,10 @@ public partial class MapPage : ContentPage
         if (matchedPois.Count == 0)
         {
             ClearSearchState();
-            await DisplayAlertAsync("Không tìm thấy", $"Không có quán phù hợp với: {keyword}", "Đóng");
+            await DisplayAlertAsync(
+                L("SearchNoResultsTitle"),
+                string.Format(L("SearchNoResultsMessage"), keyword),
+                L("Close"));
             return;
         }
 
@@ -723,8 +743,8 @@ public partial class MapPage : ContentPage
         }
 
         TourFilterTitle.Text = string.IsNullOrWhiteSpace(_activeTourName)
-            ? "Đang xem theo hành trình"
-            : $"Hành trình: {_activeTourName}";
+            ? L("TourFilterActive")
+            : string.Format(L("TourFilterWithName"), _activeTourName);
     }
 
     // Chuyển một chuỗi chứa nhiều POI ID (dạng text) thành HashSet<string> sạch, không trùng, dễ xử lý hơn, và đảm bảo rằng nếu có lỗi xảy ra trong quá trình parse thì sẽ trả về một HashSet rỗng thay vì làm hỏng chức năng của trang
@@ -872,9 +892,14 @@ public partial class MapPage : ContentPage
 
         _hasShownOfflineMapUnavailableNotice = true;
         await DisplayAlertAsync(
-            "Bản đồ offline",
-            "Hiện không có Internet và chưa có dữ liệu nền bản đồ đã lưu. Bạn vẫn xem và tương tác được các địa điểm, nhưng nền bản đồ có thể chưa hiển thị.",
-            "Đóng");
+            L("OfflineMapTitle"),
+            L("OfflineMapUnavailableMessage"),
+            L("Close"));
+    }
+
+    private static string L(string key)
+    {
+        return LocalizationResourceManager.Instance[key];
     }
 
     // nhấn vào nút xem chi tiết trên card POI đã chọn sẽ điều hướng đến trang chi tiết của POI đó, nếu có restaurantId hợp lệ

@@ -31,6 +31,7 @@ public partial class MainPage : ContentPage
     private readonly ILocationService _locationService;
     private readonly IAudioLibraryService _audioLibraryService;
     private readonly IFavoriteService _favoriteService;
+    private readonly ILanguageService _languageService;
 
     private bool _isInsidePOIUI = false; // trạng thái UI hiện tại có ở gần POI hay không
     private bool _isMapLoaded;
@@ -41,6 +42,7 @@ public partial class MainPage : ContentPage
     private bool _isInitializingMainPage;
     private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All; // filter đang được áp dụng cho danh sách POI, mặc định là All (tất cả)
     private List<POI> _filteredPois = new();
+    private string _lastAppliedLanguageCode = string.Empty;
 
     // private static bool _hasShownLanguagePopupThisSession;
     // private bool _languageSelected = Preferences.Get("language_selected", false);
@@ -51,7 +53,8 @@ public partial class MainPage : ContentPage
         NarrationFlowService narrationFlowService,
         ILocationService locationService,
         IAudioLibraryService audioLibraryService,
-        IFavoriteService favoriteService)
+        IFavoriteService favoriteService,
+        ILanguageService languageService)
 	{
 		InitializeComponent();
         _poiService = poiService;
@@ -59,6 +62,7 @@ public partial class MainPage : ContentPage
         _locationService = locationService;
         _audioLibraryService = audioLibraryService;
         _favoriteService = favoriteService;
+        _languageService = languageService;
     }
 
     // khôi phục trạng thái + cập nhật theo location + load dữ liệu nền + xử lý audio khi page xuất hiện
@@ -79,6 +83,11 @@ public partial class MainPage : ContentPage
         _locationService.LocationChanged -= OnLocationChangedForMap;
         _locationService.LocationChanged += OnLocationChangedForMap;
         LogPerf("OnAppearing: subscribed LocationChanged", sw);
+
+        if (!string.Equals(_lastAppliedLanguageCode, _languageService.CurrentLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            _ = RefreshPoiListForCurrentLanguageAsync();
+        }
 
         // Dời start tracking sau frame đầu để giảm giật lúc cold start.
         _ = StartTrackingDeferredAsync();
@@ -111,7 +120,10 @@ public partial class MainPage : ContentPage
 
         if (_audioLibraryService.ConsumeStartupOfflineNoticeFlag())
         {
-            _ = DisplayAlert("Thông báo", "Vui lòng kết nối Internet để tải dữ liệu audio.", "Đóng");
+            _ = DisplayAlert(
+                LocalizationResourceManager.Instance["NoticeTitle"],
+                LocalizationResourceManager.Instance["AudioInternetRequiredMessage"],
+                LocalizationResourceManager.Instance["Close"]);
         }
 
         // Cập nhật text/disabled state của nút, trạng thái visible đã được quyết định ở nhánh trên.
@@ -154,6 +166,7 @@ public partial class MainPage : ContentPage
                 var poisData = await _poiService.GetAllPOIsAsync();
                 _allPois = poisData;
                 _isPoiListBound = true;
+                _lastAppliedLanguageCode = _languageService.CurrentLanguage;
                 _currentPoiPageIndex = 0;
                 ApplyPoiFilterAndRefresh();
                 LogPerf($"Initialize: POI list bound ({poisData.Count})", sw);
@@ -229,12 +242,59 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            await _poiService.GetAllPOIsAsync();
-            MainThread.BeginInvokeOnMainThread(() => UpdateUIByLocation(location));
+            var pois = await _poiService.GetAllPOIsAsync();
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _allPois = pois;
+                _isPoiListBound = true;
+                _lastAppliedLanguageCode = _languageService.CurrentLanguage;
+                ApplyPoiFilterAndRefresh(location);
+                UpdateUIByLocation(location);
+            });
         }
         catch
         {
             // Ignore background preload failures; existing UI state stays usable.
+        }
+    }
+
+    private async Task RefreshPoiListForCurrentLanguageAsync()
+    {
+        try
+        {
+            var pois = await _poiService.GetAllPOIsAsync();
+            var focusLocation = _lastKnownLocation ?? _locationService.LastKnownLocation;
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                _allPois = pois;
+                _isPoiListBound = true;
+                _lastAppliedLanguageCode = _languageService.CurrentLanguage;
+                _currentPoiPageIndex = 0;
+                ApplyPoiFilterAndRefresh(_lastKnownLocation);
+            });
+
+            if (_isMapLoaded)
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await MapHelper.LoadMapAsync(
+                        mapControl,
+                        _poiService,
+                        _locationService,
+                        initialLocation: focusLocation,
+                        initialZoomLevel: 19);
+                });
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    UpdateMapHighlightByCurrentFilter(focusLocation);
+                });
+            }
+        }
+        catch
+        {
+            // Keep current language data when refresh fails.
         }
     }
 
@@ -657,11 +717,11 @@ public partial class MainPage : ContentPage
 
         if (_narrationFlowService.IsNarrating)
         {
-            NarratorText.Text = "Dừng thuyết minh";
+            NarratorText.Text = LocalizationResourceManager.Instance["StopNarration"];
         }
         else
         {
-            NarratorText.Text = "Bắt đầu thuyết minh tự động";
+            NarratorText.Text = LocalizationResourceManager.Instance["StartNarration"];
         }
     }
 }
