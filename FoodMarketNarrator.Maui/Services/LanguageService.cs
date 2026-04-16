@@ -23,6 +23,7 @@ public class LanguageService : ILanguageService
     public LanguageService(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        ApplyCulture(CurrentLanguage, savePreference: false);
     }
 
     // 
@@ -164,15 +165,27 @@ public class LanguageService : ILanguageService
 	// Thay đổi ngôn ngữ hiện tại của ứng dụng
 	public void ChangeLanguage(string cultureCode)
     {
-		// LÆ°u láº¡i Ä‘á»ƒ láº§n sau app má»Ÿ tá»± load
-        Preferences.Set("AppLanguage", cultureCode);
+        ApplyCulture(cultureCode, savePreference: true);
+    }
+
+    private static void ApplyCulture(string cultureCode, bool savePreference)
+    {
+        if (string.IsNullOrWhiteSpace(cultureCode))
+        {
+            cultureCode = "vi-VN";
+        }
+
+        if (savePreference)
+        {
+            Preferences.Set(LANGUAGE_KEY, cultureCode);
+        }
 
         var culture = new CultureInfo(cultureCode);
 
         Thread.CurrentThread.CurrentUICulture = culture;
         Thread.CurrentThread.CurrentCulture = culture;
-
         AppResources.Culture = culture;
+        LocalizationResourceManager.Instance.SetCulture(culture);
     }
 }
 

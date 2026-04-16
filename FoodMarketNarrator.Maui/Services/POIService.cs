@@ -32,6 +32,7 @@ public class POIService : IPOIService
     private DateTime _lastFetchFailureUtc = DateTime.MinValue;
     private int _consecutiveFetchFailures;
     private bool _lastLoadSucceededFromNetwork;
+    private string _lastAppliedLanguageCode = string.Empty;
 
     // Cấu hình refresh POI từ network.
     private static readonly TimeSpan PoiTtl = TimeSpan.FromMinutes(3);
@@ -78,10 +79,12 @@ public class POIService : IPOIService
 
     // HttpClient dùng cho các request lấy POI, ảnh và món ăn.
     private readonly HttpClient _httpClient;
+    private readonly ILanguageService _languageService;
 
-    public POIService(HttpClient httpClient)
+    public POIService(HttpClient httpClient, ILanguageService languageService)
     {
         _httpClient = httpClient;
+        _languageService = languageService;
         Log($"[POIService] HttpClient.BaseAddress = {_httpClient.BaseAddress}");
     }
 
@@ -129,6 +132,212 @@ public class POIService : IPOIService
         return $"{ex.GetType().Name}: {ex.Message}" + (string.IsNullOrWhiteSpace(inner) ? string.Empty : $" | Inner: {inner}");
     }
 
+    private static string NormalizeLanguageCode(string? languageCode)
+    {
+        return string.IsNullOrWhiteSpace(languageCode)
+            ? "vi-VN"
+            : languageCode.Trim();
+    }
+
+    private static string BuildTranslationKey(string entityId, string fieldName)
+    {
+        return $"{entityId}|{fieldName}";
+    }
+
+    private static Dictionary<string, string> ToTranslationMap(IEnumerable<UiTranslationModel> items)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(item.EntityId)
+                || string.IsNullOrWhiteSpace(item.FieldName)
+                || string.IsNullOrWhiteSpace(item.TranslatedText))
+            {
+                continue;
+            }
+
+            var key = BuildTranslationKey(item.EntityId.Trim(), item.FieldName.Trim().ToLowerInvariant());
+            map[key] = item.TranslatedText;
+        }
+
+        return map;
+    }
+
+    private static void CaptureOriginalPoiText(IEnumerable<POI> pois)
+    {
+        foreach (var poi in pois)
+        {
+            poi.OriginalName ??= poi.Name;
+            poi.OriginalDescription ??= poi.Description;
+            poi.OriginalAddress ??= poi.Address;
+        }
+    }
+
+    private static void CaptureOriginalDishText(IEnumerable<DishModel> dishes)
+    {
+        foreach (var dish in dishes)
+        {
+            dish.OriginalName ??= dish.Name;
+        }
+    }
+
+    private async Task<List<UiTranslationModel>> FetchUiTranslationsAsync(
+        string languageCode,
+        string entityType,
+        IReadOnlyCollection<string> entityIds)
+    {
+        if (string.IsNullOrWhiteSpace(languageCode) || entityIds.Count == 0)
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var baseCandidates = new List<string>();
+        if (_httpClient.BaseAddress != null)
+        {
+            baseCandidates.Add(_httpClient.BaseAddress.ToString());
+        }
+
+        baseCandidates.Add(AppSettings.ApiBaseUrl);
+        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+
+        var uniqueBases = baseCandidates
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var entityIdsRaw = string.Join(",", entityIds.Where(x => !string.IsNullOrWhiteSpace(x)));
+        if (string.IsNullOrWhiteSpace(entityIdsRaw))
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var relativePath = $"{AppSettings.PublicTranslationsEndpoint}?languageCode={Uri.EscapeDataString(languageCode)}&entityType={Uri.EscapeDataString(entityType)}&entityIds={Uri.EscapeDataString(entityIdsRaw)}";
+
+        foreach (var baseUrl in uniqueBases)
+        {
+            try
+            {
+                var requestUrl = new Uri(new Uri(baseUrl), relativePath);
+                var data = await _httpClient.GetFromJsonAsync<List<UiTranslationModel>>(requestUrl);
+                if (data != null)
+                {
+                    return data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"[POIService][Translation] Request failed: {baseUrl} -> {FormatException(ex)}");
+            }
+        }
+
+        return new List<UiTranslationModel>();
+    }
+
+    private async Task ApplyPoiTranslationsForCurrentLanguageAsync(List<POI> pois)
+    {
+        if (pois.Count == 0)
+        {
+            return;
+        }
+
+        var currentLanguage = NormalizeLanguageCode(_languageService.CurrentLanguage);
+        if (string.Equals(_lastAppliedLanguageCode, currentLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        CaptureOriginalPoiText(pois);
+
+        var restaurantIds = pois
+            .Where(x => !string.IsNullOrWhiteSpace(x.restaurantId))
+            .Select(x => x.restaurantId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        try
+        {
+            var translationItems = await FetchUiTranslationsAsync(currentLanguage, "restaurant", restaurantIds);
+            var translationMap = ToTranslationMap(translationItems);
+
+            foreach (var poi in pois)
+            {
+                var restaurantId = poi.restaurantId ?? string.Empty;
+                var translatedNameKey = BuildTranslationKey(restaurantId, "name");
+                var translatedDescriptionKey = BuildTranslationKey(restaurantId, "description");
+                var translatedAddressKey = BuildTranslationKey(restaurantId, "address");
+
+                poi.Name = translationMap.TryGetValue(translatedNameKey, out var translatedName)
+                    ? translatedName
+                    : (poi.OriginalName ?? poi.Name);
+
+                poi.Description = translationMap.TryGetValue(translatedDescriptionKey, out var translatedDescription)
+                    ? translatedDescription
+                    : (poi.OriginalDescription ?? poi.Description);
+
+                poi.Address = translationMap.TryGetValue(translatedAddressKey, out var translatedAddress)
+                    ? translatedAddress
+                    : (poi.OriginalAddress ?? poi.Address);
+            }
+
+            foreach (var poi in pois.Where(x => x.Dishes != null && x.Dishes.Count > 0))
+            {
+                await ApplyDishTranslationsForCurrentLanguageAsync(poi.restaurantId, poi.Dishes, currentLanguage);
+            }
+
+            _lastAppliedLanguageCode = currentLanguage;
+        }
+        catch (Exception ex)
+        {
+            Log($"[POIService][Translation] Apply POI translation failed: {FormatException(ex)}");
+        }
+    }
+
+    private async Task ApplyDishTranslationsForCurrentLanguageAsync(
+        string restaurantId,
+        List<DishModel> dishes,
+        string? languageCode = null)
+    {
+        if (dishes.Count == 0)
+        {
+            return;
+        }
+
+        CaptureOriginalDishText(dishes);
+
+        var currentLanguage = NormalizeLanguageCode(languageCode ?? _languageService.CurrentLanguage);
+        var dishIds = dishes
+            .Select(d => d.DishId.ToString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        try
+        {
+            var translationItems = await FetchUiTranslationsAsync(currentLanguage, "dish", dishIds);
+            var translationMap = ToTranslationMap(translationItems);
+
+            foreach (var dish in dishes)
+            {
+                var translatedNameKey = BuildTranslationKey(dish.DishId.ToString(), "name");
+                dish.Name = translationMap.TryGetValue(translatedNameKey, out var translatedName)
+                    ? translatedName
+                    : (dish.OriginalName ?? dish.Name);
+            }
+
+            var poi = _pois?.FirstOrDefault(x =>
+                string.Equals(x.restaurantId, restaurantId, StringComparison.OrdinalIgnoreCase));
+            if (poi != null)
+            {
+                poi.Dishes = dishes;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[POIService][Translation] Apply dish translation failed for restaurant {restaurantId}: {FormatException(ex)}");
+        }
+    }
+
     // Lấy POI theo chiến lược cache-first: memory -> disk -> network.
     public async Task<List<POI>> GetPOIsAsync()
     {
@@ -136,6 +345,7 @@ public class POIService : IPOIService
         if (_pois != null && _pois.Count > 0)
         {
             ApplyCachedImagePaths(_pois);
+            await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
             Log($"[POIService] Using in-memory POIs: {_pois.Count}");
             _lastLoadSucceededFromNetwork = false;
             return _pois;
@@ -148,10 +358,12 @@ public class POIService : IPOIService
             _pois = cachedPois
                 .Where(p => p.IsActive)
                 .ToList();
+            _lastAppliedLanguageCode = string.Empty;
             ApplyCachedImagePaths(_pois);
             StartOfflineAssetWarmup(_pois);
             _lastLoadSucceededFromNetwork = false;
             _lastFetchUtc = DateTime.UtcNow;
+            await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
 
             var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
             Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from offline cache (fast path). | elapsedMs={swTotal.ElapsedMilliseconds}");
@@ -180,6 +392,11 @@ public class POIService : IPOIService
         {
             if (!await _networkRefreshLock.WaitAsync(0))
             {
+                if (_pois != null && _pois.Count > 0)
+                {
+                    await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
+                }
+
                 return _pois ?? new List<POI>();
             }
         }
@@ -226,6 +443,7 @@ public class POIService : IPOIService
                     _pois = data
                         .Where(p => p.IsActive)
                         .ToList();
+                    _lastAppliedLanguageCode = string.Empty;
                     ApplyCachedImagePaths(_pois);
                     await SavePoisCacheAsync(_pois);
                     StartOfflineAssetWarmup(_pois);
@@ -233,6 +451,7 @@ public class POIService : IPOIService
                     _consecutiveFetchFailures = 0;
                     _lastFetchFailureUtc = DateTime.MinValue;
                     _lastFetchUtc = DateTime.UtcNow;
+                    await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
                     var totalAudios = _pois.Sum(p => p.Audios?.Count ?? 0);
                     Log($"[POIService] Loaded {_pois.Count} POIs and {totalAudios} audios from {requestUrl} | elapsedMs={sw.ElapsedMilliseconds} | totalElapsedMs={swTotal.ElapsedMilliseconds}");
                     return _pois;
@@ -247,6 +466,11 @@ public class POIService : IPOIService
             _consecutiveFetchFailures++;
             _lastFetchFailureUtc = DateTime.UtcNow;
             Log($"[POIService] Error fetching POIs from all candidates. | failures={_consecutiveFetchFailures} | elapsedMs={swTotal.ElapsedMilliseconds}");
+
+            if (_pois != null && _pois.Count > 0)
+            {
+                await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
+            }
 
             return _pois ?? new List<POI>();
         }
@@ -953,6 +1177,7 @@ public class POIService : IPOIService
         if (_pois != null && _pois.Any() && cacheAge < PoiTtl)
         {
             Log($"[POIService][TTL] cache-hit: age={cacheAge.TotalSeconds:F0}s < ttl={PoiTtl.TotalSeconds:F0}s, count={_pois.Count}");
+            await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
             return _pois;
         }
 
@@ -978,6 +1203,7 @@ public class POIService : IPOIService
             if (_pois != null && _pois.Any() && cacheAge < PoiTtl)
             {
                 Log($"[POIService][TTL] cache-hit-after-lock: age={cacheAge.TotalSeconds:F0}s < ttl={PoiTtl.TotalSeconds:F0}s, count={_pois.Count}");
+                await ApplyPoiTranslationsForCurrentLanguageAsync(_pois);
                 return _pois;
             }
 
@@ -1002,6 +1228,8 @@ public class POIService : IPOIService
                     Log($"[POIService][TTL] refresh-success-non-network: source=in-memory-or-offline, keepLastFetchUtc={_lastFetchUtc:O}, count={refreshed.Count}");
                 }
 
+                await ApplyPoiTranslationsForCurrentLanguageAsync(refreshed);
+
                 return refreshed;
             }
 
@@ -1009,6 +1237,7 @@ public class POIService : IPOIService
             {
                 _pois = previous;
                 Log($"[POIService][TTL] refresh-empty -> restore-previous: restoredCount={previous.Count}, lastFetchUtc={_lastFetchUtc:O}");
+                await ApplyPoiTranslationsForCurrentLanguageAsync(previous);
                 return previous;
             }
 
@@ -1152,6 +1381,7 @@ public class POIService : IPOIService
 
             if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             {
+                await ApplyDishTranslationsForCurrentLanguageAsync(restaurantId, cachedDishes);
                 return cachedDishes;
             }
 
@@ -1174,7 +1404,10 @@ public class POIService : IPOIService
             {
                 try
                 {
-                    var requestUrl = new Uri(new Uri(baseUrl), $"Restaurant/{restaurantId}/dishes");
+                    var currentLanguage = NormalizeLanguageCode(_languageService.CurrentLanguage);
+                    var requestUrl = new Uri(
+                        new Uri(baseUrl),
+                        $"Restaurant/{restaurantId}/dishes?languageCode={Uri.EscapeDataString(currentLanguage)}");
                     using var cts = new CancellationTokenSource(DishesRequestTimeout);
                     Log($"[POIService] Requesting dishes from: {requestUrl} | timeout={DishesRequestTimeout.TotalSeconds:F0}s");
 
@@ -1190,6 +1423,7 @@ public class POIService : IPOIService
                     }
 
                     await SaveDishesCacheAsync(restaurantId, dishes);
+                    await ApplyDishTranslationsForCurrentLanguageAsync(restaurantId, dishes);
                     return dishes;
                 }
                 catch (Exception ex)
@@ -1198,12 +1432,15 @@ public class POIService : IPOIService
                 }
             }
 
+            await ApplyDishTranslationsForCurrentLanguageAsync(restaurantId, cachedDishes);
             return cachedDishes;
         }
         catch (Exception ex)
         {
             Log($"[POIService] GetDishes failed: {ex.Message}");
-            return await ReadDishesCacheAsync(restaurantId);
+            var fallbackDishes = await ReadDishesCacheAsync(restaurantId);
+            await ApplyDishTranslationsForCurrentLanguageAsync(restaurantId, fallbackDishes);
+            return fallbackDishes;
         }
         finally
         {

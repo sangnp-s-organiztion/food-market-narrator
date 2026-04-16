@@ -5,35 +5,35 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:food_market_narrator"
-    Title="Chợ ẩm thực Vĩnh Khánh">
+    Title="{local:Translate AppTitle}">
 
     <ShellContent
-        Title="Trang chủ"
+        Title="{local:Translate TabHome}"
         ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
 
     <ShellContent
-        Title="Bản đồ"
+        Title="{local:Translate TabMap}"
         ContentTemplate="{DataTemplate views:MapPage}"
         Route="MapPage" />
 
     <ShellContent
-        Title="Hành trình"
+        Title="{local:Translate TabTour}"
         ContentTemplate="{DataTemplate views:TourPage}"
         Route="TourPage" />
 
     <ShellContent
-        Title="Yêu thích"
+        Title="{local:Translate TabFavorite}"
         ContentTemplate="{DataTemplate views:FavoritePage}"
         Route="FavoritePage" />
 
     <ShellContent
-        Title="Lịch sử"
+        Title="{local:Translate TabHistory}"
         ContentTemplate="{DataTemplate views:HistoryPage}"
         Route="HistoryPage" />
 
     <ShellContent
-        Title="Cài đặt"
+        Title="{local:Translate TabSettings}"
         ContentTemplate="{DataTemplate views:SettingsPage}"
         Route="SettingsPage" />
 

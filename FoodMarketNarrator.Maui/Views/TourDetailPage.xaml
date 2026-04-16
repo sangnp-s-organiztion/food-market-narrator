@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:food_market_narrator.Models"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.TourDetailPage"
              x:DataType="models:TourModel"
              Shell.NavBarIsVisible="False"
@@ -28,7 +29,7 @@
             </Border>
 
                         <Label Grid.Column="1"
-                                     Text="Chi tiết hành trình"
+                                     Text="{local:Translate JourneyDetail}"
                    FontSize="19"
                    FontFamily="OpenSansSemibold"
                    TextColor="#242424"
@@ -70,7 +71,7 @@
                                            FontSize="20"
                                            TextColor="#222222"
                                            HorizontalOptions="Center"/>
-                                    <Label Text="THỜI GIAN"
+                                     <Label Text="{local:Translate Duration}"
                                            FontSize="11"
                                            TextColor="#909090"
                                            HorizontalOptions="Center"/>
@@ -90,7 +91,7 @@
                                            FontSize="20"
                                            TextColor="#222222"
                                            HorizontalOptions="Center"/>
-                                    <Label Text="ĐỊA ĐIỂM"
+                                     <Label Text="{local:Translate Locations}"
                                            FontSize="11"
                                            TextColor="#909090"
                                            HorizontalOptions="Center"/>
@@ -108,7 +109,7 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Padding="20,0" Spacing="7">
-                        <Label Text="HÀNH TRÌNH KHÁM PHÁ"
+                           <Label Text="{local:Translate ExploreJourney}"
                                FontFamily="OpenSansSemibold"
                                FontSize="17"
                                TextColor="#B37846"
@@ -123,7 +124,7 @@
 
                     <VerticalStackLayout Padding="20,0" Spacing="8">
                         <Grid ColumnDefinitions="*" VerticalOptions="Center">
-                            <Label Text="LỊCH TRÌNH CHI TIẾT"
+                            <Label Text="{local:Translate DetailedSchedule}"
                                    FontFamily="OpenSansSemibold"
                                    FontSize="17"
                                    TextColor="#B37846"
@@ -141,7 +142,7 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.EmptyView>
-                                <Label Text="Hành trình này chưa có điểm dừng."
+                                    <Label Text="{local:Translate NoStopsYet}"
                                        FontSize="14"
                                        TextColor="#929292"
                                        HorizontalOptions="Center"
@@ -219,7 +220,7 @@
                                  VerticalOptions="Center"
                                  Spacing="10">
                 <ActivityIndicator IsRunning="True" Color="#F39C12" WidthRequest="30" HeightRequest="30"/>
-                <Label Text="Đang tải chi tiết hành trình..." FontSize="14" TextColor="#777777"/>
+                <Label Text="{local:Translate LoadingTourDetail}" FontSize="14" TextColor="#777777"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout x:Name="ErrorContainer"
@@ -228,16 +229,16 @@
                                  VerticalOptions="Center"
                                  Spacing="10"
                                  Padding="24">
-                                <Label Text="Không thể tải chi tiết hành trình."
+                                    <Label Text="{local:Translate LoadTourDetailFailed}"
                        FontSize="16"
                        FontFamily="OpenSansSemibold"
                        TextColor="#3A3A3A"
                        HorizontalTextAlignment="Center"/>
-                <Label Text="Vui lòng thử lại sau."
+                          <Label Text="{local:Translate TryAgainLater}"
                        FontSize="14"
                        TextColor="#8A8A8A"
                        HorizontalTextAlignment="Center"/>
-                <Button Text="Thử lại"
+                          <Button Text="{local:Translate BtnRetry}"
                         Clicked="OnRetryClicked"
                         HeightRequest="44"
                         CornerRadius="22"
@@ -254,8 +255,8 @@
                 StrokeThickness="0"
                 Padding="16,10,16,14"
                 StrokeShape="RoundRectangle 24,24,0,0">
-            <Button x:Name="StartJourneyButton"
-                    Text="Bắt đầu hành trình"
+                <Button x:Name="StartJourneyButton"
+                    Text="{local:Translate StartJourney}"
                     FontFamily="OpenSansSemibold"
                     FontSize="18"
                     HeightRequest="56"

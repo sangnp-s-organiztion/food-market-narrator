@@ -87,6 +87,7 @@ Luu y:
 - GET /public/Restaurant/{restaurantId}/dishes (public)
 - GET /Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
+- GET /public/translations?languageCode={code}&entityType={restaurant|dish}&entityIds={id1,id2,...} (public)
 - GET /public/audios/{audioId:int}/file (public)
 
 ## Mongo

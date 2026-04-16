@@ -1,64 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
-    Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
-    associated with the data types.
-
-    Example:
-
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-
-    There are any number of "resheader" rows that contain simple
-    name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
-    mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
-    extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
-    read any of the formats listed below.
-
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -117,44 +58,381 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+
+  <!-- Shell -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Chợ ẩm thực Vĩnh Khánh</value>
+  </data>
+  <data name="TabHome" xml:space="preserve">
+    <value>Trang chủ</value>
+  </data>
+  <data name="TabMap" xml:space="preserve">
+    <value>Bản đồ</value>
+  </data>
+  <data name="TabTour" xml:space="preserve">
+    <value>Hành trình</value>
+  </data>
+  <data name="TabFavorite" xml:space="preserve">
+    <value>Yêu thích</value>
+  </data>
+  <data name="TabHistory" xml:space="preserve">
+    <value>Lịch sử</value>
+  </data>
+  <data name="TabSettings" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+
+  <!-- MainPage -->
+  <data name="MainTitle" xml:space="preserve">
+    <value>Ẩm thực Vĩnh Khánh</value>
+  </data>
+  <data name="MainSubtitle" xml:space="preserve">
+    <value>Khám phá thiên đường ẩm thực</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Tìm ốc, phá lấu, đồ nướng...</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>Tất cả</value>
+  </data>
+  <data name="FilterNear" xml:space="preserve">
+    <value>Gần bạn</value>
+  </data>
+  <data name="FilterFavorite" xml:space="preserve">
+    <value>Yêu thích</value>
+  </data>
+  <data name="FilterOpen" xml:space="preserve">
+    <value>Đang mở</value>
+  </data>
+  <data name="FeaturedRestaurants" xml:space="preserve">
+    <value>Quán ngon nổi bật</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>Xem tất cả</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Trạng thái: </value>
+  </data>
+  <data name="BtnPrevious" xml:space="preserve">
+    <value>Trước</value>
+  </data>
+  <data name="BtnNext" xml:space="preserve">
+    <value>Sau</value>
+  </data>
+  <data name="PageIndicator" xml:space="preserve">
+    <value>Trang 1/1</value>
+  </data>
+  <data name="StartNarration" xml:space="preserve">
+    <value>Bắt đầu thuyết minh tự động</value>
+  </data>
+  <data name="StopNarration" xml:space="preserve">
+    <value>Dừng thuyết minh</value>
+  </data>
+
+  <!-- MapPage -->
+  <data name="MapSearchPlaceholder" xml:space="preserve">
+    <value>Tìm món ăn hoặc quán...</value>
+  </data>
+  <data name="TourFilterActive" xml:space="preserve">
+    <value>Đang xem theo hành trình</value>
+  </data>
+  <data name="TourFilterHint" xml:space="preserve">
+    <value>Chỉ hiển thị các POI thuộc hành trình đã chọn</value>
+  </data>
+  <data name="TourFilterWithName" xml:space="preserve">
+    <value>Hành trình: {0}</value>
+  </data>
+  <data name="ShowAll" xml:space="preserve">
+    <value>Hiện tất cả</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Điểm đến</value>
+  </data>
+  <data name="AddressUpdating" xml:space="preserve">
+    <value>Đang cập nhật địa chỉ</value>
+  </data>
+  <data name="ViewDetail" xml:space="preserve">
+    <value>Xem chi tiết</value>
+  </data>
+
+  <!-- POIDetailPage -->
+  <data name="AudioNarration" xml:space="preserve">
+    <value>Thuyết minh</value>
+  </data>
+  <data name="AudioHintLine1" xml:space="preserve">
+    <value>- Nghe thuyết minh để tìm hiểu thêm về quán, không gian và các món đặc trưng. Mang đến trải nghiệm khám phá sống động.</value>
+  </data>
+  <data name="AudioHintLine2" xml:space="preserve">
+    <value>- Nội dung hỗ trợ tiếng Việt, tiếng Anh, tiếng Trung, tiếng Nhật, tiếng Hàn.</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Thực đơn</value>
+  </data>
+  <data name="AboutUs" xml:space="preserve">
+    <value>Về chúng tôi</value>
+  </data>
+  <data name="OpenedDate" xml:space="preserve">
+    <value>Ngày mở bán: {0}</value>
+  </data>
+  <data name="GetDirections" xml:space="preserve">
+    <value>Đường đi</value>
+  </data>
+  <data name="CallNow" xml:space="preserve">
+    <value>Gọi điện ngay</value>
+  </data>
+
+  <!-- TourPage -->
+  <data name="ExploreToday" xml:space="preserve">
+    <value>Khám phá gì hôm nay?</value>
+  </data>
+  <data name="CulinaryJourney" xml:space="preserve">
+    <value>HÀNH TRÌNH ẨM THỰC PHỐ VĨNH KHÁNH</value>
+  </data>
+  <data name="NoTourAvailable" xml:space="preserve">
+    <value>Chưa có hành trình khả dụng</value>
+  </data>
+  <data name="NoTourHint" xml:space="preserve">
+    <value>Vui lòng kiểm tra lại kết nối hoặc dữ liệu hành trình từ máy chủ</value>
+  </data>
+  <data name="BtnViewDetail" xml:space="preserve">
+    <value>Xem chi tiết</value>
+  </data>
+
+  <!-- TourDetailPage -->
+  <data name="JourneyDetail" xml:space="preserve">
+    <value>Chi tiết hành trình</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>THỜI GIAN</value>
+  </data>
+  <data name="Locations" xml:space="preserve">
+    <value>ĐỊA ĐIỂM</value>
+  </data>
+  <data name="ExploreJourney" xml:space="preserve">
+    <value>HÀNH TRÌNH KHÁM PHÁ</value>
+  </data>
+  <data name="DetailedSchedule" xml:space="preserve">
+    <value>LỊCH TRÌNH CHI TIẾT</value>
+  </data>
+  <data name="NoStopsYet" xml:space="preserve">
+    <value>Hành trình này chưa có điểm dừng.</value>
+  </data>
+  <data name="LoadingTourDetail" xml:space="preserve">
+    <value>Đang tải chi tiết hành trình...</value>
+  </data>
+  <data name="LoadTourDetailFailed" xml:space="preserve">
+    <value>Không thể tải chi tiết hành trình.</value>
+  </data>
+  <data name="TryAgainLater" xml:space="preserve">
+    <value>Vui lòng thử lại sau.</value>
+  </data>
+  <data name="BtnRetry" xml:space="preserve">
+    <value>Thử lại</value>
+  </data>
+  <data name="StartJourney" xml:space="preserve">
+    <value>Bắt đầu hành trình</value>
+  </data>
+
+  <!-- FavoritePage -->
+  <data name="Favorites" xml:space="preserve">
+    <value>Yêu thích</value>
+  </data>
+  <data name="NoFavoritesYet" xml:space="preserve">
+    <value>Chưa có quán yêu thích</value>
+  </data>
+  <data name="NoFavoritesHint" xml:space="preserve">
+    <value>Nhấn vào biểu tượng trái tim để thêm</value>
+  </data>
+
+  <!-- HistoryPage -->
+  <data name="History" xml:space="preserve">
+    <value>Lịch sử</value>
+  </data>
+  <data name="NoHistoryYet" xml:space="preserve">
+    <value>Chưa có lịch sử đã nghe</value>
+  </data>
+  <data name="NoHistoryHint" xml:space="preserve">
+    <value>Lịch sử sẽ hiển thị khi bạn nghe thuyết minh</value>
+  </data>
+
+  <!-- SettingsPage -->
+  <data name="Settings" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+  <data name="TodaysTip" xml:space="preserve">
+    <value>MẸO HÔM NAY</value>
+  </data>
+  <data name="TipTitle" xml:space="preserve">
+    <value>Trải nghiệm hành trình khám phá</value>
+  </data>
+  <data name="TipDescription" xml:space="preserve">
+    <value>Bật thuyết minh tự động và tận hưởng những câu chuyện thú vị tại mỗi điểm dừng.</value>
+  </data>
+  <data name="ExperienceNow" xml:space="preserve">
+    <value>Trải nghiệm ngay  -&gt;</value>
+  </data>
+  <data name="AppSection" xml:space="preserve">
+    <value>ỨNG DỤNG</value>
+  </data>
+  <data name="NarrationLanguage" xml:space="preserve">
+    <value>Ngôn ngữ thuyết minh</value>
+  </data>
+  <data name="SelectNarrationLanguage" xml:space="preserve">
+    <value>Chọn ngôn ngữ thuyết minh</value>
+  </data>
+  <data name="Vietnamese" xml:space="preserve">
+    <value>Tiếng Việt</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Tiếng Anh</value>
+  </data>
+  <data name="Japanese" xml:space="preserve">
+    <value>Tiếng Nhật</value>
+  </data>
+  <data name="Korean" xml:space="preserve">
+    <value>Tiếng Hàn</value>
+  </data>
+  <data name="Chinese" xml:space="preserve">
+    <value>Tiếng Trung</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="BackgroundLocation" xml:space="preserve">
+    <value>Vị trí nền</value>
+  </data>
+  <data name="NotCheckedYet" xml:space="preserve">
+    <value>Chưa kiểm tra</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>Chế độ tối</value>
+  </data>
+  <data name="DataSection" xml:space="preserve">
+    <value>DỮ LIỆU</value>
+  </data>
+  <data name="StorageManagement" xml:space="preserve">
+    <value>Quản lý bộ nhớ</value>
+  </data>
+  <data name="StorageDescription" xml:space="preserve">
+    <value>Bao gồm bản đồ ngoại tuyến, hình ảnh và dữ liệu âm thanh.</value>
+  </data>
+  <data name="Used" xml:space="preserve">
+    <value>ĐÃ SỬ DỤNG</value>
+  </data>
+  <data name="MapLegend" xml:space="preserve">
+    <value>Bản đồ</value>
+  </data>
+  <data name="ImageLegend" xml:space="preserve">
+    <value>Ảnh</value>
+  </data>
+  <data name="OtherLegend" xml:space="preserve">
+    <value>Khác</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value> Xóa tất cả</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
+  <data name="StorageDetailsTitle" xml:space="preserve">
+    <value>Chi tiết bộ nhớ</value>
+  </data>
+  <data name="StorageDetailTotal" xml:space="preserve">
+    <value>Tổng dữ liệu: {0}</value>
+  </data>
+  <data name="StorageDetailMap" xml:space="preserve">
+    <value>Bản đồ: {0} ({1} file)</value>
+  </data>
+  <data name="StorageDetailImage" xml:space="preserve">
+    <value>Ảnh: {0} ({1} file)</value>
+  </data>
+  <data name="StorageDetailAudio" xml:space="preserve">
+    <value>Audio: {0}</value>
+  </data>
+  <data name="StorageDetailPoi" xml:space="preserve">
+    <value>POI: {0}</value>
+  </data>
+  <data name="StorageDetailDish" xml:space="preserve">
+    <value>Món ăn: {0} ({1} file)</value>
+  </data>
+  <data name="StorageDetailLanguage" xml:space="preserve">
+    <value>Ngôn ngữ: {0}</value>
+  </data>
+  <data name="ListeningHistory" xml:space="preserve">
+    <value>Lịch sử đã nghe</value>
+  </data>
+  <data name="ClearListeningHistory" xml:space="preserve">
+    <value>Xóa lịch sử đã nghe</value>
+  </data>
+  <data name="ClearFavorites" xml:space="preserve">
+    <value>Xóa yêu thích</value>
+  </data>
+  <data name="BtnClear" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
+  <data name="SupportSection" xml:space="preserve">
+    <value>HỖ TRỢ</value>
+  </data>
+  <data name="HelpCenter" xml:space="preserve">
+    <value>Trung tâm trợ giúp</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Chính sách bảo mật</value>
+  </data>
+  <data name="TermsOfService" xml:space="preserve">
+    <value>Điều khoản sử dụng</value>
+  </data>
+
+  <!-- Common -->
   <data name="StreetName" xml:space="preserve">
     <value>Phố ẩm thực Vĩnh Khánh</value>
-    <comment/>
   </data>
   <data name="GettingLocation" xml:space="preserve">
     <value>Đang lấy vị trí ...</value>
-    <comment/>
   </data>
   <data name="Lock" xml:space="preserve">
     <value>Khóa</value>
-    <comment/>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Ngôn ngữ</value>
-    <comment/>
   </data>
   <data name="QRCode" xml:space="preserve">
     <value>Mã QR</value>
-    <comment/>
   </data>
   <data name="Story" xml:space="preserve">
     <value>Câu chuyện</value>
-    <comment/>
   </data>
   <data name="Map" xml:space="preserve">
     <value>Sơ đồ</value>
-    <comment/>
   </data>
   <data name="SelectLanguage" xml:space="preserve">
     <value>CHỌN NGÔN NGỮ</value>
-    <comment/>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Đóng</value>
-    <comment/>
+  </data>
+  <data name="NoticeTitle" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="AudioInternetRequiredMessage" xml:space="preserve">
+    <value>Vui lòng kết nối Internet để tải dữ liệu audio.</value>
+  </data>
+  <data name="MapCannotGetLocation" xml:space="preserve">
+    <value>Không thể lấy vị trí hiện tại.</value>
+  </data>
+  <data name="SearchNoResultsTitle" xml:space="preserve">
+    <value>Không tìm thấy</value>
+  </data>
+  <data name="SearchNoResultsMessage" xml:space="preserve">
+    <value>Không có quán phù hợp với: {0}</value>
+  </data>
+  <data name="OfflineMapTitle" xml:space="preserve">
+    <value>Bản đồ offline</value>
+  </data>
+  <data name="OfflineMapUnavailableMessage" xml:space="preserve">
+    <value>Hiện không có Internet và chưa có dữ liệu nền bản đồ đã lưu. Bạn vẫn xem và tương tác được các địa điểm, nhưng nền bản đồ có thể chưa hiển thị.</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
     <value>Số điện thoại</value>
-    <comment/>
   </data>
 </root>
