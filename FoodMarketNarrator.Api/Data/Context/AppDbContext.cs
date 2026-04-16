@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<AudioModel> Audio { get; set; }
     public DbSet<DishModel> Dish { get; set; }
     public DbSet<LanguageModel> Language { get; set; }
+    public DbSet<TranslationModel> Translation { get; set; }
     public DbSet<UserModel> User { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<TourModel> Tour { get; set; }
@@ -41,6 +42,12 @@ public class AppDbContext : DbContext
             .HasOne(tr => tr.Restaurant)
             .WithMany()
             .HasForeignKey(tr => tr.RestaurantId);
+
+        modelBuilder.Entity<TranslationModel>()
+            .HasOne(t => t.Language)
+            .WithMany(l => l.Translations)
+            .HasForeignKey(t => t.LanguageId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

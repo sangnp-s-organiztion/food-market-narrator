@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.Shared.BottomNavigationView"
              >
 
@@ -18,7 +19,7 @@
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf015;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="HomeIcon" />
-                <Label Text="Trang chủ" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center" x:Name="HomeText" />
+                <Label Text="{local:Translate TabHome}" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center" x:Name="HomeText" />
             </VerticalStackLayout>
 
             <!-- Bản đồ -->
@@ -29,7 +30,7 @@
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf14e;" FontFamily="FASolid"  FontSize="20" HorizontalOptions="Center" x:Name="MapIcon"/>
-                <Label Text="Bản đồ" FontSize="10" HorizontalOptions="Center" x:Name="MapText"/>
+                <Label Text="{local:Translate TabMap}" FontSize="10" HorizontalOptions="Center" x:Name="MapText"/>
             </VerticalStackLayout>
 
             <!-- Yêu thích -->
@@ -40,7 +41,7 @@
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf004;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="FavoriteIcon"/>
-                <Label Text="Yêu thích" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
+                <Label Text="{local:Translate TabFavorite}" FontSize="10" HorizontalOptions="Center" x:Name="FavoriteText"/>
             </VerticalStackLayout>
 
             <!-- Hành trình -->
@@ -50,7 +51,7 @@
                 </VerticalStackLayout.GestureRecognizers>
 
                 <Label Text="&#xf4d7;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center" x:Name="TourIcon"/>
-                <Label Text="Hành trình" FontSize="10" HorizontalOptions="Center" x:Name="TourText"/>
+                <Label Text="{local:Translate TabTour}" FontSize="10" HorizontalOptions="Center" x:Name="TourText"/>
             </VerticalStackLayout>
 
             <!-- Cài đặt -->
@@ -61,7 +62,7 @@
                 </VerticalStackLayout.GestureRecognizers>
                 
                 <Label x:Name="SettingIcon" Text="&#xf013;" FontFamily="FASolid" FontSize="20" HorizontalOptions="Center"/>
-                <Label x:Name="SettingText" Text="Cài đặt" FontSize="10" HorizontalOptions="Center"/>
+                <Label x:Name="SettingText" Text="{local:Translate TabSettings}" FontSize="10" HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </Grid>
     </Border>

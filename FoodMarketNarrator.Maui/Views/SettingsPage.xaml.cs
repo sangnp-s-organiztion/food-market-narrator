@@ -68,9 +68,9 @@ public partial class SettingsPage : ContentPage
             _lastStorageUsage = await ReadStorageUsageAsync();
             StorageTotalSizeLabel.Text = FormatBytesCompact(_lastStorageUsage.TotalBytes);
 
-            StorageMapLegendLabel.Text = $"Bản đồ {FormatBytesCompact(_lastStorageUsage.MapBytes)}";
-            StorageImageLegendLabel.Text = $"Ảnh {FormatBytesCompact(_lastStorageUsage.ImageBytes)}";
-            StorageOtherLegendLabel.Text = $"Khác {FormatBytesCompact(_lastStorageUsage.OtherBytes)}";
+            StorageMapLegendLabel.Text = $"{LocalizationResourceManager.Instance["MapLegend"]} {FormatBytesCompact(_lastStorageUsage.MapBytes)}";
+            StorageImageLegendLabel.Text = $"{LocalizationResourceManager.Instance["ImageLegend"]} {FormatBytesCompact(_lastStorageUsage.ImageBytes)}";
+            StorageOtherLegendLabel.Text = $"{LocalizationResourceManager.Instance["OtherLegend"]} {FormatBytesCompact(_lastStorageUsage.OtherBytes)}";
 
             ApplyStorageBarSegments(_lastStorageUsage);
         }
@@ -78,9 +78,9 @@ public partial class SettingsPage : ContentPage
         {
             _lastStorageUsage = new StorageUsageSummary();
             StorageTotalSizeLabel.Text = "0 B";
-            StorageMapLegendLabel.Text = "Bản đồ 0 B";
-            StorageImageLegendLabel.Text = "Ảnh 0 B";
-            StorageOtherLegendLabel.Text = "Khác 0 B";
+            StorageMapLegendLabel.Text = $"{LocalizationResourceManager.Instance["MapLegend"]} 0 B";
+            StorageImageLegendLabel.Text = $"{LocalizationResourceManager.Instance["ImageLegend"]} 0 B";
+            StorageOtherLegendLabel.Text = $"{LocalizationResourceManager.Instance["OtherLegend"]} 0 B";
             ApplyStorageBarSegments(_lastStorageUsage);
         }
     }
@@ -95,6 +95,7 @@ public partial class SettingsPage : ContentPage
 
         var poiFilePath = IOPath.Combine(offlineCacheRoot, "pois.json");
         var languageFilePath = IOPath.Combine(offlineCacheRoot, "languages.json");
+        var translationsDirPath = IOPath.Combine(offlineCacheRoot, "translations");
         var dishesDirPath = IOPath.Combine(offlineCacheRoot, "dishes");
 
         var audioBytes = _audioService != null
@@ -102,7 +103,7 @@ public partial class SettingsPage : ContentPage
             : GetDirectorySizeSafe(IOPath.Combine(appData, "audio_cache"));
 
         var poiBytes = GetFileSizeSafe(poiFilePath);
-        var languageBytes = GetFileSizeSafe(languageFilePath);
+        var languageBytes = GetFileSizeSafe(languageFilePath) + GetDirectorySizeSafe(translationsDirPath);
         var dishesBytes = GetDirectorySizeSafe(dishesDirPath);
         var imageBytes = GetDirectorySizeSafe(imageCacheRoot);
         var mapBytes = GetDirectorySizeSafe(mapCacheRoot);
@@ -223,7 +224,6 @@ public partial class SettingsPage : ContentPage
 #if ANDROID
         if (_locationService == null)
         {
-            BackgroundPermissionStatusLabel.Text = "Không thể kiểm tra quyền";
             _isUpdatingBackgroundToggle = true;
             BackgroundPermissionSwitch.IsToggled = false;
             _isUpdatingBackgroundToggle = false;
@@ -232,16 +232,11 @@ public partial class SettingsPage : ContentPage
         }
 
         var granted = await _locationService.HasBackgroundLocationPermissionAsync();
-        BackgroundPermissionStatusLabel.Text = granted
-            ? "Đã cấp quyền vị trí nền"
-            : "Chưa cấp quyền vị trí nền";
-
         _isUpdatingBackgroundToggle = true;
         BackgroundPermissionSwitch.IsToggled = granted;
         _isUpdatingBackgroundToggle = false;
         BackgroundPermissionSwitch.IsEnabled = true;
 #else
-        BackgroundPermissionStatusLabel.Text = "Thiết bị này không yêu cầu quyền vị trí nền";
         _isUpdatingBackgroundToggle = true;
         BackgroundPermissionSwitch.IsToggled = false;
         _isUpdatingBackgroundToggle = false;
@@ -251,19 +246,25 @@ public partial class SettingsPage : ContentPage
 
     private string GetLanguageDisplayName(string code)
     {
+        var resourceKey = GetLanguageResourceKey(code);
+        if (resourceKey == null)
+        {
+            return code;
+        }
+
+        return LocalizationResourceManager.Instance[resourceKey];
+    }
+
+    private static string? GetLanguageResourceKey(string code)
+    {
         return code.ToLowerInvariant() switch
         {
-            "vi-vn" => "Tiếng Việt",
-            // Redundant alternatives were removed because input is already normalized by ToLowerInvariant().
-            // "en-us" or "en-US" => "Tiếng Anh",
-            "en-us" => "Tiếng Anh",
-            // "zh-cn" or "zh-CN" => "中文",
-            "zh-cn" => "中文",
-            // "ko-kr" or "ko-KR" => "한국어",
-            "ko-kr" => "한국어",
-            // "ja-jp" or "ja-JP" => "日本語",
-            "ja-jp" => "日本語",
-            _ => code
+            "vi" or "vi-vn" => "Vietnamese",
+            "en" or "en-us" => "English",
+            "ja" or "ja-jp" => "Japanese",
+            "ko" or "ko-kr" => "Korean",
+            "zh" or "zh-cn" => "Chinese",
+            _ => null
         };
     }
 
@@ -305,12 +306,29 @@ public partial class SettingsPage : ContentPage
 
     private async Task ShowLanguagePopupAsync()
     {
+        if (_languagePopupOverlay != null)
+        {
+            return;
+        }
+
         // Tạo overlay
         _languagePopupOverlay = new Grid
         {
-            BackgroundColor = Color.FromArgb("#80000000"),
+            BackgroundColor = Color.FromArgb("#4D000000"),
             InputTransparent = false
         };
+
+        // Tap vào vùng nền tối sẽ đóng popup như nút X.
+        var dismissBackdrop = new BoxView
+        {
+            Color = Colors.Transparent,
+            InputTransparent = false
+        };
+        dismissBackdrop.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await HideLanguagePopupAsync())
+        });
+        _languagePopupOverlay.Children.Add(dismissBackdrop);
 
         // Tạo nội dung popup
         var popupContent = new Border
@@ -331,7 +349,7 @@ public partial class SettingsPage : ContentPage
 
         var titleLabel = new Label
         {
-            Text = "Chọn ngôn ngữ thuyết minh",
+            Text = LocalizationResourceManager.Instance["SelectNarrationLanguage"],
             FontSize = 20,
             FontAttributes = FontAttributes.Bold,
             TextColor = Color.FromArgb("#1A1A1A"),
@@ -374,7 +392,7 @@ public partial class SettingsPage : ContentPage
         var mainStack = new VerticalStackLayout { VerticalOptions = LayoutOptions.End };
         mainStack.Add(popupContent);
 
-        _languagePopupOverlay.Add(mainStack, 0, 1);
+        _languagePopupOverlay.Children.Add(mainStack);
 
         // Thêm vào page
         if (Content is Grid mainGrid)
@@ -464,7 +482,7 @@ public partial class SettingsPage : ContentPage
             // Language name
             var nameLabel = new Label
             {
-                Text = language.LanguageName,
+                Text = GetLanguageDisplayName(language.LanguageCode),
                 FontSize = 16,
                 FontAttributes = FontAttributes.Bold,
                 TextColor = Color.FromArgb("#1A1A1A"),
@@ -537,6 +555,7 @@ public partial class SettingsPage : ContentPage
 
         // Cập nhật label hiển thị
         CurrentLanguageLabel.Text = GetLanguageDisplayName(cultureCode);
+        await LoadOfflineDataUsageAsync();
 
         if (wasNarrating)
         {
@@ -582,16 +601,19 @@ public partial class SettingsPage : ContentPage
         var usage = _lastStorageUsage;
         var message = string.Join(Environment.NewLine, new[]
         {
-            $"Tổng dữ liệu: {FormatBytesCompact(usage.TotalBytes)}",
-            $"Bản đồ: {FormatBytesCompact(usage.MapBytes)} ({usage.MapFileCount} file)",
-            $"Ảnh: {FormatBytesCompact(usage.ImageBytes)} ({usage.ImageFileCount} file)",
-            $"Audio: {FormatBytesCompact(usage.AudioBytes)}",
-            $"POI: {FormatBytesCompact(usage.PoiBytes)}",
-            $"Món ăn: {FormatBytesCompact(usage.DishesBytes)} ({usage.DishesFileCount} file)",
-            $"Ngôn ngữ: {FormatBytesCompact(usage.LanguageBytes)}"
+            string.Format(LocalizationResourceManager.Instance["StorageDetailTotal"], FormatBytesCompact(usage.TotalBytes)),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailMap"], FormatBytesCompact(usage.MapBytes), usage.MapFileCount),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailImage"], FormatBytesCompact(usage.ImageBytes), usage.ImageFileCount),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailAudio"], FormatBytesCompact(usage.AudioBytes)),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailPoi"], FormatBytesCompact(usage.PoiBytes)),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailDish"], FormatBytesCompact(usage.DishesBytes), usage.DishesFileCount),
+            string.Format(LocalizationResourceManager.Instance["StorageDetailLanguage"], FormatBytesCompact(usage.LanguageBytes))
         });
 
-        await DisplayAlert("Chi tiết bộ nhớ", message, "Đóng");
+        await DisplayAlert(
+            LocalizationResourceManager.Instance["StorageDetailsTitle"],
+            message,
+            LocalizationResourceManager.Instance["Close"]);
     }
 
     private async void OnClearAllDataClicked(object sender, EventArgs e)

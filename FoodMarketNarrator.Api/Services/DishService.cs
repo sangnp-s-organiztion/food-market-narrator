@@ -7,16 +7,55 @@ namespace food_market_narrator_api.Services
     public class DishService
     {
         private readonly DishRepository _dishRepository;
+        private readonly LanguageRepository _languageRepository;
 
-        public DishService(DishRepository dishRepository)
+        public DishService(DishRepository dishRepository, LanguageRepository languageRepository)
         {
             _dishRepository = dishRepository;
+            _languageRepository = languageRepository;
         }
 
-        public async Task<List<DishResponse>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize)
+        public async Task<List<DishResponse>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize, string? languageCode = null)
         {
-            var dishes = await _dishRepository.GetByRestaurantIdAsync(restaurantId, page, pageSize);
+            var languageId = await ResolveLanguageIdAsync(languageCode);
+            var dishes = await _dishRepository.GetByRestaurantIdAsync(restaurantId, page, pageSize, languageId);
             return dishes.Select(Map).ToList();
+        }
+
+        private async Task<int?> ResolveLanguageIdAsync(string? languageCode)
+        {
+            if (string.IsNullOrWhiteSpace(languageCode))
+            {
+                return null;
+            }
+
+            var normalizedInput = languageCode.Trim().Replace('_', '-');
+            var allLanguages = await _languageRepository.GetAllLanguagesAsync();
+
+            var exact = allLanguages.FirstOrDefault(x =>
+                string.Equals(x.LanguageCode, normalizedInput, StringComparison.OrdinalIgnoreCase));
+            if (exact != null)
+            {
+                return exact.LanguageId;
+            }
+
+            var baseCode = normalizedInput.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(baseCode))
+            {
+                return null;
+            }
+
+            var shortCodeExact = allLanguages.FirstOrDefault(x =>
+                string.Equals(x.LanguageCode, baseCode, StringComparison.OrdinalIgnoreCase));
+            if (shortCodeExact != null)
+            {
+                return shortCodeExact.LanguageId;
+            }
+
+            var byPrefix = allLanguages.FirstOrDefault(x =>
+                x.LanguageCode.StartsWith(baseCode + "-", StringComparison.OrdinalIgnoreCase));
+
+            return byPrefix?.LanguageId;
         }
 
         public async Task<int> CountDishesAsync()

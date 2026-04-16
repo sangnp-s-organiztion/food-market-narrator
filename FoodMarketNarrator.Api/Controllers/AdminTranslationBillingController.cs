@@ -21,7 +21,7 @@ public class AdminTranslationBillingController : ControllerBase
     [HttpGet("monthly")]
     public async Task<IActionResult> GetMonthlyBilling(
         [FromQuery] string? billingMonth = null,
-        [FromQuery] int? sellerUserId = null,
+        [FromQuery] string? sellerUsername = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -34,7 +34,7 @@ public class AdminTranslationBillingController : ControllerBase
         {
             var result = await _adminTranslationBillingService.GetMonthlyBillingAsync(
                 billingMonth,
-                sellerUserId,
+                sellerUsername,
                 page,
                 pageSize);
 
@@ -49,8 +49,7 @@ public class AdminTranslationBillingController : ControllerBase
     [HttpGet("usage")]
     public async Task<IActionResult> GetUsageLedger(
         [FromQuery] string? billingMonth = null,
-        [FromQuery] int? sellerUserId = null,
-        [FromQuery] string? status = null,
+        [FromQuery] string? sellerUsername = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -63,8 +62,35 @@ public class AdminTranslationBillingController : ControllerBase
         {
             var result = await _adminTranslationBillingService.GetUsageLedgerAsync(
                 billingMonth,
-                sellerUserId,
-                status,
+                sellerUsername,
+                page,
+                pageSize);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("audio-usage")]
+    public async Task<IActionResult> GetAudioUsageLedger(
+        [FromQuery] string? billingMonth = null,
+        [FromQuery] string? sellerUsername = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        if (!IsCurrentUserAdmin())
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            var result = await _adminTranslationBillingService.GetAudioUsageLedgerAsync(
+                billingMonth,
+                sellerUsername,
                 page,
                 pageSize);
 

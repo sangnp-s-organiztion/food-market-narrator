@@ -1,4 +1,5 @@
 using food_market_narrator.Models;
+using food_market_narrator.Resources.Localization;
 using food_market_narrator.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -114,7 +115,7 @@ public partial class TourDetailPage : ContentPage
 
                 if (string.IsNullOrWhiteSpace(stop.Address))
                 {
-                    stop.Address = "Đang cập nhật địa chỉ";
+                    stop.Address = LocalizationResourceManager.Instance["TourAddressUpdating"];
                 }
             }
 
@@ -123,15 +124,15 @@ public partial class TourDetailPage : ContentPage
             BindingContext = tour;
 
             DurationMetricValue.Text = tour.EstimatedDurationMinutes.HasValue
-                ? $"{tour.EstimatedDurationMinutes.Value} phút"
+                ? string.Format(LocalizationResourceManager.Instance["TourDurationMetricFormat"], tour.EstimatedDurationMinutes.Value)
                 : "--";
-            StopMetricValue.Text = $"{Math.Max(tour.StopCount, tour.Stops.Count)} điểm dừng";
+            StopMetricValue.Text = string.Format(
+                LocalizationResourceManager.Instance["TourStopCountMetricFormat"],
+                Math.Max(tour.StopCount, tour.Stops.Count));
 
             TourDescriptionLabel.Text = !string.IsNullOrWhiteSpace(tour.Description)
                 ? tour.Description
-                : !string.IsNullOrWhiteSpace(tour.ShortDescription)
-                    ? tour.ShortDescription
-                    : "Hành trình này chưa có mô tả chi tiết.";
+                : LocalizationResourceManager.Instance["TourDescriptionFallback"];
 
             StartJourneyButton.IsEnabled = tour.Stops.Count > 0;
             StartJourneyButton.Opacity = tour.Stops.Count > 0 ? 1 : 0.6;

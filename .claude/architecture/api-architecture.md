@@ -17,6 +17,7 @@ Luu y:
 - POST /Auth/admin/logout
 - GET /Auth/me
 - GET /Auth/admin/me
+- POST /Auth/admin/qr-code (admin upload PNG, overwrite fixed file)
 
 ## Language
 
@@ -38,6 +39,12 @@ Luu y:
 
 - GET /api/admin/translation-billing/monthly
 - GET /api/admin/translation-billing/usage
+- GET /api/admin/translation-billing/audio-usage
+
+## Seller Translation Billing
+
+- GET /api/translation-billing/my-usage
+- GET /api/translation-billing/my-audio-usage
 
 ## Audio
 
@@ -80,6 +87,7 @@ Luu y:
 - GET /public/Restaurant/{restaurantId}/dishes (public)
 - GET /Restaurant/{restaurantId}/images (public)
 - GET /public/Restaurant/{restaurantId}/audios (public)
+- GET /public/translations?languageCode={code}&entityType={restaurant|dish}&entityIds={id1,id2,...} (public)
 - GET /public/audios/{audioId:int}/file (public)
 
 ## Mongo

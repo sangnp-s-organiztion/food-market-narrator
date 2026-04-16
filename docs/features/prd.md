@@ -43,7 +43,8 @@ Hệ thống tập trung vào khu vực **phố ẩm thực Vĩnh Khánh, Quận
 ### 4.2 Người quản trị / quản lý nội dung
 
 - Thêm, chỉnh sửa và quản lý thông tin địa điểm.
-- Quản lý và kiểm duyệt nội dung thuyết minh (audio, văn bản).
+- Quản lý nội dung thuyết minh (audio, văn bản).
+- Thống kê dữ liệu phục vụ cho việc phân tích
 
 ---
 
@@ -72,9 +73,6 @@ Một số vấn đề phổ biến mà người dùng thường gặp:
 
 - **Thiếu thông tin giới thiệu về quán ăn**  
   Người dùng không biết lịch sử, đặc điểm nổi bật hoặc điểm đặc trưng của từng quán ăn.
-
-- **Xếp hàng lâu tại các quán nổi tiếng**  
-  Một số quán đông khách khiến người dùng phải chờ lâu mà không biết trước tình trạng đông đúc.
 
 - **Trải nghiệm khám phá ẩm thực còn bị động**  
   Du khách thường chỉ đi dọc khu phố và chọn quán ngẫu nhiên, thiếu thông tin hướng dẫn hoặc gợi ý.
@@ -110,7 +108,7 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 ### 8.1 Du khách / Khách tham quan (Visitor)
 
 **Độ tuổi:** 13+  
-**Thiết bị sử dụng:** Smartphone (Android / iOS)
+**Thiết bị sử dụng:** Smartphone (Android)
 
 **Đặc điểm:**
 
@@ -139,41 +137,50 @@ Phần này mô tả các nhóm người dùng chính của hệ thống và nhu
 
 **Đặc điểm:**
 
-- Quản lý nội dung của hệ thống.
-- Chịu trách nhiệm cập nhật thông tin về quán ăn và nội dung thuyết minh.
+- Là quản trị viên vận hành hệ thống ở cấp toàn cục.
+- Theo dõi hoạt động người dùng và chất lượng dữ liệu trên toàn nền tảng.
+- Sử dụng web admin để quản lý quyền truy cập, nhà hàng, tour và các chỉ số vận hành.
 
 **Nhu cầu:**
 
-- Thêm mới các địa điểm hoặc quán ăn vào hệ thống.
-- Chỉnh sửa thông tin như mô tả, menu, nội dung thuyết minh.
-- Quản lý dữ liệu địa điểm một cách dễ dàng.
+- Quản lý tài khoản người dùng: tạo mới, khóa/mở khóa.
+- Quản lý toàn bộ nhà hàng ở mức hệ thống và kiểm soát trạng thái hoạt động.
+- Theo dõi dashboard vận hành: Nhật ký hoạt động, tuyến di chuyển và heatmap.
+- Quản lý hành trình (tour), cấu hình QR mở app và theo dõi mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+- Quản lý tài khoản admin (thông tin cá nhân, mật khẩu) một cách an toàn.
 
 **Pain points:**
 
-- Cần một hệ thống quản lý đơn giản và dễ sử dụng.
-- Phải đảm bảo thông tin hiển thị cho người dùng luôn chính xác và cập nhật.
+- Cần một giao diện quản trị thống nhất để thao tác nhanh trên nhiều nhóm dữ liệu.
+- Khó phát hiện sớm bất thường nếu thiếu log và số liệu vận hành theo thời gian thực.
+- Rủi ro phân quyền sai có thể làm lộ hoặc sai lệch dữ liệu vận hành.
+- Cần đảm bảo dữ liệu hiển thị cho visitor luôn nhất quán, chính xác và cập nhật.
 
 ---
 
 ### 8.3 Chủ quán / Người bán (Seller)
 
-**Độ tuổi:** 20 – 50  
-**Thiết bị sử dụng:** Smartphone hoặc máy tính
+**Độ tuổi:** 20 – 50+  
+**Thiết bị sử dụng:** Máy tính
 
 **Đặc điểm:**
 
 - Là chủ quán hoặc người quản lý quán ăn trong khu phố.
-- Muốn quảng bá quán ăn và món đặc trưng của mình.
+- Tập trung vận hành dữ liệu nhà hàng của chính mình thay vì quản trị toàn hệ thống.
+- Thao tác chủ yếu qua saler dashboard theo từng nhà hàng được phân quyền.
 
 **Nhu cầu:**
 
-- Quán của mình được giới thiệu cho nhiều khách hơn.
-- Có thể cập nhật menu hoặc thông tin quán.
+- Đăng nhập an toàn, chọn đúng nhà hàng cần thao tác.
+- Cập nhật thông tin nhà hàng, menu món ăn và hình ảnh.
+- Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+- Cập nhật thông tin tài khoản cá nhân để sử dụng dashboard ổn định.
 
 **Pain points:**
 
-- Khó tiếp cận khách du lịch mới.
-- Cạnh tranh với nhiều quán khác trong khu vực.
+- Dễ chỉnh nhầm dữ liệu nếu thao tác sai nhà hàng trong trường hợp quản lý nhiều cơ sở.
+- Mất nhiều thời gian khi cập nhật menu/ảnh/audio nếu quy trình không tập trung.
+- Cần đồng bộ nội dung nhanh để thông tin hiển thị cho visitor luôn chính xác.
 
 ## 9. User Stories
 
@@ -193,7 +200,7 @@ Format chuẩn:
 
 Với vai trò là du khách  
 Tôi muốn quét mã QR  
-Để có thể mở nhanh ứng dụng chợ ẩm thực.
+Để có thể mở nhanh ứng dụng thuyết minh về phố ẩm thực.
 
 **Story V2 - Cấp quyền vị trí**
 
@@ -222,7 +229,7 @@ Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI
 **Story V6 - Đổi ngôn ngữ thuyết minh**
 
 Với vai trò là du khách  
-Tôi muốn đổi ngôn ngữ thuyết minh  
+Tôi muốn đổi ngôn ngữ nghe thuyết minh  
 Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
 
 **Story V7 - Phát lại thủ công**
@@ -248,6 +255,12 @@ Tôi muốn thấy POI gần nhất được làm nổi bật
 Với vai trò là du khách  
 Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên  
 Để tôi không bị khó chịu vì âm thanh lặp lại.
+
+**Story V11 – Tham quan theo tour**
+
+Với vai trò là du khách  
+Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn  
+Để tôi được hướng dẫn theo lộ trình tối ưu và không bỏ sót các điểm quan trọng
 
 ---
 
@@ -295,6 +308,18 @@ Với vai trò là chủ quán
 Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu  
 Để tránh cập nhật nhầm địa điểm.
 
+**Story S8 - Quản lý tài khoản saler**
+
+Với vai trò là chủ quán  
+Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập  
+Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
+
+**Story S9 - Xem lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh**
+
+Với vai trò là chủ quán  
+Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng  
+Để tôi có thể theo dõi mức sử dụng, đối chiếu chi phí và tối ưu nội dung cần dịch/tạo audio.
+
 ---
 
 ### 9.3 Admin / Quản trị hệ thống
@@ -322,6 +347,12 @@ Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật 
 Với vai trò là quản trị viên  
 Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng  
 Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
+
+**Story A5 - Quản lý hành trình (Tour)**
+
+Với vai trò là quản trị viên  
+Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng  
+Để du khách có thể khám phá theo tuyến gợi ý có cấu trúc.
 
 ## 10. Features / Functional Requirements
 
@@ -512,12 +543,28 @@ Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng
   - -> API xử lý
   - -> cập nhật danh sách audio
 
+**Feature S-07: Theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh**
+
+- Mô tả: Seller xem lịch sử mức sử dụng theo tháng cho cả dịch thuật văn bản và tạo tệp thuyết minh.
+- Actor: Seller.
+- Functional requirements:
+  - Hiển thị KPI tổng mức sử dụng theo tháng cho dịch thuật và tạo tệp thuyết minh.
+  - Hiển thị bảng lịch sử dịch thuật gồm thời gian, hành động, ký tự đầu vào, mức sử dụng.
+  - Hiển thị bảng lịch sử tạo tệp thuyết minh gồm thời gian, nhà hàng, ngôn ngữ, hành động, ký tự đầu vào, mức sử dụng.
+  - Hỗ trợ lọc theo tháng và phân trang dữ liệu mức sử dụng.
+- Flow:
+  - Mở tab Lịch sử thuyết minh
+  - -> chọn tháng cần xem
+  - -> gọi API mức sử dụng dịch thuật và mức sử dụng tạo tệp thuyết minh
+  - -> hiển thị KPI + bảng lịch sử
+  - -> đổi trang để xem thêm dữ liệu
+
 ### 10.3 Admin Features (Quản trị hệ thống)
 
 Ghi chú phạm vi:
 
-- Nhóm A-01 đến A-05 là phạm vi đã có trong trạng thái hiện tại.
-- Nhóm A-06 đến A-08 là roadmap, chưa phải module hoàn chỉnh trên admin web.
+- Nhóm A-01 đến A-06 là phạm vi đã có trong trạng thái hiện tại.
+- Nhóm A-07 đến A-09 là roadmap, chưa phải module hoàn chỉnh trên admin web.
 
 **Feature A-01: Đăng nhập quản trị**
 
@@ -589,7 +636,24 @@ Ghi chú phạm vi:
 - -> lọc theo nhu cầu
 - -> đối chiếu sự kiện
 
-**Feature A-06 (Roadmap): Quản lý ngôn ngữ hệ thống**
+**Feature A-06: Quản lý hành trình (Tour Management)**
+
+- Mô tả: Admin tạo và quản lý tuyến hành trình du lịch theo nhiều điểm dừng.
+- Actor: Admin.
+- Functional requirements:
+- Xem danh sách tour và chi tiết từng tour.
+- Tạo/sửa thông tin tour (name, description, estimated duration, isActive).
+- Thêm/xóa nhà hàng trong tour.
+- Sắp xếp lại thứ tự stop trong tour.
+- Upload ảnh đại diện cho tour.
+- Flow:
+- Mở module Tours
+- -> tạo/chỉnh sửa tour
+- -> thêm hoặc xóa nhà hàng
+- -> sắp xếp thứ tự điểm dừng
+- -> lưu thay đổi
+
+**Feature A-07 (Roadmap): Quản lý ngôn ngữ hệ thống**
 
 - Mô tả: Duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
 - Actor: Admin.
@@ -603,7 +667,7 @@ Ghi chú phạm vi:
 - -> validate
 - -> lưu
 
-**Feature A-07 (Roadmap): Kiểm duyệt media và chất lượng nội dung**
+**Feature A-08 (Roadmap): Kiểm duyệt media và chất lượng nội dung**
 
 - Mô tả: Admin kiểm duyệt nội dung media để đảm bảo chất lượng trải nghiệm visitor.
 - Actor: Admin.
@@ -617,7 +681,7 @@ Ghi chú phạm vi:
   - -> duyệt hoặc từ chối
   - -> cập nhật trạng thái
 
-**Feature A-08 (Roadmap): Cấu hình chính sách bảo mật endpoint**
+**Feature A-09 (Roadmap): Cấu hình chính sách bảo mật endpoint**
 
 - Mô tả: Admin kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
 - Actor: Admin.
@@ -637,10 +701,11 @@ Ghi chú phạm vi:
 - FR-02: Visitor xem bản đồ POI và chi tiết quán (ảnh, món, audio).
 - FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
 - FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
-- FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu.
-- FR-06: Admin quản lý user/role, restaurants, analytics và logs để vận hành hệ thống.
+- FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+- FR-06: Admin quản lý user/role, restaurants, tours, analytics và logs để vận hành hệ thống.
 - FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
-- FR-08: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
+- FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+- FR-09: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
 
 ## 11. Technical Requirements
 
@@ -663,11 +728,14 @@ Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển
   - GET /Restaurant/{id}
   - GET /Language
   - GET /Restaurant/{restaurantId}/images
+  - GET /Restaurant/{restaurantId}/dishes
+  - GET /Restaurant/{restaurantId}/audios
   - GET /public/Restaurant/{restaurantId}/dishes
   - GET /public/Restaurant/{restaurantId}/audios
 - Protected APIs cho Seller/Admin:
   - CRUD Restaurant, Dish, Image, Audio
   - User/Role management
+  - Tour management (GET/POST/PATCH tour, add/remove stop, reorder stops, upload image)
 - Chuẩn dữ liệu:
   - JSON UTF-8
   - HTTP status code rõ ràng (200/400/401/403/404/500)

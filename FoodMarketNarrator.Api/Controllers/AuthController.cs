@@ -306,6 +306,57 @@ namespace food_market_narrator_api.Controllers
             return Ok(me);
         }
 
+        [HttpPost("admin/qr-code")]
+        [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
+        public async Task<IActionResult> UpdateAdminQrCode([FromForm] IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "Vui lòng chọn file PNG." });
+            }
+
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "File QR vượt quá 5MB." });
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+            var isPngFileName = string.Equals(extension, ".png", StringComparison.OrdinalIgnoreCase);
+            var isPngMime = string.Equals(file.ContentType, "image/png", StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(file.ContentType)
+                || string.Equals(file.ContentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase);
+
+            if (!isPngFileName || !isPngMime)
+            {
+                return BadRequest(new { message = "Chỉ hỗ trợ file PNG." });
+            }
+
+            var qrDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "qr");
+            Directory.CreateDirectory(qrDir);
+
+            const string fileName = "qr_open_app.png";
+            var filePath = Path.Combine(qrDir, fileName);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+
+            await using (var stream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var updatedAtUtc = System.IO.File.GetLastWriteTimeUtc(filePath);
+
+            return Ok(new
+            {
+                fileName,
+                url = $"/uploads/qr/{fileName}",
+                updatedAt = updatedAtUtc
+            });
+        }
+
         [HttpPatch("password")]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
@@ -353,6 +404,7 @@ namespace food_market_narrator_api.Controllers
                 updated = await _userService.UpdateProfileAsync(
                     currentUserId,
                     request.Username,
+                    request.FullName,
                     request.Phone,
                     request.Email);
             }
@@ -392,6 +444,7 @@ namespace food_market_narrator_api.Controllers
             {
                 updated.UserId,
                 updated.Username,
+                updated.FullName,
                 updated.Role,
                 updated.Phone,
                 updated.Email,

@@ -5,7 +5,7 @@ namespace food_market_narrator.Settings;
 public static class AppSettings
 {
     // Chi can sua 1 dong nay khi IP may chay API thay doi.
-    private const string LocalApiHost = "192.168.1.14";
+    private const string LocalApiHost = "192.168.1.2";
     private const int HttpPort = 5044;
     private const int HttpsPort = 7041;
 
@@ -37,6 +37,7 @@ public static class AppSettings
     public const string RestaurantEndpoint = "restaurant";
     public const string TourEndpoint = "tour";
     public const string LanguageEndpoint = "language";
+    public const string PublicTranslationsEndpoint = "public/translations";
     public const string UserSessionsStartEndpoint = "api/user-sessions/start";
     public const string LocationLogsBatchEndpoint = "api/location-logs/batch";
     public const string AudioLogsEndpoint = "api/audio-logs";

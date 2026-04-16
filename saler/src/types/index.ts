@@ -2,6 +2,7 @@ export interface User {
   user_id: number;
   username: string;
   role: string;
+  full_name?: string;
   phone?: string;
   email?: string;
   is_active?: boolean;
@@ -101,14 +102,12 @@ export interface TranslationUsageLedgerItem {
   tax_amount: number;
   total_amount: number;
   currency: string;
-  status: string;
   billing_month: string;
   created_at_utc: string;
 }
 
 export interface TranslationUsageLedgerSummary {
   billing_month: string;
-  status: string;
   event_count: number;
   total_billable_units: number;
   total_amount: number;
@@ -121,6 +120,37 @@ export interface TranslationUsageLedgerResponse {
   page: number;
   page_size: number;
   summary: TranslationUsageLedgerSummary;
+}
+
+export interface AudioUsageLedgerItem {
+  usage_event_id: string;
+  request_id: string;
+  seller_user_id: number;
+  seller_username: string;
+  restaurant_id: string;
+  audio_id: number | null;
+  provider: string;
+  action_type: string;
+  unit_type: string;
+  input_chars: number;
+  output_chars: number;
+  billable_units: number;
+  billing_month: string;
+  created_at_utc: string;
+}
+
+export interface AudioUsageLedgerSummary {
+  billing_month: string;
+  event_count: number;
+  total_billable_units: number;
+}
+
+export interface AudioUsageLedgerResponse {
+  items: AudioUsageLedgerItem[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  summary: AudioUsageLedgerSummary;
 }
 
 export interface AnalyticsKpi {

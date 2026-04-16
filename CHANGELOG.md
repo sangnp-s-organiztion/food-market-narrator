@@ -3,6 +3,126 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-17
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Mở rộng hỗ trợ translation động cho `tour` ở API public translations để mobile có thể lấy tên/mô tả tour theo ngôn ngữ.
+  - Cập nhật MAUI `TourService` để áp dụng translation theo ngôn ngữ hiện tại cho:
+    - Tên + mô tả tour.
+    - Tên quán + địa chỉ trong danh sách điểm dừng (tour stops).
+  - Bổ sung cache translation offline theo `language + entityType` cho Tour flow, có fallback khi mất mạng.
+  - Localize toàn bộ metric và fallback text ở Tour Detail (ví dụ: số phút, số điểm dừng, mô tả/địa chỉ mặc định) qua RESX.
+  - Sửa popup chọn ngôn ngữ ở Settings:
+    - Tap vào overlay để đóng popup như nút X.
+    - Giảm độ tối overlay để UX nhẹ hơn.
+    - Chặn mở chồng nhiều popup.
+  - Cập nhật thống kê dung lượng offline trong Settings để tính luôn thư mục cache translation.
+  - Localize trạng thái mở/đóng quán ở Main/Favorite theo ngôn ngữ (`StatusOpenNow`, `StatusClosedNow`), bỏ hardcode tiếng Việt.
+  - Localize tiêu đề và empty-state của trang Favorite (bỏ hardcode "Yêu thích").
+- Xác minh:
+  - Build MAUI `food-market-narrator.csproj` thành công sau các thay đổi.
+  - API có cập nhật code hỗ trợ `tour` translation; build API có lúc bị lock file do process đang chạy, không phải lỗi compile logic.
+
+### Local Workspace (chưa ghi nhận commit)
+
+- FoodMarketNarrator.Api
+  - `Services/UiTranslationService.cs`
+- FoodMarketNarrator.Maui
+  - `Models/POI.cs`
+  - `Models/TourModel.cs`
+  - `Services/TourService.cs`
+  - `Views/TourDetailPage.xaml.cs`
+  - `Views/SettingsPage.xaml.cs`
+  - `Views/FavoritePage.xaml`
+  - `Views/FavoritePage.xaml.cs`
+  - `Resources/Localization/AppResources.resx`
+  - `Resources/Localization/AppResources.en-US.resx`
+  - `Resources/Localization/AppResources.ja-JP.resx`
+  - `Resources/Localization/AppResources.ko-KR.resx`
+  - `Resources/Localization/AppResources.zh-CN.resx`
+
+## 2026-04-12
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Bổ sung hiển thị lịch sử tạo audio cho saler và cập nhật giao diện saler.
+  - Điều chỉnh logic thêm audio ở backend.
+  - Thêm/chuẩn hóa comment mô tả tác dụng của hàm.
+  - Cập nhật tài liệu use case, activity và testing.
+- Merged:
+  - Merge pull request #208 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #206 từ nhánh `main`.
+  - Merge pull request #205 từ nhánh `release`.
+  - Merge pull request #204 từ nhánh `develop`.
+  - Merge pull request #203 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #202 từ nhánh `fix/bug-before-submit`.
+  - Merge branch `fix/bug-before-submit` vào `fix/bug-before-submit`.
+
+### Nguyen Phuoc Sang (6 commits)
+
+- [94c640b] Merge pull request #208 from sangnp-s-organiztion/fix/bug-giathieu
+- [9a1c582] Merge pull request #206 from sangnp-s-organiztion/main
+- [eb51166] Merge pull request #205 from sangnp-s-organiztion/release
+- [7bbcf34] Merge pull request #204 from sangnp-s-organiztion/develop
+- [4a4e2b3] Merge pull request #203 from sangnp-s-organiztion/fix/bug-giathieu
+- [985ebc4] Merge pull request #202 from sangnp-s-organiztion/fix/bug-before-submit
+
+### sangnpdev (7 commits)
+
+- [636c6e0] cập nhật giao diện saler
+- [d4a833a] Merge branch 'fix/bug-before-submit' of https://github.com/sangnp-s-organiztion/food-market-narrator into fix/bug-before-submit
+- [7cd0ccc] thêm comment tác dụng tác dụng của hàm
+- [eb315e8] thêm hiển thị lịch sử tạo audio của saler
+- [d3173c7] thêm useccase cho app và đặc tả
+- [dfa6407] thêm usecase cho app
+- [d52bd03] cập nhật tài liệu testing
+
+### giathieu0311 (3 commits)
+
+- [1c6fe7c] chỉnh sửa logic thêm audio
+- [815cdac] Sua UseCase
+- [8bbbc1d] cập nhật activity
+
+## 2026-04-11
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Cập nhật giao diện admin và saler, đồng thời vá một số lỗi UI/logic giữa hai cổng web.
+  - Điều chỉnh flow QR ở admin theo hướng upload file QR thay vì tạo mới trực tiếp trong UI.
+  - Cập nhật logic MAUI để tính thời gian nghe audio chính xác hơn.
+  - Bổ sung schema Mongo và cập nhật file setup collection liên quan.
+  - Bổ sung `.gitignore` để chặn file build tạm.
+  - Cập nhật tài liệu sequence và dọn dẹp file draw.io không còn dùng.
+- Merged:
+  - Merge pull request #197 từ nhánh `fix/bug-giathieu`.
+  - Merge pull request #196 từ nhánh `fix/bug-before-submit`.
+
+### Nguyen Phuoc Sang (2 commits)
+
+- [1735940] Merge pull request #197 from sangnp-s-organiztion/fix/bug-giathieu
+- [db57a6a] Merge pull request #196 from sangnp-s-organiztion/fix/bug-before-submit
+
+### sangnpdev (10 commits)
+
+- [14bc53e] xóa draw.io
+- [96a0f70] sửa saler cho phép sửa full name và ko cho sửa username
+- [6d8b2cd] đổi giao diện admin, sửa qr từ tạo mới thành upload
+- [c3a31e5] thêm mongo schema và cập nhật file set up collection mongo
+- [c79e1a3] thêm gitignore chặn build temp
+- [7fb2d61] cập nhật lại giao diện
+- [1d64fec] cập nhật lại giao diện
+- [2c665c2] sửa giao diện admin
+- [5dd286a] sửa lại logic tính thời gian nghe audio ở maui
+- [06c2e7b] sửa lỗi admin và saler
+
+### giathieu0311 (1 commit)
+
+- [f938611] cap nhat sequence
+
 ## 2026-04-10
 
 ### Tóm tắt trong ngày

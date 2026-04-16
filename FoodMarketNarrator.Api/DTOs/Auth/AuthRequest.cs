@@ -15,6 +15,7 @@ namespace food_market_narrator_api.DTOs.Auth
     public class UpdateProfileRequest
     {
         public string Username { get; set; } = string.Empty;
+        public string? FullName { get; set; }
         public string Phone { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
     }

@@ -2,6 +2,7 @@ using food_market_narrator.Services;
 using food_market_narrator.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls.Shapes;
+using food_market_narrator;
 
 namespace food_market_narrator.Views;
 
@@ -103,7 +104,7 @@ public partial class FavoritePage : ContentPage
 
         infoStack.Add(new Label
         {
-            Text = poi.Name ?? "Tên quán",
+            Text = !string.IsNullOrWhiteSpace(poi.Name) ? poi.Name : poi.restaurantId,
             FontSize = 15,
             FontAttributes = FontAttributes.Bold,
             TextColor = Color.FromArgb("#1A1A1A")
@@ -111,7 +112,7 @@ public partial class FavoritePage : ContentPage
 
         infoStack.Add(new Label
         {
-            Text = poi.Address ?? "Đang cập nhật địa chỉ",
+            Text = poi.Address ?? LocalizationResourceManager.Instance["TourAddressUpdating"],
             FontSize = 12,
             TextColor = Color.FromArgb("#757575"),
             MaxLines = 2,
@@ -122,7 +123,9 @@ public partial class FavoritePage : ContentPage
         {
             Text = poi.StatusText,
             FontSize = 11,
-            TextColor = Color.FromArgb("#4CAF50")
+            TextColor = poi.IsCurrentlyOpen
+                ? Color.FromArgb("#4CAF50")
+                : Color.FromArgb("#C62828")
         });
 
         // Nút xóa yêu thích

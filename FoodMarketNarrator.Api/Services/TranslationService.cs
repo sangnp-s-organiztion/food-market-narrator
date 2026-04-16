@@ -74,7 +74,8 @@ public class TranslationService
             var finishedAtUtc = DateTime.UtcNow;
             var inputChars = sourceText.Length;
             var outputChars = translatedText.Length;
-            var costAmount = CalculateEstimatedCost(inputChars);
+            var billableUnits = CalculateBillableUnits(inputChars);
+            var costAmount = CalculateEstimatedCost(billableUnits);
             var billingMonth = finishedAtUtc.ToString("yyyy-MM");
 
             await _translationHistoryRepository.InsertTranslationJobAsync(new TranslationJobRecord
@@ -106,17 +107,16 @@ public class TranslationService
                 AudioId = null,
                 Provider = "libretranslate",
                 ActionType = "translate",
-                UnitType = "chars",
+                UnitType = "tokens",
                 InputChars = inputChars,
                 OutputChars = outputChars,
-                BillableUnits = inputChars,
+                BillableUnits = billableUnits,
                 RateVersion = _translationPricingSettings.RateVersion,
                 PricePer1KUnits = _translationPricingSettings.PricePer1KChars,
                 Currency = _translationPricingSettings.Currency,
                 CostAmount = costAmount,
                 TaxAmount = 0,
                 TotalAmount = costAmount,
-                Status = "billable",
                 BillingMonth = billingMonth,
                 CreatedAtUtc = finishedAtUtc
             });
@@ -128,7 +128,7 @@ public class TranslationService
                 TotalRequests = 1,
                 SuccessRequests = 1,
                 FailedRequests = 0,
-                TotalBillableUnits = inputChars,
+                TotalBillableUnits = billableUnits,
                 TotalAmount = costAmount,
                 Currency = _translationPricingSettings.Currency,
                 LastRecomputedAtUtc = finishedAtUtc
@@ -183,7 +183,7 @@ public class TranslationService
                 AudioId = null,
                 Provider = "libretranslate",
                 ActionType = "translate",
-                UnitType = "chars",
+                UnitType = "tokens",
                 InputChars = sourceText.Length,
                 OutputChars = 0,
                 BillableUnits = 0,
@@ -193,7 +193,6 @@ public class TranslationService
                 CostAmount = 0,
                 TaxAmount = 0,
                 TotalAmount = 0,
-                Status = "failed",
                 BillingMonth = billingMonth,
                 CreatedAtUtc = failedAtUtc
             });
@@ -228,60 +227,115 @@ public class TranslationService
         var requestId = NormalizeRequestId(request.RequestId);
         var ttsText = request.Text.Trim();
 
-        var languageId = await ResolveLanguageIdAsync(languageCode);
-        if (languageId <= 0)
+        try
         {
-            throw new ArgumentException($"Language '{request.LanguageCode}' is not configured in MSSQL Languages table.");
+            var languageId = await ResolveLanguageIdAsync(languageCode);
+            if (languageId <= 0)
+            {
+                throw new ArgumentException($"Language '{request.LanguageCode}' is not configured in MSSQL Languages table.");
+            }
+
+            var ttsResult = await GenerateAudioWithEdgeTtsAsync(ttsText, languageCode, request.Voice);
+
+            string webRoot = _environment.WebRootPath;
+            if (string.IsNullOrWhiteSpace(webRoot))
+            {
+                webRoot = Path.Combine(_environment.ContentRootPath, "wwwroot");
+            }
+
+            var uploadDir = Path.Combine(webRoot, "uploads", "audios");
+            Directory.CreateDirectory(uploadDir);
+
+            var fileName = $"tts_{languageCode}_{Guid.NewGuid():N}.mp3";
+            var fullPath = Path.Combine(uploadDir, fileName);
+            await File.WriteAllBytesAsync(fullPath, ttsResult.AudioBytes);
+
+            var audioUrl = $"/uploads/audios/{fileName}";
+            var createdAudio = await _audioService.CreateAsync(restaurantId, languageId, audioUrl);
+            var persistedAudio = await _audioService.GetByIdAsync(createdAudio.AudioId);
+            if (persistedAudio == null)
+            {
+                throw new InvalidOperationException("Created audio was not found in SQL after insert.");
+            }
+
+            var sqlAudioId = persistedAudio.AudioId;
+
+            var nowUtc = DateTime.UtcNow;
+            var sourceText = string.IsNullOrWhiteSpace(request.SourceText) ? ttsText : request.SourceText.Trim();
+            var usageEventId = Guid.NewGuid().ToString("N");
+
+            await _translationHistoryRepository.InsertAudioUsageLedgerAsync(new AudioUsageLedgerRecord
+            {
+                UsageEventId = usageEventId,
+                RequestId = requestId,
+                JobId = requestId,
+                SellerUserId = sellerUserId,
+                RestaurantId = restaurantId,
+                AudioId = sqlAudioId,
+                Provider = "edge-tts",
+                ActionType = "create_audio",
+                UnitType = "tokens",
+                InputChars = sourceText.Length,
+                OutputChars = ttsText.Length,
+                BillableUnits = CalculateBillableUnits(sourceText.Length),
+                BillingMonth = nowUtc.ToString("yyyy-MM"),
+                CreatedAtUtc = nowUtc
+            });
+
+            await _translationHistoryRepository.InsertTranslationVersionAsync(new AudioTranslationVersionRecord
+            {
+                SellerUserId = sellerUserId,
+                RestaurantId = restaurantId,
+                AudioId = sqlAudioId,
+                SourceLanguageCode = languageCode,
+                TargetLanguageCode = languageCode,
+                SourceText = sourceText,
+                TranslatedText = ttsText,
+                TranslatedTextHash = ComputeSha256(ttsText),
+                VersionNo = createdAudio.Version,
+                IsActive = createdAudio.IsActive,
+                GenerationMethod = "edge-tts",
+                JobId = requestId,
+                UsageEventId = usageEventId,
+                CreatedAtUtc = nowUtc,
+                ActivatedAtUtc = createdAudio.IsActive ? nowUtc : null
+            });
+
+            return new CreateAudioFromTextResponse
+            {
+                RequestId = requestId,
+                AudioId = sqlAudioId,
+                AudioUrl = createdAudio.AudioUrl,
+                LanguageCode = languageCode,
+                Voice = ttsResult.Voice,
+                CreatedAt = nowUtc
+            };
         }
-
-        var ttsResult = await GenerateAudioWithEdgeTtsAsync(ttsText, languageCode, request.Voice);
-
-        string webRoot = _environment.WebRootPath;
-        if (string.IsNullOrWhiteSpace(webRoot))
+        catch
         {
-            webRoot = Path.Combine(_environment.ContentRootPath, "wwwroot");
+            var failedAtUtc = DateTime.UtcNow;
+            var sourceText = string.IsNullOrWhiteSpace(request.SourceText) ? ttsText : request.SourceText.Trim();
+
+            await _translationHistoryRepository.InsertAudioUsageLedgerAsync(new AudioUsageLedgerRecord
+            {
+                UsageEventId = Guid.NewGuid().ToString("N"),
+                RequestId = requestId,
+                JobId = requestId,
+                SellerUserId = sellerUserId,
+                RestaurantId = restaurantId,
+                AudioId = null,
+                Provider = "edge-tts",
+                ActionType = "create_audio",
+                UnitType = "tokens",
+                InputChars = sourceText.Length,
+                OutputChars = 0,
+                BillableUnits = 0,
+                BillingMonth = failedAtUtc.ToString("yyyy-MM"),
+                CreatedAtUtc = failedAtUtc
+            });
+
+            throw;
         }
-
-        var uploadDir = Path.Combine(webRoot, "uploads", "audios");
-        Directory.CreateDirectory(uploadDir);
-
-        var fileName = $"tts_{languageCode}_{Guid.NewGuid():N}.mp3";
-        var fullPath = Path.Combine(uploadDir, fileName);
-        await File.WriteAllBytesAsync(fullPath, ttsResult.AudioBytes);
-
-        var audioUrl = $"/uploads/audios/{fileName}";
-        var createdAudio = await _audioService.CreateAsync(restaurantId, languageId, audioUrl);
-
-        var nowUtc = DateTime.UtcNow;
-        var sourceText = string.IsNullOrWhiteSpace(request.SourceText) ? ttsText : request.SourceText.Trim();
-        await _translationHistoryRepository.InsertTranslationVersionAsync(new AudioTranslationVersionRecord
-        {
-            SellerUserId = sellerUserId,
-            RestaurantId = restaurantId,
-            AudioId = createdAudio.AudioId,
-            SourceLanguageCode = languageCode,
-            TargetLanguageCode = languageCode,
-            SourceText = sourceText,
-            TranslatedText = ttsText,
-            TranslatedTextHash = ComputeSha256(ttsText),
-            VersionNo = createdAudio.Version,
-            IsActive = createdAudio.IsActive,
-            GenerationMethod = "edge-tts",
-            JobId = requestId,
-            UsageEventId = null,
-            CreatedAtUtc = nowUtc,
-            ActivatedAtUtc = createdAudio.IsActive ? nowUtc : null
-        });
-
-        return new CreateAudioFromTextResponse
-        {
-            RequestId = requestId,
-            AudioId = createdAudio.AudioId,
-            AudioUrl = createdAudio.AudioUrl,
-            LanguageCode = languageCode,
-            Voice = ttsResult.Voice,
-            CreatedAt = nowUtc
-        };
     }
 
     private async Task EnsureRestaurantOwnershipAsync(int sellerUserId, string restaurantId)
@@ -586,10 +640,22 @@ public class TranslationService
         };
     }
 
-    private decimal CalculateEstimatedCost(int inputChars)
+    private decimal CalculateEstimatedCost(decimal billableUnits)
     {
-        var rawCost = (inputChars / 1000m) * _translationPricingSettings.PricePer1KChars;
+        var rawCost = (billableUnits / 1000m) * _translationPricingSettings.PricePer1KChars;
         return Math.Round(rawCost, 6, MidpointRounding.AwayFromZero);
+    }
+
+    private decimal CalculateBillableUnits(int inputChars)
+    {
+        var multiplier = _translationPricingSettings.BillableUnitMultiplier;
+        if (multiplier <= 0)
+        {
+            multiplier = 1m;
+        }
+
+        var scaledUnits = inputChars * multiplier;
+        return Math.Ceiling(scaledUnits);
     }
 
     private static string BuildEndpoint(string baseUrl, string relativePath)

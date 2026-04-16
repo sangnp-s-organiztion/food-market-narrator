@@ -337,9 +337,10 @@ public class POIService_Tests
     {
         // Create a mock HttpClient (not actually used in these tests)
         var httpClient = new HttpClient();
+        var languageService = new StubLanguageService();
 
         // Create the service
-        var service = new POIService(httpClient);
+        var service = new POIService(httpClient, languageService);
 
         // Use reflection to set the private _pois field
         var field = typeof(POIService).GetField("_pois",
@@ -347,6 +348,25 @@ public class POIService_Tests
         field!.SetValue(service, pois);
 
         return service;
+    }
+
+    private sealed class StubLanguageService : ILanguageService
+    {
+        public string CurrentLanguage => "vi-VN";
+
+        public Task<List<LanguageModel>> GetAllLanguagesAsync()
+        {
+            return Task.FromResult(new List<LanguageModel>());
+        }
+
+        public Task<LanguageModel?> GetLanguageByCodeAsync(string languageCode)
+        {
+            return Task.FromResult<LanguageModel?>(null);
+        }
+
+        public void ChangeLanguage(string cultureCode)
+        {
+        }
     }
 
     #endregion

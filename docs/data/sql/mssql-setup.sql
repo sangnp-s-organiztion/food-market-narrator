@@ -13,6 +13,25 @@ CREATE TABLE food_market_narrator.dbo.Languages (
 );
 
 
+-- food_market_narrator.dbo.Tour definition
+
+-- Drop table
+
+-- DROP TABLE food_market_narrator.dbo.Tour;
+
+CREATE TABLE food_market_narrator.dbo.Tour (
+	tour_id int IDENTITY(1,1) NOT NULL,
+	name nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	description nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	estimated_duration_minutes int NULL,
+	is_active bit DEFAULT 1 NOT NULL,
+	created_at datetime2 DEFAULT sysdatetime() NOT NULL,
+	url_image varchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	CONSTRAINT PK__Tour__4B16B9E6D6265369 PRIMARY KEY (tour_id)
+);
+ALTER TABLE food_market_narrator.dbo.Tour WITH NOCHECK ADD CONSTRAINT CK_Tour_Duration CHECK (([estimated_duration_minutes] IS NULL OR [estimated_duration_minutes]>(0)));
+
+
 -- food_market_narrator.dbo.Users definition
 
 -- Drop table
@@ -26,6 +45,9 @@ CREATE TABLE food_market_narrator.dbo.Users (
 	[role] nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 	is_active bit DEFAULT 1 NULL,
 	created_at datetime DEFAULT getdate() NULL,
+	phone varchar(15) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	email varchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	full_name nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 	CONSTRAINT PK__Users__B9BE370F2E780BE1 PRIMARY KEY (user_id),
 	CONSTRAINT UQ__Users__F3DBC5728C03A3C7 UNIQUE (username)
 );
@@ -73,6 +95,46 @@ CREATE TABLE food_market_narrator.dbo.Restaurant_Image (
 );
 
 
+-- food_market_narrator.dbo.Tour_Restaurant definition
+
+-- Drop table
+
+-- DROP TABLE food_market_narrator.dbo.Tour_Restaurant;
+
+CREATE TABLE food_market_narrator.dbo.Tour_Restaurant (
+	tour_id int NOT NULL,
+	restaurant_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	stop_order int NOT NULL,
+	created_at datetime2 DEFAULT sysdatetime() NOT NULL,
+	CONSTRAINT PK__Tour_POI__48A6434F6AECBDED PRIMARY KEY (tour_id,restaurant_id),
+	CONSTRAINT UQ_Tour_POI_Order UNIQUE (tour_id,stop_order),
+	CONSTRAINT FK_Tour_POI_Restaurant FOREIGN KEY (restaurant_id) REFERENCES food_market_narrator.dbo.Restaurant(restaurant_id),
+	CONSTRAINT FK_Tour_POI_Tour FOREIGN KEY (tour_id) REFERENCES food_market_narrator.dbo.Tour(tour_id) ON DELETE CASCADE
+);
+ CREATE NONCLUSTERED INDEX IX_Tour_POI_Restaurant ON food_market_narrator.dbo.Tour_Restaurant (  restaurant_id ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+
+
+-- food_market_narrator.dbo.[Translation] definition
+
+-- Drop table
+
+-- DROP TABLE food_market_narrator.dbo.[Translation];
+
+CREATE TABLE food_market_narrator.dbo.[Translation] (
+	translation_id int IDENTITY(1,1) NOT NULL,
+	entity_type nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	entity_id varchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	language_id int NOT NULL,
+	field_name nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	translated_text nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	created_at datetime DEFAULT getdate() NULL,
+	CONSTRAINT PK__translat__23DB90A436AF4C8A PRIMARY KEY (translation_id),
+	CONSTRAINT FK_translation_language FOREIGN KEY (language_id) REFERENCES food_market_narrator.dbo.Languages(language_id) ON DELETE CASCADE
+);
+
+
 -- food_market_narrator.dbo.Audio definition
 
 -- Drop table
@@ -111,43 +173,3 @@ CREATE TABLE food_market_narrator.dbo.Dish (
 	CONSTRAINT FK__Dish__image_id__5070F446 FOREIGN KEY (image_id) REFERENCES food_market_narrator.dbo.Restaurant_Image(image_id),
 	CONSTRAINT FK__Dish__restaurant__4F7CD00D FOREIGN KEY (restaurant_id) REFERENCES food_market_narrator.dbo.Restaurant(restaurant_id)
 );
-
-CREATE TABLE dbo.Tour (
-    tour_id INT IDENTITY(1,1) PRIMARY KEY,
-    -- tour_code VARCHAR(50) NOT NULL UNIQUE,
-    name NVARCHAR(200) NOT NULL,
-    short_description NVARCHAR(500) NULL,
-    description NVARCHAR(MAX) NULL,
-    estimated_duration_minutes INT NULL,
-	image_id INT NOT NULL,
-    is_active BIT NOT NULL DEFAULT 1,
-    is_featured BIT NOT NULL DEFAULT 0,
-    sort_priority INT NOT NULL DEFAULT 0,
-    created_by INT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-    updated_by INT NULL,
-    updated_at DATETIME2 NULL,
-    CONSTRAINT FK_Tour_CreatedBy FOREIGN KEY (created_by) REFERENCES dbo.Users(user_id),
-    CONSTRAINT FK_Tour_UpdatedBy FOREIGN KEY (updated_by) REFERENCES dbo.Users(user_id),
-	CONSTRAINT FK_Tour_Image FOREIGN KEY (image_id) REFERENCES dbo.Restaurant_Image(image_id),
-    CONSTRAINT CK_Tour_Duration CHECK (estimated_duration_minutes IS NULL OR estimated_duration_minutes > 0)
-);
-
-CREATE TABLE dbo.Tour_Restaurant (
-    tour_id INT NOT NULL,
-    restaurant_id VARCHAR(100) NOT NULL,
-    stop_order INT NOT NULL,
-    -- stay_minutes INT NULL,
-    -- is_must_visit BIT NOT NULL DEFAULT 1,
-    -- custom_radius_meters INT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-    PRIMARY KEY (tour_id, restaurant_id),
-    CONSTRAINT UQ_Tour_Restaurant_Order UNIQUE (tour_id, stop_order),
-    CONSTRAINT FK_Tour_Restaurant_Tour FOREIGN KEY (tour_id) REFERENCES dbo.Tour(tour_id) ON DELETE CASCADE,
-    CONSTRAINT FK_Tour_Restaurant_Restaurant FOREIGN KEY (restaurant_id) REFERENCES dbo.Restaurant(restaurant_id),
-    -- CONSTRAINT CK_Tour_Restaurant_Stay CHECK (stay_minutes IS NULL OR stay_minutes > 0),
-    -- CONSTRAINT CK_Tour_Restaurant_Radius CHECK (custom_radius_meters IS NULL OR custom_radius_meters > 0)
-);
-
-CREATE INDEX IX_Tour_Active_Priority ON dbo.Tour(is_active, is_featured, sort_priority);
-CREATE INDEX IX_Tour_Restaurant_Restaurant ON dbo.Tour_Restaurant(restaurant_id);

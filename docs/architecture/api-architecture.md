@@ -17,6 +17,7 @@ File này đóng vai trò index trong `docs/` để gom cấu trúc theo nhóm t
 - `GET /Restaurant/{restaurantId}/images`
 - `GET /public/Restaurant/{restaurantId}/dishes`
 - `GET /public/Restaurant/{restaurantId}/audios`
+- `GET /public/translations?languageCode={code}&entityType={restaurant|dish}&entityIds={id1,id2,...}`
 - `POST /Auth/forgot-password/send-otp`
 - `POST /Auth/forgot-password/verify-otp`
 - `POST /Auth/forgot-password/reset`

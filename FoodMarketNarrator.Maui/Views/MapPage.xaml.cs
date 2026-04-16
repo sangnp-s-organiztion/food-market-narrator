@@ -39,6 +39,7 @@ public partial class MapPage : ContentPage
     private readonly ILocationService _locationService;
     private readonly NarrationFlowService _narrationFlowService;
     private readonly IFavoriteService _favoriteService;
+    private readonly ILanguageService _languageService;
     private List<POI> _pois = new();
     private List<POI> _searchSuggestions = new();
     private POI? _selectedPoi;
@@ -53,6 +54,7 @@ public partial class MapPage : ContentPage
     private bool _hasShownOfflineMapUnavailableNotice;
     private CancellationTokenSource? _searchDebounceCts;
     private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All;
+    private string _lastAppliedLanguageCode = string.Empty;
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -94,13 +96,15 @@ public partial class MapPage : ContentPage
         IPOIService poiService,
         ILocationService locationService,
         NarrationFlowService narrationFlowService,
-        IFavoriteService favoriteService)
+        IFavoriteService favoriteService,
+        ILanguageService languageService)
     {
         InitializeComponent();
         _poiService = poiService;
         _locationService = locationService;
         _narrationFlowService = narrationFlowService;
         _favoriteService = favoriteService;
+        _languageService = languageService;
     }
 
     // Khi trang xuất hiện, bắt đầu theo dõi vị trí và tải dữ liệu bản đồ
@@ -127,9 +131,22 @@ public partial class MapPage : ContentPage
 
         await ShowOfflineMapNoticeIfNeededAsync();
 
-        if (_pois.Count == 0)
+        var currentLanguage = _languageService.CurrentLanguage;
+        var languageChanged = !string.Equals(_lastAppliedLanguageCode, currentLanguage, StringComparison.OrdinalIgnoreCase);
+        if (_pois.Count == 0 || languageChanged)
         {
             _pois = await _poiService.GetAllPOIsAsync();
+            _lastAppliedLanguageCode = currentLanguage;
+
+            if (_isMapLoaded)
+            {
+                await MapHelper.LoadMapAsync(
+                    mapControl,
+                    _poiService,
+                    _locationService,
+                    initialLocation: _lastKnownLocation ?? _locationService.LastKnownLocation,
+                    initialZoomLevel: DefaultZoomLevel);
+            }
         }
 
         mapControl.MapTapped -= OnMapTapped;
@@ -194,7 +211,7 @@ public partial class MapPage : ContentPage
         var currentLocation = await _locationService.GetCurrentLocationAsync();
         if (currentLocation == null)
         {
-            await DisplayAlertAsync("Thông báo", "Không thể lấy vị trí hiện tại.", "Đóng");
+            await DisplayAlertAsync(L("NoticeTitle"), L("MapCannotGetLocation"), L("Close"));
             return;
         }
 
@@ -318,7 +335,10 @@ public partial class MapPage : ContentPage
         if (matchedPois.Count == 0)
         {
             ClearSearchState();
-            await DisplayAlertAsync("Không tìm thấy", $"Không có quán phù hợp với: {keyword}", "Đóng");
+            await DisplayAlertAsync(
+                L("SearchNoResultsTitle"),
+                string.Format(L("SearchNoResultsMessage"), keyword),
+                L("Close"));
             return;
         }
 
@@ -406,6 +426,7 @@ public partial class MapPage : ContentPage
         ClearSearchState();
     }
 
+    // áp dụng kết quả tìm kiếm
     private void ApplySearchResults(List<POI> pois, bool focusOnFirst)
     {
         _searchHighlightedPoiIds = pois
@@ -430,6 +451,7 @@ public partial class MapPage : ContentPage
         ApplyPoiModeFromState(focusOnTour: false);
     }
 
+    // dọn ô liên quan đến tìm kiếm
     private void ClearSearchState()
     {
         _searchHighlightedPoiIds.Clear();
@@ -437,6 +459,8 @@ public partial class MapPage : ContentPage
         ApplyPoiModeFromState(focusOnTour: false);
     }
 
+
+    // tìm những poi match với từ khóa tim kiếm
     private List<POI> FindMatchingPois(string keyword, int maxResults, IEnumerable<POI>? sourcePois = null)
     {
         var normalizedKeyword = NormalizeSearchText(keyword);
@@ -464,6 +488,7 @@ public partial class MapPage : ContentPage
         return matches;
     }
 
+    // Chấm điểm (ranking) độ liên quan của một POI so với từ khóa tìm kiếm
     private static int GetSearchScore(POI poi, string normalizedKeyword)
     {
         var name = NormalizeSearchText(poi.Name ?? string.Empty);
@@ -479,6 +504,7 @@ public partial class MapPage : ContentPage
         return 0;
     }
 
+    // chuẩn hóa chuỗi tìm kiếm
     private static string NormalizeSearchText(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -523,6 +549,7 @@ public partial class MapPage : ContentPage
         SetPoiFilter(PoiCategoryFilter.OpenNow);
     }
 
+    // Đổi bộ lọc POI (category) và reset lại toàn bộ trạng thái UI + dữ liệu liên quan
     private void SetPoiFilter(PoiCategoryFilter filter)
     {
         _activePoiFilter = filter;
@@ -534,6 +561,7 @@ public partial class MapPage : ContentPage
         ApplyPoiModeFromState(focusOnTour: false);
     }
 
+    // cập nhật trạng thái hienr thị của các filter trên UI
     private void UpdateCategoryFilterUi()
     {
         SetMapChipState(MapFilterAllChip, MapFilterAllLabel, _activePoiFilter == PoiCategoryFilter.All, MapFilterAllIcon);
@@ -542,6 +570,7 @@ public partial class MapPage : ContentPage
         SetMapChipState(MapFilterOpenChip, MapFilterOpenLabel, _activePoiFilter == PoiCategoryFilter.OpenNow, MapFilterOpenIcon);
     }
 
+    // cập nhật trạng thái hiển thị của filter trên bản đồ
     private static void SetMapChipState(Border border, Label textLabel, bool isActive, Label? iconLabel = null)
     {
         border.BackgroundColor = isActive ? Color.FromArgb("#F48C06") : Colors.White;
@@ -552,6 +581,7 @@ public partial class MapPage : ContentPage
         }
     }
 
+    // cập nhật dánh sách POI hiển thị dựa vào filter đang áp dụng
     private List<POI> ApplyCategoryFilter(IEnumerable<POI> source)
     {
         var candidates = source.ToList();
@@ -591,6 +621,8 @@ public partial class MapPage : ContentPage
         }
     }
 
+
+    // áp dụng state hiện tại (bao gồm filter hành trình, filter category, và search) để cập nhật lại trạng thái hiển thị của các POI trên bản đồ, bao gồm việc highlight POI nào, ẩn hiện card thông tin POI nào, v.v. Hàm này sẽ được gọi mỗi khi có sự thay đổi về state filter hoặc vị trí người dùng để đảm bảo rằng bản đồ luôn phản ánh đúng state hiện tại
     private void ApplyPoiModeFromState(bool focusOnTour)
     {
         if (!_isMapLoaded || mapControl?.Map == null)
@@ -661,6 +693,7 @@ public partial class MapPage : ContentPage
             visiblePoiIds: visiblePoiIds);
     }
 
+    // Lấy danh sách POI “có thể tương tác” (click / hiển thị / xử lý UI) dựa trên trạng thái hiện tại (tour + category filter) 
     private List<POI> GetInteractivePois()
     {
         var scopedPois = _tourPoiFilterIds.Count == 0
@@ -671,7 +704,8 @@ public partial class MapPage : ContentPage
 
         return ApplyCategoryFilter(scopedPois);
     }
-
+    
+    // Lấy danh sách các POI ID đang hiển thị trên bản đồ dựa trên state filter hiện tại (bao gồm filter hành trình và filter category), để chỉ highlight các POI đó trên bản đồ, giúp giảm thiểu tình trạng bị highlight nhầm các POI không nằm trong filter hiện tại
     private IEnumerable<string>? GetVisiblePoiIds()
     {
         var hasTourFilter = _tourPoiFilterIds.Count > 0;
@@ -688,6 +722,7 @@ public partial class MapPage : ContentPage
             .ToList();
     }
 
+    // Cập nhật banner hiển thị thông tin về filter hành trình đang áp dụng, nếu có. Nếu không có filter hành trình thì ẩn banner này đi để tiết kiệm không gian hiển thị bản đồ
     private void UpdateTourFilterBanner()
     {
         if (TourFilterBanner == null || TourFilterTitle == null)
@@ -708,10 +743,11 @@ public partial class MapPage : ContentPage
         }
 
         TourFilterTitle.Text = string.IsNullOrWhiteSpace(_activeTourName)
-            ? "Đang xem theo hành trình"
-            : $"Hành trình: {_activeTourName}";
+            ? L("TourFilterActive")
+            : string.Format(L("TourFilterWithName"), _activeTourName);
     }
 
+    // Chuyển một chuỗi chứa nhiều POI ID (dạng text) thành HashSet<string> sạch, không trùng, dễ xử lý hơn, và đảm bảo rằng nếu có lỗi xảy ra trong quá trình parse thì sẽ trả về một HashSet rỗng thay vì làm hỏng chức năng của trang
     private static HashSet<string> ParsePoiIdSet(string? rawPoiIds)
     {
         var decoded = DecodeQueryValue(rawPoiIds);
@@ -726,6 +762,7 @@ public partial class MapPage : ContentPage
             .ToHashSet(StringComparer.Ordinal);
     }
 
+    // Hàm này để parse map từ restaurantId sang stop order của các POI trong tour, giúp cho việc hiển thị số thứ tự dừng trên marker của POI khi đang ở chế độ tour
     private static Dictionary<string, int> ParsePoiStopOrderMap(string? rawStopOrders)
     {
         var decoded = DecodeQueryValue(rawStopOrders);
@@ -763,6 +800,7 @@ public partial class MapPage : ContentPage
         return result;
     }
 
+    // Lấy thứ tự các điểm dừng (tour stop order) của POI khi đang ở chế độ tour
     private IReadOnlyDictionary<string, int>? GetTourStopOrdersForCurrentMode()
     {
         if (_tourPoiFilterIds.Count == 0 || _tourStopOrdersByPoiId.Count == 0)
@@ -772,7 +810,8 @@ public partial class MapPage : ContentPage
 
         return _tourStopOrdersByPoiId;
     }
-
+    
+    // Hàm này để giải mã giá trị query parameter đã được mã hóa trước đó, đảm bảo rằng nếu có lỗi xảy ra trong quá trình giải mã thì sẽ trả về giá trị gốc thay vì làm hỏng chức năng của trang
     private static string? DecodeQueryValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -790,6 +829,7 @@ public partial class MapPage : ContentPage
         }
     }
 
+    // Khi người dùng nhấn vào nút xóa filter hành trình, sẽ xóa bỏ filter hành trình hiện tại, clear scope của narration flow để có thể tự động đọc tất cả POI như bình thường, và cập nhật lại bản đồ để hiển thị tất cả POI
     private void OnClearTourFilterClicked(object sender, EventArgs e)
     {
         _tourPoiIdsRaw = string.Empty;
@@ -803,6 +843,7 @@ public partial class MapPage : ContentPage
         ApplyPoiModeFromState(focusOnTour: false);
     }
 
+    // Khi có filter hành trình, sẽ set scope cho narration flow để chỉ tự động đọc các POI trong hành trình đó, nếu có. Nếu không có filter hành trình thì clear scope để có thể tự động đọc tất cả POI như bình thường
     private void ApplyNarrationScopeFromTourFilter()
     {
         if (_tourPoiFilterIds.Count > 0)
@@ -814,6 +855,7 @@ public partial class MapPage : ContentPage
         _narrationFlowService.ClearAutoNarrationPoiScope();
     }
 
+    // Hiển thị card thông tin của POI đã chọn, bao gồm tên, địa chỉ, hình ảnh và các thông tin liên quan khác. Card này sẽ được hiển thị ở dưới cùng
     private void ShowSelectedPoiCard(POI poi)
     {
         _selectedPoi = poi;
@@ -823,12 +865,14 @@ public partial class MapPage : ContentPage
         SelectedPoiCard.IsVisible = true;
     }
 
+    // Ẩn card POI đã chọn và xóa bỏ POI được chọn hiện tại
     private void HideSelectedPoiCard()
     {
         _selectedPoi = null;
         SelectedPoiCard.IsVisible = false;
     }
 
+    // Hàm này để hiển thị thông báo cho người dùng khi họ không có kết nối Internet và cũng không có dữ liệu bản đồ offline nào đã được lưu trước đó, nhằm giải thích rằng họ vẫn có thể xem và tương tác với các địa điểm trên bản đồ nhưng nền bản đồ có thể không hiển thị được, và đảm bảo rằng thông báo này chỉ được hiển thị một lần
     private async Task ShowOfflineMapNoticeIfNeededAsync()
     {
         if (_hasShownOfflineMapUnavailableNotice)
@@ -848,11 +892,17 @@ public partial class MapPage : ContentPage
 
         _hasShownOfflineMapUnavailableNotice = true;
         await DisplayAlertAsync(
-            "Bản đồ offline",
-            "Hiện không có Internet và chưa có dữ liệu nền bản đồ đã lưu. Bạn vẫn xem và tương tác được các địa điểm, nhưng nền bản đồ có thể chưa hiển thị.",
-            "Đóng");
+            L("OfflineMapTitle"),
+            L("OfflineMapUnavailableMessage"),
+            L("Close"));
     }
 
+    private static string L(string key)
+    {
+        return LocalizationResourceManager.Instance[key];
+    }
+
+    // nhấn vào nút xem chi tiết trên card POI đã chọn sẽ điều hướng đến trang chi tiết của POI đó, nếu có restaurantId hợp lệ
     private async void OnViewDetailClicked(object sender, EventArgs e)
     {
         if (_selectedPoi == null || string.IsNullOrWhiteSpace(_selectedPoi.restaurantId))

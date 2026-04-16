@@ -58,34 +58,399 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="StreetName">
+
+  <!-- Shell -->
+  <data name="AppTitle" xml:space="preserve">
     <value>Vinh Khanh Food Street</value>
   </data>
-  <data name="GettingLocation">
-    <value>Getting location ...</value>
+  <data name="TabHome" xml:space="preserve">
+    <value>Home</value>
   </data>
-  <data name="Lock">
-    <value>Lock</value>
-  </data>
-  <data name="Language">
-    <value>Language</value>
-  </data>
-  <data name="QRCode">
-    <value>QR Code</value>
-  </data>
-  <data name="Story">
-    <value>Story</value>
-  </data>
-  <data name="Map">
+  <data name="TabMap" xml:space="preserve">
     <value>Map</value>
   </data>
-  <data name="SelectLanguage">
+  <data name="TabTour" xml:space="preserve">
+    <value>Tour</value>
+  </data>
+  <data name="TabFavorite" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="TabHistory" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="TabSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+
+  <!-- MainPage -->
+  <data name="MainTitle" xml:space="preserve">
+    <value>Vinh Khanh Cuisine</value>
+  </data>
+  <data name="MainSubtitle" xml:space="preserve">
+    <value>Explore the culinary paradise</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search snails, braised pork, grilled items...</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="FilterNear" xml:space="preserve">
+    <value>Near you</value>
+  </data>
+  <data name="FilterFavorite" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="FilterOpen" xml:space="preserve">
+    <value>Open now</value>
+  </data>
+  <data name="FeaturedRestaurants" xml:space="preserve">
+    <value>Featured restaurants</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>View all</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status: </value>
+  </data>
+  <data name="StatusOpenNow" xml:space="preserve">
+    <value>Open now</value>
+  </data>
+  <data name="StatusClosedNow" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="BtnPrevious" xml:space="preserve">
+    <value>Prev</value>
+  </data>
+  <data name="BtnNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="PageIndicator" xml:space="preserve">
+    <value>Page 1/1</value>
+  </data>
+  <data name="StartNarration" xml:space="preserve">
+    <value>Start auto narration</value>
+  </data>
+  <data name="StopNarration" xml:space="preserve">
+    <value>Stop narration</value>
+  </data>
+
+  <!-- MapPage -->
+  <data name="MapSearchPlaceholder" xml:space="preserve">
+    <value>Search food or restaurants...</value>
+  </data>
+  <data name="TourFilterActive" xml:space="preserve">
+    <value>Viewing by tour</value>
+  </data>
+  <data name="TourFilterHint" xml:space="preserve">
+    <value>Only showing POIs in the selected tour</value>
+  </data>
+  <data name="TourFilterWithName" xml:space="preserve">
+    <value>Tour: {0}</value>
+  </data>
+  <data name="ShowAll" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="AddressUpdating" xml:space="preserve">
+    <value>Updating address</value>
+  </data>
+  <data name="ViewDetail" xml:space="preserve">
+    <value>View details</value>
+  </data>
+
+  <!-- POIDetailPage -->
+  <data name="AudioNarration" xml:space="preserve">
+    <value>Narration</value>
+  </data>
+  <data name="AudioHintLine1" xml:space="preserve">
+    <value>- Listen to the narration to learn more about the restaurant, ambiance and signature dishes. Enjoy a vibrant exploration experience.</value>
+  </data>
+  <data name="AudioHintLine2" xml:space="preserve">
+    <value>- Content available in Vietnamese, English, Chinese, Japanese, and Korean.</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="AboutUs" xml:space="preserve">
+    <value>About us</value>
+  </data>
+  <data name="OpenedDate" xml:space="preserve">
+    <value>Opened: {0}</value>
+  </data>
+  <data name="GetDirections" xml:space="preserve">
+    <value>Directions</value>
+  </data>
+  <data name="CallNow" xml:space="preserve">
+    <value>Call now</value>
+  </data>
+
+  <!-- TourPage -->
+  <data name="ExploreToday" xml:space="preserve">
+    <value>What to explore today?</value>
+  </data>
+  <data name="CulinaryJourney" xml:space="preserve">
+    <value>CULINARY JOURNEY VINH KHANH STREET</value>
+  </data>
+  <data name="NoTourAvailable" xml:space="preserve">
+    <value>No tours available</value>
+  </data>
+  <data name="NoTourHint" xml:space="preserve">
+    <value>Please check your connection or tour data from the server</value>
+  </data>
+  <data name="BtnViewDetail" xml:space="preserve">
+    <value>View details</value>
+  </data>
+
+  <!-- TourDetailPage -->
+  <data name="JourneyDetail" xml:space="preserve">
+    <value>Journey details</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>DURATION</value>
+  </data>
+  <data name="Locations" xml:space="preserve">
+    <value>LOCATIONS</value>
+  </data>
+  <data name="ExploreJourney" xml:space="preserve">
+    <value>EXPLORE JOURNEY</value>
+  </data>
+  <data name="DetailedSchedule" xml:space="preserve">
+    <value>DETAILED ITINERARY</value>
+  </data>
+  <data name="NoStopsYet" xml:space="preserve">
+    <value>This journey has no stops yet.</value>
+  </data>
+  <data name="LoadingTourDetail" xml:space="preserve">
+    <value>Loading journey details...</value>
+  </data>
+  <data name="LoadTourDetailFailed" xml:space="preserve">
+    <value>Unable to load journey details.</value>
+  </data>
+  <data name="TryAgainLater" xml:space="preserve">
+    <value>Please try again later.</value>
+  </data>
+  <data name="BtnRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="StartJourney" xml:space="preserve">
+    <value>Start journey</value>
+  </data>
+  <data name="TourDurationMetricFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="TourStopCountMetricFormat" xml:space="preserve">
+    <value>{0} stops</value>
+  </data>
+  <data name="TourDescriptionFallback" xml:space="preserve">
+    <value>This journey has no detailed description yet.</value>
+  </data>
+  <data name="TourAddressUpdating" xml:space="preserve">
+    <value>Address is being updated</value>
+  </data>
+
+  <!-- FavoritePage -->
+  <data name="Favorites" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
+  <data name="NoFavoritesYet" xml:space="preserve">
+    <value>No favorite restaurants yet</value>
+  </data>
+  <data name="NoFavoritesHint" xml:space="preserve">
+    <value>Tap the heart icon to add favorites</value>
+  </data>
+
+  <!-- HistoryPage -->
+  <data name="History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="NoHistoryYet" xml:space="preserve">
+    <value>No listening history yet</value>
+  </data>
+  <data name="NoHistoryHint" xml:space="preserve">
+    <value>History will appear when you listen to narrations</value>
+  </data>
+
+  <!-- SettingsPage -->
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="TodaysTip" xml:space="preserve">
+    <value>TODAY'S TIP</value>
+  </data>
+  <data name="TipTitle" xml:space="preserve">
+    <value>Experience the exploration journey</value>
+  </data>
+  <data name="TipDescription" xml:space="preserve">
+    <value>Turn on auto narration and enjoy interesting stories at each stop.</value>
+  </data>
+  <data name="ExperienceNow" xml:space="preserve">
+    <value>Experience now  -&gt;</value>
+  </data>
+  <data name="AppSection" xml:space="preserve">
+    <value>APPLICATION</value>
+  </data>
+  <data name="NarrationLanguage" xml:space="preserve">
+    <value>Narration language</value>
+  </data>
+  <data name="SelectNarrationLanguage" xml:space="preserve">
+    <value>Select narration language</value>
+  </data>
+  <data name="Vietnamese" xml:space="preserve">
+    <value>Vietnamese</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Japanese" xml:space="preserve">
+    <value>Japanese</value>
+  </data>
+  <data name="Korean" xml:space="preserve">
+    <value>Korean</value>
+  </data>
+  <data name="Chinese" xml:space="preserve">
+    <value>Chinese</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="BackgroundLocation" xml:space="preserve">
+    <value>Background location</value>
+  </data>
+  <data name="NotCheckedYet" xml:space="preserve">
+    <value>Not checked</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>Dark mode</value>
+  </data>
+  <data name="DataSection" xml:space="preserve">
+    <value>DATA</value>
+  </data>
+  <data name="StorageManagement" xml:space="preserve">
+    <value>Storage management</value>
+  </data>
+  <data name="StorageDescription" xml:space="preserve">
+    <value>Includes offline maps, images, and audio data.</value>
+  </data>
+  <data name="Used" xml:space="preserve">
+    <value>USED</value>
+  </data>
+  <data name="MapLegend" xml:space="preserve">
+    <value>Maps</value>
+  </data>
+  <data name="ImageLegend" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="OtherLegend" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value> Clear all</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="StorageDetailsTitle" xml:space="preserve">
+    <value>Storage details</value>
+  </data>
+  <data name="StorageDetailTotal" xml:space="preserve">
+    <value>Total data: {0}</value>
+  </data>
+  <data name="StorageDetailMap" xml:space="preserve">
+    <value>Map: {0} ({1} files)</value>
+  </data>
+  <data name="StorageDetailImage" xml:space="preserve">
+    <value>Image: {0} ({1} files)</value>
+  </data>
+  <data name="StorageDetailAudio" xml:space="preserve">
+    <value>Audio: {0}</value>
+  </data>
+  <data name="StorageDetailPoi" xml:space="preserve">
+    <value>POI: {0}</value>
+  </data>
+  <data name="StorageDetailDish" xml:space="preserve">
+    <value>Dishes: {0} ({1} files)</value>
+  </data>
+  <data name="StorageDetailLanguage" xml:space="preserve">
+    <value>Languages: {0}</value>
+  </data>
+  <data name="ListeningHistory" xml:space="preserve">
+    <value>Listening history</value>
+  </data>
+  <data name="ClearListeningHistory" xml:space="preserve">
+    <value>Clear listening history</value>
+  </data>
+  <data name="ClearFavorites" xml:space="preserve">
+    <value>Clear favorites</value>
+  </data>
+  <data name="BtnClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="SupportSection" xml:space="preserve">
+    <value>SUPPORT</value>
+  </data>
+  <data name="HelpCenter" xml:space="preserve">
+    <value>Help center</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="TermsOfService" xml:space="preserve">
+    <value>Terms of service</value>
+  </data>
+
+  <!-- Common -->
+  <data name="StreetName" xml:space="preserve">
+    <value>Vinh Khanh Food Street</value>
+  </data>
+  <data name="GettingLocation" xml:space="preserve">
+    <value>Getting location ...</value>
+  </data>
+  <data name="Lock" xml:space="preserve">
+    <value>Lock</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="QRCode" xml:space="preserve">
+    <value>QR Code</value>
+  </data>
+  <data name="Story" xml:space="preserve">
+    <value>Story</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
     <value>SELECT LANGUAGE</value>
   </data>
-  <data name="Close">
+  <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="PhoneNumber">
+  <data name="NoticeTitle" xml:space="preserve">
+    <value>Notice</value>
+  </data>
+  <data name="AudioInternetRequiredMessage" xml:space="preserve">
+    <value>Please connect to the Internet to download audio data.</value>
+  </data>
+  <data name="MapCannotGetLocation" xml:space="preserve">
+    <value>Unable to get current location.</value>
+  </data>
+  <data name="SearchNoResultsTitle" xml:space="preserve">
+    <value>No results</value>
+  </data>
+  <data name="SearchNoResultsMessage" xml:space="preserve">
+    <value>No restaurant matches: {0}</value>
+  </data>
+  <data name="OfflineMapTitle" xml:space="preserve">
+    <value>Offline map</value>
+  </data>
+  <data name="OfflineMapUnavailableMessage" xml:space="preserve">
+    <value>No Internet connection and no cached map tiles found. You can still view and interact with POIs, but the map background may not be visible.</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
     <value>Phone Number</value>
   </data>
 </root>
