@@ -12,17 +12,20 @@ public class AdminStatsController : ControllerBase
     private readonly RestaurantService _restaurantService;
     private readonly AudioService _audioService;
     private readonly UserService _userService;
+    private readonly UserSessionService _userSessionService;
     private readonly DishService _dishService;
 
     public AdminStatsController(
         RestaurantService restaurantService,
         AudioService audioService,
         UserService userService,
+        UserSessionService userSessionService,
         DishService dishService)
     {
         _restaurantService = restaurantService;
         _audioService = audioService;
         _userService = userService;
+        _userSessionService = userSessionService;
         _dishService = dishService;
     }
 
@@ -43,8 +46,14 @@ public class AdminStatsController : ControllerBase
     [HttpGet("users/count")]
     public async Task<IActionResult> GetUserCount()
     {
-        int count = await _userService.CountUsersAsync();
-        return Ok(new { count });
+        int appUserCount = await _userService.CountUsersAsync();
+        int visitorCount = await _userSessionService.CountVisitorsAsync();
+        return Ok(new
+        {
+            count = appUserCount + visitorCount,
+            appUsers = appUserCount,
+            visitors = visitorCount
+        });
     }
 
     [HttpGet("dishes/count")]

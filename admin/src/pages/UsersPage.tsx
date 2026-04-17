@@ -24,6 +24,7 @@ import {
   userApi,
   type CreateUserRequest,
   type UserResponse,
+  type VisitorSessionResponse,
 } from "@/lib/adminApi";
 import { toast } from "sonner";
 
@@ -35,11 +36,37 @@ function toPageUser(r: UserResponse) {
   return {
     user_id: r.userId,
     username: r.username,
+    fullName: r.fullName ?? "",
     phone: r.phone ?? "",
     email: r.email ?? "",
     role: normalizedRole === "admin" ? ("admin" as const) : ("saler" as const),
     is_active: r.isActive,
     created_at: r.createdAt ? r.createdAt.split("T")[0] : "",
+  };
+}
+
+function toDisplayDateTime(value?: string | null): string {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return date.toLocaleString("vi-VN", {
+    hour12: false,
+  });
+}
+
+function toPageVisitor(visitor: VisitorSessionResponse) {
+  return {
+    sessionId: visitor.sessionId || "-",
+    deviceId: visitor.deviceId || "-",
+    deviceInfo: visitor.deviceInfo || "unknown",
+    lastSeenAt: toDisplayDateTime(visitor.lastSeenAtUtc),
+    createdAt: toDisplayDateTime(visitor.createdAtUtc),
   };
 }
 
@@ -85,6 +112,16 @@ const UsersPage = () => {
   });
 
   const {
+    data: visitorSessions = [],
+    isLoading: isVisitorsLoading,
+    isError: isVisitorsError,
+  } = useQuery({
+    queryKey: ["admin", "users", "visitors"],
+    queryFn: () => userApi.getVisitors(500),
+    staleTime: 60_000,
+  });
+
+  const {
     data: restaurants = [],
     isLoading: isRestaurantsLoading,
     isError: isRestaurantsError,
@@ -95,6 +132,7 @@ const UsersPage = () => {
   });
 
   const pageUsers = apiUsers.map(toPageUser);
+  const pageVisitors = visitorSessions.map(toPageVisitor);
   const detailUserRestaurants = useMemo(() => {
     if (!detailUser) return [];
 
@@ -291,6 +329,78 @@ const UsersPage = () => {
                           <Lock className="h-4 w-4" />
                         )}
                       </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="stat-card mt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold">Danh sách visitor</h2>
+            <span className="text-xs text-muted-foreground">
+              Tổng visitor: {pageVisitors.length.toLocaleString("vi-VN")}
+            </span>
+          </div>
+
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Device ID</th>
+                <th>Thiết bị</th>
+                <th>Lần cuối sử dụng</th>
+                <th>Lần đầu sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isVisitorsLoading && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-8 text-center text-muted-foreground"
+                  >
+                    Đang tải visitor...
+                  </td>
+                </tr>
+              )}
+
+              {isVisitorsError && (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-destructive">
+                    Không thể tải danh sách visitor. Vui lòng thử lại.
+                  </td>
+                </tr>
+              )}
+
+              {!isVisitorsLoading &&
+                !isVisitorsError &&
+                pageVisitors.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="py-8 text-center text-muted-foreground"
+                    >
+                      Chưa có visitor nào.
+                    </td>
+                  </tr>
+                )}
+
+              {!isVisitorsLoading &&
+                !isVisitorsError &&
+                pageVisitors.map((visitor) => (
+                  <tr key={`${visitor.deviceId}-${visitor.sessionId}`}>
+                    <td className="mono text-xs text-muted-foreground">
+                      {visitor.deviceId}
+                    </td>
+                    <td className="max-w-[320px] truncate text-xs text-muted-foreground">
+                      {visitor.deviceInfo}
+                    </td>
+                    <td className="mono text-xs text-muted-foreground">
+                      {visitor.lastSeenAt}
+                    </td>
+                    <td className="mono text-xs text-muted-foreground">
+                      {visitor.createdAt}
                     </td>
                   </tr>
                 ))}
