@@ -449,3 +449,718 @@ sequenceDiagram
 - Deep link hiện mới dừng ở bước validate URL hợp lệ, chưa có nhánh điều hướng nghiệp vụ chi tiết theo tham số.
 - History đang lưu in-memory (reset khi app đóng), còn favorite lưu bằng Preferences (persist qua phiên).
 - Audio playback ưu tiên local cache trước, không phụ thuộc mạng nếu file đã được prefetch.
+
+## Sequence bổ sung
+
+## 18. Use case: Xem danh sách POI
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage
+    participant POI as POIService
+    participant CACHE as Offline Cache
+    participant API as Backend API
+
+    U->>MAIN: Mở màn hình danh sách POI
+    MAIN->>POI: GetAllPOIsAsync()
+    POI->>CACHE: Đọc pois.json
+    alt Cache có dữ liệu
+        CACHE-->>POI: Trả danh sách POI
+    else Cache trống hoặc hết hạn
+        POI->>API: GET /restaurant
+        API-->>POI: Danh sách POI
+        POI->>CACHE: Ghi cache POI mới
+    end
+    POI-->>MAIN: Trả danh sách POI
+    MAIN-->>U: Hiển thị danh sách POI
+```
+
+## 19. Use case: Lọc POI (extend Xem danh sách POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage
+    participant FILTER as Filter Engine
+    participant LOC as Location Service
+
+    U->>MAIN: Chọn bộ lọc (All/Nearby/Favorite/Open)
+    MAIN->>FILTER: ApplyFilter(selectedFilter, poiList)
+    alt Filter = Nearby
+        FILTER->>LOC: GetLastKnownLocation()
+        LOC-->>FILTER: currentLocation hoặc null
+        FILTER->>FILTER: Tính khoảng cách và giữ POI phù hợp
+    else Filter khác
+        FILTER->>FILTER: Lọc theo điều kiện tương ứng
+    end
+    FILTER-->>MAIN: filteredList
+    MAIN-->>U: Cập nhật danh sách theo bộ lọc
+```
+
+## 20. Use case: Tìm kiếm POI (extend Xem danh sách POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage
+    participant SEARCH as Search Engine
+
+    U->>MAIN: Nhập từ khóa tìm kiếm
+    MAIN->>MAIN: Debounce input
+    MAIN->>SEARCH: Search(keyword, currentPoiList)
+    SEARCH->>SEARCH: Chuẩn hóa keyword (trim/lowercase/bỏ dấu)
+    SEARCH->>SEARCH: Match theo tên/địa chỉ/tags
+    SEARCH-->>MAIN: searchResult
+    MAIN-->>U: Hiển thị kết quả tìm kiếm
+```
+
+## 21. Use case: Xem chi tiết POI
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage/MapPage
+    participant DETAIL as POIDetailPage
+    participant POI as POIService
+
+    U->>MAIN: Chọn một POI từ danh sách/bản đồ
+    MAIN->>DETAIL: Navigate POIDetailPage?restaurantId=...
+    DETAIL->>POI: GetPOIByIdAsync(restaurantId)
+    DETAIL->>POI: GetDishesByRestaurantIdAsync(restaurantId)
+    DETAIL->>POI: GetImagesByRestaurantIdAsync(restaurantId)
+    DETAIL->>POI: GetAudiosByRestaurantIdAsync(restaurantId)
+    POI-->>DETAIL: Trả dữ liệu chi tiết POI
+    DETAIL-->>U: Render thông tin + action (nghe/chia sẻ/yêu thích/đường đi/liên hệ)
+```
+
+## 22. Use case: Nghe thuyết minh (extend Xem chi tiết POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant LANG as LanguageService
+    participant AUD as AudioService
+    participant CACHE as Audio Cache
+    participant NET as Backend API
+
+    U->>DETAIL: Bấm nút Nghe thuyết minh
+    DETAIL->>LANG: Lấy ngôn ngữ hiện tại
+    LANG-->>DETAIL: languageCode
+    DETAIL->>DETAIL: Resolve audio theo language
+    DETAIL->>AUD: PlaySound(audioId)
+    AUD->>CACHE: Kiểm tra audio cache
+    alt Cache hit
+        CACHE-->>AUD: Trả file local
+    else Cache miss
+        AUD->>NET: Tải audio theo endpoint công khai
+        NET-->>AUD: Audio bytes
+        AUD->>CACHE: Lưu cache audio
+    end
+    AUD-->>DETAIL: Playback started/ended
+    DETAIL-->>U: Cập nhật trạng thái phát
+```
+
+## 23. Use case: Yêu thích POI (extend Xem chi tiết POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant FAV as FavoriteService
+    participant PREF as Preferences
+
+    U->>DETAIL: Bấm Yêu thích/Bỏ yêu thích
+    DETAIL->>FAV: ToggleFavorite(restaurantId)
+    FAV->>PREF: Đọc danh sách favorites hiện tại
+    PREF-->>FAV: favoriteIds
+    FAV->>FAV: Add hoặc Remove restaurantId
+    FAV->>PREF: Lưu favoriteIds mới
+    FAV-->>DETAIL: Trả trạng thái đã cập nhật
+    DETAIL-->>U: Đổi icon và thông báo thành công
+```
+
+## 24. Use case: Chia sẻ POI (extend Xem chi tiết POI)
+
+```mermaid
+    sequenceDiagram
+        autonumber
+        participant U as Người dùng
+        participant DETAIL as POIDetailPage
+        participant SHARE as Share Service
+        participant OS as Share Sheet (Android)
+
+        U->>DETAIL: Bấm Chia sẻ POI
+        DETAIL->>DETAIL: Build nội dung chia sẻ (tên, địa chỉ, link/deep link)
+        DETAIL->>SHARE: RequestShareAsync(payload)
+        SHARE->>OS: Mở native share sheet
+        OS-->>U: Người dùng chọn app nhận chia sẻ
+        OS-->>DETAIL: Trạng thái hoàn tất/hủy
+        DETAIL-->>U: Giữ nguyên màn hình chi tiết
+```
+
+## 25. Use case: Xem đường đi (extend Xem chi tiết POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant MAP as Map Launcher
+    participant EXT as Ứng dụng bản đồ ngoài
+
+    U->>DETAIL: Bấm Xem đường đi
+    DETAIL->>DETAIL: Lấy lat,lng của POI
+    DETAIL->>MAP: OpenMapAsync(destination)
+    MAP->>EXT: Mở Google Maps/Apple Maps với destination
+    EXT-->>U: Hiển thị route từ vị trí hiện tại
+```
+
+## 26. Use case: Liên hệ nhà hàng (extend Xem chi tiết POI)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant CONTACT as Contact Launcher
+    participant OS as Android Dialer
+
+    U->>DETAIL: Bấm Liên hệ nhà hàng
+    DETAIL->>DETAIL: Lấy phone number của POI
+    alt Có số điện thoại
+        DETAIL->>CONTACT: OpenDialer(phone)
+        CONTACT->>OS: Launch tel:phone
+        OS-->>U: Hiển thị màn hình gọi điện
+    else Không có số điện thoại
+        DETAIL-->>U: Thông báo POI chưa có thông tin liên hệ
+    end
+```
+
+## 27. Use case: Xem danh sách tour
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant TOURP as TourPage
+    participant TS as TourService
+    participant CACHE as Tour Cache
+    participant API as Backend API
+
+    U->>TOURP: Mở tab Hành trình
+    TOURP->>TS: GetToursAsync()
+    TS->>CACHE: Đọc tour cache (memory/disk)
+    alt Cache có dữ liệu hợp lệ
+        CACHE-->>TS: tours
+    else Cache trống hoặc hết hạn
+        TS->>API: GET /tour
+        API-->>TS: tours
+        TS->>CACHE: Cập nhật tour cache
+    end
+    TS-->>TOURP: Danh sách tour
+    TOURP-->>U: Hiển thị danh sách tour
+```
+
+## 28. Use case: Xem chi tiết tour (extend Xem danh sách tour)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant TOURP as TourPage
+    participant DETAIL as TourDetailPage
+    participant TS as TourService
+    participant POI as POIService
+
+    U->>TOURP: Chọn một tour
+    TOURP->>DETAIL: Navigate TourDetailPage?tourId=...
+    DETAIL->>TS: GetTourByIdAsync(tourId)
+    TS-->>DETAIL: Thông tin tour + danh sách stopIds
+    DETAIL->>POI: GetPOIsByIdsAsync(stopIds)
+    POI-->>DETAIL: Danh sách POI theo thứ tự điểm dừng
+    DETAIL-->>U: Hiển thị mô tả tour, số điểm dừng, thời lượng
+```
+
+## 29. Use case: Xem POI trên bản đồ (extend Xem chi tiết tour)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as TourDetailPage
+    participant MAP as MapPage
+    participant NF as NarrationFlowService
+
+    U->>DETAIL: Bấm Xem POI trên bản đồ
+    DETAIL->>MAP: Navigate //MapPage?tourPoiIds&tourName&tourStopOrders
+    MAP->>MAP: Render marker theo tourPoiIds
+    MAP->>NF: SetAutoNarrationPoiScope(tourPoiIds)
+    MAP-->>U: Hiển thị POI thuộc tour trên bản đồ
+```
+
+## 30. Use case: Xem chi tiết POI (extend Xem chi tiết tour)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as TourDetailPage
+    participant MAP as MapPage
+    participant POID as POIDetailPage
+    participant POI as POIService
+
+    U->>DETAIL: Chọn một điểm dừng trong tour
+    alt Chọn từ danh sách điểm dừng
+        DETAIL->>POID: Navigate POIDetailPage?restaurantId=...
+    else Chọn marker từ bản đồ tour
+        DETAIL->>MAP: Navigate //MapPage?tourPoiIds...
+        MAP->>POID: Navigate POIDetailPage?restaurantId=...
+    end
+    POID->>POI: GetPOIByIdAsync(restaurantId)
+    POI-->>POID: Dữ liệu chi tiết POI
+    POID-->>U: Hiển thị chi tiết POI và các hành động liên quan
+```
+
+## 31. Use case: Nghe thuyết minh
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage/MapPage/POIDetailPage
+    participant NF as NarrationFlowService
+    participant POI as POIService
+    participant LANG as LanguageService
+    participant AUD as AudioService
+
+    U->>MAIN: Bật chức năng nghe thuyết minh
+    MAIN->>NF: StartNarration() hoặc TriggerManualNarration(restaurantId)
+    NF->>POI: Resolve POI mục tiêu (theo geofence hoặc theo POI người dùng chọn)
+    NF->>LANG: Lấy ngôn ngữ hiện tại
+    NF->>NF: Resolve audio phù hợp theo language
+    NF->>AUD: Enqueue và PlaySound(audioId)
+    AUD-->>NF: Playback started/ended
+    NF-->>MAIN: Cập nhật trạng thái phát
+    MAIN-->>U: Hiển thị đang phát thuyết minh
+```
+
+## 32. Use case: Nghe thuyết minh tự động (extend Nghe thuyết minh)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant LOC as LocationChanged Event
+    participant NF as NarrationFlowService
+    participant POI as POIService
+    participant AUD as AudioService
+
+    LOC->>NF: OnLocationChanged(location)
+    NF->>POI: UpdateNearestPOI(lat,lng)
+    alt Enter hoặc Switch POI trong geofence
+        POI-->>NF: targetPoi
+        NF->>NF: Check distance/cooldown/played list
+        alt Đủ điều kiện tự động phát
+            NF->>AUD: PlaySound(audioId của targetPoi)
+            AUD-->>NF: Playback started
+        else Không đủ điều kiện
+            NF->>NF: Bỏ qua lần trigger này
+        end
+    else Không có geofence transition
+        POI-->>NF: null
+    end
+```
+
+## 33. Use case: Nghe thủ công (extend Nghe thuyết minh)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant NF as NarrationFlowService
+    participant AUD as AudioService
+
+    U->>DETAIL: Bấm nút Nghe
+    DETAIL->>NF: TriggerManualNarration(restaurantId)
+    NF->>NF: Bỏ qua rule auto (distance/cooldown) cho manual trigger
+    NF->>AUD: Stop audio hiện tại (nếu có)
+    NF->>AUD: PlaySound(audioId)
+    AUD-->>DETAIL: Playback started/ended
+    DETAIL-->>U: Cập nhật Play/Pause/Progress
+```
+
+## 34. Use case: Chọn ngôn ngữ thuyết minh (extend Nghe thuyết minh)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant LANG as LanguageService
+    participant NF as NarrationFlowService
+    participant AUD as AudioService
+
+    U->>SET: Chọn ngôn ngữ thuyết minh
+    SET->>LANG: ChangeLanguage(cultureCode)
+    LANG-->>SET: Đổi ngôn ngữ thành công
+    alt Đang phát audio
+        SET->>NF: RequestReloadCurrentPoiNarration()
+        NF->>AUD: Stop audio hiện tại
+        NF->>NF: Resolve audio mới theo language vừa chọn
+        NF->>AUD: PlaySound(audioId mới)
+    else Chưa phát audio
+        SET->>SET: Lưu preference cho lần phát kế tiếp
+    end
+    SET-->>U: Thông báo đã cập nhật ngôn ngữ
+```
+
+## 35. Use case: Phát lại audio (extend Nghe thuyết minh)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant DETAIL as POIDetailPage
+    participant AUD as AudioService
+    participant CACHE as Audio Cache
+
+    U->>DETAIL: Bấm Phát lại
+    DETAIL->>AUD: Replay(audioId)
+    AUD->>CACHE: Kiểm tra file local đã cache
+    alt Có file local
+        CACHE-->>AUD: Trả stream local
+        AUD->>AUD: Seek(0) và phát lại
+    else Không có cache
+        AUD->>AUD: Tải lại audio rồi phát từ đầu
+    end
+    AUD-->>DETAIL: Playback restarted
+    DETAIL-->>U: Hiển thị audio đang phát lại
+```
+
+## 36. Use case: Xem dung lượng bộ nhớ đệm
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant CM as CacheManager
+    participant FS as File System
+
+    U->>SET: Mở Cài đặt và vào mục bộ nhớ đệm
+    SET->>CM: GetCacheUsageSummaryAsync()
+    CM->>FS: Scan thư mục audio/image/map/offline cache
+    FS-->>CM: Kích thước từng thư mục
+    CM-->>SET: Tổng dung lượng + breakdown theo loại
+    SET-->>U: Hiển thị dung lượng bộ nhớ đệm
+```
+
+## 37. Use case: Xem chi tiết dung lượng (extend Xem dung lượng bộ nhớ đệm)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant CM as CacheManager
+    participant FS as File System
+
+    U->>SET: Bấm xem chi tiết dung lượng
+    SET->>CM: GetCacheUsageDetailsAsync()
+    CM->>FS: Liệt kê file theo từng vùng cache
+    FS-->>CM: Danh sách file + size + modified time
+    CM->>CM: Gom nhóm theo loại và sắp xếp dung lượng giảm dần
+    CM-->>SET: Chi tiết từng nhóm cache
+    SET-->>U: Hiển thị màn hình chi tiết dung lượng
+```
+
+## 38. Use case: Xóa bộ nhớ đệm (extend Xem dung lượng bộ nhớ đệm)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant CM as CacheManager
+    participant AUD as AudioService
+    participant FS as File System
+
+    U->>SET: Chọn xóa bộ nhớ đệm
+    SET->>SET: Hiển thị confirm dialog
+    alt Người dùng xác nhận
+        SET->>AUD: ClearAudioCacheAsync()
+        SET->>CM: ClearCacheAsync(selectedScopes)
+        CM->>FS: Xóa file trong audio/image/map/offline cache
+        FS-->>CM: Kết quả xóa
+        CM-->>SET: Success + dung lượng đã giải phóng
+        SET-->>U: Thông báo xóa thành công
+    else Người dùng hủy
+        SET-->>U: Giữ nguyên dữ liệu cache
+    end
+```
+
+## 39. Use case: Xem danh sách POI yêu thích
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant FAVP as FavoritePage
+    participant FAV as FavoriteService
+    participant POI as POIService
+
+    U->>FAVP: Mở tab Yêu thích
+    FAVP->>FAV: GetFavorites()
+    FAV-->>FAVP: Danh sách favoriteIds
+    FAVP->>POI: GetAllPOIsAsync()
+    POI-->>FAVP: Danh sách POI
+    FAVP->>FAVP: Join favoriteIds với POI data
+    FAVP-->>U: Hiển thị danh sách POI yêu thích
+```
+
+## 40. Use case: Xóa POI khỏi danh sách yêu thích
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant FAVP as FavoritePage/POIDetailPage
+    participant FAV as FavoriteService
+    participant PREF as Preferences
+
+    U->>FAVP: Bấm bỏ yêu thích một POI
+    FAVP->>FAV: RemoveFavorite(restaurantId)
+    FAV->>PREF: Đọc danh sách favoriteIds hiện tại
+    PREF-->>FAV: favoriteIds
+    FAV->>FAV: Remove restaurantId khỏi danh sách
+    FAV->>PREF: Lưu favoriteIds mới
+    FAV-->>FAVP: Trả trạng thái đã cập nhật
+    FAVP-->>U: POI biến mất khỏi danh sách yêu thích
+```
+
+## 41. Use case: Xem chi tiết POI (extend Xem danh sách POI yêu thích)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant FAVP as FavoritePage
+    participant DETAIL as POIDetailPage
+    participant POI as POIService
+
+    U->>FAVP: Chọn một POI yêu thích
+    FAVP->>DETAIL: Navigate POIDetailPage?restaurantId=...
+    DETAIL->>POI: GetPOIByIdAsync(restaurantId)
+    DETAIL->>POI: GetDishesByRestaurantIdAsync(restaurantId)
+    DETAIL->>POI: GetAudiosByRestaurantIdAsync(restaurantId)
+    POI-->>DETAIL: Dữ liệu chi tiết POI
+    DETAIL-->>U: Hiển thị thông tin chi tiết POI
+```
+
+## 42. Use case: Xem lịch sử đã nghe
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant HISTP as HistoryPage
+    participant HIST as HistoryService
+    participant POI as POIService
+
+    U->>HISTP: Mở tab Lịch sử
+    HISTP->>HIST: GetHistory()
+    HIST-->>HISTP: Danh sách lịch sử đã nghe
+    HISTP->>POI: GetAllPOIsAsync()
+    POI-->>HISTP: Danh sách POI
+    HISTP->>HISTP: Mapping history entries với POI data
+    HISTP-->>U: Hiển thị lịch sử đã nghe
+```
+
+## 43. Use case: Xóa lịch sử (extend Xem lịch sử đã nghe)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant HISTP as HistoryPage
+    participant HIST as HistoryService
+
+    U->>HISTP: Bấm Xóa lịch sử
+    HISTP->>HISTP: Hiển thị confirm dialog
+    alt Người dùng xác nhận
+        HISTP->>HIST: ClearHistory()
+        HIST-->>HISTP: Clear thành công
+        HISTP-->>U: Danh sách lịch sử trống
+    else Người dùng hủy
+        HISTP-->>U: Giữ nguyên dữ liệu lịch sử
+    end
+```
+
+## 44. Use case: Xem chi tiết POI (extend Xem lịch sử đã nghe)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant HISTP as HistoryPage
+    participant DETAIL as POIDetailPage
+    participant POI as POIService
+
+    U->>HISTP: Chọn một item trong lịch sử đã nghe
+    HISTP->>DETAIL: Navigate POIDetailPage?restaurantId=...
+    DETAIL->>POI: GetPOIByIdAsync(restaurantId)
+    DETAIL->>POI: GetDishesByRestaurantIdAsync(restaurantId)
+    DETAIL->>POI: GetAudiosByRestaurantIdAsync(restaurantId)
+    POI-->>DETAIL: Dữ liệu chi tiết POI
+    DETAIL-->>U: Hiển thị chi tiết POI
+```
+
+## 45. Use case: Theo dõi vị trí
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage
+    participant LOC as LocationService
+    participant OS as Android Permissions
+    participant FG as TrackingForegroundService
+
+    U->>MAIN: Bật theo dõi vị trí
+    MAIN->>LOC: StartTrackingAsync()
+    LOC->>OS: Check LocationWhenInUse permission
+    alt Đã có quyền truy cập
+        LOC->>FG: Start foreground service
+        LOC->>LOC: RunTrackingLoop mỗi 2s
+        LOC-->>MAIN: Publish LocationChanged/LocationSampled
+        MAIN-->>U: Trạng thái đang theo dõi vị trí
+    else Chưa có quyền
+        LOC-->>MAIN: Yêu cầu xin quyền truy cập trước
+        MAIN-->>U: Hiển thị trạng thái chưa thể theo dõi
+    end
+```
+
+## 46. Use case: Xin quyền truy cập (include Theo dõi vị trí)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage
+    participant LOC as LocationService
+    participant OS as Android Permissions
+
+    U->>MAIN: Bật theo dõi vị trí khi chưa có quyền
+    MAIN->>LOC: RequestLocationPermissionAsync()
+    LOC->>OS: Request LocationWhenInUse
+    alt Người dùng cấp quyền
+        OS-->>LOC: Granted
+        LOC-->>MAIN: PermissionGranted
+        MAIN-->>U: Cho phép bật tracking
+    else Người dùng từ chối
+        OS-->>LOC: Denied
+        LOC-->>MAIN: PermissionDenied
+        MAIN-->>U: Hướng dẫn cấp quyền trong cài đặt hệ thống
+    end
+```
+
+## 47. Use case: Xin quyền chạy nền (extend Theo dõi vị trí)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant LOC as LocationService
+    participant OS as Android Permissions
+
+    U->>SET: Bật quyền chạy nền cho tracking
+    SET->>LOC: RequestBackgroundLocationPermissionAsync()
+    LOC->>OS: Request LocationAlways (Android 10+)
+    alt Người dùng cấp quyền
+        OS-->>LOC: Granted
+        LOC-->>SET: BackgroundPermissionGranted
+        SET-->>U: Tracking có thể chạy nền ổn định
+    else Người dùng từ chối
+        OS-->>LOC: Denied
+        LOC-->>SET: BackgroundPermissionDenied
+        SET-->>U: Thông báo giới hạn tracking khi app nền
+    end
+```
+
+## 48. Use case: Tắt theo dõi vị trí (extend Theo dõi vị trí)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant MAIN as MainPage/SettingsPage
+    participant LOC as LocationService
+    participant FG as TrackingForegroundService
+
+    U->>MAIN: Tắt theo dõi vị trí
+    MAIN->>LOC: StopTrackingAsync()
+    LOC->>LOC: Hủy timer/loop và unsubscribe event
+    LOC->>FG: Stop foreground service
+    LOC-->>MAIN: TrackingStopped
+    MAIN-->>U: Trạng thái đã tắt theo dõi vị trí
+```
+
+## 49. Use case: Chọn ngôn ngữ ứng dụng (dịch UI + dữ liệu theo ngôn ngữ)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Người dùng
+    participant SET as SettingsPage
+    participant LANG as LanguageService
+    participant PREF as Preferences
+    participant LRM as LocalizationResourceManager
+    participant RES as Resource Files (.resx)
+    participant PAGE as MainPage/MapPage/POIDetailPage/TourPage
+    participant POI as POIService/TourService
+    participant API as Backend API
+    participant CACHE as Offline Cache
+
+    U->>SET: Chọn ngôn ngữ mới (vd: en, vi, ja)
+    SET->>LANG: ChangeLanguage(cultureCode)
+    LANG->>PREF: Lưu app_language = cultureCode
+    LANG->>LRM: SetCulture(cultureCode)
+
+    PAGE->>LRM: Resolve text theo cultureCode
+    LRM->>RES: Lấy text resource theo ngôn ngữ
+    alt Có resource đúng ngôn ngữ
+        RES-->>LRM: Localized strings
+    else Thiếu key hoặc thiếu culture
+        RES-->>LRM: Fallback strings (default language)
+    end
+    LRM-->>PAGE: Trả text đã localize
+
+    PAGE->>LANG: GetCurrentLanguage()
+    LANG-->>PAGE: languageCode
+    PAGE->>POI: LoadDataAsync(languageCode)
+    POI->>API: GET data kèm languageCode (header/query/path)
+    alt API trả dữ liệu đúng ngôn ngữ
+        API-->>POI: POI/Tour/Dishes đã localize
+        POI->>CACHE: Cập nhật cache theo languageCode
+        POI-->>PAGE: Trả data theo ngôn ngữ đã chọn
+    else Offline hoặc thiếu bản dịch
+        POI->>CACHE: Đọc cache theo languageCode
+        alt Có cache cùng language
+            CACHE-->>POI: Data localized từ cache
+        else Không có cache cùng language
+            CACHE-->>POI: Fallback cache mặc định
+        end
+        POI-->>PAGE: Trả data fallback
+    end
+    PAGE->>PAGE: Re-render UI text + danh sách/chi tiết theo ngôn ngữ mới
+    SET-->>U: Hoàn tất đổi ngôn ngữ toàn ứng dụng
+```
