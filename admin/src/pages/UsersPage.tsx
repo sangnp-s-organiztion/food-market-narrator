@@ -338,7 +338,7 @@ const UsersPage = () => {
 
         <div className="stat-card mt-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold">Danh sách visitor</h2>
+            <h2 className="text-base font-semibold">Danh sách khách thăm quan</h2>
             <span className="text-xs text-muted-foreground">
               Tổng visitor: {pageVisitors.length.toLocaleString("vi-VN")}
             </span>
@@ -347,7 +347,7 @@ const UsersPage = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Device ID</th>
+                <th>Mã thiết bị</th>
                 <th>Thiết bị</th>
                 <th>Lần cuối sử dụng</th>
                 <th>Lần đầu sử dụng</th>

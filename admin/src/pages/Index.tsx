@@ -62,8 +62,8 @@ const Dashboard = () => {
       icon: Store,
     },
     {
-      label: "Người dùng",
-      value: userCount?.count ?? 0,
+      label: "Tổng khách tham quan",
+      value: userCount?.visitors ?? 0,
       icon: Users,
     },
   ];
