@@ -34,6 +34,8 @@ Luu y:
 ## Users
 
 - GET /Users/{userId:int}/restaurants
+- GET /api/users (admin/saler)
+- GET /api/users/visitors (admin only)
 
 ## Admin Translation Billing
 
@@ -97,6 +99,10 @@ Luu y:
 - GET /api/user-sessions/{sessionId}/qr-access (public)
 - POST /api/location-logs/batch (public)
 - POST /api/audio-logs (public)
+
+Ghi chu them:
+
+- GET /api/admin/stats/users/count hien tra tong so nguoi dung gom: admin + saler (SQL Users) + visitor (Mongo UserSessions).
 
 ## Static Media URLs
 

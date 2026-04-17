@@ -293,10 +293,10 @@
     <value>APPLICATION</value>
   </data>
   <data name="NarrationLanguage" xml:space="preserve">
-    <value>Narration language</value>
+    <value>Language</value>
   </data>
   <data name="SelectNarrationLanguage" xml:space="preserve">
-    <value>Select narration language</value>
+    <value>Select language</value>
   </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Vietnamese</value>

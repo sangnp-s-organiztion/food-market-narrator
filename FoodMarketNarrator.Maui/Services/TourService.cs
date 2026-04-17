@@ -601,12 +601,9 @@ public class TourService : ITourService
                     continue;
                 }
 
-                var stopNameKey = BuildTranslationKey(stop.RestaurantId, "name");
                 var stopAddressKey = BuildTranslationKey(stop.RestaurantId, "address");
 
-                stop.RestaurantName = restaurantTranslationMap.TryGetValue(stopNameKey, out var translatedStopName)
-                    ? translatedStopName
-                    : (stop.OriginalRestaurantName ?? stop.RestaurantName);
+                stop.RestaurantName = stop.OriginalRestaurantName ?? stop.RestaurantName;
 
                 stop.Address = restaurantTranslationMap.TryGetValue(stopAddressKey, out var translatedAddress)
                     ? translatedAddress

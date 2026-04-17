@@ -34,6 +34,39 @@ public class UserSessionRepository
         await _userSessions.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
     }
 
+    public Task<long> CountVisitorsAsync()
+    {
+        return _userSessions.CountDocumentsAsync(FilterDefinition<BsonDocument>.Empty);
+    }
+
+    public async Task<IReadOnlyList<VisitorSessionRecord>> GetVisitorsAsync(int limit)
+    {
+        var normalizedLimit = Math.Clamp(limit, 1, 1000);
+
+        var projection = Builders<BsonDocument>.Projection
+            .Include("session_id")
+            .Include("device_id")
+            .Include("device_info")
+            .Include("created_at")
+            .Include("last_seen_at")
+            .Include("updated_at")
+            .Include("qr_access_expires_at");
+
+        var sort = Builders<BsonDocument>.Sort
+            .Descending("updated_at")
+            .Descending("last_seen_at")
+            .Descending("created_at");
+
+        var docs = await _userSessions
+            .Find(FilterDefinition<BsonDocument>.Empty)
+            .Project(projection)
+            .Sort(sort)
+            .Limit(normalizedLimit)
+            .ToListAsync();
+
+        return docs.Select(MapVisitorRecord).ToList();
+    }
+
     public async Task TouchSessionsAsync(IReadOnlyCollection<string> sessionIds, DateTime lastSeenAtUtc)
     {
         if (sessionIds.Count == 0)
@@ -109,6 +142,46 @@ public class UserSessionRepository
             QrAccessExpiresAtUtc = qrAccessExpiresAtUtc
         };
     }
+
+    private static VisitorSessionRecord MapVisitorRecord(BsonDocument doc)
+    {
+        return new VisitorSessionRecord
+        {
+            SessionId = GetStringValue(doc, "session_id"),
+            DeviceId = GetStringValue(doc, "device_id"),
+            DeviceInfo = GetStringValue(doc, "device_info"),
+            CreatedAtUtc = GetDateTimeValue(doc, "created_at"),
+            LastSeenAtUtc = GetDateTimeValue(doc, "last_seen_at"),
+            UpdatedAtUtc = GetDateTimeValue(doc, "updated_at"),
+            QrAccessExpiresAtUtc = GetDateTimeValue(doc, "qr_access_expires_at")
+        };
+    }
+
+    private static string GetStringValue(BsonDocument doc, string fieldName)
+    {
+        if (!doc.TryGetValue(fieldName, out var value) || value.IsBsonNull)
+        {
+            return string.Empty;
+        }
+
+        var text = value.IsString ? value.AsString : value.ToString();
+        return text ?? string.Empty;
+    }
+
+    private static DateTime? GetDateTimeValue(BsonDocument doc, string fieldName)
+    {
+        if (!doc.TryGetValue(fieldName, out var value) || value.IsBsonNull)
+        {
+            return null;
+        }
+
+        if (value.IsBsonDateTime)
+        {
+            return DateTime.SpecifyKind(value.AsBsonDateTime.ToUniversalTime(), DateTimeKind.Utc);
+        }
+
+        return null;
+    }
 }
 
 public class UserSessionStartRecord
@@ -122,5 +195,16 @@ public class UserSessionStartRecord
 public class UserSessionQrAccessRecord
 {
     public string SessionId { get; set; } = string.Empty;
+    public DateTime? QrAccessExpiresAtUtc { get; set; }
+}
+
+public class VisitorSessionRecord
+{
+    public string SessionId { get; set; } = string.Empty;
+    public string DeviceId { get; set; } = string.Empty;
+    public string DeviceInfo { get; set; } = string.Empty;
+    public DateTime? CreatedAtUtc { get; set; }
+    public DateTime? LastSeenAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
     public DateTime? QrAccessExpiresAtUtc { get; set; }
 }

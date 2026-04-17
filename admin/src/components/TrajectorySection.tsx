@@ -15,24 +15,59 @@ interface TrajectorySectionProps {
   movementPaths?: MovementPath[];
 }
 
-type DateSortOrder = "desc" | "asc";
 type SortedPath = MovementPath & { latestTimestamp: number };
 
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
-const PATH_COLORS = [
-  "hsl(221, 83%, 53%)",
-  "hsl(199, 89%, 48%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(280, 67%, 54%)",
-  "hsl(25, 95%, 53%)",
-];
 const SESSION_IDS_PER_PAGE = 20;
 const TABLE_ROWS_PER_PAGE = 20;
 
+const colorFromSessionId = (sessionId: string): string => {
+  if (!sessionId) {
+    return "hsl(221, 83%, 53%)";
+  }
+
+  // Deterministic hash so each session keeps its own color across rerenders.
+  let hash = 0;
+  for (let i = 0; i < sessionId.length; i += 1) {
+    hash = (hash * 31 + sessionId.charCodeAt(i)) | 0;
+  }
+
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 78%, 52%)`;
+};
+
 const toTimestamp = (value: string): number => {
+  if (!value) {
+    return 0;
+  }
+
+  // Prefer native parser for ISO timestamps.
   const parsed = Date.parse(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+
+  // Fallback parser for dd/MM/yyyy HH:mm:ss or dd/MM/yyyy formats.
+  const normalized = value.trim();
+  const match = normalized.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/,
+  );
+
+  if (!match) {
+    return 0;
+  }
+
+  const day = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10) - 1;
+  const year = Number.parseInt(match[3], 10);
+  const hour = Number.parseInt(match[4] ?? "0", 10);
+  const minute = Number.parseInt(match[5] ?? "0", 10);
+  const second = Number.parseInt(match[6] ?? "0", 10);
+
+  const date = new Date(year, month, day, hour, minute, second);
+  const timestamp = date.getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
 };
 
 const formatSessionDate = (timestamp: number): string => {
@@ -86,7 +121,6 @@ export function TrajectorySection({
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
   );
-  const [dateSortOrder, setDateSortOrder] = useState<DateSortOrder>("desc");
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
   const [tablePage, setTablePage] = useState(1);
@@ -116,21 +150,14 @@ export function TrajectorySection({
         };
       })
       .sort((a, b) => {
-        if (dateSortOrder === "asc") {
-          return a.latestTimestamp - b.latestTimestamp;
-        }
+        // Always show newest sessions first.
         return b.latestTimestamp - a.latestTimestamp;
       });
-  }, [movementPaths, dateSortOrder]);
+  }, [movementPaths]);
 
   const dateFilteredPaths = useMemo<SortedPath[]>(() => {
     if (!selectedRange?.from && !selectedRange?.to) {
-      return [...sortedMovementPaths].sort((a, b) => {
-        if (dateSortOrder === "asc") {
-          return a.latestTimestamp - b.latestTimestamp;
-        }
-        return b.latestTimestamp - a.latestTimestamp;
-      });
+      return sortedMovementPaths;
     }
 
     return sortedMovementPaths
@@ -153,12 +180,10 @@ export function TrajectorySection({
       })
       .filter((path): path is SortedPath => path !== null)
       .sort((a, b) => {
-        if (dateSortOrder === "asc") {
-          return a.latestTimestamp - b.latestTimestamp;
-        }
+        // Always show newest sessions first.
         return b.latestTimestamp - a.latestTimestamp;
       });
-  }, [dateSortOrder, selectedRange, sortedMovementPaths]);
+  }, [selectedRange, sortedMovementPaths]);
 
   const dateSessionRows = useMemo(
     () =>
@@ -338,8 +363,8 @@ export function TrajectorySection({
 
     pathLayer.clearLayers();
 
-    filteredPaths.forEach((path, idx) => {
-      const color = PATH_COLORS[idx % PATH_COLORS.length];
+    filteredPaths.forEach((path) => {
+      const color = colorFromSessionId(path.sessionId);
 
       const latlngs = path.points.map(
         (p) => [p.latitude, p.longitude] as L.LatLngTuple,

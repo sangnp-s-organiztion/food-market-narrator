@@ -80,7 +80,7 @@
                                 <BoxView Grid.Column="1" WidthRequest="1" Color="#E7E1DA" HorizontalOptions="Start" VerticalOptions="Fill"/>
 
                                 <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Label Text="&#xf0f5;"
+                                    <Label Text="&#xf124;"
                                            FontFamily="FASolid"
                                            FontSize="15"
                                            TextColor="#F39C12"

@@ -42,6 +42,14 @@
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\ILocationLogSyncService.cs" Link="Interfaces\ILocationLogSyncService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IQrAccessService.cs" Link="Interfaces\IQrAccessService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Settings\AppSettings.cs" Link="Settings\AppSettings.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\LocalizationResourceManager.cs" Link="LocalizationResourceManager.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Resources\Localization\AppResources.Designer.cs" Link="Resources\Localization\AppResources.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\FoodMarketNarrator.Maui\Resources\Localization\AppResources.resx" Link="Resources\Localization\AppResources.resx">
+      <LogicalName>food_market_narrator.Resources.Localization.AppResources.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!-- Required packages for testing -->

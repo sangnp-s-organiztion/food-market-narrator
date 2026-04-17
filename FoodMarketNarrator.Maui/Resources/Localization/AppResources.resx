@@ -293,10 +293,10 @@
     <value>ỨNG DỤNG</value>
   </data>
   <data name="NarrationLanguage" xml:space="preserve">
-    <value>Ngôn ngữ thuyết minh</value>
+    <value>Ngôn ngữ</value>
   </data>
   <data name="SelectNarrationLanguage" xml:space="preserve">
-    <value>Chọn ngôn ngữ thuyết minh</value>
+    <value>Chọn ngôn ngữ</value>
   </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Tiếng Việt</value>
