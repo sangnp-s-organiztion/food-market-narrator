@@ -6,6 +6,7 @@ import type {
   Dish,
   Language,
   Restaurant,
+  RestaurantFieldTranslations,
   RestaurantImage,
   TranslationUsageLedgerResponse,
   TranslateTextResult,
@@ -301,6 +302,14 @@ function mapLanguage(item: ApiLanguage): Language {
     code: item.languageCode ?? item.code ?? "",
   };
 }
+
+type ApiUiTranslationItem = {
+  entityType: string;
+  entityId: string;
+  languageId: number;
+  fieldName: string;
+  translatedText: string;
+};
 
 type LoginResponse = {
   userId: number;
@@ -622,6 +631,45 @@ export async function replaceImageApi(
 export async function getLanguagesApi(): Promise<Language[]> {
   const data = await request<ApiLanguage[]>("/Language", { method: "GET" });
   return data.map(mapLanguage);
+}
+
+export async function getRestaurantTranslationsApi(
+  restaurantId: string,
+  languageCode: string,
+): Promise<RestaurantFieldTranslations> {
+  const query = toQueryString({
+    languageCode,
+    entityType: "restaurant",
+    entityIds: restaurantId,
+  });
+
+  const items = await request<ApiUiTranslationItem[]>(
+    `/public/translations?${query}`,
+    { method: "GET" },
+  );
+
+  const normalized: RestaurantFieldTranslations = {};
+
+  items
+    .filter(
+      (item) =>
+        item.entityType?.toLowerCase() === "restaurant" &&
+        item.entityId === restaurantId,
+    )
+    .forEach((item) => {
+      const key = item.fieldName?.toLowerCase();
+      if (key === "name") {
+        normalized.name = item.translatedText ?? "";
+      }
+      if (key === "description") {
+        normalized.description = item.translatedText ?? "";
+      }
+      if (key === "address") {
+        normalized.address = item.translatedText ?? "";
+      }
+    });
+
+  return normalized;
 }
 
 export async function getRestaurantAudiosApi(

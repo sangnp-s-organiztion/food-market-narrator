@@ -306,7 +306,7 @@
                       <!-- <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
                           FontSize="12"
                           TextColor="#6B7280" /> -->
-                      <Label Text="{Binding CreatedAtDisplay, StringFormat='Ngày mở bán: {0}'}"
+                      <Label Text="{Binding OpenedDateDisplay}"
                           FontSize="12"
                           TextColor="#6B7280" />
                       <!-- <Label Text="{Binding AudioSummaryDisplay}"

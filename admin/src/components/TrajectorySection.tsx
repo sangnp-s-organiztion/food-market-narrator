@@ -19,15 +19,23 @@ type SortedPath = MovementPath & { latestTimestamp: number };
 
 const MAP_CENTER: [number, number] = [10.761, 106.703];
 const MAP_ZOOM = 16;
-const PATH_COLORS = [
-  "hsl(221, 83%, 53%)",
-  "hsl(199, 89%, 48%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(280, 67%, 54%)",
-  "hsl(25, 95%, 53%)",
-];
 const SESSION_IDS_PER_PAGE = 20;
 const TABLE_ROWS_PER_PAGE = 20;
+
+const colorFromSessionId = (sessionId: string): string => {
+  if (!sessionId) {
+    return "hsl(221, 83%, 53%)";
+  }
+
+  // Deterministic hash so each session keeps its own color across rerenders.
+  let hash = 0;
+  for (let i = 0; i < sessionId.length; i += 1) {
+    hash = (hash * 31 + sessionId.charCodeAt(i)) | 0;
+  }
+
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 78%, 52%)`;
+};
 
 const toTimestamp = (value: string): number => {
   if (!value) {
@@ -355,8 +363,8 @@ export function TrajectorySection({
 
     pathLayer.clearLayers();
 
-    filteredPaths.forEach((path, idx) => {
-      const color = PATH_COLORS[idx % PATH_COLORS.length];
+    filteredPaths.forEach((path) => {
+      const color = colorFromSessionId(path.sessionId);
 
       const latlngs = path.points.map(
         (p) => [p.latitude, p.longitude] as L.LatLngTuple,

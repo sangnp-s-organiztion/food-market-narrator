@@ -420,20 +420,32 @@ public partial class SettingsPage : ContentPage
 
     private async Task BuildLanguageOptionsAsync()
     {
-        if (_languageOptionsContainer == null || _languageService == null)
+        if (_languageOptionsContainer == null)
             return;
 
         // if (_isLanguageOptionsLoaded)
         //     return;
 
-        var languages = await _languageService.GetAllLanguagesAsync();
-        if (languages.Count == 0)
+        var currentLanguage = CanonicalizeLanguageCode(_languageService?.CurrentLanguage ?? "vi-VN");
+        List<LanguageModel> languages;
+
+        try
         {
-            languages = new List<LanguageModel>
+            if (_languageService != null)
             {
-                new() { LanguageCode = _languageService.CurrentLanguage, LanguageName = _languageService.CurrentLanguage }
-            };
+                languages = await _languageService.GetAllLanguagesAsync().WaitAsync(TimeSpan.FromSeconds(4));
+            }
+            else
+            {
+                languages = new List<LanguageModel>();
+            }
         }
+        catch
+        {
+            languages = new List<LanguageModel>();
+        }
+
+        languages = NormalizeLanguageOptions(languages, currentLanguage);
 
         _languageOptionsContainer.Children.Clear();
         _languageOptions.Clear();
@@ -441,7 +453,8 @@ public partial class SettingsPage : ContentPage
 
         foreach (var language in languages)
         {
-            if (string.IsNullOrWhiteSpace(language.LanguageCode))
+            var languageCode = CanonicalizeLanguageCode(language.LanguageCode);
+            if (string.IsNullOrWhiteSpace(languageCode))
                 continue;
 
             var optionBorder = new Border
@@ -454,8 +467,8 @@ public partial class SettingsPage : ContentPage
 
             optionBorder.GestureRecognizers.Add(new TapGestureRecognizer
             {
-                CommandParameter = language.LanguageCode,
-                Command = new Command(async () => await OnLanguageOptionTappedAsync(language.LanguageCode))
+                CommandParameter = languageCode,
+                Command = new Command(async () => await OnLanguageOptionTappedAsync(languageCode))
             });
 
             var row = new Grid
@@ -504,13 +517,94 @@ public partial class SettingsPage : ContentPage
 
             optionBorder.Content = row;
 
-            _languageOptions[language.LanguageCode] = optionBorder;
-            _languageChecks[language.LanguageCode] = checkLabel;
+            _languageOptions[languageCode] = optionBorder;
+            _languageChecks[languageCode] = checkLabel;
             _languageOptionsContainer.Children.Add(optionBorder);
         }
 
         _isLanguageOptionsLoaded = true;
-        ApplyLanguageSelectionStyle(_languageService.CurrentLanguage);
+        ApplyLanguageSelectionStyle(currentLanguage);
+    }
+
+    private static string CanonicalizeLanguageCode(string? languageCode)
+    {
+        var normalized = (languageCode ?? string.Empty).Trim().Replace('_', '-').ToLowerInvariant();
+
+        return normalized switch
+        {
+            "vi" or "vi-vn" => "vi-VN",
+            "en" or "en-us" => "en-US",
+            "zh" or "zh-cn" => "zh-CN",
+            "ja" or "ja-jp" => "ja-JP",
+            "ko" or "ko-kr" => "ko-KR",
+            _ => string.IsNullOrWhiteSpace(languageCode) ? "vi-VN" : languageCode.Trim()
+        };
+    }
+
+    private static List<LanguageModel> BuildDefaultLanguageOptions()
+    {
+        return new List<LanguageModel>
+        {
+            new() { LanguageCode = "vi-VN", LanguageName = "Tiếng Việt" },
+            new() { LanguageCode = "en-US", LanguageName = "English" },
+            new() { LanguageCode = "zh-CN", LanguageName = "中文" },
+            new() { LanguageCode = "ja-JP", LanguageName = "日本語" },
+            new() { LanguageCode = "ko-KR", LanguageName = "한국어" }
+        };
+    }
+
+    private static List<LanguageModel> NormalizeLanguageOptions(
+        IEnumerable<LanguageModel> source,
+        string currentLanguage)
+    {
+        var merged = new Dictionary<string, LanguageModel>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in BuildDefaultLanguageOptions())
+        {
+            var code = CanonicalizeLanguageCode(item.LanguageCode);
+            merged[code] = new LanguageModel
+            {
+                LanguageCode = code,
+                LanguageName = item.LanguageName
+            };
+        }
+
+        foreach (var item in source)
+        {
+            if (string.IsNullOrWhiteSpace(item.LanguageCode))
+            {
+                continue;
+            }
+
+            var code = CanonicalizeLanguageCode(item.LanguageCode);
+            if (!merged.TryGetValue(code, out var existing) || string.IsNullOrWhiteSpace(existing.LanguageName))
+            {
+                merged[code] = new LanguageModel
+                {
+                    LanguageCode = code,
+                    LanguageName = item.LanguageName
+                };
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.LanguageName))
+            {
+                existing.LanguageName = item.LanguageName;
+            }
+        }
+
+        if (!merged.ContainsKey(currentLanguage))
+        {
+            merged[currentLanguage] = new LanguageModel
+            {
+                LanguageCode = currentLanguage,
+                LanguageName = currentLanguage
+            };
+        }
+
+        return merged.Values
+            .OrderBy(x => x.LanguageCode, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private void ApplyLanguageSelectionStyle(string cultureCode)
@@ -540,6 +634,8 @@ public partial class SettingsPage : ContentPage
         if (string.IsNullOrWhiteSpace(cultureCode) || _languageService == null)
             return;
 
+        cultureCode = CanonicalizeLanguageCode(cultureCode);
+
         var wasNarrating = _narrationFlowService?.IsNarrating ?? false;
 
         ApplyLanguageSelectionStyle(cultureCode);
@@ -565,7 +661,7 @@ public partial class SettingsPage : ContentPage
 
     private string GetFlagByLanguageCode(string languageCode)
     {
-        return languageCode.ToLowerInvariant() switch
+        return CanonicalizeLanguageCode(languageCode).ToLowerInvariant() switch
         {
             "vi-vn" => "🇻🇳",
             "en-us" => "🇺🇸",
