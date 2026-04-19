@@ -97,6 +97,10 @@ export default function RestaurantPage() {
   const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hydratedRestaurantId, setHydratedRestaurantId] = useState<
+    string | null
+  >(selectedRestaurant?.restaurant_id ?? null);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [previewLanguageCode, setPreviewLanguageCode] = useState("vi");
   const [translatedFields, setTranslatedFields] =
@@ -108,13 +112,25 @@ export default function RestaurantPage() {
 
   useEffect(() => {
     if (selectedRestaurant) {
+      const isRestaurantChanged =
+        selectedRestaurant.restaurant_id !== hydratedRestaurantId;
+
+      if (!isRestaurantChanged && hasUnsavedChanges) {
+        return;
+      }
+
       setRestaurant({ ...selectedRestaurant });
-      setGoogleMapsUrl("");
-      setAutoMode(true);
-      setPreviewLanguageCode("vi");
-      setTranslatedFields({});
+      setHasUnsavedChanges(false);
+      setHydratedRestaurantId(selectedRestaurant.restaurant_id);
+
+      if (isRestaurantChanged) {
+        setGoogleMapsUrl("");
+        setAutoMode(true);
+        setPreviewLanguageCode("vi");
+        setTranslatedFields({});
+      }
     }
-  }, [selectedRestaurant]);
+  }, [hasUnsavedChanges, hydratedRestaurantId, selectedRestaurant]);
 
   useEffect(() => {
     let mounted = true;
@@ -193,7 +209,14 @@ export default function RestaurantPage() {
     key: K,
     value: Restaurant[K],
   ) => {
-    setRestaurant((prev) => (prev ? { ...prev, [key]: value } : prev));
+    setRestaurant((prev) => {
+      if (!prev || prev[key] === value) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, [key]: value };
+    });
   };
 
   const updateAutoStatus = useCallback(() => {
@@ -242,7 +265,9 @@ export default function RestaurantPage() {
         restaurant.restaurant_id,
         restaurant.is_active,
       );
-      setRestaurant(updatedRestaurant);
+      setRestaurant({ ...updatedRestaurant, is_active: restaurant.is_active });
+      setHasUnsavedChanges(false);
+      setHydratedRestaurantId(updatedRestaurant.restaurant_id);
       if (previewLanguageCode !== "vi") {
         try {
           const translated = await getRestaurantTranslationsApi(
@@ -263,7 +288,18 @@ export default function RestaurantPage() {
   };
 
   const applyCoordinates = (latitude: number, longitude: number) => {
-    setRestaurant((prev) => (prev ? { ...prev, latitude, longitude } : prev));
+    setRestaurant((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      if (prev.latitude === latitude && prev.longitude === longitude) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, latitude, longitude };
+    });
   };
 
   const handleGoogleMapsUrlChange = (value: string) => {
