@@ -8,11 +8,19 @@ namespace food_market_narrator_api.Services
     {
         private readonly DishRepository _dishRepository;
         private readonly LanguageRepository _languageRepository;
+        private readonly RestaurantRepository _restaurantRepository;
+        private readonly TranslationService _translationService;
 
-        public DishService(DishRepository dishRepository, LanguageRepository languageRepository)
+        public DishService(
+            DishRepository dishRepository,
+            LanguageRepository languageRepository,
+            RestaurantRepository restaurantRepository,
+            TranslationService translationService)
         {
             _dishRepository = dishRepository;
             _languageRepository = languageRepository;
+            _restaurantRepository = restaurantRepository;
+            _translationService = translationService;
         }
 
         public async Task<List<DishResponse>> GetByRestaurantIdAsync(string restaurantId, int page, int pageSize, string? languageCode = null)
@@ -75,10 +83,25 @@ namespace food_market_narrator_api.Services
             };
 
             var created = await _dishRepository.CreateAsync(dish);
+
+            var ownerUserId = await TryGetRestaurantOwnerUserIdAsync(restaurantId);
+            if (ownerUserId.HasValue)
+            {
+                await _translationService.SyncDishNameTranslationsAsync(
+                    ownerUserId.Value,
+                    restaurantId,
+                    created.DishId,
+                    created.Name,
+                    requestIdPrefix: $"dish-create-{created.DishId}");
+            }
+
             return Map(created);
         }
 
-        public async Task<DishResponse?> UpdateAsync(int dishId, UpdateDishRequest request)
+        public async Task<DishResponse?> UpdateAsync(
+            int dishId,
+            UpdateDishRequest request,
+            int? sellerUserId = null)
         {
             var existing = await _dishRepository.GetByIdAsync(dishId);
             if (existing == null)
@@ -86,7 +109,13 @@ namespace food_market_narrator_api.Services
                 return null;
             }
 
-            existing.Name = request.Name.Trim();
+            var normalizedName = request.Name.Trim();
+            var isDishNameChanged = !string.Equals(
+                NormalizeForComparison(existing.Name),
+                NormalizeForComparison(normalizedName),
+                StringComparison.Ordinal);
+
+            existing.Name = normalizedName;
             existing.Price = request.Price;
             existing.ImageId = request.ImageId;
 
@@ -96,7 +125,28 @@ namespace food_market_narrator_api.Services
                 return null;
             }
 
+            if (sellerUserId.HasValue && isDishNameChanged)
+            {
+                await _translationService.SyncDishNameTranslationsAsync(
+                    sellerUserId.Value,
+                    existing.RestaurantId,
+                    existing.DishId,
+                    existing.Name,
+                    requestIdPrefix: $"dish-update-{existing.DishId}");
+            }
+
             return Map(existing);
+        }
+
+        private static string NormalizeForComparison(string? value)
+        {
+            return (value ?? string.Empty).Trim();
+        }
+
+        private async Task<int?> TryGetRestaurantOwnerUserIdAsync(string restaurantId)
+        {
+            var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId);
+            return restaurant?.UserId;
         }
 
         public async Task<bool> DeleteAsync(int dishId)
