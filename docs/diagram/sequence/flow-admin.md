@@ -430,10 +430,25 @@ sequenceDiagram
     participant USER as User API
     participant RES as Restaurant API
 
-    U->>FE: Bấm xem chi tiết user
-    FE->>USER: Dùng dữ liệu user đã load để render dialog
-    FE->>RES: Dùng dữ liệu /restaurant đã load, lọc theo userId
-    FE-->>U: Hiển thị profile user + danh sách nhà hàng user đang quản lý
+    U->>FE: Truy cập /users
+    par Load dữ liệu
+        FE->>USER: GET /api/users
+    and
+        FE->>RES: GET /restaurant
+    end
+    alt Tải dữ liệu thành công
+        USER-->>FE: Danh sách user
+        RES-->>FE: Danh sách nhà hàng
+        U->>FE: Bấm xem chi tiết user
+        FE->>FE: Lọc nhà hàng theo userId và sắp xếp theo tên
+        alt User chưa quản lý nhà hàng
+            FE-->>U: Hiển thị hồ sơ user + thông báo chưa có nhà hàng
+        else User có nhà hàng quản lý
+            FE-->>U: Hiển thị hồ sơ user + danh sách nhà hàng quản lý
+        end
+    else Tải dữ liệu thất bại
+        FE-->>U: Hiển thị lỗi tải dữ liệu
+    end
 ```
 
 ## 15. Xem nhật ký hệ thống và nhật ký nghe audio
