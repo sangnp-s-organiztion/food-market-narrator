@@ -222,11 +222,14 @@ export default function RestaurantPage() {
   const updateAutoStatus = useCallback(() => {
     if (!autoMode || !openTime || !closeTime) return;
     const shouldBeActive = isWithinSchedule(openTime, closeTime);
-    setRestaurant((prev) =>
-      prev && prev.is_active !== shouldBeActive
-        ? { ...prev, is_active: shouldBeActive }
-        : prev,
-    );
+    setRestaurant((prev) => {
+      if (!prev || prev.is_active === shouldBeActive) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, is_active: shouldBeActive };
+    });
   }, [autoMode, openTime, closeTime]);
 
   useEffect(() => {
