@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type {
   Language,
@@ -10,7 +10,6 @@ import {
   getRestaurantTranslationsApi,
   resolveMapCoordinatesApi,
   updateRestaurantApi,
-  updateRestaurantStatusApi,
 } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,12 +27,37 @@ import { toast } from "sonner";
 import { MapPin, Phone, Save, Clock } from "lucide-react";
 
 function isWithinSchedule(openTime: string, closeTime: string): boolean {
+  const parseTimeToMinutes = (value: string): number | null => {
+    const match = value.trim().match(/^(\d{1,2}):(\d{2})/);
+    if (!match) {
+      return null;
+    }
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+
+    if (
+      !Number.isFinite(hours) ||
+      !Number.isFinite(minutes) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return null;
+    }
+
+    return hours * 60 + minutes;
+  };
+
+  const openMinutes = parseTimeToMinutes(openTime);
+  const closeMinutes = parseTimeToMinutes(closeTime);
+  if (openMinutes === null || closeMinutes === null) {
+    return false;
+  }
+
   const now = new Date();
-  const [openH, openM] = openTime.split(":").map(Number);
-  const [closeH, closeM] = closeTime.split(":").map(Number);
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const openMinutes = openH * 60 + openM;
-  const closeMinutes = closeH * 60 + closeM;
 
   if (closeMinutes > openMinutes) {
     return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
@@ -94,6 +118,10 @@ export default function RestaurantPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(
     selectedRestaurant ? { ...selectedRestaurant } : null,
   );
+  const [persistedRestaurant, setPersistedRestaurant] =
+    useState<Restaurant | null>(
+      selectedRestaurant ? { ...selectedRestaurant } : null,
+    );
   const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
@@ -119,7 +147,18 @@ export default function RestaurantPage() {
         return;
       }
 
-      setRestaurant({ ...selectedRestaurant });
+      const shouldAutoOpen =
+        autoMode &&
+        isWithinSchedule(
+          selectedRestaurant.open_time,
+          selectedRestaurant.close_time,
+        );
+
+      setRestaurant({
+        ...selectedRestaurant,
+        is_active: autoMode ? shouldAutoOpen : selectedRestaurant.is_active,
+      });
+      setPersistedRestaurant({ ...selectedRestaurant });
       setHasUnsavedChanges(false);
       setHydratedRestaurantId(selectedRestaurant.restaurant_id);
 
@@ -130,7 +169,7 @@ export default function RestaurantPage() {
         setTranslatedFields({});
       }
     }
-  }, [hasUnsavedChanges, hydratedRestaurantId, selectedRestaurant]);
+  }, [autoMode, hasUnsavedChanges, hydratedRestaurantId, selectedRestaurant]);
 
   useEffect(() => {
     let mounted = true;
@@ -219,21 +258,25 @@ export default function RestaurantPage() {
     });
   };
 
-  const updateAutoStatus = useCallback(() => {
-    if (!autoMode || !openTime || !closeTime) return;
-    const shouldBeActive = isWithinSchedule(openTime, closeTime);
-    setRestaurant((prev) =>
-      prev && prev.is_active !== shouldBeActive
-        ? { ...prev, is_active: shouldBeActive }
-        : prev,
-    );
-  }, [autoMode, openTime, closeTime]);
-
   useEffect(() => {
-    updateAutoStatus();
-    const interval = setInterval(updateAutoStatus, 60000);
-    return () => clearInterval(interval);
-  }, [updateAutoStatus]);
+    if (!autoMode) {
+      return;
+    }
+
+    setRestaurant((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      const shouldBeActive = isWithinSchedule(prev.open_time, prev.close_time);
+      if (prev.is_active === shouldBeActive) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, is_active: shouldBeActive };
+    });
+  }, [autoMode, closeTime, openTime]);
 
   const handleManualToggle = (value: boolean) => {
     setAutoMode(false);
@@ -261,11 +304,8 @@ export default function RestaurantPage() {
         restaurant.restaurant_id,
         restaurant,
       );
-      await updateRestaurantStatusApi(
-        restaurant.restaurant_id,
-        restaurant.is_active,
-      );
       setRestaurant({ ...updatedRestaurant, is_active: restaurant.is_active });
+      setPersistedRestaurant({ ...updatedRestaurant });
       setHasUnsavedChanges(false);
       setHydratedRestaurantId(updatedRestaurant.restaurant_id);
       if (previewLanguageCode !== "vi") {
@@ -334,15 +374,16 @@ export default function RestaurantPage() {
 
   if (!selectedRestaurant || !restaurant) return null;
 
-  const displayName = restaurant.name;
+  const previewRestaurant = persistedRestaurant ?? selectedRestaurant;
+  const displayName = previewRestaurant?.name ?? "";
   const displayDescription =
     previewLanguageCode === "vi"
-      ? restaurant.description
-      : translatedFields.description || restaurant.description;
+      ? (previewRestaurant?.description ?? "")
+      : translatedFields.description || previewRestaurant?.description || "";
   const displayAddress =
     previewLanguageCode === "vi"
-      ? restaurant.address
-      : translatedFields.address || restaurant.address;
+      ? (previewRestaurant?.address ?? "")
+      : translatedFields.address || previewRestaurant?.address || "";
 
   const hasTranslationForPreviewLanguage =
     previewLanguageCode === "vi"

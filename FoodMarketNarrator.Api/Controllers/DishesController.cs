@@ -1,7 +1,10 @@
 using food_market_narrator_api.DTOs.Dish;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace food_market_narrator_api.Controllers
 {
@@ -51,7 +54,26 @@ namespace food_market_narrator_api.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var updated = await _dishService.UpdateAsync(dishId, request);
+            var sellerUserId = await TryGetCurrentSellerUserIdAsync();
+
+            DishResponse? updated;
+            try
+            {
+                updated = await _dishService.UpdateAsync(dishId, request, sellerUserId);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, new { message = ex.Message });
+            }
+
             if (updated == null)
             {
                 return NotFound(new { message = "Dish not found." });
@@ -70,6 +92,20 @@ namespace food_market_narrator_api.Controllers
             }
 
             return Ok(new { message = "Dish deleted successfully." });
+        }
+
+        private async Task<int?> TryGetCurrentSellerUserIdAsync()
+        {
+            var authResult = await HttpContext.AuthenticateAsync(AuthSchemes.Saler);
+            var principal = authResult.Succeeded ? authResult.Principal : null;
+            var userIdRaw = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (int.TryParse(userIdRaw, out var userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
     }
 }
