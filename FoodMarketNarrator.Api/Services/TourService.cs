@@ -7,10 +7,12 @@ namespace food_market_narrator_api.Services;
 public class TourService
 {
     private readonly TourRepository _tourRepository;
+    private readonly TranslationService _translationService;
 
-    public TourService(TourRepository tourRepository)
+    public TourService(TourRepository tourRepository, TranslationService translationService)
     {
         _tourRepository = tourRepository;
+        _translationService = translationService;
     }
 
     public async Task<List<TourResponse>> GetAllToursAsync(double? latitude = null, double? longitude = null, double radiusMeters = 30)
@@ -223,6 +225,16 @@ public class TourService
         {
             return CreateTourResult.Invalid("Unable to load created tour.");
         }
+
+        await _translationService.SyncTourInfoTranslationsAsync(
+            createdTour.TourId,
+            new TourTranslationContent
+            {
+                Name = createdTour.Name,
+                Description = createdTour.Description
+            },
+            fieldsToSync: new[] { "name", "description" },
+            requestIdPrefix: $"tour-create-{createdTour.TourId}");
 
         return CreateTourResult.Success(MapTour(createdTour, null, null, 30));
     }
