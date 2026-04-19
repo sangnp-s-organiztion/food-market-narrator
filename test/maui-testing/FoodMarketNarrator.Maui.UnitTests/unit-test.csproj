@@ -28,6 +28,7 @@
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Models\LanguageModel.cs" Link="Models\LanguageModel.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Models\RestaurantImageModel.cs" Link="Models\RestaurantImageModel.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Models\DishModel.cs" Link="Models\DishModel.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Models\UiTranslationModel.cs" Link="Models\UiTranslationModel.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\HistoryService.cs" Link="Services\HistoryService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\POIService.cs" Link="Services\POIService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Services\NarrationFlowService.cs" Link="Services\NarrationFlowService.cs" />
@@ -41,6 +42,14 @@
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\ILocationLogSyncService.cs" Link="Interfaces\ILocationLogSyncService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Interfaces\IQrAccessService.cs" Link="Interfaces\IQrAccessService.cs" />
     <Compile Include="..\..\..\FoodMarketNarrator.Maui\Settings\AppSettings.cs" Link="Settings\AppSettings.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\LocalizationResourceManager.cs" Link="LocalizationResourceManager.cs" />
+    <Compile Include="..\..\..\FoodMarketNarrator.Maui\Resources\Localization\AppResources.Designer.cs" Link="Resources\Localization\AppResources.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\FoodMarketNarrator.Maui\Resources\Localization\AppResources.resx" Link="Resources\Localization\AppResources.resx">
+      <LogicalName>food_market_narrator.Resources.Localization.AppResources.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!-- Required packages for testing -->

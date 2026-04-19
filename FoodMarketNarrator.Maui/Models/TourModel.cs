@@ -20,6 +20,8 @@ public class TourModel
     }
 
     public string? ResolvedImageUrl { get; set; }
+    public string? OriginalName { get; set; }
+    public string? OriginalDescription { get; set; }
 
     public string DisplayImageSource => string.IsNullOrWhiteSpace(ResolvedImageUrl)
         ? "dotnet_bot.svg"
@@ -54,8 +56,10 @@ public class TourStopModel
     public int StopOrder { get; set; }
     public string RestaurantId { get; set; } = string.Empty;
     public string RestaurantName { get; set; } = string.Empty;
+    public string? OriginalRestaurantName { get; set; }
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public string? Address { get; set; }
+    public string? OriginalAddress { get; set; }
     public string? PrimaryImageUrl { get; set; }
 }

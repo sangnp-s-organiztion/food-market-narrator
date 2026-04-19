@@ -14,7 +14,7 @@ import { Store } from "lucide-react";
 
 export default function DashboardLayout() {
   const { user } = useAuth();
-  const { restaurants, selectedRestaurant, selectRestaurant } = useRestaurant();
+  const { activeRestaurants, selectedRestaurant, selectRestaurant } = useRestaurant();
   const location = useLocation();
   const isAccountPage = location.pathname.startsWith("/dashboard/account");
 
@@ -29,7 +29,7 @@ export default function DashboardLayout() {
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center border-b bg-card px-4 gap-4">
             <SidebarTrigger />
-            {restaurants.length > 1 && selectedRestaurant && (
+            {activeRestaurants.length > 1 && selectedRestaurant && (
               <div className="flex items-center gap-2">
                 <Store className="w-4 h-4 text-muted-foreground" />
                 <Select
@@ -40,7 +40,7 @@ export default function DashboardLayout() {
                     <SelectValue placeholder="Chọn nhà hàng" />
                   </SelectTrigger>
                   <SelectContent>
-                    {restaurants.map((r) => (
+                    {activeRestaurants.map((r) => (
                       <SelectItem key={r.restaurant_id} value={String(r.restaurant_id)}>
                         {r.name}
                       </SelectItem>

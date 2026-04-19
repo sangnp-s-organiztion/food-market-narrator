@@ -12,11 +12,13 @@ namespace food_market_narrator.Services;
 public class TourService : ITourService
 {
     private const string OfflineCacheFolderName = "offline_cache";
+    private const string TranslationCacheFolderName = "translations";
     private const string ImageCacheFolderName = "image_cache";
     private const int MinValidImageBytes = 128;
 
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
+    private readonly ILanguageService _languageService;
     private readonly SemaphoreSlim _cacheFileLock = new(1, 1);
     private readonly SemaphoreSlim _networkRefreshLock = new(1, 1);
     private List<TourModel>? _cachedTours;
@@ -32,11 +34,12 @@ public class TourService : ITourService
         WriteIndented = false
     };
 
-    // Khởi tạo service tour với HttpClient và LocationService để build endpoint theo vị trí hiện tại.
-    public TourService(HttpClient httpClient, ILocationService locationService)
+    // Khởi tạo service tour với HttpClient, LocationService và LanguageService.
+    public TourService(HttpClient httpClient, ILocationService locationService, ILanguageService languageService)
     {
         _httpClient = httpClient;
         _locationService = locationService;
+        _languageService = languageService;
     }
 
     // Lấy danh sách tour: ưu tiên memory cache -> disk cache -> network.
@@ -44,6 +47,7 @@ public class TourService : ITourService
     {
         if (HasFreshMemoryCache())
         {
+            await ApplyTourTranslationsForCurrentLanguageAsync(_cachedTours!);
             return _cachedTours!;
         }
 
@@ -51,6 +55,7 @@ public class TourService : ITourService
         if (cachedTours.Count > 0)
         {
             SetMemoryCache(cachedTours);
+            await ApplyTourTranslationsForCurrentLanguageAsync(_cachedTours!);
 
             if (Connectivity.Current.NetworkAccess == NetworkAccess.Internet && ShouldRefreshFromNetwork())
             {
@@ -65,7 +70,9 @@ public class TourService : ITourService
             return new List<TourModel>();
         }
 
-        return await RefreshToursFromNetworkAsync(new List<TourModel>());
+        var refreshedTours = await RefreshToursFromNetworkAsync(new List<TourModel>());
+        await ApplyTourTranslationsForCurrentLanguageAsync(refreshedTours);
+        return refreshedTours;
     }
 
     // Lấy chi tiết 1 tour theo id, vẫn giữ fallback cache nếu mạng lỗi.
@@ -84,11 +91,18 @@ public class TourService : ITourService
 
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
         {
-            return cachedTour == null ? null : NormalizeTour(cachedTour);
+            if (cachedTour == null)
+            {
+                return null;
+            }
+
+            await ApplyTourTranslationsForCurrentLanguageAsync(new List<TourModel> { cachedTour });
+            return NormalizeTour(cachedTour);
         }
 
         if (cachedTour != null)
         {
+            await ApplyTourTranslationsForCurrentLanguageAsync(new List<TourModel> { cachedTour });
             _ = RefreshTourByIdInBackgroundAsync(tourId);
             return NormalizeTour(cachedTour);
         }
@@ -107,7 +121,13 @@ public class TourService : ITourService
             // Return cached fallback below.
         }
 
-        return cachedTour == null ? null : NormalizeTour(cachedTour);
+        if (cachedTour == null)
+        {
+            return null;
+        }
+
+        await ApplyTourTranslationsForCurrentLanguageAsync(new List<TourModel> { cachedTour });
+        return NormalizeTour(cachedTour);
     }
 
     // Kiểm tra memory cache còn trong TTL.
@@ -187,6 +207,7 @@ public class TourService : ITourService
 
                 _lastSuccessfulBaseUrl = baseUrl;
                 SetMemoryCache(tours);
+                await ApplyTourTranslationsForCurrentLanguageAsync(_cachedTours!);
                 _lastNetworkFetchUtc = DateTime.UtcNow;
                 await SaveToursCacheAsync(_cachedTours!);
                 return _cachedTours!;
@@ -274,6 +295,7 @@ public class TourService : ITourService
 
                 _lastSuccessfulBaseUrl = baseUrl;
                 var normalizedTour = NormalizeTour(tour);
+                await ApplyTourTranslationsForCurrentLanguageAsync(new List<TourModel> { normalizedTour });
                 await MergeTourIntoCacheAsync(normalizedTour);
                 return normalizedTour;
             }
@@ -284,6 +306,310 @@ public class TourService : ITourService
         }
 
         return null;
+    }
+
+    private static string NormalizeLanguageCode(string? languageCode)
+    {
+        return string.IsNullOrWhiteSpace(languageCode)
+            ? "vi-VN"
+            : languageCode.Trim();
+    }
+
+    private static string BuildTranslationKey(string entityId, string fieldName)
+    {
+        return $"{entityId}|{fieldName}";
+    }
+
+    private static Dictionary<string, string> ToTranslationMap(IEnumerable<UiTranslationModel> items)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(item.EntityId)
+                || string.IsNullOrWhiteSpace(item.FieldName)
+                || string.IsNullOrWhiteSpace(item.TranslatedText))
+            {
+                continue;
+            }
+
+            var key = BuildTranslationKey(item.EntityId.Trim(), item.FieldName.Trim().ToLowerInvariant());
+            map[key] = item.TranslatedText;
+        }
+
+        return map;
+    }
+
+    private static void CaptureOriginalTourText(IEnumerable<TourModel> tours)
+    {
+        foreach (var tour in tours)
+        {
+            tour.OriginalName ??= tour.Name;
+            tour.OriginalDescription ??= tour.Description;
+        }
+    }
+
+    private static void CaptureOriginalStopText(IEnumerable<TourModel> tours)
+    {
+        foreach (var tour in tours)
+        {
+            foreach (var stop in tour.Stops)
+            {
+                stop.OriginalRestaurantName ??= stop.RestaurantName;
+                stop.OriginalAddress ??= stop.Address;
+            }
+        }
+    }
+
+    private static string GetTranslationCacheFilePath(string languageCode, string entityType)
+    {
+        var translationsDir = Path.Combine(FileSystem.AppDataDirectory, OfflineCacheFolderName, TranslationCacheFolderName);
+        Directory.CreateDirectory(translationsDir);
+        var safeLanguage = ToSafeFileSegment(languageCode);
+        var safeEntityType = ToSafeFileSegment(entityType);
+        return Path.Combine(translationsDir, $"{safeLanguage}_{safeEntityType}.json");
+    }
+
+    private static string ToSafeFileSegment(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "unknown";
+        }
+
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var cleaned = value.Trim();
+        foreach (var invalid in invalidChars)
+        {
+            cleaned = cleaned.Replace(invalid, '_');
+        }
+
+        return cleaned.Replace(' ', '_').ToLowerInvariant();
+    }
+
+    private static List<UiTranslationModel> NormalizeTranslationItems(IEnumerable<UiTranslationModel> items, string entityType)
+    {
+        return items
+            .Where(x => !string.IsNullOrWhiteSpace(x.EntityId)
+                && !string.IsNullOrWhiteSpace(x.FieldName)
+                && !string.IsNullOrWhiteSpace(x.TranslatedText))
+            .Select(x => new UiTranslationModel
+            {
+                EntityType = entityType,
+                EntityId = x.EntityId.Trim(),
+                LanguageId = x.LanguageId,
+                FieldName = x.FieldName.Trim().ToLowerInvariant(),
+                TranslatedText = x.TranslatedText
+            })
+            .ToList();
+    }
+
+    private async Task<List<UiTranslationModel>> ReadTranslationsCacheAsync(string languageCode, string entityType)
+    {
+        await _cacheFileLock.WaitAsync();
+        try
+        {
+            var path = GetTranslationCacheFilePath(languageCode, entityType);
+            if (!File.Exists(path))
+            {
+                return new List<UiTranslationModel>();
+            }
+
+            await using var stream = File.OpenRead(path);
+            var data = await JsonSerializer.DeserializeAsync<List<UiTranslationModel>>(stream, JsonOptions);
+            return data ?? new List<UiTranslationModel>();
+        }
+        catch
+        {
+            return new List<UiTranslationModel>();
+        }
+        finally
+        {
+            _cacheFileLock.Release();
+        }
+    }
+
+    private async Task SaveTranslationsCacheAsync(string languageCode, string entityType, IEnumerable<UiTranslationModel> incoming)
+    {
+        await _cacheFileLock.WaitAsync();
+        try
+        {
+            var path = GetTranslationCacheFilePath(languageCode, entityType);
+            var merged = new Dictionary<string, UiTranslationModel>(StringComparer.OrdinalIgnoreCase);
+
+            if (File.Exists(path))
+            {
+                await using var readStream = File.OpenRead(path);
+                var existing = await JsonSerializer.DeserializeAsync<List<UiTranslationModel>>(readStream, JsonOptions);
+                foreach (var item in NormalizeTranslationItems(existing ?? new List<UiTranslationModel>(), entityType))
+                {
+                    merged[BuildTranslationKey(item.EntityId, item.FieldName)] = item;
+                }
+            }
+
+            foreach (var item in NormalizeTranslationItems(incoming, entityType))
+            {
+                merged[BuildTranslationKey(item.EntityId, item.FieldName)] = item;
+            }
+
+            var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+            await using (var writeStream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(writeStream, merged.Values.ToList(), JsonOptions);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            File.Move(tempPath, path);
+        }
+        catch
+        {
+            // Ignore translation cache-write failures silently.
+        }
+        finally
+        {
+            _cacheFileLock.Release();
+        }
+    }
+
+    private static List<UiTranslationModel> FilterTranslationsByEntityIds(
+        IEnumerable<UiTranslationModel> items,
+        IReadOnlyCollection<string> entityIds)
+    {
+        var normalizedIds = entityIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (normalizedIds.Count == 0)
+        {
+            return items.ToList();
+        }
+
+        return items
+            .Where(x => !string.IsNullOrWhiteSpace(x.EntityId) && normalizedIds.Contains(x.EntityId))
+            .ToList();
+    }
+
+    private async Task<List<UiTranslationModel>> FetchTranslationsAsync(
+        string languageCode,
+        string entityType,
+        IReadOnlyCollection<string> entityIds)
+    {
+        if (string.IsNullOrWhiteSpace(languageCode) || entityIds.Count == 0)
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var baseCandidates = new List<string>();
+        if (_httpClient.BaseAddress != null)
+        {
+            baseCandidates.Add(_httpClient.BaseAddress.ToString());
+        }
+
+        baseCandidates.Add(AppSettings.ApiBaseUrl);
+        baseCandidates.AddRange(AppSettings.ApiFallbackBaseUrls);
+
+        var uniqueBases = baseCandidates
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var entityIdsRaw = string.Join(",", entityIds.Where(x => !string.IsNullOrWhiteSpace(x)));
+        if (string.IsNullOrWhiteSpace(entityIdsRaw))
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var normalizedLanguage = NormalizeLanguageCode(languageCode);
+        var normalizedEntityType = entityType.Trim().ToLowerInvariant();
+        var relativePath = $"{AppSettings.PublicTranslationsEndpoint}?languageCode={Uri.EscapeDataString(normalizedLanguage)}&entityType={Uri.EscapeDataString(normalizedEntityType)}&entityIds={Uri.EscapeDataString(entityIdsRaw)}";
+
+        foreach (var baseUrl in uniqueBases)
+        {
+            try
+            {
+                var requestUrl = new Uri(new Uri(baseUrl), relativePath);
+                var data = await _httpClient.GetFromJsonAsync<List<UiTranslationModel>>(requestUrl);
+                if (data != null)
+                {
+                    await SaveTranslationsCacheAsync(normalizedLanguage, normalizedEntityType, data);
+                    return data;
+                }
+            }
+            catch
+            {
+                // Fall through to offline translation cache.
+            }
+        }
+
+        var cached = await ReadTranslationsCacheAsync(normalizedLanguage, normalizedEntityType);
+        return FilterTranslationsByEntityIds(cached, entityIds);
+    }
+
+    private async Task ApplyTourTranslationsForCurrentLanguageAsync(List<TourModel> tours)
+    {
+        if (tours.Count == 0)
+        {
+            return;
+        }
+
+        var currentLanguage = NormalizeLanguageCode(_languageService.CurrentLanguage);
+
+        CaptureOriginalTourText(tours);
+        CaptureOriginalStopText(tours);
+
+        var tourIds = tours
+            .Select(x => x.TourId.ToString(CultureInfo.InvariantCulture))
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var tourTranslationItems = await FetchTranslationsAsync(currentLanguage, "tour", tourIds);
+        var tourTranslationMap = ToTranslationMap(tourTranslationItems);
+
+        var restaurantIds = tours
+            .SelectMany(x => x.Stops)
+            .Where(x => !string.IsNullOrWhiteSpace(x.RestaurantId))
+            .Select(x => x.RestaurantId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var restaurantTranslationItems = await FetchTranslationsAsync(currentLanguage, "restaurant", restaurantIds);
+        var restaurantTranslationMap = ToTranslationMap(restaurantTranslationItems);
+
+        foreach (var tour in tours)
+        {
+            var id = tour.TourId.ToString(CultureInfo.InvariantCulture);
+            var translatedNameKey = BuildTranslationKey(id, "name");
+            var translatedDescriptionKey = BuildTranslationKey(id, "description");
+
+            tour.Name = tourTranslationMap.TryGetValue(translatedNameKey, out var translatedName)
+                ? translatedName
+                : (tour.OriginalName ?? tour.Name);
+
+            tour.Description = tourTranslationMap.TryGetValue(translatedDescriptionKey, out var translatedDescription)
+                ? translatedDescription
+                : (tour.OriginalDescription ?? tour.Description);
+
+            foreach (var stop in tour.Stops)
+            {
+                if (string.IsNullOrWhiteSpace(stop.RestaurantId))
+                {
+                    continue;
+                }
+
+                var stopAddressKey = BuildTranslationKey(stop.RestaurantId, "address");
+
+                stop.RestaurantName = stop.OriginalRestaurantName ?? stop.RestaurantName;
+
+                stop.Address = restaurantTranslationMap.TryGetValue(stopAddressKey, out var translatedAddress)
+                    ? translatedAddress
+                    : (stop.OriginalAddress ?? stop.Address);
+            }
+        }
     }
 
     // Build endpoint danh sách tour, có gắn lat/lng/radius khi đã có vị trí người dùng.

@@ -6,6 +6,10 @@ public class DishModel
 {
     public int DishId { get; set; }
     public string Name { get; set; } = string.Empty;
+
+    [Ignore]
+    public string? OriginalName { get; set; }
+
     public decimal? Price { get; set; }
     public string RestaurantId { get; set; } = string.Empty;
     public int? ImageId { get; set; }

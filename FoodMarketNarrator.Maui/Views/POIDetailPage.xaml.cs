@@ -20,6 +20,7 @@ public partial class POIDetailPage : ContentPage
 	private DateTime? _playbackStartUtc;
 	private int _playbackAudioId;
 	private string _playbackRestaurantId = string.Empty;
+	private string _lastAppliedLanguageCode = string.Empty;
 	private const string PlayGlyph = "\uf04b";
 	private const string StopGlyph = "\uf04c";
 	private const string HeartSolid = "\uf004"; // filled heart
@@ -73,6 +74,7 @@ public partial class POIDetailPage : ContentPage
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
 			BindingContext = poi;
+			_lastAppliedLanguageCode = _languageService?.CurrentLanguage ?? "vi-VN";
 			SyncAudioUiWithService();
 			UpdateFavoriteIcon();
 		});
@@ -133,6 +135,13 @@ public partial class POIDetailPage : ContentPage
 	protected override void OnAppearing()
 	{
 		base.OnAppearing();
+		var currentLanguage = _languageService?.CurrentLanguage ?? "vi-VN";
+		if (!string.Equals(_lastAppliedLanguageCode, currentLanguage, StringComparison.OrdinalIgnoreCase)
+			&& !string.IsNullOrWhiteSpace(_restaurantId))
+		{
+			_ = LoadPoiDetailAsync();
+		}
+
 		SyncAudioUiWithService();
 		UpdateNarrationActionAvailability();
 	}
