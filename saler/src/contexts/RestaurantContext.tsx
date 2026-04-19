@@ -38,7 +38,9 @@ export function RestaurantProvider({
     }
 
     const allRestaurants = await getRestaurantsApi();
-    const userRestaurants = allRestaurants.filter((r) => r.user_id === user.user_id);
+    const userRestaurants = allRestaurants.filter(
+      (r) => r.user_id === user.user_id,
+    );
     setRestaurants(userRestaurants);
   }, [user]);
 
@@ -63,22 +65,6 @@ export function RestaurantProvider({
       mounted = false;
     };
   }, [user]);
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      void refreshRestaurants().catch(() => {
-        // Ignore polling errors; next tick may recover.
-      });
-    }, 5_000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [user, refreshRestaurants]);
 
   useEffect(() => {
     if (!user || !selectedId) {
@@ -109,8 +95,7 @@ export function RestaurantProvider({
   );
 
   const selectedRestaurant = useMemo(
-    () =>
-      activeRestaurants.find((r) => r.restaurant_id === selectedId) ?? null,
+    () => activeRestaurants.find((r) => r.restaurant_id === selectedId) ?? null,
     [activeRestaurants, selectedId],
   );
 
