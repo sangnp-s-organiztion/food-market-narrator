@@ -62,6 +62,22 @@ namespace food_market_narrator_api.Services
             };
 
             var created = await _restaurantRepository.AddAsync(model);
+
+            if (created.UserId > 0)
+            {
+                await _translationService.SyncRestaurantInfoTranslationsAsync(
+                    created.UserId,
+                    created.RestaurantId,
+                    new RestaurantTranslationContent
+                    {
+                        Name = created.Name,
+                        Description = created.Description,
+                        Address = created.Address
+                    },
+                    fieldsToSync: new[] { "description", "address" },
+                    requestIdPrefix: $"restaurant-create-{created.RestaurantId}");
+            }
+
             return MapRestaurant(created);
         }
 

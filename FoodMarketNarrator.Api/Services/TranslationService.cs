@@ -360,6 +360,261 @@ public class TranslationService
         return result;
     }
 
+    public async Task<DishTranslationSyncResult> SyncDishNameTranslationsAsync(
+        int sellerUserId,
+        string restaurantId,
+        int dishId,
+        string? dishName,
+        string? requestIdPrefix = null)
+    {
+        if (dishId <= 0)
+        {
+            throw new ArgumentException("Dish id is invalid.");
+        }
+
+        await EnsureRestaurantOwnershipAsync(sellerUserId, restaurantId);
+
+        var dishEntityId = dishId.ToString();
+        var sourceText = (dishName ?? string.Empty).Trim();
+
+        var languages = await _languageRepository.GetAllLanguagesAsync();
+        var supportedLanguages = languages
+            .Select(language => new
+            {
+                language.LanguageId,
+                LanguageCode = NormalizeBaseLanguageCode(language.LanguageCode)
+            })
+            .Where(x => UiSupportedLanguageCodes.Contains(x.LanguageCode))
+            .GroupBy(x => x.LanguageId)
+            .Select(x => x.First())
+            .ToList();
+
+        var vietnameseLanguageIds = supportedLanguages
+            .Where(x => string.Equals(x.LanguageCode, "vi", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.LanguageId)
+            .Distinct()
+            .ToList();
+
+        var targetLanguages = supportedLanguages
+            .Where(x => !string.Equals(x.LanguageCode, "vi", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (string.IsNullOrWhiteSpace(sourceText))
+        {
+            foreach (var vietnameseLanguageId in vietnameseLanguageIds)
+            {
+                await _uiTranslationRepository.DeleteByEntityFieldAndLanguageAsync(
+                    "dish",
+                    dishEntityId,
+                    "name",
+                    vietnameseLanguageId);
+            }
+
+            foreach (var target in targetLanguages)
+            {
+                await _uiTranslationRepository.DeleteByEntityFieldAndLanguageAsync(
+                    "dish",
+                    dishEntityId,
+                    "name",
+                    target.LanguageId);
+            }
+
+            return new DishTranslationSyncResult();
+        }
+
+        foreach (var vietnameseLanguageId in vietnameseLanguageIds)
+        {
+            await _uiTranslationRepository.UpsertAsync(
+                "dish",
+                dishEntityId,
+                vietnameseLanguageId,
+                "name",
+                sourceText);
+        }
+
+        var normalizedPrefix = string.IsNullOrWhiteSpace(requestIdPrefix)
+            ? $"dish-sync-{dishId}"
+            : requestIdPrefix.Trim();
+
+        var result = new DishTranslationSyncResult();
+
+        foreach (var target in targetLanguages)
+        {
+            result.TotalAttempts += 1;
+
+            var requestId = $"{normalizedPrefix}-name-{target.LanguageCode}-{Guid.NewGuid():N}";
+
+            try
+            {
+                var translated = await TranslateAsync(sellerUserId, restaurantId, new TranslateTextRequest
+                {
+                    Text = sourceText,
+                    SourceLanguageCode = "auto",
+                    TargetLanguageCode = target.LanguageCode,
+                    RequestId = requestId
+                });
+
+                await _uiTranslationRepository.UpsertAsync(
+                    "dish",
+                    dishEntityId,
+                    target.LanguageId,
+                    "name",
+                    translated.TranslatedText);
+
+                result.SuccessCount += 1;
+            }
+            catch (Exception ex)
+            {
+                result.FailedItems.Add(new DishTranslationFailure
+                {
+                    LanguageCode = target.LanguageCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<TourTranslationSyncResult> SyncTourInfoTranslationsAsync(
+        int tourId,
+        TourTranslationContent content,
+        IReadOnlyCollection<string>? fieldsToSync = null,
+        string? requestIdPrefix = null)
+    {
+        if (tourId <= 0)
+        {
+            throw new ArgumentException("Tour id is invalid.");
+        }
+
+        if (content == null)
+        {
+            throw new ArgumentException("Tour translation content is required.");
+        }
+
+        var tourEntityId = tourId.ToString();
+
+        var languages = await _languageRepository.GetAllLanguagesAsync();
+        var supportedLanguages = languages
+            .Select(language => new
+            {
+                language.LanguageId,
+                LanguageCode = NormalizeBaseLanguageCode(language.LanguageCode)
+            })
+            .Where(x => UiSupportedLanguageCodes.Contains(x.LanguageCode))
+            .GroupBy(x => x.LanguageId)
+            .Select(x => x.First())
+            .ToList();
+
+        var vietnameseLanguageIds = supportedLanguages
+            .Where(x => string.Equals(x.LanguageCode, "vi", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.LanguageId)
+            .Distinct()
+            .ToList();
+
+        var targetLanguages = supportedLanguages
+            .Where(x => !string.Equals(x.LanguageCode, "vi", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var fields = new List<(string FieldName, string? Text)>
+        {
+            ("name", content.Name),
+            ("description", content.Description)
+        };
+
+        if (fieldsToSync is { Count: > 0 })
+        {
+            var fieldFilter = new HashSet<string>(
+                fieldsToSync
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Trim().ToLowerInvariant()),
+                StringComparer.Ordinal);
+
+            fields = fields
+                .Where(x => fieldFilter.Contains(x.FieldName))
+                .ToList();
+        }
+
+        if (fields.Count == 0)
+        {
+            return new TourTranslationSyncResult();
+        }
+
+        var normalizedPrefix = string.IsNullOrWhiteSpace(requestIdPrefix)
+            ? $"tour-sync-{tourId}"
+            : requestIdPrefix.Trim();
+
+        var result = new TourTranslationSyncResult();
+
+        foreach (var (fieldName, sourceTextRaw) in fields)
+        {
+            var sourceText = (sourceTextRaw ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(sourceText))
+            {
+                foreach (var vietnameseLanguageId in vietnameseLanguageIds)
+                {
+                    await _uiTranslationRepository.DeleteByEntityFieldAndLanguageAsync(
+                        "tour",
+                        tourEntityId,
+                        fieldName,
+                        vietnameseLanguageId);
+                }
+
+                foreach (var target in targetLanguages)
+                {
+                    await _uiTranslationRepository.DeleteByEntityFieldAndLanguageAsync(
+                        "tour",
+                        tourEntityId,
+                        fieldName,
+                        target.LanguageId);
+                }
+
+                continue;
+            }
+
+            foreach (var vietnameseLanguageId in vietnameseLanguageIds)
+            {
+                await _uiTranslationRepository.UpsertAsync(
+                    "tour",
+                    tourEntityId,
+                    vietnameseLanguageId,
+                    fieldName,
+                    sourceText);
+            }
+
+            foreach (var target in targetLanguages)
+            {
+                result.TotalAttempts += 1;
+
+                try
+                {
+                    var translatedText = await TranslateWithLibreAsync(sourceText, "auto", target.LanguageCode);
+
+                    await _uiTranslationRepository.UpsertAsync(
+                        "tour",
+                        tourEntityId,
+                        target.LanguageId,
+                        fieldName,
+                        translatedText);
+
+                    result.SuccessCount += 1;
+                }
+                catch (Exception ex)
+                {
+                    result.FailedItems.Add(new TourTranslationFailure
+                    {
+                        FieldName = fieldName,
+                        LanguageCode = target.LanguageCode,
+                        Message = ex.Message
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
+
     public async Task<CreateAudioFromTextResponse> CreateAudioFromTextAsync(int sellerUserId, string restaurantId, CreateAudioFromTextRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Text))
@@ -916,6 +1171,41 @@ public class RestaurantTranslationSyncResult
 }
 
 public class RestaurantTranslationFailure
+{
+    public string FieldName { get; set; } = string.Empty;
+    public string LanguageCode { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+}
+
+public class DishTranslationSyncResult
+{
+    public int TotalAttempts { get; set; }
+    public int SuccessCount { get; set; }
+    public int FailedCount => FailedItems.Count;
+    public List<DishTranslationFailure> FailedItems { get; set; } = new();
+}
+
+public class DishTranslationFailure
+{
+    public string LanguageCode { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+}
+
+public class TourTranslationContent
+{
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+}
+
+public class TourTranslationSyncResult
+{
+    public int TotalAttempts { get; set; }
+    public int SuccessCount { get; set; }
+    public int FailedCount => FailedItems.Count;
+    public List<TourTranslationFailure> FailedItems { get; set; } = new();
+}
+
+public class TourTranslationFailure
 {
     public string FieldName { get; set; } = string.Empty;
     public string LanguageCode { get; set; } = string.Empty;

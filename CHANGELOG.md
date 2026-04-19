@@ -3,6 +3,42 @@
 Tổng hợp từ toàn bộ lịch sử commit (all refs).
 Mỗi ngày có phần tóm tắt công việc và phần commit chi tiết theo contributor.
 
+## 2026-04-19
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Cập nhật sequence diagram.
+- Merged:
+  - Merge pull request #229 từ nhánh `dat-duoc-9.5`.
+
+### Nguyen Phuoc Sang (1 commit)
+
+- [51c88bc4] Merge pull request #229 from sangnp-s-organiztion/dat-duoc-9.5
+
+### giathieu0311 (1 commit)
+
+- [f60e7e7c] Sửa sequence
+
+## 2026-04-18
+
+### Tóm tắt trong ngày
+
+- Đã thay đổi:
+  - Sửa logic khóa nhà hàng.
+  - Sửa chính tả.
+- Merged:
+  - Merge pull request #228 từ nhánh `week11-report`.
+
+### Nguyen Phuoc Sang (1 commit)
+
+- [5c3313b8] Merge pull request #228 from sangnp-s-organiztion/week11-report
+
+### giathieu0311 (2 commits)
+
+- [3eeedabd] sửa khóa nhà hàng
+- [67f134d1] sửa chính tả
+
 ## 2026-04-17
 
 ### Tóm tắt trong ngày
