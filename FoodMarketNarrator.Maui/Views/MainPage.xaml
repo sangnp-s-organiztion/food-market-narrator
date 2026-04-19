@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.MainPage"
              BackgroundColor="#FFFCF8"
              Shell.NavBarIsVisible="False">
@@ -23,8 +24,8 @@
 
                     <!-- Title -->
                     <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0" VerticalOptions="Center" Spacing="0">
-                        <Label Text="Ẩm thực Vĩnh Khánh" FontSize="18" FontAttributes="Bold" TextColor="#1A1A1A"/>
-                        <Label Text="Khám phá thiên đường ẩm thực" FontSize="12" TextColor="#9E9E9E"/>
+                        <Label Text="{local:Translate MainTitle}" FontSize="18" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                        <Label Text="{local:Translate MainSubtitle}" FontSize="12" TextColor="#9E9E9E"/>
                     </VerticalStackLayout>
 
                     <!-- User Icon (chưa đăng nhập) -->
@@ -44,7 +45,7 @@
                         <Grid ColumnDefinitions="Auto, *">
                             <Label Text="&#xf002;" FontFamily="FASolid" TextColor="#8D6E63" 
                                    VerticalOptions="Center" FontSize="16" Margin="0,0,10,0"/>
-                            <Entry Grid.Column="1" Placeholder="Tìm ốc, phá lấu, đồ nướng..." 
+                            <Entry Grid.Column="1" Placeholder="{local:Translate SearchPlaceholder}" 
                                    FontSize="14" VerticalOptions="Center" BackgroundColor="Transparent" TextColor="#3E2723" PlaceholderColor="#8D6E63"/>
                         </Grid>
                     </Border>
@@ -106,7 +107,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnFilterAllTapped"/>
                             </Border.GestureRecognizers>
-                            <Label x:Name="MainFilterAllLabel" Text="Tất cả" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <Label x:Name="MainFilterAllLabel" Text="{local:Translate FilterAll}" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
                         </Border>
 
                         <!-- Other Categories -->
@@ -116,7 +117,7 @@
                             </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                  <Label x:Name="MainFilterNearIcon" Text="&#xf3c5;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label x:Name="MainFilterNearLabel" Text="Gần bạn" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterNearLabel" Text="{local:Translate FilterNear}" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
@@ -126,7 +127,7 @@
                             </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                  <Label x:Name="MainFilterFavoriteIcon" Text="&#xf004;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label x:Name="MainFilterFavoriteLabel" Text="Yêu thích" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterFavoriteLabel" Text="{local:Translate FilterFavorite}" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
 
@@ -136,7 +137,7 @@
                             </Border.GestureRecognizers>
                              <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                  <Label x:Name="MainFilterOpenIcon" Text="&#xf017;" FontFamily="FASolid" TextColor="#3E2723" FontSize="12"/>
-                                 <Label x:Name="MainFilterOpenLabel" Text="Đang mở" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
+                                 <Label x:Name="MainFilterOpenLabel" Text="{local:Translate FilterOpen}" TextColor="#3E2723" FontSize="13" FontAttributes="Bold"/>
                              </HorizontalStackLayout>
                         </Border>
                     </HorizontalStackLayout>
@@ -144,8 +145,8 @@
 
                 <!-- 5. Featured Section Header -->
                 <Grid ColumnDefinitions="*, Auto">
-                    <Label Text="Quán ngon nổi bật" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A"/>
-                    <Label Grid.Column="1" Text="Xem tất cả" FontSize="13" TextColor="#F48C06"/>
+                    <Label Text="{local:Translate FeaturedRestaurants}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                    <Label Grid.Column="1" Text="{local:Translate ViewAll}" FontSize="13" TextColor="#F48C06"/>
                 </Grid>
 
                 <!-- 6. List Items -->
@@ -230,7 +231,7 @@
                                         </Label> -->
 
                                         <!-- Trạng thái -->
-                                        <Label FontSize="12" Text="Trạng thái: " TextColor="#757575" />
+                                        <Label FontSize="12" Text="{local:Translate Status}" TextColor="#757575" />
                                         <Label FontSize="12" Text="{Binding StatusText}" TextColor="{Binding IsCurrentlyOpen, Converter={StaticResource StatusToColorConverter}}" FontAttributes="Bold" />
 
                                         <!-- CreatedAt -->
@@ -260,7 +261,7 @@
                       IsVisible="False"
                       Margin="0,6,0,0">
                     <Button x:Name="PreviousPageButton"
-                            Text="Trước"
+                            Text="{local:Translate BtnPrevious}"
                             Clicked="OnPreviousPageClicked"
                             BackgroundColor="#F5F1EE"
                             TextColor="#8D6E63"
@@ -271,7 +272,7 @@
 
                     <Label x:Name="PageIndicatorLabel"
                            Grid.Column="1"
-                           Text="Trang 1/1"
+                           Text="{local:Translate PageIndicator}"
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
                            TextColor="#8D6E63"
@@ -280,7 +281,7 @@
 
                     <Button x:Name="NextPageButton"
                             Grid.Column="2"
-                            Text="Sau"
+                            Text="{local:Translate BtnNext}"
                             Clicked="OnNextPageClicked"
                             BackgroundColor="#F5F1EE"
                             TextColor="#8D6E63"
@@ -307,7 +308,7 @@
                             <TapGestureRecognizer Tapped="OnNarratorTapped"/>
                         </HorizontalStackLayout.GestureRecognizers>
                         <Label Text="&#xf590;" FontFamily="FASolid" TextColor="White" FontSize="20" VerticalOptions="Center" />
-                    <Label x:Name="NarratorText" Text="Bắt đầu thuyết minh tự động" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
+                    <Label x:Name="NarratorText" Text="{local:Translate StartNarration}" TextColor="White" FontAttributes="Bold" FontSize="15" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </Border>
         </Grid>

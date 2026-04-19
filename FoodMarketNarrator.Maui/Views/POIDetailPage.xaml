@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:food_market_narrator.Models"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.POIDetailPage"
              x:DataType="models:POI"
              Shell.NavBarIsVisible="False"
@@ -168,16 +169,21 @@
                                        FontSize="18" />
                             </Border>
                             <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Label Text="Thuyết minh" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
+                                <Label Text="{local:Translate AudioNarration}" FontSize="29" FontAttributes="Bold" TextColor="#1B1F2A" />
                                 <!-- <Label Text="{Binding Description}" FontSize="12" TextColor="#6B7280" LineBreakMode="WordWrap" MaxLines="2" /> -->
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
-                        <Label 
-                            Text="- Nghe thuyết minh để tìm hiểu thêm về quán, không gian và các món đặc trưng. Mang đến trải nghiệm khám phá sống động.&#10;- Nội dung hỗ trợ tiếng Việt, tiếng Anh, tiếng Trung, tiếng Nhật, tiếng Hàn."
-                            FontSize="13"
-                            TextColor="#6B7280"
-                            LineBreakMode="WordWrap" />
+                           <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate AudioHintLine1}"
+                                FontSize="13"
+                                TextColor="#6B7280"
+                                LineBreakMode="WordWrap" />
+                            <Label Text="{local:Translate AudioHintLine2}"
+                                FontSize="13"
+                                TextColor="#6B7280"
+                                LineBreakMode="WordWrap" />
+                           </VerticalStackLayout>
 
 
 
@@ -226,12 +232,12 @@
 
                 <!-- Header phần thực đơn -->
                 <Grid Padding="10,0,10,0" ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                    <Label Text="Thực đơn"
+                          <Label Text="{local:Translate Menu}"
                            FontSize="32"
                            FontFamily="OpenSansSemibold"
                            TextColor="#1F2937" />
                     <Label Grid.Column="1"
-                           Text="Xem tất cả"
+                              Text="{local:Translate ViewAll}"
                            FontSize="13"
                            FontAttributes="Bold"
                            TextColor="#F39C12"
@@ -285,7 +291,7 @@
 
                 <!-- Phần giới thiệu / mô tả về quán -->
                 <VerticalStackLayout Spacing="8" Padding="10,0,10,0">
-                    <Label Text="Về chúng tôi"
+                          <Label Text="{local:Translate AboutUs}"
                            FontSize="30"
                            FontFamily="OpenSansSemibold"
                            TextColor="#1F2937" />
@@ -300,7 +306,7 @@
                       <!-- <Label Text="{Binding CoordinatesDisplay, StringFormat='Tọa độ: {0}'}"
                           FontSize="12"
                           TextColor="#6B7280" /> -->
-                      <Label Text="{Binding CreatedAtDisplay, StringFormat='Ngày mở bán: {0}'}"
+                      <Label Text="{Binding OpenedDateDisplay}"
                           FontSize="12"
                           TextColor="#6B7280" />
                       <!-- <Label Text="{Binding AudioSummaryDisplay}"
@@ -316,7 +322,7 @@
         <Grid Grid.Row="1" BackgroundColor="#EEEEEE" Padding="14,10,14,16" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     x:Name="BtnGetDirection"
-                    Text="Đường đi"
+                    Text="{local:Translate GetDirections}"
                     FontAttributes="Bold"
                     TextColor="#F39C12"
                     BackgroundColor="White"
@@ -331,7 +337,7 @@
 
             <Button Grid.Column="1"
                     x:Name="BtnCallNow"
-                    Text="Gọi điện ngay"
+                    Text="{local:Translate CallNow}"
                     FontAttributes="Bold"
                     TextColor="White"
                     BackgroundColor="#F39C12"

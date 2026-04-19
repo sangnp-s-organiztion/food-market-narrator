@@ -21,12 +21,13 @@ namespace food_market_narrator_api.Controllers
         public async Task<IActionResult> GetByRestaurantId(
             string restaurantId,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? languageCode = null)
         {
             page = page <= 0 ? 1 : page;
             pageSize = pageSize <= 0 ? 20 : pageSize;
 
-            var data = await _dishService.GetByRestaurantIdAsync(restaurantId, page, pageSize);
+            var data = await _dishService.GetByRestaurantIdAsync(restaurantId, page, pageSize, languageCode);
             return Ok(data);
         }
 

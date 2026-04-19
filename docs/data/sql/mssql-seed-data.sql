@@ -86,39 +86,47 @@ INSERT INTO food_market_narrator.dbo.Audio (restaurant_id,language_id,audio_url,
 	 (N'sot-lau-alo-quan',5,N'sot-lau-alo-quan.mp3',1,1,'2026-03-11 15:35:19.9733333'),
 	 (N'the-gioi-bo',5,N'the-gioi-bo.mp3',1,1,'2026-03-11 15:35:19.9733333'),
 	 (N'them-nuong-yakiniku',5,N'them-nuong-yakiniku.mp3',1,1,'2026-03-11 15:35:19.9733333');
+INSERT INTO food_market_narrator.dbo.Audio (restaurant_id,language_id,audio_url,version,is_active,date_generation) VALUES
+	 (N'chilli-bbq-hotpot-restaurant',2,N'/uploads/audios/tts_en_56b42e498bf7449ea7d130dbb1d60895.mp3',2,0,'2026-04-13 00:57:38.5542435');
 INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
-	 (N'Bò nướng BBQ',189000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',1,1),
+	 (N'Bò nướng BBQ',189000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',2016,1),
 	 (N'Lẩu Thái cay',209000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',2,1),
 	 (N'Hải sản nướng',229000.00,'2026-03-09 12:30:21.0',N'chilli-bbq-hotpot-restaurant',3,1),
-	 (N'Steak bò Mỹ',259000.00,'2026-03-09 12:30:21.0',N'lang-restaurant',4,1),
+	 (N'Steak bò Mỹ',259000.00,'2026-03-09 12:30:21.0',N'lang-restaurant',3004,1),
 	 (N'Cá hồi áp chảo',239000.00,'2026-03-09 12:30:21.0',N'lang-restaurant',5,1),
-	 (N'Lẩu kim chi',79000.00,'2026-03-09 12:30:21.0',N'lau-met-nuong-79k',6,1),
+	 (N'Lẩu kim chi',79000.00,'2026-03-09 12:30:21.0',N'lau-met-nuong-79k',3010,1),
 	 (N'Ba chỉ nướng',79000.00,'2026-03-09 12:30:21.0',N'lau-met-nuong-79k',7,1),
-	 (N'Lẩu riêu cua',199000.00,'2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',8,1),
+	 (N'Lẩu riêu cua',199000.00,'2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',2005,1),
 	 (N'Sườn nướng mật ong',179000.00,'2026-03-09 12:30:21.0',N'lau-nuong-thuan-viet',9,1),
-	 (N'Ốc hương rang muối',129000.00,'2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',10,1);
+	 (N'Ốc hương rang muối',129000.00,'2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',3018,1);
 INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
 	 (N'Sò điệp nướng mỡ hành',99000.00,'2026-03-09 12:30:21.0',N'oc-cuc-vinh-khanh',11,1),
-	 (N'Ốc móng tay xào me',89000.00,'2026-03-09 12:30:21.0',N'oc-hoa-kieu',12,1),
+	 (N'Ốc móng tay xào me',89000.00,'2026-03-09 12:30:21.0',N'oc-hoa-kieu',3024,1),
 	 (N'Ốc mỡ xào tỏi',79000.00,'2026-03-09 12:30:21.0',N'oc-hoa-kieu',13,1),
-	 (N'Tôm nướng muối ớt',149000.00,'2026-03-09 12:30:21.0',N'oc-hong-nhung',14,1),
+	 (N'Tôm nướng muối ớt',149000.00,'2026-03-09 12:30:21.0',N'oc-hong-nhung',3026,1),
 	 (N'Sò huyết cháy tỏi',119000.00,'2026-03-09 12:30:21.0',N'oc-hong-nhung',15,1),
-	 (N'Ốc giác xào sa tế',119000.00,'2026-03-09 12:30:21.0',N'oc-loan',16,1),
+	 (N'Ốc giác xào sa tế',119000.00,'2026-03-09 12:30:21.0',N'oc-loan',3020,1),
 	 (N'Bạch tuộc hấp gừng',139000.00,'2026-03-09 12:30:21.0',N'oc-loan',17,1),
-	 (N'Ốc bươu nướng tiêu',89000.00,'2026-03-09 12:30:21.0',N'oc-oanh',18,1),
+	 (N'Ốc bươu nướng tiêu',89000.00,'2026-03-09 12:30:21.0',N'oc-oanh',2006,1),
 	 (N'Hàu nướng phô mai',99000.00,'2026-03-09 12:30:21.0',N'oc-oanh',19,1),
-	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'oc-phat',20,1);
+	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'oc-phat',3012,1);
 INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
 	 (N'Càng ghẹ rang muối',159000.00,'2026-03-09 12:30:21.0',N'oc-phat',21,1),
 	 (N'Tôm tích nướng',189000.00,'2026-03-09 12:30:21.0',N'oc-phat',22,1),
-	 (N'Ốc hương cháy tỏi',129000.00,'2026-03-09 12:30:21.0',N'quan-bo-oc',23,1),
+	 (N'Ốc hương cháy tỏi',129000.00,'2026-03-09 12:30:21.0',N'quan-bo-oc',3006,1),
 	 (N'Sò điệp nướng phô mai',109000.00,'2026-03-09 12:30:21.0',N'quan-bo-oc',24,1),
-	 (N'Ốc móng tay nướng mỡ hành',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-thao',25,1),
+	 (N'Ốc móng tay nướng mỡ hành',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-thao',3007,1),
 	 (N'Sò huyết nướng',109000.00,'2026-03-09 12:30:21.0',N'quan-oc-thao',26,1),
-	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-vu',27,1),
+	 (N'Ốc len xào dừa',99000.00,'2026-03-09 12:30:21.0',N'quan-oc-vu',3008,1),
 	 (N'Hàu nướng mỡ hành',89000.00,'2026-03-09 12:30:21.0',N'quan-oc-vu',28,1),
-	 (N'Lẩu hải sản',219000.00,'2026-03-09 12:30:21.0',N'sot-lau-alo-quan',29,1),
+	 (N'Lẩu hải sản',219000.00,'2026-03-09 12:30:21.0',N'sot-lau-alo-quan',3013,1),
 	 (N'Tôm nướng bơ tỏi',179000.00,'2026-03-09 12:30:21.0',N'sot-lau-alo-quan',30,1);
+INSERT INTO food_market_narrator.dbo.Dish (name,price,created_at,restaurant_id,image_id,is_active) VALUES
+	 (N'Lẩu Thái Siêu Ngon',280000.00,'2026-04-03 14:43:53.633',N'lau-nuong-thuan-viet',2015,NULL),
+	 (N'Lòng bò xào khế',290000.00,'2026-04-05 15:46:04.643',N'the-gioi-bo',3016,NULL),
+	 (N'Đậu hủ tẩm hành',150000.00,'2026-04-05 15:47:29.993',N'the-gioi-bo',3017,NULL),
+	 (N'Bò nướng tảng',350000.00,'2026-04-05 15:50:41.057',N'them-nuong-yakiniku',3022,NULL),
+	 (N'Thịt bò Wagyu',790000.00,'2026-04-05 15:53:00.773',N'them-nuong-yakiniku',3023,NULL);
 INSERT INTO food_market_narrator.dbo.Languages (language_code,language_name) VALUES
 	 (N'vi-VN',N'Tiếng Việt'),
 	 (N'en-US',N'Tiếng Anh'),
@@ -144,163 +152,580 @@ INSERT INTO food_market_narrator.dbo.Restaurant (restaurant_id,name,description,
 	 (N'the-gioi-bo',N'Thế Giới Bò',N'Chuỗi quán bò nướng sốt đậm đà.',10.764057,106.701279,N'0662879151',N'6 Đ. Vĩnh Khánh, Phường 9, Quận 4, Thành phố Hồ Chí Minh',1,'2026-02-10 09:12:00.1130000',4,'08:00:00.000','22:00:00.000'),
 	 (N'them-nuong-yakiniku',N'Thèm Nướng – Yakiniku',N'Nướng phong cách Nhật Bản.',10.760800,106.704749,N'0782625019',N'122 Đ. Vĩnh Khánh, Phường 8, Quận 4, Thành phố Hồ Chí Minh',1,'2026-02-10 09:12:00.1130000',5,'08:00:00.000','22:00:00.000');
 INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
-	 (N'chilli-bbq-hotpot-restaurant',N'chilli_bbq.PNG',1,3),
 	 (N'chilli-bbq-hotpot-restaurant',N'chilli_bbq_2.PNG',0,2),
 	 (N'chilli-bbq-hotpot-restaurant',N'chilli_bbq_3.PNG',0,1),
-	 (N'lang-restaurant',N'lang_restaurant.PNG',1,1),
 	 (N'lang-restaurant',N'lang_res_2.PNG',0,2),
-	 (N'lau-met-nuong-79k',N'laumetnuong_79.jpg',1,1),
 	 (N'lau-met-nuong-79k',N'laumetnuong_79_2.jpg',0,2),
-	 (N'lau-nuong-thuan-viet',N'thuan_viet.PNG',1,1),
 	 (N'lau-nuong-thuan-viet',N'thuan_viet_2.PNG',0,2),
-	 (N'oc-cuc-vinh-khanh',N'oc_cuc.PNG',1,1);
-INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
 	 (N'oc-cuc-vinh-khanh',N'oc_cuc_2.PNG',0,2),
-	 (N'oc-hoa-kieu',N'oc_hoa_kieu.jpg',1,1),
 	 (N'oc-hoa-kieu',N'oc_hoa_kieu_2.jpg',0,2),
-	 (N'oc-hong-nhung',N'oc_hong_nhung.jpg',1,1),
 	 (N'oc-hong-nhung',N'oc_hong_nhung_2.jpg',0,2),
-	 (N'oc-loan',N'oc_loan.jpg',1,1),
 	 (N'oc-loan',N'oc_loan_2.jpg',0,2),
-	 (N'oc-oanh',N'oc_oanh.jpg',1,1),
-	 (N'oc-oanh',N'oc_oanh_2.jpg',0,2),
-	 (N'oc-phat',N'oco_phat.jpg',1,1);
+	 (N'oc-oanh',N'oc_oanh_2.jpg',0,2);
 INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
 	 (N'oc-phat',N'oc_phat.PNG',0,2),
 	 (N'oc-phat',N'oc_phat_2.PNG',0,3),
-	 (N'quan-bo-oc',N'be_oc.PNG',1,1),
 	 (N'quan-bo-oc',N'be_oc_2.PNG',0,2),
-	 (N'quan-oc-thao',N'oc_thao.PNG',1,1),
 	 (N'quan-oc-thao',N'oc_thao_2.PNG',0,2),
-	 (N'quan-oc-vu',N'oc_vu.PNG',1,1),
 	 (N'quan-oc-vu',N'oc_vu_2.PNG',0,2),
-	 (N'sot-lau-alo-quan',N'alo_quan_bear_sea_food.PNG',1,1),
-	 (N'sot-lau-alo-quan',N'alo_quan_bear_sea_food_2.PNG',0,2);
-INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
+	 (N'sot-lau-alo-quan',N'alo_quan_bear_sea_food_2.PNG',0,2),
 	 (N'sot-lau-alo-quan',N'alo_quan_bear_sea_food_3.PNG',0,3),
 	 (N'the-gioi-bo',N'the_gioi_bo.PNG',1,1),
 	 (N'the-gioi-bo',N'the_gioi_bo_2.PNG',0,2),
-	 (N'them-nuong-yakiniku',N'yakiniku.jpg',1,1),
+	 (N'them-nuong-yakiniku',N'yakiniku.jpg',1,1);
+INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
 	 (N'them-nuong-yakiniku',N'yakiniku_2.webp',0,2),
-	 (N'chilli-bbq-hotpot-restaurant',N'/uploads/images/0bc675be9981499098bc170e3af89031.png',0,4);
-INSERT INTO food_market_narrator.dbo.Users (username,password_hash,[role],is_active,created_at) VALUES
-	 (N'admin',N'admin123',N'admin',1,'2026-02-08 09:06:31.0'),
-	 (N'saler',N'123456',N'saler',1,'2026-02-08 09:06:31.0'),
-	 (N'saler1',N'123456',N'saler',1,'2026-02-08 09:06:31.0'),
-	 (N'saler2',N'123456',N'saler',1,'2026-02-08 09:13:08.0'),
-	 (N'saler3',N'123456',N'saler',1,'2026-02-08 09:13:08.0'),
-	 (N'saler4',N'123456',N'saler',1,'2026-02-08 09:13:08.0'),
-	 (N'admin2',N'sangnp123',N'admin',1,'2026-04-01 15:56:02.727'),
-	 (N'phuosang',N'admin123',N'admin',1,'2026-04-01 16:48:43.837');
-
-
-
--- Insert 4 sample tours
-INSERT INTO dbo.Tour (
-    name,
-    short_description,
-    description,
-    estimated_duration_minutes,
-    is_active,
-    is_featured,
-    sort_priority,
-    created_by,
-    updated_by
-)
-VALUES
-(
-    N'Tour Oc Vinh Khanh',
-    N'Cluster cac quan oc noi bat tren duong Vinh Khanh.',
-    N'Phu hop cho visitor muon trai nghiem nhieu mon oc, di bo ngan va dung chan nhanh.',
-    120,
-    1,
-    1,
-    100,
-    NULL,
-    NULL
-),
-(
-    N'Tour Nuong Lau Buoi Toi',
-    N'Tour danh cho nhom ban thich nuong va lau vao buoi toi.',
-    N'Ket hop cac diem nuong lau pho bien, phu hop 2-4 nguoi.',
-    150,
-    1,
-    1,
-    90,
-    NULL,
-    NULL
-),
-(
-    N'Tour Gia Dinh Cuoi Tuan',
-    N'Tour de di cho gia dinh, diem dung can bang giua khong gian va mon an.',
-    N'Lich trinh de chiu, co nhieu lua chon mon nuong hai san va nha hang co khong gian rong.',
-    180,
-    1,
-    0,
-    80,
-    NULL,
-    NULL
-),
-(
-    N'Tour Hai San Signature',
-    N'Chon loc cac diem hai san duoc visitor quan tam nhieu.',
-    N'Tour tap trung vao nhom mon hai san va oc signature de visitor de chon quan.',
-    165,
-    1,
-    0,
-    85,
-    NULL,
-    NULL
-);
-
-DECLARE @TourOcVinhKhanhId INT;
-DECLARE @TourNuongLauId INT;
-DECLARE @TourGiaDinhId INT;
-DECLARE @TourHaiSanId INT;
-
-SET @TourOcVinhKhanhId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Oc Vinh Khanh' ORDER BY tour_id DESC);
-SET @TourNuongLauId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Nuong Lau Buoi Toi' ORDER BY tour_id DESC);
-SET @TourGiaDinhId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Gia Dinh Cuoi Tuan' ORDER BY tour_id DESC);
-SET @TourHaiSanId = (SELECT TOP 1 tour_id FROM dbo.Tour WHERE name = N'Tour Hai San Signature' ORDER BY tour_id DESC);
-
--- Tour 1: 8 restaurants
-INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
-VALUES
-(@TourOcVinhKhanhId, 'oc-loan', 1, NULL),
-(@TourOcVinhKhanhId, 'oc-oanh', 2, NULL),
-(@TourOcVinhKhanhId, 'oc-phat', 3, NULL),
-(@TourOcVinhKhanhId, 'oc-cuc-vinh-khanh', 4, NULL),
-(@TourOcVinhKhanhId, 'oc-hoa-kieu', 5, NULL),
-(@TourOcVinhKhanhId, 'oc-hong-nhung', 6, NULL),
-(@TourOcVinhKhanhId, 'quan-oc-thao', 7, NULL),
-(@TourOcVinhKhanhId, 'quan-oc-vu', 8, NULL);
-
--- Tour 2: 6 restaurants
-INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
-VALUES
-(@TourNuongLauId, 'chilli-bbq-hotpot-restaurant', 1, NULL),
-(@TourNuongLauId, 'lau-met-nuong-79k', 2, NULL),
-(@TourNuongLauId, 'lau-nuong-thuan-viet', 3, NULL),
-(@TourNuongLauId, 'sot-lau-alo-quan', 4, NULL),
-(@TourNuongLauId, 'them-nuong-yakiniku', 5, NULL),
-(@TourNuongLauId, 'the-gioi-bo', 6, NULL);
-
--- Tour 3: 5 restaurants
-INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
-VALUES
-(@TourGiaDinhId, 'lang-restaurant', 1, NULL),
-(@TourGiaDinhId, 'the-gioi-bo', 2, NULL),
-(@TourGiaDinhId, 'quan-bo-oc', 3, NULL),
-(@TourGiaDinhId, 'chilli-bbq-hotpot-restaurant', 4, NULL),
-(@TourGiaDinhId, 'oc-cuc-vinh-khanh', 5, NULL);
-
--- Tour 4: 7 restaurants
-INSERT INTO dbo.Tour_Restaurant (tour_id, restaurant_id, stop_order, custom_radius_meters)
-VALUES
-(@TourHaiSanId, 'quan-bo-oc', 1, NULL),
-(@TourHaiSanId, 'oc-cuc-vinh-khanh', 2, NULL),
-(@TourHaiSanId, 'oc-hong-nhung', 3, NULL),
-(@TourHaiSanId, 'oc-phat', 4, NULL),
-(@TourHaiSanId, 'oc-oanh', 5, NULL),
-(@TourHaiSanId, 'quan-oc-vu', 6, NULL),
-(@TourHaiSanId, 'lang-restaurant', 7, NULL);
+	 (N'chilli-bbq-hotpot-restaurant',N'/uploads/images/0bc675be9981499098bc170e3af89031.png',0,4),
+	 (N'lau-nuong-thuan-viet',N'/maui-images/img_000a_ss_shshsjd_sss_a_lau_cua_dong_ngon_7cd0deb7.jpeg',0,0),
+	 (N'oc-oanh',N'/maui-images/img_oc_buu_nuong_tiu_a70e743c.jpg',0,0),
+	 (N'oc-oanh',N'/maui-images/img_10_quan_oc_tai_tphcm_thom_ngon_kho_cuong_gia_re_dong_khach_1703641185_7bd343ed.jpg',1,1),
+	 (N'lau-nuong-thuan-viet',N'/maui-images/img_gemini_generated_image_v6p4hlv6p4hlv6p4_382b500f.png',1,1),
+	 (N'lau-nuong-thuan-viet',N'/maui-images/img_cach_nau_lau_thai_chua_cay_tron_vi_thumbnail_5e0d2170.jpg',0,0),
+	 (N'chilli-bbq-hotpot-restaurant',N'/maui-images/img_nuong_bbq_la_gi_81f073cc.jpeg',0,0),
+	 (N'lang-restaurant',N'/maui-images/img_steak_than_lung_rib_eye_d7a9fdad.jpg',0,0),
+	 (N'lang-restaurant',N'/maui-images/img_pho_am_thuc_vinh_khanh_lang_quan_1707245308_daafd3bc.jpg',1,1);
+INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
+	 (N'quan-bo-oc',N'/maui-images/img_r_21437975.jpg',0,0),
+	 (N'quan-oc-thao',N'/maui-images/img_oc_mong_tay_nuong_sa_te_thumbnail_879574dd.jpg',0,0),
+	 (N'quan-oc-vu',N'/maui-images/img_r_1_68f5e219.jpg',0,0),
+	 (N'quan-oc-vu',N'/maui-images/img_screenshot_2026_04_05_224023_16f69532.png',1,1),
+	 (N'lau-met-nuong-79k',N'/maui-images/img_lau_kim_chi_1_778e5e01.jpg',0,0),
+	 (N'lau-met-nuong-79k',N'/maui-images/img_screenshot_2026_04_05_224148_bfdde420.png',1,1),
+	 (N'oc-phat',N'/maui-images/img_r_1_1ec7da79.jpg',0,0),
+	 (N'sot-lau-alo-quan',N'/maui-images/img_maxresdefault_0a1594b3.jpg',0,0),
+	 (N'sot-lau-alo-quan',N'/maui-images/img_buffet_alo_nuong_lau_125k_c881a318.jpg',1,1),
+	 (N'oc-phat',N'/maui-images/img_quan_oc_quan_4_quan_oc_vu_vinh_khanh_e606577159_4dd2c56f.jpg',1,1);
+INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
+	 (N'the-gioi-bo',N'/maui-images/img_r_2_63dcdaa8.jpg',0,0),
+	 (N'the-gioi-bo',N'/maui-images/img_r_3_b7b415c0.jpg',0,0),
+	 (N'oc-cuc-vinh-khanh',N'/maui-images/img_oc_huong_rang_muoi_hap_dan_3f111192.jpg',0,0),
+	 (N'oc-cuc-vinh-khanh',N'/maui-images/img_pho_am_thuc_vinh_khanh_ot_xiem_quan_1707245333_47e980ae.jpg',1,1),
+	 (N'oc-loan',N'/maui-images/img_oc_giac_xao_sa_ot_768062_b5ddde12.jpg',0,0),
+	 (N'oc-loan',N'/maui-images/img_quan_oc_loan_1084943_faa136b9.jpg',1,1),
+	 (N'them-nuong-yakiniku',N'/maui-images/img_bo_nuong_tang_2_0ce8c9f5.jpg',0,0),
+	 (N'them-nuong-yakiniku',N'/maui-images/img_thit_bo_wagyu_nhat_ban_cao_cap_3ba715d3.jpg',0,0),
+	 (N'oc-hoa-kieu',N'/maui-images/img_oip_8153ac57.jpg',0,0),
+	 (N'oc-hoa-kieu',N'/maui-images/img_r_4_1b4c76c5.jpg',1,1);
+INSERT INTO food_market_narrator.dbo.Restaurant_Image (restaurant_id,image_url,is_primary,sort_order) VALUES
+	 (N'oc-hong-nhung',N'/maui-images/img_r_5_9608fc38.jpg',0,0),
+	 (N'oc-hong-nhung',N'/maui-images/img_oip_1_6f7b80d6.jpg',1,1),
+	 (N'quan-bo-oc',N'/maui-images/img_screenshot_2026_04_05_225807_2a961d1d.png',1,1),
+	 (N'quan-oc-thao',N'/maui-images/img_quan_oc_thao_0bdfb400.jpg',1,1),
+	 (N'chilli-bbq-hotpot-restaurant',N'/maui-images/img_aaaaaaaaaaaa_33e76722.png',1,1);
+INSERT INTO food_market_narrator.dbo.Tour (name,description,estimated_duration_minutes,is_active,created_at,url_image) VALUES
+	 (N'Tour Oc Vinh Khanh',N'Phu hop cho visitor muon trai nghiem nhieu mon oc, di bo ngan va dung chan nhanh.',120,1,'2026-04-07 08:38:46.1311807',N'chilli_bbq_2.PNG'),
+	 (N'Tour Nuong Lau Buoi Toi',N'Ket hop cac diem nuong lau pho bien, phu hop 2-4 nguoi.',150,1,'2026-04-07 08:38:46.1311807',N'chilli_bbq_2.PNG'),
+	 (N'Tour Gia Dinh Cuoi Tuan',N'Lich trinh de chiu, co nhieu lua chon mon nuong hai san va nha hang co khong gian rong.',180,1,'2026-04-07 08:38:46.1311807',N'chilli_bbq_2.PNG'),
+	 (N'Tour Hai San Signature',N'Tour tap trung vao nhom mon hai san va oc signature de visitor de chon quan.',165,1,'2026-04-07 08:38:46.1311807',N'chilli_bbq_2.PNG'),
+	 (N'Khám phá cùng Phước Sang',N'Cùng Phước Sang – trải nghiệm không chỉ là chuyến đi, mà là hành trình đáng nhớ.
+Bạn đã sẵn sàng rời xa những bộn bề thường ngày để hòa mình vào thiên nhiên, văn hóa và những câu chuyện thú vị chưa? Tour “Khám phá cùng Phước Sang” sẽ đưa bạn đến những điểm đến độc đáo, nơi mỗi bước chân là một trải nghiệm mới.',12,1,'2026-04-09 07:54:26.3430129',N'/maui-images/tour_steak_than_lung_rib_eye_f5118353.jpg'),
+	 (N'Du lịch vui vẻ',N'Du lịch vui vẻ không chỉ là những chuyến đi, mà còn là hành trình tận hưởng từng khoảnh khắc. Từ cảnh đẹp thiên nhiên đến những trải nghiệm thú vị, mỗi điểm đến đều mang lại niềm vui, sự thư giãn và những kỷ niệm đáng nhớ. Hãy xách balo lên và để mỗi chuyến đi trở thành một câu chuyện đầy cảm hứng!',15,1,'2026-04-10 15:19:31.6875305',N'/maui-images/tour_khu_pho_am_thuc_vinh_khanh_avt_34e20122.jpg'),
+	 (N'test',N'test',120,1,'2026-04-10 16:43:39.9020243',N'/maui-images/tour_khu_pho_am_thuc_vinh_khanh_avt_86086814.jpg');
+INSERT INTO food_market_narrator.dbo.Tour_Restaurant (tour_id,restaurant_id,stop_order,created_at) VALUES
+	 (1,N'oc-cuc-vinh-khanh',4,'2026-04-07 08:38:46.1434952'),
+	 (1,N'oc-hoa-kieu',5,'2026-04-07 08:38:46.1434952'),
+	 (1,N'oc-hong-nhung',6,'2026-04-07 08:38:46.1434952'),
+	 (1,N'oc-loan',2,'2026-04-07 08:38:46.1434952'),
+	 (1,N'oc-oanh',1,'2026-04-07 08:38:46.1434952'),
+	 (1,N'oc-phat',3,'2026-04-07 08:38:46.1434952'),
+	 (1,N'quan-oc-thao',7,'2026-04-07 08:38:46.1434952'),
+	 (1,N'quan-oc-vu',8,'2026-04-07 08:38:46.1434952'),
+	 (2,N'chilli-bbq-hotpot-restaurant',1,'2026-04-07 08:38:46.1475928'),
+	 (2,N'lau-met-nuong-79k',2,'2026-04-07 08:38:46.1475928');
+INSERT INTO food_market_narrator.dbo.Tour_Restaurant (tour_id,restaurant_id,stop_order,created_at) VALUES
+	 (2,N'lau-nuong-thuan-viet',3,'2026-04-07 08:38:46.1475928'),
+	 (2,N'sot-lau-alo-quan',4,'2026-04-07 08:38:46.1475928'),
+	 (2,N'the-gioi-bo',6,'2026-04-07 08:38:46.1475928'),
+	 (2,N'them-nuong-yakiniku',5,'2026-04-07 08:38:46.1475928'),
+	 (3,N'chilli-bbq-hotpot-restaurant',4,'2026-04-07 08:38:46.1517049'),
+	 (3,N'lang-restaurant',1,'2026-04-07 08:38:46.1517049'),
+	 (3,N'oc-cuc-vinh-khanh',5,'2026-04-07 08:38:46.1517049'),
+	 (3,N'quan-bo-oc',3,'2026-04-07 08:38:46.1517049'),
+	 (3,N'the-gioi-bo',2,'2026-04-07 08:38:46.1517049'),
+	 (4,N'lang-restaurant',7,'2026-04-07 08:38:46.1517049');
+INSERT INTO food_market_narrator.dbo.Tour_Restaurant (tour_id,restaurant_id,stop_order,created_at) VALUES
+	 (4,N'oc-cuc-vinh-khanh',2,'2026-04-07 08:38:46.1517049'),
+	 (4,N'oc-hong-nhung',3,'2026-04-07 08:38:46.1517049'),
+	 (4,N'oc-oanh',5,'2026-04-07 08:38:46.1517049'),
+	 (4,N'oc-phat',4,'2026-04-07 08:38:46.1517049'),
+	 (4,N'quan-bo-oc',1,'2026-04-07 08:38:46.1517049'),
+	 (4,N'quan-oc-vu',6,'2026-04-07 08:38:46.1517049'),
+	 (5,N'oc-hong-nhung',4,'2026-04-10 15:04:54.4881983'),
+	 (5,N'oc-loan',3,'2026-04-10 15:04:52.0445515'),
+	 (5,N'quan-oc-thao',1,'2026-04-10 15:04:46.1002897'),
+	 (5,N'quan-oc-vu',2,'2026-04-10 15:04:49.0793097');
+INSERT INTO food_market_narrator.dbo.Tour_Restaurant (tour_id,restaurant_id,stop_order,created_at) VALUES
+	 (5,N'sot-lau-alo-quan',5,'2026-04-10 15:04:59.8154159'),
+	 (1005,N'lau-nuong-thuan-viet',3,'2026-04-10 16:24:33.8863333'),
+	 (1005,N'oc-oanh',5,'2026-04-10 16:24:48.5699140'),
+	 (1005,N'quan-oc-thao',1,'2026-04-10 16:24:29.2996973'),
+	 (1005,N'quan-oc-vu',2,'2026-04-10 16:24:31.1705560'),
+	 (1005,N'sot-lau-alo-quan',4,'2026-04-10 16:24:45.7101201'),
+	 (1006,N'quan-oc-vu',1,'2026-04-10 16:44:15.9432747'),
+	 (1006,N'them-nuong-yakiniku',2,'2026-04-10 16:44:20.4970481');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',1,N'name',N'Chilli BBQ Hotpot Restaurant','2026-04-16 16:38:21.827'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',1,N'description',N'Spicy hotpot and BBQ in a modern style.','2026-04-16 16:38:21.867'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',1,N'address',N'232 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:21.87'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',2,N'name',N'Chilli BBQ Hotpot Restaurant','2026-04-16 16:38:21.87'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',2,N'description',N'Spicy hotpot and BBQ in a modern style.','2026-04-16 16:38:21.873'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',2,N'address',N'232 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:21.877'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',3,N'name',N'Chilli BBQ Hotpot Restaurant (JP)','2026-04-16 16:38:21.877'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',3,N'description',N'Spicy hotpot and BBQ in a modern style. (JP)','2026-04-16 16:38:21.88'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',3,N'address',N'232 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:21.88'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',4,N'name',N'Chilli BBQ Hotpot Restaurant (KR)','2026-04-16 16:38:21.887');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',4,N'description',N'Spicy hotpot and BBQ in a modern style. (KR)','2026-04-16 16:38:21.887'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',4,N'address',N'232 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:21.89'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',5,N'name',N'Chilli BBQ Hotpot Restaurant (CN)','2026-04-16 16:38:21.89'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',5,N'description',N'Spicy hotpot and BBQ in a modern style. (CN)','2026-04-16 16:38:21.893'),
+	 (N'restaurant',N'chilli-bbq-hotpot-restaurant',5,N'address',N'232 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:21.897'),
+	 (N'restaurant',N'lang-restaurant',1,N'name',N'Lang Restaurant','2026-04-16 16:38:21.897'),
+	 (N'restaurant',N'lang-restaurant',1,N'description',N'Modern cuisine restaurant, suitable for meetings and dates.','2026-04-16 16:38:21.9'),
+	 (N'restaurant',N'lang-restaurant',1,N'address',N'531 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:21.9'),
+	 (N'restaurant',N'lang-restaurant',2,N'name',N'Lang Restaurant','2026-04-16 16:38:21.903'),
+	 (N'restaurant',N'lang-restaurant',2,N'description',N'Modern cuisine restaurant, suitable for meetings and dates.','2026-04-16 16:38:21.907');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'lang-restaurant',2,N'address',N'531 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:21.907'),
+	 (N'restaurant',N'lang-restaurant',3,N'name',N'Lang Restaurant (JP)','2026-04-16 16:38:21.91'),
+	 (N'restaurant',N'lang-restaurant',3,N'description',N'Modern cuisine restaurant, suitable for meetings and dates. (JP)','2026-04-16 16:38:21.91'),
+	 (N'restaurant',N'lang-restaurant',3,N'address',N'531 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:21.913'),
+	 (N'restaurant',N'lang-restaurant',4,N'name',N'Lang Restaurant (KR)','2026-04-16 16:38:21.913'),
+	 (N'restaurant',N'lang-restaurant',4,N'description',N'Modern cuisine restaurant, suitable for meetings and dates. (KR)','2026-04-16 16:38:21.917'),
+	 (N'restaurant',N'lang-restaurant',4,N'address',N'531 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:21.917'),
+	 (N'restaurant',N'lang-restaurant',5,N'name',N'Lang Restaurant (CN)','2026-04-16 16:38:21.92'),
+	 (N'restaurant',N'lang-restaurant',5,N'description',N'Modern cuisine restaurant, suitable for meetings and dates. (CN)','2026-04-16 16:38:21.923'),
+	 (N'restaurant',N'lang-restaurant',5,N'address',N'531 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:21.923');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'lau-met-nuong-79k',1,N'name',N'Lau Met Nuong 79K','2026-04-16 16:38:21.927'),
+	 (N'restaurant',N'lau-met-nuong-79k',1,N'description',N'Affordable hotpot and grill for students.','2026-04-16 16:38:21.927'),
+	 (N'restaurant',N'lau-met-nuong-79k',1,N'address',N'833 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:21.93'),
+	 (N'restaurant',N'lau-met-nuong-79k',2,N'name',N'Lau Met Nuong 79K','2026-04-16 16:38:21.93'),
+	 (N'restaurant',N'lau-met-nuong-79k',2,N'description',N'Affordable hotpot and grill for students.','2026-04-16 16:38:21.933'),
+	 (N'restaurant',N'lau-met-nuong-79k',2,N'address',N'833 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:21.933'),
+	 (N'restaurant',N'lau-met-nuong-79k',3,N'name',N'Lau Met Nuong 79K (JP)','2026-04-16 16:38:21.937'),
+	 (N'restaurant',N'lau-met-nuong-79k',3,N'description',N'Affordable hotpot and grill for students. (JP)','2026-04-16 16:38:21.937'),
+	 (N'restaurant',N'lau-met-nuong-79k',3,N'address',N'833 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:21.94'),
+	 (N'restaurant',N'lau-met-nuong-79k',4,N'name',N'Lau Met Nuong 79K (KR)','2026-04-16 16:38:21.94');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'lau-met-nuong-79k',4,N'description',N'Affordable hotpot and grill for students. (KR)','2026-04-16 16:38:21.943'),
+	 (N'restaurant',N'lau-met-nuong-79k',4,N'address',N'833 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:21.947'),
+	 (N'restaurant',N'lau-met-nuong-79k',5,N'name',N'Lau Met Nuong 79K (CN)','2026-04-16 16:38:21.947'),
+	 (N'restaurant',N'lau-met-nuong-79k',5,N'description',N'Affordable hotpot and grill for students. (CN)','2026-04-16 16:38:21.95'),
+	 (N'restaurant',N'lau-met-nuong-79k',5,N'address',N'833 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:21.95'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',1,N'name',N'Lau Nuong Thuan Viet','2026-04-16 16:38:21.953'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',1,N'description',N'Spacious place for group hotpot and BBQ.','2026-04-16 16:38:21.957'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',1,N'address',N'424 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:21.957'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',2,N'name',N'Lau Nuong Thuan Viet','2026-04-16 16:38:21.957'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',2,N'description',N'Spacious place for group hotpot and BBQ.','2026-04-16 16:38:21.96');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'lau-nuong-thuan-viet',2,N'address',N'424 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:21.963'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',3,N'name',N'Lau Nuong Thuan Viet (JP)','2026-04-16 16:38:21.963'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',3,N'description',N'Spacious place for group hotpot and BBQ. (JP)','2026-04-16 16:38:21.967'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',3,N'address',N'424 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:21.97'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',4,N'name',N'Lau Nuong Thuan Viet (KR)','2026-04-16 16:38:21.97'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',4,N'description',N'Spacious place for group hotpot and BBQ. (KR)','2026-04-16 16:38:21.973'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',4,N'address',N'424 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:21.973'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',5,N'name',N'Lau Nuong Thuan Viet (CN)','2026-04-16 16:38:21.977'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',5,N'description',N'Spacious place for group hotpot and BBQ. (CN)','2026-04-16 16:38:21.98'),
+	 (N'restaurant',N'lau-nuong-thuan-viet',5,N'address',N'424 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:21.98');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-cuc-vinh-khanh',1,N'name',N'Ot Xiem Quan','2026-04-16 16:38:21.98'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',1,N'description',N'Famous snail restaurant on Vinh Khanh street.','2026-04-16 16:38:21.983'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',1,N'address',N'568 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:21.983'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',2,N'name',N'Ot Xiem Quan','2026-04-16 16:38:21.987'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',2,N'description',N'Famous snail restaurant on Vinh Khanh street.','2026-04-16 16:38:21.99'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',2,N'address',N'568 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:21.99'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',3,N'name',N'Ot Xiem Quan (JP)','2026-04-16 16:38:21.993'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',3,N'description',N'Famous snail restaurant on Vinh Khanh street. (JP)','2026-04-16 16:38:21.993'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',3,N'address',N'568 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:21.997'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',4,N'name',N'Ot Xiem Quan (KR)','2026-04-16 16:38:21.997');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-cuc-vinh-khanh',4,N'description',N'Famous snail restaurant on Vinh Khanh street. (KR)','2026-04-16 16:38:22.0'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',4,N'address',N'568 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.003'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',5,N'name',N'Ot Xiem Quan (CN)','2026-04-16 16:38:22.007'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',5,N'description',N'Famous snail restaurant on Vinh Khanh street. (CN)','2026-04-16 16:38:22.01'),
+	 (N'restaurant',N'oc-cuc-vinh-khanh',5,N'address',N'568 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.01'),
+	 (N'restaurant',N'oc-hoa-kieu',1,N'name',N'Oc Hoa Kieu','2026-04-16 16:38:22.01'),
+	 (N'restaurant',N'oc-hoa-kieu',1,N'description',N'Unique cooking style seafood restaurant.','2026-04-16 16:38:22.013'),
+	 (N'restaurant',N'oc-hoa-kieu',1,N'address',N'598 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.017'),
+	 (N'restaurant',N'oc-hoa-kieu',2,N'name',N'Oc Hoa Kieu','2026-04-16 16:38:22.017'),
+	 (N'restaurant',N'oc-hoa-kieu',2,N'description',N'Unique cooking style seafood restaurant.','2026-04-16 16:38:22.02');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-hoa-kieu',2,N'address',N'598 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.02'),
+	 (N'restaurant',N'oc-hoa-kieu',3,N'name',N'Oc Hoa Kieu (JP)','2026-04-16 16:38:22.023'),
+	 (N'restaurant',N'oc-hoa-kieu',3,N'description',N'Unique cooking style seafood restaurant. (JP)','2026-04-16 16:38:22.027'),
+	 (N'restaurant',N'oc-hoa-kieu',3,N'address',N'598 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.027'),
+	 (N'restaurant',N'oc-hoa-kieu',4,N'name',N'Oc Hoa Kieu (KR)','2026-04-16 16:38:22.03'),
+	 (N'restaurant',N'oc-hoa-kieu',4,N'description',N'Unique cooking style seafood restaurant. (KR)','2026-04-16 16:38:22.03'),
+	 (N'restaurant',N'oc-hoa-kieu',4,N'address',N'598 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.033'),
+	 (N'restaurant',N'oc-hoa-kieu',5,N'name',N'Oc Hoa Kieu (CN)','2026-04-16 16:38:22.033'),
+	 (N'restaurant',N'oc-hoa-kieu',5,N'description',N'Unique cooking style seafood restaurant. (CN)','2026-04-16 16:38:22.037'),
+	 (N'restaurant',N'oc-hoa-kieu',5,N'address',N'598 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.037');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-hong-nhung',1,N'name',N'Oc Hong Nhung','2026-04-16 16:38:22.04'),
+	 (N'restaurant',N'oc-hong-nhung',1,N'description',N'Fresh seafood, family-friendly.','2026-04-16 16:38:22.04'),
+	 (N'restaurant',N'oc-hong-nhung',1,N'address',N'38 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.043'),
+	 (N'restaurant',N'oc-hong-nhung',2,N'name',N'Oc Hong Nhung','2026-04-16 16:38:22.047'),
+	 (N'restaurant',N'oc-hong-nhung',2,N'description',N'Fresh seafood, family-friendly.','2026-04-16 16:38:22.047'),
+	 (N'restaurant',N'oc-hong-nhung',2,N'address',N'38 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.05'),
+	 (N'restaurant',N'oc-hong-nhung',3,N'name',N'Oc Hong Nhung (JP)','2026-04-16 16:38:22.05'),
+	 (N'restaurant',N'oc-hong-nhung',3,N'description',N'Fresh seafood, family-friendly. (JP)','2026-04-16 16:38:22.053'),
+	 (N'restaurant',N'oc-hong-nhung',3,N'address',N'38 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.057'),
+	 (N'restaurant',N'oc-hong-nhung',4,N'name',N'Oc Hong Nhung (KR)','2026-04-16 16:38:22.057');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-hong-nhung',4,N'description',N'Fresh seafood, family-friendly. (KR)','2026-04-16 16:38:22.06'),
+	 (N'restaurant',N'oc-hong-nhung',4,N'address',N'38 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.06'),
+	 (N'restaurant',N'oc-hong-nhung',5,N'name',N'Oc Hong Nhung (CN)','2026-04-16 16:38:22.063'),
+	 (N'restaurant',N'oc-hong-nhung',5,N'description',N'Fresh seafood, family-friendly. (CN)','2026-04-16 16:38:22.063'),
+	 (N'restaurant',N'oc-hong-nhung',5,N'address',N'38 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.067'),
+	 (N'restaurant',N'oc-loan',1,N'name',N'Oc Loan','2026-04-16 16:38:22.07'),
+	 (N'restaurant',N'oc-loan',1,N'description',N'Famous for spicy stir-fried snails.','2026-04-16 16:38:22.07'),
+	 (N'restaurant',N'oc-loan',1,N'address',N'129 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.073'),
+	 (N'restaurant',N'oc-loan',2,N'name',N'Oc Loan','2026-04-16 16:38:22.077'),
+	 (N'restaurant',N'oc-loan',2,N'description',N'Famous for spicy stir-fried snails.','2026-04-16 16:38:22.077');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-loan',2,N'address',N'129 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.08'),
+	 (N'restaurant',N'oc-loan',3,N'name',N'Oc Loan (JP)','2026-04-16 16:38:22.08'),
+	 (N'restaurant',N'oc-loan',3,N'description',N'Famous for spicy stir-fried snails. (JP)','2026-04-16 16:38:22.083'),
+	 (N'restaurant',N'oc-loan',3,N'address',N'129 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.083'),
+	 (N'restaurant',N'oc-loan',4,N'name',N'Oc Loan (KR)','2026-04-16 16:38:22.087'),
+	 (N'restaurant',N'oc-loan',4,N'description',N'Famous for spicy stir-fried snails. (KR)','2026-04-16 16:38:22.09'),
+	 (N'restaurant',N'oc-loan',4,N'address',N'129 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.09'),
+	 (N'restaurant',N'oc-loan',5,N'name',N'Oc Loan (CN)','2026-04-16 16:38:22.09'),
+	 (N'restaurant',N'oc-loan',5,N'description',N'Famous for spicy stir-fried snails. (CN)','2026-04-16 16:38:22.093'),
+	 (N'restaurant',N'oc-loan',5,N'address',N'129 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.097');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-oanh',1,N'name',N'Oc Oanh','2026-04-16 16:38:22.097'),
+	 (N'restaurant',N'oc-oanh',1,N'description',N'Familiar and consistent quality snail restaurant.','2026-04-16 16:38:22.1'),
+	 (N'restaurant',N'oc-oanh',1,N'address',N'534 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.1'),
+	 (N'restaurant',N'oc-oanh',2,N'name',N'Oc Oanh','2026-04-16 16:38:22.1'),
+	 (N'restaurant',N'oc-oanh',2,N'description',N'Familiar and consistent quality snail restaurant.','2026-04-16 16:38:22.103'),
+	 (N'restaurant',N'oc-oanh',2,N'address',N'534 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.103'),
+	 (N'restaurant',N'oc-oanh',3,N'name',N'Oc Oanh (JP)','2026-04-16 16:38:22.107'),
+	 (N'restaurant',N'oc-oanh',3,N'description',N'Familiar and consistent quality snail restaurant. (JP)','2026-04-16 16:38:22.11'),
+	 (N'restaurant',N'oc-oanh',3,N'address',N'534 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.11'),
+	 (N'restaurant',N'oc-oanh',4,N'name',N'Oc Oanh (KR)','2026-04-16 16:38:22.113');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-oanh',4,N'description',N'Familiar and consistent quality snail restaurant. (KR)','2026-04-16 16:38:22.113'),
+	 (N'restaurant',N'oc-oanh',4,N'address',N'534 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.117'),
+	 (N'restaurant',N'oc-oanh',5,N'name',N'Oc Oanh (CN)','2026-04-16 16:38:22.117'),
+	 (N'restaurant',N'oc-oanh',5,N'description',N'Familiar and consistent quality snail restaurant. (CN)','2026-04-16 16:38:22.12'),
+	 (N'restaurant',N'oc-oanh',5,N'address',N'534 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.12'),
+	 (N'restaurant',N'oc-phat',1,N'name',N'Oc Phat','2026-04-16 16:38:22.123'),
+	 (N'restaurant',N'oc-phat',1,N'description',N'Affordable fresh seafood.','2026-04-16 16:38:22.123'),
+	 (N'restaurant',N'oc-phat',1,N'address',N'361 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.127'),
+	 (N'restaurant',N'oc-phat',2,N'name',N'Oc Phat','2026-04-16 16:38:22.13'),
+	 (N'restaurant',N'oc-phat',2,N'description',N'Affordable fresh seafood.','2026-04-16 16:38:22.13');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'oc-phat',2,N'address',N'361 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.13'),
+	 (N'restaurant',N'oc-phat',3,N'name',N'Oc Phat (JP)','2026-04-16 16:38:22.133'),
+	 (N'restaurant',N'oc-phat',3,N'description',N'Affordable fresh seafood. (JP)','2026-04-16 16:38:22.137'),
+	 (N'restaurant',N'oc-phat',3,N'address',N'361 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.137'),
+	 (N'restaurant',N'oc-phat',4,N'name',N'Oc Phat (KR)','2026-04-16 16:38:22.14'),
+	 (N'restaurant',N'oc-phat',4,N'description',N'Affordable fresh seafood. (KR)','2026-04-16 16:38:22.14'),
+	 (N'restaurant',N'oc-phat',4,N'address',N'361 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.14'),
+	 (N'restaurant',N'oc-phat',5,N'name',N'Oc Phat (CN)','2026-04-16 16:38:22.143'),
+	 (N'restaurant',N'oc-phat',5,N'description',N'Affordable fresh seafood. (CN)','2026-04-16 16:38:22.147'),
+	 (N'restaurant',N'oc-phat',5,N'address',N'361 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.147');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'quan-bo-oc',1,N'name',N'Quan Be Oc','2026-04-16 16:38:22.15'),
+	 (N'restaurant',N'quan-bo-oc',1,N'description',N'Budget-friendly seafood.','2026-04-16 16:38:22.15'),
+	 (N'restaurant',N'quan-bo-oc',1,N'address',N'58/44 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.153'),
+	 (N'restaurant',N'quan-bo-oc',2,N'name',N'Quan Be Oc','2026-04-16 16:38:22.153'),
+	 (N'restaurant',N'quan-bo-oc',2,N'description',N'Budget-friendly seafood.','2026-04-16 16:38:22.157'),
+	 (N'restaurant',N'quan-bo-oc',2,N'address',N'58/44 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.157'),
+	 (N'restaurant',N'quan-bo-oc',3,N'name',N'Quan Be Oc (JP)','2026-04-16 16:38:22.16'),
+	 (N'restaurant',N'quan-bo-oc',3,N'description',N'Budget-friendly seafood. (JP)','2026-04-16 16:38:22.16'),
+	 (N'restaurant',N'quan-bo-oc',3,N'address',N'58/44 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.163'),
+	 (N'restaurant',N'quan-bo-oc',4,N'name',N'Quan Be Oc (KR)','2026-04-16 16:38:22.163');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'quan-bo-oc',4,N'description',N'Budget-friendly seafood. (KR)','2026-04-16 16:38:22.163'),
+	 (N'restaurant',N'quan-bo-oc',4,N'address',N'58/44 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.167'),
+	 (N'restaurant',N'quan-bo-oc',5,N'name',N'Quan Be Oc (CN)','2026-04-16 16:38:22.17'),
+	 (N'restaurant',N'quan-bo-oc',5,N'description',N'Budget-friendly seafood. (CN)','2026-04-16 16:38:22.17'),
+	 (N'restaurant',N'quan-bo-oc',5,N'address',N'58/44 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.173'),
+	 (N'restaurant',N'quan-oc-thao',1,N'name',N'Quan Oc Thao','2026-04-16 16:38:22.173'),
+	 (N'restaurant',N'quan-oc-thao',1,N'description',N'Seafood paradise in District 4.','2026-04-16 16:38:22.177'),
+	 (N'restaurant',N'quan-oc-thao',1,N'address',N'383 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.177'),
+	 (N'restaurant',N'quan-oc-thao',2,N'name',N'Quan Oc Thao','2026-04-16 16:38:22.18'),
+	 (N'restaurant',N'quan-oc-thao',2,N'description',N'Seafood paradise in District 4.','2026-04-16 16:38:22.18');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'quan-oc-thao',2,N'address',N'383 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.183'),
+	 (N'restaurant',N'quan-oc-thao',3,N'name',N'Quan Oc Thao (JP)','2026-04-16 16:38:22.183'),
+	 (N'restaurant',N'quan-oc-thao',3,N'description',N'Seafood paradise in District 4. (JP)','2026-04-16 16:38:22.187'),
+	 (N'restaurant',N'quan-oc-thao',3,N'address',N'383 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.187'),
+	 (N'restaurant',N'quan-oc-thao',4,N'name',N'Quan Oc Thao (KR)','2026-04-16 16:38:22.19'),
+	 (N'restaurant',N'quan-oc-thao',4,N'description',N'Seafood paradise in District 4. (KR)','2026-04-16 16:38:22.19'),
+	 (N'restaurant',N'quan-oc-thao',4,N'address',N'383 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.193'),
+	 (N'restaurant',N'quan-oc-thao',5,N'name',N'Quan Oc Thao (CN)','2026-04-16 16:38:22.197'),
+	 (N'restaurant',N'quan-oc-thao',5,N'description',N'Seafood paradise in District 4. (CN)','2026-04-16 16:38:22.197'),
+	 (N'restaurant',N'quan-oc-thao',5,N'address',N'383 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.197');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'quan-oc-vu',1,N'name',N'Quan Oc Vu','2026-04-16 16:38:22.2'),
+	 (N'restaurant',N'quan-oc-vu',1,N'description',N'Fast serving delicious snails.','2026-04-16 16:38:22.2'),
+	 (N'restaurant',N'quan-oc-vu',1,N'address',N'37 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.203'),
+	 (N'restaurant',N'quan-oc-vu',2,N'name',N'Quan Oc Vu','2026-04-16 16:38:22.203'),
+	 (N'restaurant',N'quan-oc-vu',2,N'description',N'Fast serving delicious snails.','2026-04-16 16:38:22.207'),
+	 (N'restaurant',N'quan-oc-vu',2,N'address',N'37 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.207'),
+	 (N'restaurant',N'quan-oc-vu',3,N'name',N'Quan Oc Vu (JP)','2026-04-16 16:38:22.21'),
+	 (N'restaurant',N'quan-oc-vu',3,N'description',N'Fast serving delicious snails. (JP)','2026-04-16 16:38:22.21'),
+	 (N'restaurant',N'quan-oc-vu',3,N'address',N'37 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.213'),
+	 (N'restaurant',N'quan-oc-vu',4,N'name',N'Quan Oc Vu (KR)','2026-04-16 16:38:22.217');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'quan-oc-vu',4,N'description',N'Fast serving delicious snails. (KR)','2026-04-16 16:38:22.217'),
+	 (N'restaurant',N'quan-oc-vu',4,N'address',N'37 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.217'),
+	 (N'restaurant',N'quan-oc-vu',5,N'name',N'Quan Oc Vu (CN)','2026-04-16 16:38:22.22'),
+	 (N'restaurant',N'quan-oc-vu',5,N'description',N'Fast serving delicious snails. (CN)','2026-04-16 16:38:22.22'),
+	 (N'restaurant',N'quan-oc-vu',5,N'address',N'37 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.227'),
+	 (N'restaurant',N'sot-lau-alo-quan',1,N'name',N'Alo Quan','2026-04-16 16:38:22.23'),
+	 (N'restaurant',N'sot-lau-alo-quan',1,N'description',N'Seafood and beer spot.','2026-04-16 16:38:22.233'),
+	 (N'restaurant',N'sot-lau-alo-quan',1,N'address',N'333 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.237'),
+	 (N'restaurant',N'sot-lau-alo-quan',2,N'name',N'Alo Quan','2026-04-16 16:38:22.237'),
+	 (N'restaurant',N'sot-lau-alo-quan',2,N'description',N'Seafood and beer spot.','2026-04-16 16:38:22.24');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'sot-lau-alo-quan',2,N'address',N'333 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.24'),
+	 (N'restaurant',N'sot-lau-alo-quan',3,N'name',N'Alo Quan (JP)','2026-04-16 16:38:22.243'),
+	 (N'restaurant',N'sot-lau-alo-quan',3,N'description',N'Seafood and beer spot. (JP)','2026-04-16 16:38:22.243'),
+	 (N'restaurant',N'sot-lau-alo-quan',3,N'address',N'333 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.247'),
+	 (N'restaurant',N'sot-lau-alo-quan',4,N'name',N'Alo Quan (KR)','2026-04-16 16:38:22.247'),
+	 (N'restaurant',N'sot-lau-alo-quan',4,N'description',N'Seafood and beer spot. (KR)','2026-04-16 16:38:22.25'),
+	 (N'restaurant',N'sot-lau-alo-quan',4,N'address',N'333 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.25'),
+	 (N'restaurant',N'sot-lau-alo-quan',5,N'name',N'Alo Quan (CN)','2026-04-16 16:38:22.253'),
+	 (N'restaurant',N'sot-lau-alo-quan',5,N'description',N'Seafood and beer spot. (CN)','2026-04-16 16:38:22.253'),
+	 (N'restaurant',N'sot-lau-alo-quan',5,N'address',N'333 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.257');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'the-gioi-bo',1,N'name',N'The Gioi Bo','2026-04-16 16:38:22.257'),
+	 (N'restaurant',N'the-gioi-bo',1,N'description',N'Beef BBQ chain.','2026-04-16 16:38:22.26'),
+	 (N'restaurant',N'the-gioi-bo',1,N'address',N'6 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.26'),
+	 (N'restaurant',N'the-gioi-bo',2,N'name',N'The Gioi Bo','2026-04-16 16:38:22.263'),
+	 (N'restaurant',N'the-gioi-bo',2,N'description',N'Beef BBQ chain.','2026-04-16 16:38:22.263'),
+	 (N'restaurant',N'the-gioi-bo',2,N'address',N'6 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.267'),
+	 (N'restaurant',N'the-gioi-bo',3,N'name',N'The Gioi Bo (JP)','2026-04-16 16:38:22.267'),
+	 (N'restaurant',N'the-gioi-bo',3,N'description',N'Beef BBQ chain. (JP)','2026-04-16 16:38:22.27'),
+	 (N'restaurant',N'the-gioi-bo',3,N'address',N'6 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.27'),
+	 (N'restaurant',N'the-gioi-bo',4,N'name',N'The Gioi Bo (KR)','2026-04-16 16:38:22.273');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'the-gioi-bo',4,N'description',N'Beef BBQ chain. (KR)','2026-04-16 16:38:22.277'),
+	 (N'restaurant',N'the-gioi-bo',4,N'address',N'6 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.277'),
+	 (N'restaurant',N'the-gioi-bo',5,N'name',N'The Gioi Bo (CN)','2026-04-16 16:38:22.28'),
+	 (N'restaurant',N'the-gioi-bo',5,N'description',N'Beef BBQ chain. (CN)','2026-04-16 16:38:22.28'),
+	 (N'restaurant',N'the-gioi-bo',5,N'address',N'6 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.28'),
+	 (N'restaurant',N'them-nuong-yakiniku',1,N'name',N'Them Nuong Yakiniku','2026-04-16 16:38:22.283'),
+	 (N'restaurant',N'them-nuong-yakiniku',1,N'description',N'Japanese-style BBQ.','2026-04-16 16:38:22.287'),
+	 (N'restaurant',N'them-nuong-yakiniku',1,N'address',N'122 Đ. Vĩnh Khánh, Quận 4, TP.HCM','2026-04-16 16:38:22.287'),
+	 (N'restaurant',N'them-nuong-yakiniku',2,N'name',N'Them Nuong Yakiniku','2026-04-16 16:38:22.29'),
+	 (N'restaurant',N'them-nuong-yakiniku',2,N'description',N'Japanese-style BBQ.','2026-04-16 16:38:22.29');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'restaurant',N'them-nuong-yakiniku',2,N'address',N'122 St. Vĩnh Khánh, District 4, CityHCM','2026-04-16 16:38:22.293'),
+	 (N'restaurant',N'them-nuong-yakiniku',3,N'name',N'Them Nuong Yakiniku (JP)','2026-04-16 16:38:22.293'),
+	 (N'restaurant',N'them-nuong-yakiniku',3,N'description',N'Japanese-style BBQ. (JP)','2026-04-16 16:38:22.297'),
+	 (N'restaurant',N'them-nuong-yakiniku',3,N'address',N'122 通り Vĩnh Khánh, 区 4, 市HCM (JP)','2026-04-16 16:38:22.297'),
+	 (N'restaurant',N'them-nuong-yakiniku',4,N'name',N'Them Nuong Yakiniku (KR)','2026-04-16 16:38:22.3'),
+	 (N'restaurant',N'them-nuong-yakiniku',4,N'description',N'Japanese-style BBQ. (KR)','2026-04-16 16:38:22.3'),
+	 (N'restaurant',N'them-nuong-yakiniku',4,N'address',N'122 길 Vĩnh Khánh, 구 4, 시HCM (KR)','2026-04-16 16:38:22.303'),
+	 (N'restaurant',N'them-nuong-yakiniku',5,N'name',N'Them Nuong Yakiniku (CN)','2026-04-16 16:38:22.303'),
+	 (N'restaurant',N'them-nuong-yakiniku',5,N'description',N'Japanese-style BBQ. (CN)','2026-04-16 16:38:22.307'),
+	 (N'restaurant',N'them-nuong-yakiniku',5,N'address',N'122 路 Vĩnh Khánh, 区 4, 市HCM (CN)','2026-04-16 16:38:22.31');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'1',1,N'name',N'Bò nướng BBQ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1',2,N'name',N'BBQ Grilled Beef','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1',3,N'name',N'BBQ焼き牛肉','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1',4,N'name',N'BBQ 소고기 구이','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1',5,N'name',N'烧烤牛肉','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2',1,N'name',N'Lẩu Thái cay','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2',2,N'name',N'Spicy Thai Hotpot','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2',3,N'name',N'タイ辛口鍋','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2',4,N'name',N'태국식 매운 훠궈','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2',5,N'name',N'泰式辣火锅','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'3',1,N'name',N'Hải sản nướng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'3',2,N'name',N'Grilled Seafood','2026-04-16 17:21:59.963'),
+	 (N'dish',N'3',3,N'name',N'焼きシーフード','2026-04-16 17:21:59.963'),
+	 (N'dish',N'3',4,N'name',N'구운 해산물','2026-04-16 17:21:59.963'),
+	 (N'dish',N'3',5,N'name',N'烧烤海鲜','2026-04-16 17:21:59.963'),
+	 (N'dish',N'4',1,N'name',N'Steak bò Mỹ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'4',2,N'name',N'American Beef Steak','2026-04-16 17:21:59.963'),
+	 (N'dish',N'4',3,N'name',N'アメリカンビーフステーキ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'4',4,N'name',N'미국식 스테이크','2026-04-16 17:21:59.963'),
+	 (N'dish',N'4',5,N'name',N'美式牛排','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'5',1,N'name',N'Cá hồi áp chảo','2026-04-16 17:21:59.963'),
+	 (N'dish',N'5',2,N'name',N'Pan-seared Salmon','2026-04-16 17:21:59.963'),
+	 (N'dish',N'5',3,N'name',N'サーモンのソテー','2026-04-16 17:21:59.963'),
+	 (N'dish',N'5',4,N'name',N'연어 스테이크','2026-04-16 17:21:59.963'),
+	 (N'dish',N'5',5,N'name',N'香煎三文鱼','2026-04-16 17:21:59.963'),
+	 (N'dish',N'6',1,N'name',N'Lẩu kim chi','2026-04-16 17:21:59.963'),
+	 (N'dish',N'6',2,N'name',N'Kimchi Hotpot','2026-04-16 17:21:59.963'),
+	 (N'dish',N'6',3,N'name',N'キムチ鍋','2026-04-16 17:21:59.963'),
+	 (N'dish',N'6',4,N'name',N'김치 전골','2026-04-16 17:21:59.963'),
+	 (N'dish',N'6',5,N'name',N'泡菜火锅','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'7',1,N'name',N'Ba chỉ nướng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'7',2,N'name',N'Grilled Pork Belly','2026-04-16 17:21:59.963'),
+	 (N'dish',N'7',3,N'name',N'豚バラ焼き','2026-04-16 17:21:59.963'),
+	 (N'dish',N'7',4,N'name',N'삼겹살 구이','2026-04-16 17:21:59.963'),
+	 (N'dish',N'7',5,N'name',N'烤五花肉','2026-04-16 17:21:59.963'),
+	 (N'dish',N'8',1,N'name',N'Lẩu riêu cua','2026-04-16 17:21:59.963'),
+	 (N'dish',N'8',2,N'name',N'Crab Paste Hotpot','2026-04-16 17:21:59.963'),
+	 (N'dish',N'8',3,N'name',N'カニ味噌鍋','2026-04-16 17:21:59.963'),
+	 (N'dish',N'8',4,N'name',N'게장 전골','2026-04-16 17:21:59.963'),
+	 (N'dish',N'8',5,N'name',N'蟹酱火锅','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'9',1,N'name',N'Sườn nướng mật ong','2026-04-16 17:21:59.963'),
+	 (N'dish',N'9',2,N'name',N'Honey Grilled Ribs','2026-04-16 17:21:59.963'),
+	 (N'dish',N'9',3,N'name',N'ハニースペアリブ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'9',4,N'name',N'허니 갈비','2026-04-16 17:21:59.963'),
+	 (N'dish',N'9',5,N'name',N'蜂蜜烤排骨','2026-04-16 17:21:59.963'),
+	 (N'dish',N'10',1,N'name',N'Ốc hương rang muối','2026-04-16 17:21:59.963'),
+	 (N'dish',N'10',2,N'name',N'Salt Roasted Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'10',3,N'name',N'塩焼き巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'10',4,N'name',N'소금 볶음 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'10',5,N'name',N'椒盐海螺','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'11',1,N'name',N'Sò điệp nướng mỡ hành','2026-04-16 17:21:59.963'),
+	 (N'dish',N'11',2,N'name',N'Grilled Scallops with Onion Oil','2026-04-16 17:21:59.963'),
+	 (N'dish',N'11',3,N'name',N'ホタテのネギ油焼き','2026-04-16 17:21:59.963'),
+	 (N'dish',N'11',4,N'name',N'가리비 파기름 구이','2026-04-16 17:21:59.963'),
+	 (N'dish',N'11',5,N'name',N'葱油烤扇贝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'12',1,N'name',N'Ốc móng tay xào me','2026-04-16 17:21:59.963'),
+	 (N'dish',N'12',2,N'name',N'Tamarind Stir-fried Razor Clams','2026-04-16 17:21:59.963'),
+	 (N'dish',N'12',3,N'name',N'マテ貝のタマリンド炒め','2026-04-16 17:21:59.963'),
+	 (N'dish',N'12',4,N'name',N'맛조개 타마린드 볶음','2026-04-16 17:21:59.963'),
+	 (N'dish',N'12',5,N'name',N'酸角炒蛏子','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'13',1,N'name',N'Ốc mỡ xào tỏi','2026-04-16 17:21:59.963'),
+	 (N'dish',N'13',2,N'name',N'Garlic Stir-fried Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'13',3,N'name',N'ニンニク炒め巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'13',4,N'name',N'마늘 볶음 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'13',5,N'name',N'蒜蓉炒螺','2026-04-16 17:21:59.963'),
+	 (N'dish',N'14',1,N'name',N'Tôm nướng muối ớt','2026-04-16 17:21:59.963'),
+	 (N'dish',N'14',2,N'name',N'Chili Salt Grilled Shrimp','2026-04-16 17:21:59.963'),
+	 (N'dish',N'14',3,N'name',N'エビの塩唐辛子焼き','2026-04-16 17:21:59.963'),
+	 (N'dish',N'14',4,N'name',N'고추 소금 새우구이','2026-04-16 17:21:59.963'),
+	 (N'dish',N'14',5,N'name',N'椒盐烤虾','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'15',1,N'name',N'Sò huyết cháy tỏi','2026-04-16 17:21:59.963'),
+	 (N'dish',N'15',2,N'name',N'Garlic Fried Blood Cockles','2026-04-16 17:21:59.963'),
+	 (N'dish',N'15',3,N'name',N'アカガイのガーリック炒め','2026-04-16 17:21:59.963'),
+	 (N'dish',N'15',4,N'name',N'마늘 피조개 볶음','2026-04-16 17:21:59.963'),
+	 (N'dish',N'15',5,N'name',N'蒜香血蛤','2026-04-16 17:21:59.963'),
+	 (N'dish',N'16',1,N'name',N'Ốc giác xào sa tế','2026-04-16 17:21:59.963'),
+	 (N'dish',N'16',2,N'name',N'Sate Stir-fried Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'16',3,N'name',N'サテ炒め巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'16',4,N'name',N'사테 볶음 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'16',5,N'name',N'沙爹炒螺','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'17',1,N'name',N'Bạch tuộc hấp gừng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'17',2,N'name',N'Steamed Octopus with Ginger','2026-04-16 17:21:59.963'),
+	 (N'dish',N'17',3,N'name',N'タコの生姜蒸し','2026-04-16 17:21:59.963'),
+	 (N'dish',N'17',4,N'name',N'생강 문어찜','2026-04-16 17:21:59.963'),
+	 (N'dish',N'17',5,N'name',N'姜蒸章鱼','2026-04-16 17:21:59.963'),
+	 (N'dish',N'18',1,N'name',N'Ốc bươu nướng tiêu','2026-04-16 17:21:59.963'),
+	 (N'dish',N'18',2,N'name',N'Pepper Grilled Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'18',3,N'name',N'コショウ焼き巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'18',4,N'name',N'후추 구이 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'18',5,N'name',N'胡椒烤螺','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'19',1,N'name',N'Hàu nướng phô mai','2026-04-16 17:21:59.963'),
+	 (N'dish',N'19',2,N'name',N'Grilled Oysters with Cheese','2026-04-16 17:21:59.963'),
+	 (N'dish',N'19',3,N'name',N'チーズ焼き牡蠣','2026-04-16 17:21:59.963'),
+	 (N'dish',N'19',4,N'name',N'치즈 구이 굴','2026-04-16 17:21:59.963'),
+	 (N'dish',N'19',5,N'name',N'芝士烤生蚝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'20',1,N'name',N'Ốc len xào dừa','2026-04-16 17:21:59.963'),
+	 (N'dish',N'20',2,N'name',N'Coconut Stir-fried Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'20',3,N'name',N'ココナッツ炒め巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'20',4,N'name',N'코코넛 볶음 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'20',5,N'name',N'椰汁炒螺','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'21',1,N'name',N'Càng ghẹ rang muối','2026-04-16 17:21:59.963'),
+	 (N'dish',N'21',2,N'name',N'Salt Roasted Crab Claws','2026-04-16 17:21:59.963'),
+	 (N'dish',N'21',3,N'name',N'塩焼きカニの爪','2026-04-16 17:21:59.963'),
+	 (N'dish',N'21',4,N'name',N'소금 게 집게','2026-04-16 17:21:59.963'),
+	 (N'dish',N'21',5,N'name',N'椒盐蟹钳','2026-04-16 17:21:59.963'),
+	 (N'dish',N'22',1,N'name',N'Tôm tích nướng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'22',2,N'name',N'Grilled Mantis Shrimp','2026-04-16 17:21:59.963'),
+	 (N'dish',N'22',3,N'name',N'シャコのグリル','2026-04-16 17:21:59.963'),
+	 (N'dish',N'22',4,N'name',N'구운 갯가재','2026-04-16 17:21:59.963'),
+	 (N'dish',N'22',5,N'name',N'烤皮皮虾','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'23',1,N'name',N'Ốc hương cháy tỏi','2026-04-16 17:21:59.963'),
+	 (N'dish',N'23',2,N'name',N'Garlic Fried Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'23',3,N'name',N'ニンニク焼き巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'23',4,N'name',N'마늘 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'23',5,N'name',N'蒜香螺','2026-04-16 17:21:59.963'),
+	 (N'dish',N'24',1,N'name',N'Sò điệp nướng phô mai','2026-04-16 17:21:59.963'),
+	 (N'dish',N'24',2,N'name',N'Grilled Scallops with Cheese','2026-04-16 17:21:59.963'),
+	 (N'dish',N'24',3,N'name',N'チーズホタテ焼き','2026-04-16 17:21:59.963'),
+	 (N'dish',N'24',4,N'name',N'치즈 가리비','2026-04-16 17:21:59.963'),
+	 (N'dish',N'24',5,N'name',N'芝士扇贝','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'25',1,N'name',N'Ốc móng tay nướng mỡ hành','2026-04-16 17:21:59.963'),
+	 (N'dish',N'25',2,N'name',N'Grilled Razor Clams with Onion Oil','2026-04-16 17:21:59.963'),
+	 (N'dish',N'25',3,N'name',N'ネギ油焼きマテ貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'25',4,N'name',N'파기름 맛조개','2026-04-16 17:21:59.963'),
+	 (N'dish',N'25',5,N'name',N'葱油烤蛏子','2026-04-16 17:21:59.963'),
+	 (N'dish',N'26',1,N'name',N'Sò huyết nướng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'26',2,N'name',N'Grilled Blood Cockles','2026-04-16 17:21:59.963'),
+	 (N'dish',N'26',3,N'name',N'焼きアカガイ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'26',4,N'name',N'구운 피조개','2026-04-16 17:21:59.963'),
+	 (N'dish',N'26',5,N'name',N'烤血蛤','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'27',1,N'name',N'Ốc len xào dừa','2026-04-16 17:21:59.963'),
+	 (N'dish',N'27',2,N'name',N'Coconut Stir-fried Snails','2026-04-16 17:21:59.963'),
+	 (N'dish',N'27',3,N'name',N'ココナッツ炒め巻貝','2026-04-16 17:21:59.963'),
+	 (N'dish',N'27',4,N'name',N'코코넛 고둥','2026-04-16 17:21:59.963'),
+	 (N'dish',N'27',5,N'name',N'椰汁螺','2026-04-16 17:21:59.963'),
+	 (N'dish',N'28',1,N'name',N'Hàu nướng mỡ hành','2026-04-16 17:21:59.963'),
+	 (N'dish',N'28',2,N'name',N'Grilled Oysters with Onion Oil','2026-04-16 17:21:59.963'),
+	 (N'dish',N'28',3,N'name',N'ネギ油牡蠣','2026-04-16 17:21:59.963'),
+	 (N'dish',N'28',4,N'name',N'파기름 굴','2026-04-16 17:21:59.963'),
+	 (N'dish',N'28',5,N'name',N'葱油生蚝','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'29',1,N'name',N'Lẩu hải sản','2026-04-16 17:21:59.963'),
+	 (N'dish',N'29',2,N'name',N'Seafood Hotpot','2026-04-16 17:21:59.963'),
+	 (N'dish',N'29',3,N'name',N'シーフード鍋','2026-04-16 17:21:59.963'),
+	 (N'dish',N'29',4,N'name',N'해산물 전골','2026-04-16 17:21:59.963'),
+	 (N'dish',N'29',5,N'name',N'海鲜火锅','2026-04-16 17:21:59.963'),
+	 (N'dish',N'30',1,N'name',N'Tôm nướng bơ tỏi','2026-04-16 17:21:59.963'),
+	 (N'dish',N'30',2,N'name',N'Garlic Butter Grilled Shrimp','2026-04-16 17:21:59.963'),
+	 (N'dish',N'30',3,N'name',N'ガーリックバターエビ','2026-04-16 17:21:59.963'),
+	 (N'dish',N'30',4,N'name',N'마늘 버터 새우','2026-04-16 17:21:59.963'),
+	 (N'dish',N'30',5,N'name',N'蒜香黄油虾','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'1002',1,N'name',N'Lẩu Thái Siêu Ngon','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1002',2,N'name',N'Super Delicious Thai Hotpot','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1002',3,N'name',N'超美味タイ鍋','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1002',4,N'name',N'초맛있는 태국식 전골','2026-04-16 17:21:59.963'),
+	 (N'dish',N'1002',5,N'name',N'超级好吃泰式火锅','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2002',1,N'name',N'Lòng bò xào khế','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2002',2,N'name',N'Stir-fried Beef Intestine with Starfruit','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2002',3,N'name',N'牛内臓とスターフルーツ炒め','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2002',4,N'name',N'소 내장 스타프루트 볶음','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2002',5,N'name',N'牛杂炒杨桃','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'2003',1,N'name',N'Đậu hủ tẩm hành','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2003',2,N'name',N'Tofu with Scallion Oil','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2003',3,N'name',N'ネギ油豆腐','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2003',4,N'name',N'파기름 두부','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2003',5,N'name',N'葱油豆腐','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2004',1,N'name',N'Bò nướng tảng','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2004',2,N'name',N'Grilled Beef Chunk','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2004',3,N'name',N'厚切り牛肉焼き','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2004',4,N'name',N'두꺼운 소고기 구이','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2004',5,N'name',N'厚切牛肉','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.[Translation] (entity_type,entity_id,language_id,field_name,translated_text,created_at) VALUES
+	 (N'dish',N'2005',1,N'name',N'Thịt bò Wagyu','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2005',2,N'name',N'Wagyu Beef','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2005',3,N'name',N'和牛','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2005',4,N'name',N'와규','2026-04-16 17:21:59.963'),
+	 (N'dish',N'2005',5,N'name',N'和牛','2026-04-16 17:21:59.963');
+INSERT INTO food_market_narrator.dbo.Users (username,password_hash,[role],is_active,created_at,phone,email,full_name) VALUES
+	 (N'admin',N'PBKDF2$100000$3rhn8f4slYStm0PatAjv9Q==$2FAwlWBvDYm3v82GpVdPfkpLKe6dWAkgAD3JJZiB1As=',N'admin',1,'2026-02-08 09:06:31.0',N'0900000001',N'admin1@gmail.com',N'Phuoc Sang'),
+	 (N'seller',N'PBKDF2$100000$u0mpW3Z8QZh1KEUS8hGI+w==$y4jyXFPCoSfe44fSnEO9K0aFBXszC4lZE1qYaJ6KU4o=',N'saler',1,'2026-02-08 09:06:31.0',N'0900000002',N'phuocnsang@gmail.com',N'Phuoc Sang'),
+	 (N'seller1',N'PBKDF2$100000$0UZftwztXKxKibuSGoneOQ==$JytByL4PFtO67y3nRS2SWQekuWytfPDdkXhEk1OKbg8=',N'saler',1,'2026-02-08 09:06:31.0',N'0900000003',N'saler1@gmail.com',N'Phuoc Sang'),
+	 (N'seller2',N'PBKDF2$100000$0UZftwztXKxKibuSGoneOQ==$JytByL4PFtO67y3nRS2SWQekuWytfPDdkXhEk1OKbg8=',N'saler',1,'2026-02-08 09:13:08.0',N'0900000004',N'saler2@gmail.com',N'Phuoc Sang'),
+	 (N'seller3',N'PBKDF2$100000$0UZftwztXKxKibuSGoneOQ==$JytByL4PFtO67y3nRS2SWQekuWytfPDdkXhEk1OKbg8=',N'saler',1,'2026-02-08 09:13:08.0',N'0900000005',N'saler3@gmail.com',N'Phuoc Sang'),
+	 (N'seller4',N'PBKDF2$100000$0UZftwztXKxKibuSGoneOQ==$JytByL4PFtO67y3nRS2SWQekuWytfPDdkXhEk1OKbg8=',N'saler',1,'2026-02-08 09:13:08.0',N'0900000006',N'saler4@gmail.com',N'Phuoc Sang'),
+	 (N'admin2',N'PBKDF2$100000$4iOzaQRJoDws/UAqAu74NQ==$nWs06t6wPOiCz9v89jx9bdGUZCrwtJcSfcZk8o8l4os=',N'admin',1,'2026-04-01 15:56:02.727',N'0900001002',N'binbibo@gmail.com',N'Phuoc Sang'),
+	 (N'phuosang',N'PBKDF2$100000$4iOzaQRJoDws/UAqAu74NQ==$nWs06t6wPOiCz9v89jx9bdGUZCrwtJcSfcZk8o8l4os=',N'admin',1,'2026-04-01 16:48:43.837',N'0988877883',N'sang11@gmail.com',N'Phuoc Sang');

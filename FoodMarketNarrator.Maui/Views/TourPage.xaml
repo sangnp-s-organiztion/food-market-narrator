@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:food_market_narrator.Models"
              xmlns:shared="clr-namespace:food_market_narrator.Views.Shared"
+             xmlns:local="clr-namespace:food_market_narrator"
              x:Class="food_market_narrator.Views.TourPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#FFFCF8">
@@ -16,12 +17,12 @@
                     VerticalOptions="Center"/>
 
             <VerticalStackLayout Grid.Column="1" Spacing="2">
-                <Label Text="Khám phá gì hôm nay?"
+                  <Label Text="{local:Translate ExploreToday}"
                        FontSize="34"
                        FontFamily="OpenSansSemibold"
                        TextColor="#2C2C2C"
                        LineBreakMode="WordWrap" />
-                <Label Text="HÀNH TRÌNH ẨM THỰC PHỐ VĨNH KHÁNH"
+                  <Label Text="{local:Translate CulinaryJourney}"
                        FontSize="11"
                        FontAttributes="Bold"
                        TextColor="#C09163"
@@ -52,11 +53,11 @@
                            FontSize="48"
                            TextColor="#E0E0E0"
                            HorizontalOptions="Center"/>
-                      <Label Text="Chưa có hành trình khả dụng"
+                      <Label Text="{local:Translate NoTourAvailable}"
                            FontSize="16"
                            TextColor="#9E9E9E"
                            HorizontalOptions="Center"/>
-                      <Label Text="Vui lòng kiểm tra lại kết nối hoặc dữ liệu hành trình từ máy chủ"
+                      <Label Text="{local:Translate NoTourHint}"
                            FontSize="13"
                            TextColor="#BDBDBD"
                            HorizontalOptions="Center"
@@ -99,7 +100,7 @@
                                            VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
 
-                                <Button Text="Xem chi tiết"
+                                <Button Text="{local:Translate BtnViewDetail}"
                                         Clicked="OnViewDetailClicked"
                                         FontSize="12"
                                         Padding="12,6"

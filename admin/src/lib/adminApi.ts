@@ -240,6 +240,21 @@ export interface CountResponse {
   count: number;
 }
 
+export interface UserCountResponse extends CountResponse {
+  appUsers?: number;
+  visitors?: number;
+}
+
+export interface VisitorSessionResponse {
+  sessionId: string;
+  deviceId: string;
+  deviceInfo: string;
+  createdAtUtc?: string | null;
+  lastSeenAtUtc?: string | null;
+  updatedAtUtc?: string | null;
+  qrAccessExpiresAtUtc?: string | null;
+}
+
 export interface TranslationMonthlyBillingItem {
   sellerUserId: number;
   sellerUsername: string;
@@ -458,6 +473,9 @@ export const tourApi = {
 export const userApi = {
   getAll: () => adminFetch<UserResponse[]>("/api/users"),
 
+  getVisitors: (limit = 200) =>
+    adminFetch<VisitorSessionResponse[]>(`/api/users/visitors?limit=${limit}`),
+
   getById: (id: number) => adminFetch<UserResponse>(`/api/users/${id}`),
 
   create: (data: CreateUserRequest) =>
@@ -500,7 +518,8 @@ export const adminStatsApi = {
   getAudioCount: () =>
     adminFetch<CountResponse>("/api/admin/stats/audios/count"),
 
-  getUserCount: () => adminFetch<CountResponse>("/api/admin/stats/users/count"),
+  getUserCount: () =>
+    adminFetch<UserCountResponse>("/api/admin/stats/users/count"),
 
   getDishCount: () =>
     adminFetch<CountResponse>("/api/admin/stats/dishes/count"),

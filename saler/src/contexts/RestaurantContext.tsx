@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
+  activeRestaurants: Restaurant[];
   selectedRestaurant: Restaurant | null;
   selectRestaurant: (restaurantId: string) => void;
   clearSelection: () => void;
@@ -37,9 +38,7 @@ export function RestaurantProvider({
     }
 
     const allRestaurants = await getRestaurantsApi();
-    const userRestaurants = allRestaurants.filter(
-      (r) => r.user_id === user.user_id && r.is_active,
-    );
+    const userRestaurants = allRestaurants.filter((r) => r.user_id === user.user_id);
     setRestaurants(userRestaurants);
   }, [user]);
 
@@ -53,9 +52,7 @@ export function RestaurantProvider({
       }
       try {
         const allRestaurants = await getRestaurantsApi();
-        const data = allRestaurants.filter(
-          (r) => r.user_id === user.user_id && r.is_active,
-        );
+        const data = allRestaurants.filter((r) => r.user_id === user.user_id);
         if (mounted) setRestaurants(data ?? []);
       } catch {
         if (mounted) setRestaurants([]);
@@ -76,7 +73,7 @@ export function RestaurantProvider({
       void refreshRestaurants().catch(() => {
         // Ignore polling errors; next tick may recover.
       });
-    }, 30_000);
+    }, 5_000);
 
     return () => {
       window.clearInterval(intervalId);
@@ -88,21 +85,33 @@ export function RestaurantProvider({
       return;
     }
 
-    const stillAvailable = restaurants.some(
+    const selectedRestaurantState = restaurants.find(
       (r) => r.restaurant_id === selectedId,
     );
 
-    if (stillAvailable) {
+    if (!selectedRestaurantState) {
+      setSelectedId(null);
+      toast.error("Nhà hàng đang quản lý không còn khả dụng.");
+      return;
+    }
+
+    if (selectedRestaurantState.is_active) {
       return;
     }
 
     setSelectedId(null);
-    toast.error("Nhà hàng đang quản lý đã bị khóa hoặc không còn khả dụng.");
+    toast.error("Nhà hàng đang quản lý đã bị khóa.");
   }, [restaurants, selectedId, user]);
 
+  const activeRestaurants = useMemo(
+    () => restaurants.filter((r) => r.is_active),
+    [restaurants],
+  );
+
   const selectedRestaurant = useMemo(
-    () => restaurants.find((r) => r.restaurant_id === selectedId) ?? null,
-    [restaurants, selectedId],
+    () =>
+      activeRestaurants.find((r) => r.restaurant_id === selectedId) ?? null,
+    [activeRestaurants, selectedId],
   );
 
   const selectRestaurant = useCallback((restaurantId: string) => {
@@ -117,6 +126,7 @@ export function RestaurantProvider({
     <RestaurantContext.Provider
       value={{
         restaurants,
+        activeRestaurants,
         selectedRestaurant,
         selectRestaurant,
         clearSelection,

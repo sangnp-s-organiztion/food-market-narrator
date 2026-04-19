@@ -1,7 +1,13 @@
 ﻿import { useState, useEffect, useCallback } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import type { Restaurant } from "@/types";
+import type {
+  Language,
+  Restaurant,
+  RestaurantFieldTranslations,
+} from "@/types";
 import {
+  getLanguagesApi,
+  getRestaurantTranslationsApi,
   resolveMapCoordinatesApi,
   updateRestaurantApi,
   updateRestaurantStatusApi,
@@ -11,6 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { MapPin, Phone, Save, Clock } from "lucide-react";
 
@@ -72,6 +85,10 @@ function extractCoordinatesFromGoogleMapsUrl(
   return null;
 }
 
+function getBaseLanguageCode(code: string): string {
+  return code.trim().toLowerCase().replace("_", "-").split("-")[0] ?? "";
+}
+
 export default function RestaurantPage() {
   const { selectedRestaurant, refreshRestaurants } = useRestaurant();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(
@@ -80,14 +97,97 @@ export default function RestaurantPage() {
   const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [previewLanguageCode, setPreviewLanguageCode] = useState("vi");
+  const [translatedFields, setTranslatedFields] =
+    useState<RestaurantFieldTranslations>({});
+  const [loadingTranslation, setLoadingTranslation] = useState(false);
+  const restaurantId = restaurant?.restaurant_id ?? "";
+  const openTime = restaurant?.open_time ?? "";
+  const closeTime = restaurant?.close_time ?? "";
 
   useEffect(() => {
     if (selectedRestaurant) {
       setRestaurant({ ...selectedRestaurant });
       setGoogleMapsUrl("");
       setAutoMode(true);
+      setPreviewLanguageCode("vi");
+      setTranslatedFields({});
     }
   }, [selectedRestaurant]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadLanguages = async () => {
+      try {
+        const data = await getLanguagesApi();
+        if (!mounted) return;
+
+        const normalized = data
+          .filter((lang) => Boolean(lang.code))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setLanguages(normalized);
+
+        if (
+          !normalized.some(
+            (lang) => getBaseLanguageCode(lang.code ?? "") === "vi",
+          )
+        ) {
+          setPreviewLanguageCode(normalized[0]?.code ?? "vi");
+        }
+      } catch {
+        if (!mounted) return;
+        setLanguages([]);
+      }
+    };
+
+    loadLanguages();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadTranslation = async () => {
+      if (
+        !restaurantId ||
+        !previewLanguageCode ||
+        previewLanguageCode === "vi"
+      ) {
+        setTranslatedFields({});
+        return;
+      }
+
+      setLoadingTranslation(true);
+      try {
+        const translated = await getRestaurantTranslationsApi(
+          restaurantId,
+          previewLanguageCode,
+        );
+
+        if (!mounted) return;
+        setTranslatedFields(translated);
+      } catch {
+        if (!mounted) return;
+        setTranslatedFields({});
+      } finally {
+        if (mounted) {
+          setLoadingTranslation(false);
+        }
+      }
+    };
+
+    loadTranslation();
+
+    return () => {
+      mounted = false;
+    };
+  }, [previewLanguageCode, restaurantId]);
 
   const updateField = <K extends keyof Restaurant>(
     key: K,
@@ -97,17 +197,14 @@ export default function RestaurantPage() {
   };
 
   const updateAutoStatus = useCallback(() => {
-    if (!autoMode || !restaurant) return;
-    const shouldBeActive = isWithinSchedule(
-      restaurant.open_time,
-      restaurant.close_time,
-    );
+    if (!autoMode || !openTime || !closeTime) return;
+    const shouldBeActive = isWithinSchedule(openTime, closeTime);
     setRestaurant((prev) =>
       prev && prev.is_active !== shouldBeActive
         ? { ...prev, is_active: shouldBeActive }
         : prev,
     );
-  }, [autoMode, restaurant?.open_time, restaurant?.close_time]);
+  }, [autoMode, openTime, closeTime]);
 
   useEffect(() => {
     updateAutoStatus();
@@ -146,6 +243,17 @@ export default function RestaurantPage() {
         restaurant.is_active,
       );
       setRestaurant(updatedRestaurant);
+      if (previewLanguageCode !== "vi") {
+        try {
+          const translated = await getRestaurantTranslationsApi(
+            restaurant.restaurant_id,
+            previewLanguageCode,
+          );
+          setTranslatedFields(translated);
+        } catch {
+          setTranslatedFields({});
+        }
+      }
       await refreshRestaurants();
       toast.success("Lưu thay đổi thành công!");
     } catch {
@@ -189,6 +297,21 @@ export default function RestaurantPage() {
   };
 
   if (!selectedRestaurant || !restaurant) return null;
+
+  const displayName = restaurant.name;
+  const displayDescription =
+    previewLanguageCode === "vi"
+      ? restaurant.description
+      : translatedFields.description || restaurant.description;
+  const displayAddress =
+    previewLanguageCode === "vi"
+      ? restaurant.address
+      : translatedFields.address || restaurant.address;
+
+  const hasTranslationForPreviewLanguage =
+    previewLanguageCode === "vi"
+      ? true
+      : Boolean(translatedFields.description || translatedFields.address);
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
@@ -362,6 +485,74 @@ export default function RestaurantPage() {
               referrerPolicy="no-referrer-when-downgrade"
               src={`https://www.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}&z=15&output=embed`}
             />
+          </div>
+        </div>
+
+        <div className="form-section space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h3 className="font-medium text-foreground">
+              Xem thông tin nhà hàng theo ngôn ngữ
+            </h3>
+            <div className="w-full sm:w-56">
+              <Select
+                value={previewLanguageCode}
+                onValueChange={setPreviewLanguageCode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn ngôn ngữ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vi">Tiếng Việt</SelectItem>
+                  {languages
+                    .filter(
+                      (language) =>
+                        language.code &&
+                        getBaseLanguageCode(language.code) !== "vi",
+                    )
+                    .map((language) => (
+                      <SelectItem
+                        key={language.language_id}
+                        value={language.code}
+                      >
+                        {language.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+            <div>
+              <p className="text-xs text-muted-foreground">Tên nhà hàng</p>
+              <p className="font-medium text-foreground">{displayName}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Mô tả</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">
+                {displayDescription || "(Chưa có mô tả)"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Địa chỉ</p>
+              <p className="text-sm text-foreground">
+                {displayAddress || "(Chưa có địa chỉ)"}
+              </p>
+            </div>
+
+            {previewLanguageCode !== "vi" &&
+              !loadingTranslation &&
+              !hasTranslationForPreviewLanguage && (
+                <p className="text-xs text-amber-600">
+                  Chưa có bản dịch cho ngôn ngữ này, hệ thống đang dùng dữ liệu
+                  tiếng Việt.
+                </p>
+              )}
+            {previewLanguageCode !== "vi" && loadingTranslation && (
+              <p className="text-xs text-muted-foreground">
+                Đang tải bản dịch...
+              </p>
+            )}
           </div>
         </div>
 

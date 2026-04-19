@@ -1,5 +1,6 @@
 using SQLite;
 using System.Globalization;
+using food_market_narrator;
 
 namespace food_market_narrator.Models;
 
@@ -10,6 +11,16 @@ public class POI
 
     public string? Name { get; set; }
     public string? Description { get; set; }
+
+    [Ignore]
+    public string? OriginalName { get; set; }
+
+    [Ignore]
+    public string? OriginalDescription { get; set; }
+
+    [Ignore]
+    public string? OriginalAddress { get; set; }
+
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string? Category { get; set; }
@@ -38,7 +49,9 @@ public class POI
     }
 
     [Ignore]
-    public string StatusText => IsCurrentlyOpen ? "Đang mở cửa" : "Đóng cửa";
+    public string StatusText => IsCurrentlyOpen
+        ? LocalizationResourceManager.Instance["StatusOpenNow"]
+        : LocalizationResourceManager.Instance["StatusClosedNow"];
     
     public DateTime CreatedAt { get; set; }
     public string AudioFile { get; set; } = string.Empty;
@@ -134,7 +147,38 @@ public class POI
     public string CoordinatesDisplay => $"{Latitude.ToString("0.######", CultureInfo.InvariantCulture)}, {Longitude.ToString("0.######", CultureInfo.InvariantCulture)}";
 
     [Ignore]
-    public string CreatedAtDisplay => CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture);
+    public string CreatedAtDisplay
+    {
+        get
+        {
+            if (CreatedAt == default)
+            {
+                return "-";
+            }
+
+            var localDisplayTime = CreatedAt.Kind == DateTimeKind.Utc
+                ? CreatedAt.ToLocalTime()
+                : CreatedAt;
+
+            // Use short date/time pattern from current language culture.
+            return localDisplayTime.ToString("g", CultureInfo.CurrentCulture);
+        }
+    }
+
+    [Ignore]
+    public string OpenedDateDisplay
+    {
+        get
+        {
+            var template = LocalizationResourceManager.Instance["OpenedDate"];
+            if (string.IsNullOrWhiteSpace(template))
+            {
+                template = "Ngày mở bán: {0}";
+            }
+
+            return string.Format(CultureInfo.CurrentCulture, template, CreatedAtDisplay);
+        }
+    }
 
     [Ignore]
     public string AudioLanguagesDisplay

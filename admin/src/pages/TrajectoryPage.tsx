@@ -5,7 +5,7 @@ import TrajectorySection from "@/components/TrajectorySection";
 import { analyticsApi } from "@/lib/analyticsApi";
 
 const TrajectoryPage = () => {
-  const [sessionLimit] = useState<20 | 50 | 100 | 200 | "all">(100);
+  const [sessionLimit] = useState<20 | 50 | 100 | 200 | "all">("all");
 
   const { data: movementPathsData } = useQuery({
     queryKey: ["analytics", "movement-paths", sessionLimit],

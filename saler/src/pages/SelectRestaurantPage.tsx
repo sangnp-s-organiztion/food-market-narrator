@@ -5,17 +5,25 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
 export default function SelectRestaurantPage() {
-  const { restaurants, selectRestaurant } = useRestaurant();
+  const { restaurants, activeRestaurants, selectRestaurant } = useRestaurant();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (restaurants.length === 1) {
-      selectRestaurant(restaurants[0].restaurant_id);
+    if (activeRestaurants.length === 1) {
+      selectRestaurant(activeRestaurants[0].restaurant_id);
       navigate("/dashboard/restaurant", { replace: true });
     }
-  }, [restaurants, selectRestaurant, navigate]);
+  }, [activeRestaurants, selectRestaurant, navigate]);
 
   const handleSelect = (restaurantId: string) => {
+    const targetRestaurant = restaurants.find(
+      (restaurant) => restaurant.restaurant_id === restaurantId,
+    );
+
+    if (!targetRestaurant?.is_active) {
+      return;
+    }
+
     selectRestaurant(restaurantId);
     navigate("/dashboard/restaurant", { replace: true });
   };
@@ -51,8 +59,8 @@ export default function SelectRestaurantPage() {
             Chọn nhà hàng để quản lý
           </h1>
           <p className="text-muted-foreground mt-2">
-            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng để
-            tiếp tục.
+            Bạn đang quản lý {restaurants.length} nhà hàng. Chọn một nhà hàng
+            đang hoạt động để tiếp tục.
           </p>
         </div>
 
@@ -75,8 +83,12 @@ export default function SelectRestaurantPage() {
                   <span>{restaurant.phone}</span>
                 </div>
               </div>
-              <Button onClick={() => handleSelect(restaurant.restaurant_id)}>
-                Quản lý
+              <Button
+                onClick={() => handleSelect(restaurant.restaurant_id)}
+                disabled={!restaurant.is_active}
+                variant={restaurant.is_active ? "default" : "secondary"}
+              >
+                {restaurant.is_active ? "Quản lý" : "Đã khóa"}
               </Button>
             </div>
           ))}
