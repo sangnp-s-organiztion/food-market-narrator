@@ -5,7 +5,7 @@ services:
     plan: free
     dockerfilePath: ./FoodMarketNarrator.Api/Dockerfile
     dockerContext: .
-    healthCheckPath: /Mongo/test-connect
+    healthCheckPath: /healthz
     autoDeploy: true
     envVars:
       - key: ASPNETCORE_ENVIRONMENT

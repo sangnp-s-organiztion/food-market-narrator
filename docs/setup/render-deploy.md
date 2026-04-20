@@ -33,7 +33,7 @@ Neu ban khong dung Blueprint, co the tao Web Service thu cong:
 - Environment: Docker
 - Dockerfile Path: `./FoodMarketNarrator.Api/Dockerfile`
 - Docker Context: `.`
-- Health Check Path: `/Mongo/test-connect`
+- Health Check Path: `/healthz`
 
 ## 4) Env vars bat buoc tren Render
 

@@ -215,7 +215,8 @@ public class Program
         //    app.UseSwagger();
         //    app.UseSwaggerUI();
         //}
-        if (!app.Environment.IsDevelopment())
+        var isRunningOnRender = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RENDER"));
+        if (!app.Environment.IsDevelopment() && !isRunningOnRender)
         {
             app.UseHttpsRedirection();
         }
@@ -265,6 +266,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseMiddleware<food_market_narrator_api.Middleware.AuditLoggingMiddleware>();
+        // Health check endpoint cho platform (Render) khong phu thuoc DB.
+        app.MapGet("/healthz", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
         app.MapControllers();
         app.Run();
     }
