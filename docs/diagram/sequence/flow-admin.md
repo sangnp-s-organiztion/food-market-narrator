@@ -89,11 +89,17 @@ Xem profile admin, chỉnh sửa thông tin cá nhân và refresh trạng thái 
 22.Đổi mật khẩu tài khoản
 Đổi mật khẩu với validate bắt buộc/độ dài/xác nhận khớp và reset form khi thành công.
 
-23.Xem chi phí dịch token
-Tải dữ liệu tổng hợp và chi tiết usage để hiển thị KPI cùng hai bảng chi phí dịch token.
+23.Xem trang Dịch vụ (token)
+Mở trang translation-billing và tải dữ liệu mặc định để hiển thị KPI cùng bảng tổng hợp theo tháng.
 
-24.Lọc và phân trang chi phí dịch token
-Cho phép lọc theo tháng/seller, reset trang phù hợp và phân trang độc lập cho bảng monthly và usage.
+24.Lọc theo tháng/người bán
+Cho phép đổi bộ lọc billingMonth/sellerUsername, reset page phù hợp và tải lại dữ liệu theo điều kiện mới.
+
+25.Xem lịch sử sử dụng dịch vụ
+Tải và hiển thị bảng usage chi tiết theo bộ lọc hiện tại để admin theo dõi phát sinh token.
+
+26.Phân trang dữ liệu
+Hỗ trợ phân trang độc lập cho bảng monthly và usage để duyệt dữ liệu theo từng trang.
 
 ## 1. Kiểm tra phiên đăng nhập
 
@@ -685,7 +691,7 @@ sequenceDiagram
     end
 ```
 
-## 23. Xem chi phí dịch token
+## 23. Xem trang Dịch vụ (token)
 
 ```mermaid
 sequenceDiagram
@@ -695,13 +701,12 @@ sequenceDiagram
     participant BILL as Translation Billing API
 
     U->>FE: Truy cập /translation-billing
-    FE->>BILL: GET /api/admin/translation-billing/monthly?billingMonth&sellerUserId&page&pageSize
-    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUserId&page&pageSize
-    BILL-->>FE: Summary + monthly items + usage items
-    FE-->>U: Hiển thị KPI tổng hợp, bảng monthly, bảng usage
+    FE->>BILL: GET /api/admin/translation-billing/monthly?billingMonth&sellerUsername&page=1&pageSize=20
+    BILL-->>FE: Summary + monthly items
+    FE-->>U: Hiển thị KPI tổng hợp và bảng monthly mặc định
 ```
 
-## 24. Lọc và phân trang chi phí dịch token
+## 24. Lọc theo tháng/người bán
 
 ```mermaid
 sequenceDiagram
@@ -710,20 +715,45 @@ sequenceDiagram
     participant FE as Translation Billing Page
     participant BILL as Translation Billing API
 
-    U->>FE: Đổi filter tháng / sellerUserId
+    U->>FE: Đổi filter billingMonth / sellerUsername
     FE->>FE: Reset page về 1 cho bảng liên quan
-    FE->>BILL: Tải lại monthly
-    FE->>BILL: Tải lại usage
+    FE->>BILL: GET /api/admin/translation-billing/monthly?billingMonth&sellerUsername&page=1&pageSize=20
+    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUsername&page=1&pageSize=20
     BILL-->>FE: Dữ liệu mới
     FE-->>U: Cập nhật KPI và 2 bảng
+```
+
+## 25. Xem lịch sử sử dụng dịch vụ
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Translation Billing Page
+    participant BILL as Translation Billing API
+
+    U->>FE: Xem bảng lịch sử usage
+    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUsername&page&pageSize
+    BILL-->>FE: usage items + totalCount
+    FE-->>U: Hiển thị lịch sử sử dụng dịch token theo từng bản ghi
+```
+
+## 26. Phân trang dữ liệu
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Admin
+    participant FE as Translation Billing Page
+    participant BILL as Translation Billing API
 
     U->>FE: Chuyển trang bảng monthly
-    FE->>BILL: Gọi monthly với page mới
-    BILL-->>FE: monthly page mới
+    FE->>BILL: GET /api/admin/translation-billing/monthly?billingMonth&sellerUsername&page=n&pageSize
+    BILL-->>FE: monthly items trang mới
 
     U->>FE: Chuyển trang bảng usage
-    FE->>BILL: Gọi usage với page mới
-    BILL-->>FE: usage page mới
+    FE->>BILL: GET /api/admin/translation-billing/usage?billingMonth&sellerUsername&page=n&pageSize
+    BILL-->>FE: usage items trang mới
     FE-->>U: Cập nhật độc lập từng bảng
 ```
 
