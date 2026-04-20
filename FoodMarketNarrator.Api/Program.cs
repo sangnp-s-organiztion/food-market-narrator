@@ -184,7 +184,19 @@ public class Program
 
 
 
-        builder.WebHost.UseUrls("http://0.0.0.0:5044"); // cấu hình cho phép truy cập từ bên ngoài container
+        // Render cấp cổng động qua biến môi trường PORT; fallback:
+        // - Development: 5044 (local)
+        // - Non-Development: 10000 (mặc định thường dùng trên Render)
+        var renderPort = Environment.GetEnvironmentVariable("PORT");
+        if (int.TryParse(renderPort, out var parsedPort) && parsedPort > 0)
+        {
+            builder.WebHost.UseUrls($"http://0.0.0.0:{parsedPort}");
+        }
+        else
+        {
+            var fallbackPort = builder.Environment.IsDevelopment() ? 5044 : 10000;
+            builder.WebHost.UseUrls($"http://0.0.0.0:{fallbackPort}");
+        }
 
 
 

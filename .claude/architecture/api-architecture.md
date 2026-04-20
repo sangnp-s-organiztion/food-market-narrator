@@ -109,3 +109,6 @@ Ghi chu them:
 - /maui-images/{fileName}
 - /maui-audios/{fileName}
 - /uploads/audios/{fileName}
+- /qr/open.html (QR landing page: open app or fallback)
+- /qr/download.html (APK fallback download page)
+- /uploads/apk/food-market-narrator.apk (APK file served as static file)

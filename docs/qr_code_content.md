@@ -2,52 +2,44 @@
 
 ## Overview
 
-QR code được sử dụng để mở ứng dụng **Food Market Narrator** thông qua một **custom URL scheme**.
+QR code nên dùng URL web trung gian thay vì deep link trực tiếp để đảm bảo:
+
+- Có app -> mở app ngay.
+- Chưa có app -> chuyển đến trang tải APK.
+- Có thể ghi session vào Mongo `UserSessions` ngay từ lúc scan/download.
 
 ## QR Code Data
 
-Nội dung được mã hóa trong QR code:
+Nội dung nên encode trong QR:
 
 ```
-foodmarketnarrator://open
+http://<api-host>:5044/qr/open.html
 ```
 
-## Required Application
-
-Để quét mã QR, người dùng cần sử dụng ứng dụng **Trình quét QR và mã vạch** trên CH PLay.
-
-## How It Works
-
-Quy trình hoạt động:
-
-1. Người dùng mở **ứng dụng QR scanner** trên điện thoại.
-2. Hướng camera vào mã QR được đặt tại địa điểm.
-3. Ứng dụng scanner đọc nội dung QR code.
-4. Hệ thống nhận diện URL scheme `foodmarketnarrator://`.
-5. Nếu ứng dụng **Food Market Narrator** đã được cài đặt trên thiết bị:
-   - Hệ điều hành sẽ mở ứng dụng tự động.
-
-6. Nếu ứng dụng chưa được cài đặt:
-
-- Liên kết sẽ không thể được xử lý.
-
-## Use Case
-
-QR code được đặt tại các vị trí trong khu chợ để người dùng có thể:
-
-- Quét mã bằng ứng dụng QR scanner
-- Mở ứng dụng **Food Market Narrator**
-- Truy cập nhanh vào hệ thống hướng dẫn hoặc thông tin địa điểm
-
-## Example Scenario
-
-1. Người dùng mở ứng dụng QR scanner.
-2. Quét mã QR tại quầy hàng.
-3. Điện thoại hiển thị liên kết:
+Ví dụ khi chạy nội bộ LAN:
 
 ```
-foodmarketnarrator://open
+http://192.168.1.7:5044/qr/open.html
 ```
 
-4. Người dùng nhấn vào liên kết.
-5. Ứng dụng **Food Market Narrator** được mở.
+## Runtime Flow
+
+1. User scan QR -> mở `/qr/open.html`.
+2. Trang gọi `POST /api/user-sessions/start` để tạo/cập nhật visitor session.
+3. Trang thử mở app qua `foodmarketnarrator://open`.
+4. Nếu mở app thất bại sau timeout ngắn -> redirect sang `/qr/download.html`.
+5. Trang download tiếp tục gọi `POST /api/user-sessions/start` trước khi tải APK.
+6. User tải APK tại `/uploads/apk/food-market-narrator.apk`.
+
+## APK Placement
+
+Đặt file APK tại:
+
+```
+FoodMarketNarrator.Api/wwwroot/uploads/apk/food-market-narrator.apk
+```
+
+## Notes
+
+- Endpoint session start đã là public nên dùng trực tiếp cho flow QR web.
+- Dữ liệu web visitor dùng `deviceId` dạng `web-*` và `deviceInfo` lấy từ user-agent.

@@ -6,32 +6,69 @@ public static class AppSettings
 {
     // Chi can sua 1 dong nay khi IP may chay API thay doi.
     private const string LocalApiHost = "192.168.1.7";
+    // Neu deploy cloud (Render), gan full base URL https tai day.
+    // Vi du: https://food-market-narrator-api.onrender.com/
+    private const string CloudApiBaseUrl = "";
     private const int HttpPort = 5044;
     private const int HttpsPort = 7041;
 
     private static string BuildHttpBaseUrl(string host) => $"http://{host}:{HttpPort}/";
     private static string BuildHttpsBaseUrl(string host) => $"https://{host}:{HttpsPort}/";
+    private static bool HasCloudApiBaseUrl => !string.IsNullOrWhiteSpace(CloudApiBaseUrl);
+
+    private static string NormalizeBaseUrl(string baseUrl)
+    {
+        var trimmed = (baseUrl ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            return string.Empty;
+        }
+
+        return trimmed.EndsWith("/", StringComparison.Ordinal) ? trimmed : $"{trimmed}/";
+    }
 
 #if ANDROID
     private static string ActiveApiHost =>
         DeviceInfo.DeviceType == DeviceType.Virtual ? "10.0.2.2" : LocalApiHost;
 
+    private static bool UseCloudApiOnAndroid =>
+        DeviceInfo.DeviceType != DeviceType.Virtual && HasCloudApiBaseUrl;
+
     public static string ApiBaseUrl
     {
-        get { return BuildHttpBaseUrl(ActiveApiHost); }
+        get
+        {
+            if (UseCloudApiOnAndroid)
+            {
+                return NormalizeBaseUrl(CloudApiBaseUrl);
+            }
+
+            return BuildHttpBaseUrl(ActiveApiHost);
+        }
     }
 
     public static string[] ApiFallbackBaseUrls
     {
-        get { return new[] { BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) }; }
+        get
+        {
+            if (UseCloudApiOnAndroid)
+            {
+                return new[] { NormalizeBaseUrl(CloudApiBaseUrl) };
+            }
+
+            return new[] { BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) };
+        }
     }
 #else
-    public static string ApiBaseUrl => BuildHttpBaseUrl(LocalApiHost);
-    public static readonly string[] ApiFallbackBaseUrls =
-    {
-        BuildHttpBaseUrl(LocalApiHost),
-        BuildHttpsBaseUrl(LocalApiHost)
-    };
+    public static string ApiBaseUrl =>
+        HasCloudApiBaseUrl ? NormalizeBaseUrl(CloudApiBaseUrl) : BuildHttpBaseUrl(LocalApiHost);
+
+    public static readonly string[] ApiFallbackBaseUrls = HasCloudApiBaseUrl
+        ? [NormalizeBaseUrl(CloudApiBaseUrl)]
+        : [
+            BuildHttpBaseUrl(LocalApiHost),
+            BuildHttpsBaseUrl(LocalApiHost)
+        ];
 #endif
 
     public const string RestaurantEndpoint = "restaurant";

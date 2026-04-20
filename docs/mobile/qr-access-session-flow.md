@@ -1,53 +1,67 @@
 # Luồng QR App Open (trạng thái hiện tại)
 
-Tài liệu này mô tả flow thực tế theo code hiện tại của MAUI app.
+Tài liệu này mô tả flow QR mới (web landing + deep link + fallback tải APK).
 
 ## 1) Tổng quan
 
-QR deep link hiện chỉ dùng để mở ứng dụng.
+QR code hiện trỏ đến URL web:
 
-- Không còn chế độ giới hạn thời gian từ QR.
-- Không còn chặn narration theo trạng thái hết hạn QR.
+- `/qr/open.html`
 
-Deep link hợp lệ:
+Luồng xử lý:
 
-- Scheme: foodmarketnarrator
-- Host: open
-- Ví dụ khuyến nghị: foodmarketnarrator://open
+- Nếu đã cài app: trang web gọi deep link để mở app.
+- Nếu chưa cài app: trang web tự động chuyển đến `/qr/download.html` để tải APK.
 
-## 2) Tham số deep link
+## 2) Deep link contract trong app
 
-QrAccessService hiện chỉ kiểm tra định dạng deep link hợp lệ theo scheme/host.
+Deep link hợp lệ để mở MAUI app:
 
-- App không còn parse các tham số thời gian.
-- Nếu deep link có query string, app vẫn mở bình thường miễn là đúng scheme/host.
+- Scheme: `foodmarketnarrator`
+- Host: `open`
+- Ví dụ: `foodmarketnarrator://open`
 
-## 3) Runtime flow trong app
+`QrAccessService` vẫn chỉ validate scheme/host.
 
-### 3.1 Nhận deep link
+- App không parse logic business từ query string.
+- Query string (nếu có) không làm app crash.
 
-App nhận deep link qua 2 đường:
+## 3) Runtime flow
 
-- Lúc khởi động app (HandleAppStart)
-- Trong runtime qua AppLinkDispatcher.DeepLinkReceived
+### 3.1 Trên web landing
 
-Sau đó app gọi:
+1. User mở `/qr/open.html` sau khi scan QR.
+2. Trang gọi `POST /api/user-sessions/start` (best effort) để ghi session vào `UserSessions`.
+3. Trang thử mở app bằng `foodmarketnarrator://open`.
+4. Nếu app không mở được trong khoảng timeout ngắn, redirect sang `/qr/download.html`.
 
-1. QrAccessService.ApplyDeepLink(deepLink)
+### 3.2 Trên trang download
 
-### 3.2 Hành vi narration
+1. `/qr/download.html` tiếp tục gọi `POST /api/user-sessions/start`.
+2. User bấm tải APK tại `/uploads/apk/food-market-narrator.apk`.
 
-- Nút thuyết minh và phát audio không còn bị disable bởi trạng thái QR.
-- App không hiển thị cảnh báo "QR hết hạn".
+### 3.3 Trong MAUI app
+
+App nhận deep link qua:
+
+- Lúc khởi động app.
+- Runtime thông qua `AppLinkDispatcher.DeepLinkReceived`.
+
+Sau đó gọi `QrAccessService.ApplyDeepLink(deepLink)`.
 
 ## 4) API liên quan
 
-- MAUI app không còn gọi endpoint kiểm tra QR access theo session.
-- Endpoint session start và các endpoint log vẫn hoạt động bình thường theo flow tracking/audio.
+- `POST /api/user-sessions/start` (public)
+- `POST /api/location-logs/batch` (public)
+- `POST /api/audio-logs` (public)
+
+Ghi chú:
+
+- MAUI app không còn gọi `GET /api/user-sessions/{sessionId}/qr-access` để chặn narration.
 
 ## 5) Checklist test nhanh
 
-1. Quét deep link foodmarketnarrator://open, app mở thành công.
-2. Bật thuyết minh tự động, narration hoạt động bình thường.
-3. Vào trang chi tiết POI, phát audio bình thường.
-4. Đóng app và quét lại QR, app vẫn mở và hoạt động như trên.
+1. Quét QR trỏ `/qr/open.html` khi thiết bị đã cài app -> app mở.
+2. Quét QR trên thiết bị chưa cài app -> chuyển tới `/qr/download.html`.
+3. Bấm Download APK -> tải file `/uploads/apk/food-market-narrator.apk`.
+4. Kiểm tra Mongo `UserSessions` có record `device_id` dạng `web-*` sau bước scan/tải.

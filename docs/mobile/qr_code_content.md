@@ -2,52 +2,52 @@
 
 ## Overview
 
-QR code được sử dụng để mở ứng dụng **Food Market Narrator** thông qua một **custom URL scheme**.
+QR code nên trỏ tới một URL web trung gian để xử lý được cả 2 tình huống:
+
+- Thiết bị đã cài app -> tự mở app.
+- Thiết bị chưa cài app -> chuyển sang trang tải APK.
 
 ## QR Code Data
 
-Nội dung được mã hóa trong QR code:
+Nội dung khuyến nghị để mã hóa trong QR code:
 
 ```
-foodmarketnarrator://open
+http://<api-host>:5044/qr/open.html
 ```
 
-## Required Application
+Ví dụ trong mạng LAN:
 
-Để quét mã QR, người dùng cần sử dụng ứng dụng **Trình quét QR và mã vạch** trên CH Play.
+```
+http://192.168.1.7:5044/qr/open.html
+```
+
+Nếu đã có domain public thì dùng HTTPS domain tương ứng.
 
 ## How It Works
 
-Quy trình hoạt động:
+1. Người dùng quét QR và mở URL `/qr/open.html`.
+2. Trang này gọi `POST /api/user-sessions/start` (public) để ghi nhận session vào Mongo collection `UserSessions`.
+3. Trang thử mở app bằng deep link `foodmarketnarrator://open`.
+4. Nếu app đã cài -> app được mở.
+5. Nếu app chưa cài -> tự động chuyển sang `/qr/download.html`.
+6. Trang download tiếp tục gọi `POST /api/user-sessions/start` (best effort) trước khi tải APK.
+7. Người dùng tải và cài file APK từ `/uploads/apk/food-market-narrator.apk`.
 
-1. Người dùng mở **ứng dụng QR scanner** trên điện thoại.
-2. Hướng camera vào mã QR được đặt tại địa điểm.
-3. Ứng dụng scanner đọc nội dung QR code.
-4. Hệ thống nhận diện URL scheme `foodmarketnarrator://`.
-5. Nếu ứng dụng **Food Market Narrator** đã được cài đặt trên thiết bị:
-   - Hệ điều hành sẽ mở ứng dụng tự động.
+## APK File Requirement
 
-6. Nếu ứng dụng chưa được cài đặt:
-
-- Liên kết sẽ không thể được xử lý.
-
-## Use Case
-
-QR code được đặt tại các vị trí trong khu chợ để người dùng có thể:
-
-- Quét mã bằng ứng dụng QR scanner
-- Mở ứng dụng **Food Market Narrator**
-- Truy cập nhanh vào hệ thống hướng dẫn hoặc thông tin địa điểm
-
-## Example Scenario
-
-1. Người dùng mở ứng dụng QR scanner.
-2. Quét mã QR tại quầy hàng.
-3. Điện thoại hiển thị liên kết:
+Backend cần có file APK tại:
 
 ```
-foodmarketnarrator://open
+FoodMarketNarrator.Api/wwwroot/uploads/apk/food-market-narrator.apk
 ```
 
-4. Người dùng nhấn vào liên kết.
-5. Ứng dụng **Food Market Narrator** được mở.
+URL tải tương ứng:
+
+```
+/uploads/apk/food-market-narrator.apk
+```
+
+## Notes
+
+- Flow mới không phụ thuộc việc QR scanner có hỗ trợ custom scheme trực tiếp hay không.
+- Session tạo từ trang web dùng `deviceId` dạng `web-*` để theo dõi anonymous visitor.

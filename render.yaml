@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: food-market-narrator-api
+    env: docker
+    plan: free
+    dockerfilePath: ./FoodMarketNarrator.Api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /Mongo/test-connect
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: MongoDb__ConnectionString
+        sync: false
+      - key: MongoDb__DatabaseName
+        value: food_market_narrator
+      - key: LibreTranslate__BaseUrl
+        sync: false
+      - key: EdgeTts__BaseUrl
+        sync: false
+      - key: Smtp__Host
+        sync: false
+      - key: Smtp__Port
+        sync: false
+      - key: Smtp__EnableSsl
+        value: true
+      - key: Smtp__Username
+        sync: false
+      - key: Smtp__Password
+        sync: false
+      - key: Smtp__FromEmail
+        sync: false
+      - key: Smtp__FromName
+        value: Food Market Narrator
