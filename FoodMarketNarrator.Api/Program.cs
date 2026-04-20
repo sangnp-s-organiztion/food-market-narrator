@@ -280,6 +280,27 @@ public class Program
         app.UseMiddleware<food_market_narrator_api.Middleware.AuditLoggingMiddleware>();
         // Health check endpoint cho platform (Render) khong phu thuoc DB.
         app.MapGet("/healthz", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
+        // Endpoint tai APK public: neu thieu file se tra 404 thay vi 401.
+        app.MapGet("/uploads/apk/{fileName}", (string fileName, IWebHostEnvironment env) =>
+        {
+            var safeFileName = Path.GetFileName(fileName ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(safeFileName))
+            {
+                return Results.BadRequest(new { message = "File name is required" });
+            }
+
+            var apkPath = Path.Combine(env.ContentRootPath, "wwwroot", "uploads", "apk", safeFileName);
+            if (!File.Exists(apkPath))
+            {
+                return Results.NotFound(new { message = "APK file not found" });
+            }
+
+            return Results.File(
+                apkPath,
+                "application/vnd.android.package-archive",
+                fileDownloadName: safeFileName,
+                enableRangeProcessing: true);
+        }).AllowAnonymous();
         app.MapControllers();
         app.Run();
     }
