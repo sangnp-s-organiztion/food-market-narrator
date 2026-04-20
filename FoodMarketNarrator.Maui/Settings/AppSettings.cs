@@ -8,7 +8,7 @@ public static class AppSettings
     private const string LocalApiHost = "192.168.1.7";
     // Neu deploy cloud (Render), gan full base URL https tai day.
     // Vi du: https://food-market-narrator-api.onrender.com/
-    private const string CloudApiBaseUrl = "";
+    private const string CloudApiBaseUrl = "https://food-market-narrator-api.onrender.com/";
     private const int HttpPort = 5044;
     private const int HttpsPort = 7041;
 

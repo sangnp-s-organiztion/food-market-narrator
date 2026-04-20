@@ -13,10 +13,10 @@ QR code nên dùng URL web trung gian thay vì deep link trực tiếp để đ�
 Nội dung nên encode trong QR:
 
 ```
-http://<api-host>:5044/qr/open.html
+https://food-market-narrator-api.onrender.com/qr/open.html
 ```
 
-Ví dụ khi chạy nội bộ LAN:
+Ví dụ khi chạy nội bộ LAN (local only):
 
 ```
 http://192.168.1.7:5044/qr/open.html

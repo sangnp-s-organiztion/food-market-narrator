@@ -67,6 +67,36 @@ Kiem tra nhanh:
 - `GET https://food-market-narrator-api.onrender.com/Mongo/test-connect`
 - `GET https://food-market-narrator-api.onrender.com/Restaurant`
 
+## 5.1) Deploy admin va saler cung Blueprint
+
+`render.yaml` da khai bao them 2 static site:
+
+- `food-market-narrator-admin` (rootDir: `admin`)
+- `food-market-narrator-saler` (rootDir: `saler`)
+
+Moi site deu:
+
+- build: `npm install && npm run build`
+- publish: `dist`
+- rewrite SPA: `/* -> /index.html`
+- env build-time: `VITE_API_BASE_URL=https://food-market-narrator-api.onrender.com`
+
+## 5.2) Cau hinh CORS de web goi API cookie auth
+
+API da ho tro doc env var:
+
+- `Cors__AllowedOrigins`
+
+Gia tri la danh sach origin cach nhau boi dau phay.
+
+Vi du:
+
+```text
+https://food-market-narrator-admin.onrender.com,https://food-market-narrator-saler.onrender.com
+```
+
+Sau khi co URL thuc te cua 2 static site, cap nhat env var nay tren service API va redeploy API.
+
 ## 6) Cau hinh MAUI cho Android that
 
 Mo file `FoodMarketNarrator.Maui/Settings/AppSettings.cs`:

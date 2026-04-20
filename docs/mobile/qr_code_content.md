@@ -12,16 +12,16 @@ QR code nên trỏ tới một URL web trung gian để xử lý được cả 2
 Nội dung khuyến nghị để mã hóa trong QR code:
 
 ```
-http://<api-host>:5044/qr/open.html
+https://food-market-narrator-api.onrender.com/qr/open.html
 ```
 
-Ví dụ trong mạng LAN:
+Ví dụ trong mạng LAN (khi chỉ chạy local):
 
 ```
 http://192.168.1.7:5044/qr/open.html
 ```
 
-Nếu đã có domain public thì dùng HTTPS domain tương ứng.
+Nếu đã có domain public thì dùng HTTPS domain tương ứng (như Render URL bên trên).
 
 ## How It Works
 

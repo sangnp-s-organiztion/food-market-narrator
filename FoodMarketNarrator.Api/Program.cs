@@ -114,6 +114,12 @@ public class Program
 
         builder.Services.AddCors(options =>
         {
+            var configuredOrigins = (builder.Configuration["Cors:AllowedOrigins"] ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(origin => origin.Trim().TrimEnd('/'))
+                .Where(origin => !string.IsNullOrWhiteSpace(origin))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             options.AddPolicy("SalerCors", policy =>
             {
                 policy
@@ -124,7 +130,13 @@ public class Program
                             return false;
                         }
 
-                        return string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase);
+                        if (string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+
+                        var normalizedOrigin = uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+                        return configuredOrigins.Contains(normalizedOrigin);
                     })
                     .AllowAnyHeader()
                     .AllowAnyMethod()
