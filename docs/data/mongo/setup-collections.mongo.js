@@ -38,6 +38,39 @@ db.AudioLogs.createIndex({ timestamp: -1 });
 // compound index (rất hữu ích)
 db.AudioLogs.createIndex({ restaurant_id: 1, timestamp: -1 });
 
+// =======================================================================
+db.createCollection("AuditLogs");
+
+// index cho phân trang/sort chung
+db.AuditLogs.createIndex(
+  { created_at: -1 },
+  { name: "ix_audit_logs_created_at" },
+);
+
+// index cho lọc user + sort thời gian
+db.AuditLogs.createIndex(
+  { user_id: 1, created_at: -1 },
+  { name: "ix_audit_logs_user_created_at" },
+);
+
+// index cho lọc action + sort thời gian
+db.AuditLogs.createIndex(
+  { action: 1, created_at: -1 },
+  { name: "ix_audit_logs_action_created_at" },
+);
+
+// index cho lọc target_type + sort thời gian
+db.AuditLogs.createIndex(
+  { target_type: 1, created_at: -1 },
+  { name: "ix_audit_logs_target_type_created_at" },
+);
+
+// index cho kiểm tra tồn tại theo action + target_id
+db.AuditLogs.createIndex(
+  { action: 1, target_id: 1 },
+  { name: "ix_audit_logs_action_target_id" },
+);
+
 // use food_market_narrator
 
 //  =======================================================================

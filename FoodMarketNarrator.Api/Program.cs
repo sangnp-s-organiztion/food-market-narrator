@@ -4,6 +4,7 @@ using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,20 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var isDevelopment = builder.Environment.IsDevelopment();
+        var allowedCorsOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? Array.Empty<string>();
+
+        var renderPort = Environment.GetEnvironmentVariable("PORT");
+        if (!string.IsNullOrWhiteSpace(renderPort) && int.TryParse(renderPort, out _))
+        {
+            builder.WebHost.UseUrls($"http://0.0.0.0:{renderPort}");
+        }
+        else
+        {
+            builder.WebHost.UseUrls("http://0.0.0.0:5044");
+        }
 
         // Theem Repository vào DI container
         builder.Services.AddScoped<RestaurantRepository>();
@@ -61,6 +76,8 @@ public class Program
             .AddCookie(AuthSchemes.Saler, options =>
             {
                 options.Cookie.Name = "fmn_saler_auth_v2";
+                options.Cookie.SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None;
+                options.Cookie.SecurePolicy = isDevelopment ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
                 options.LoginPath = "/Auth/login";
                 options.AccessDeniedPath = "/Auth/login";
                 options.SlidingExpiration = true;
@@ -82,6 +99,8 @@ public class Program
             .AddCookie(AuthSchemes.Admin, options =>
             {
                 options.Cookie.Name = "fmn_admin_auth_v2";
+                options.Cookie.SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None;
+                options.Cookie.SecurePolicy = isDevelopment ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
                 options.LoginPath = "/Auth/admin/login";
                 options.AccessDeniedPath = "/Auth/admin/login";
                 options.SlidingExpiration = true;
@@ -124,12 +143,24 @@ public class Program
                             return false;
                         }
 
-                        return string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase);
+                        if (string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+
+                        return allowedCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
                     })
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
+        });
+
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
         });
 
         // Lấy connection string từ appsettings.json
@@ -175,20 +206,6 @@ public class Program
             }
         }
 
-
-
-
-
-
-
-
-
-
-        builder.WebHost.UseUrls("http://0.0.0.0:5044"); // cấu hình cho phép truy cập từ bên ngoài container
-
-
-
-
         // Add services to the container.
         builder.Services.AddControllers(options =>
         {
@@ -203,6 +220,7 @@ public class Program
         //    app.UseSwagger();
         //    app.UseSwaggerUI();
         //}
+        app.UseForwardedHeaders();
         if (!app.Environment.IsDevelopment())
         {
             app.UseHttpsRedirection();
