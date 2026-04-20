@@ -4,7 +4,10 @@ namespace food_market_narrator.Settings;
 
 public static class AppSettings
 {
-    // Chi can sua 1 dong nay khi IP may chay API thay doi.
+    // Base URL mac dinh khi deploy backend tren Render.
+    private const string RenderApiBaseUrl = "https://food-market-narrator.onrender.com/";
+
+    // Chi can sua 1 dong nay khi IP may chay API local thay doi.
     private const string LocalApiHost = "192.168.1.7";
     private const int HttpPort = 5044;
     private const int HttpsPort = 7041;
@@ -16,19 +19,16 @@ public static class AppSettings
     private static string ActiveApiHost =>
         DeviceInfo.DeviceType == DeviceType.Virtual ? "10.0.2.2" : LocalApiHost;
 
-    public static string ApiBaseUrl
-    {
-        get { return BuildHttpBaseUrl(ActiveApiHost); }
-    }
+    public static string ApiBaseUrl => RenderApiBaseUrl;
 
-    public static string[] ApiFallbackBaseUrls
-    {
-        get { return new[] { BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) }; }
-    }
+    public static string[] ApiFallbackBaseUrls =>
+        new[] { RenderApiBaseUrl, BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) };
 #else
-    public static string ApiBaseUrl => BuildHttpBaseUrl(LocalApiHost);
+    public static string ApiBaseUrl => RenderApiBaseUrl;
+
     public static readonly string[] ApiFallbackBaseUrls =
     {
+        RenderApiBaseUrl,
         BuildHttpBaseUrl(LocalApiHost),
         BuildHttpsBaseUrl(LocalApiHost)
     };

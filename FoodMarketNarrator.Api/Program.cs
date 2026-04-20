@@ -227,21 +227,33 @@ public class Program
         }
         app.UseCors("SalerCors");
         app.UseStaticFiles();
-        var mauiImagesDir = Path.GetFullPath(
+        string ResolveMediaDirectory(string preferredDir, string fallbackDir)
+        {
+            if (Directory.Exists(preferredDir))
+            {
+                return preferredDir;
+            }
+
+            Directory.CreateDirectory(fallbackDir);
+            return fallbackDir;
+        }
+
+        var mauiImagesSourceDir = Path.GetFullPath(
             Path.Combine(
                 app.Environment.ContentRootPath,
                 "..",
                 "FoodMarketNarrator.Maui",
                 "Resources",
                 "Images"));
-        Directory.CreateDirectory(mauiImagesDir);
+        var mauiImagesFallbackDir = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "maui-images");
+        var mauiImagesDir = ResolveMediaDirectory(mauiImagesSourceDir, mauiImagesFallbackDir);
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(mauiImagesDir),
             RequestPath = "/maui-images"
         });
 
-        var mauiNarrationAudioDir = Path.GetFullPath(
+        var mauiNarrationAudioSourceDir = Path.GetFullPath(
             Path.Combine(
                 app.Environment.ContentRootPath,
                 "..",
@@ -249,7 +261,8 @@ public class Program
                 "Resources",
                 "Narration",
                 "audio"));
-        Directory.CreateDirectory(mauiNarrationAudioDir);
+        var mauiNarrationAudioFallbackDir = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "maui-audios");
+        var mauiNarrationAudioDir = ResolveMediaDirectory(mauiNarrationAudioSourceDir, mauiNarrationAudioFallbackDir);
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(mauiNarrationAudioDir),
