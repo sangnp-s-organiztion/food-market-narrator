@@ -1,0 +1,15 @@
+**/.git
+**/.github
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/coverage
+**/test_output
+**/test_output2.txt
+**/*.user
+**/*.suo
+**/*.swp
+**/*.log
