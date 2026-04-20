@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -58,399 +117,504 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-
-  <!-- Shell -->
   <data name="AppTitle" xml:space="preserve">
-    <value>ビンカン美食街</value>
+    <value>Vinh Khanh 美食街</value>
+    <comment/>
   </data>
   <data name="TabHome" xml:space="preserve">
     <value>ホーム</value>
+    <comment/>
   </data>
   <data name="TabMap" xml:space="preserve">
     <value>マップ</value>
+    <comment/>
   </data>
   <data name="TabTour" xml:space="preserve">
     <value>旅程</value>
+    <comment/>
   </data>
   <data name="TabFavorite" xml:space="preserve">
     <value>お気に入り</value>
+    <comment/>
   </data>
   <data name="TabHistory" xml:space="preserve">
     <value>履歴</value>
+    <comment/>
   </data>
   <data name="TabSettings" xml:space="preserve">
     <value>設定</value>
+    <comment/>
   </data>
-
-  <!-- MainPage -->
   <data name="MainTitle" xml:space="preserve">
-    <value>ビンカングルメ</value>
+    <value>Vinh Khanh 料理</value>
+    <comment/>
   </data>
   <data name="MainSubtitle" xml:space="preserve">
     <value>グルメのパラダイスを探る</value>
+    <comment/>
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>貝類、ラーメン、焼き鳥を検索...</value>
+    <comment/>
   </data>
   <data name="FilterAll" xml:space="preserve">
     <value>すべて</value>
+    <comment/>
   </data>
   <data name="FilterNear" xml:space="preserve">
     <value>近く</value>
+    <comment/>
   </data>
   <data name="FilterFavorite" xml:space="preserve">
     <value>お気に入り</value>
+    <comment/>
   </data>
   <data name="FilterOpen" xml:space="preserve">
     <value>営業中</value>
+    <comment/>
   </data>
   <data name="FeaturedRestaurants" xml:space="preserve">
     <value>注目の餐厅</value>
+    <comment/>
   </data>
   <data name="ViewAll" xml:space="preserve">
     <value>すべて見る</value>
+    <comment/>
   </data>
   <data name="Status" xml:space="preserve">
     <value>ステータス：</value>
+    <comment/>
   </data>
   <data name="StatusOpenNow" xml:space="preserve">
     <value>営業中</value>
+    <comment/>
   </data>
   <data name="StatusClosedNow" xml:space="preserve">
     <value>営業終了</value>
+    <comment/>
   </data>
   <data name="BtnPrevious" xml:space="preserve">
     <value>前へ</value>
+    <comment/>
   </data>
   <data name="BtnNext" xml:space="preserve">
     <value>次へ</value>
+    <comment/>
   </data>
   <data name="PageIndicator" xml:space="preserve">
     <value>ページ 1/1</value>
+    <comment/>
   </data>
   <data name="StartNarration" xml:space="preserve">
     <value>自動解説を開始</value>
+    <comment/>
   </data>
   <data name="StopNarration" xml:space="preserve">
     <value>解説を停止</value>
+    <comment/>
   </data>
-
-  <!-- MapPage -->
   <data name="MapSearchPlaceholder" xml:space="preserve">
     <value>料理や餐厅を検索...</value>
+    <comment/>
   </data>
   <data name="TourFilterActive" xml:space="preserve">
     <value>旅程で表示中</value>
+    <comment/>
   </data>
   <data name="TourFilterHint" xml:space="preserve">
     <value>選択した旅程のPOIのみ表示</value>
+    <comment/>
   </data>
   <data name="TourFilterWithName" xml:space="preserve">
     <value>旅程: {0}</value>
+    <comment/>
   </data>
   <data name="ShowAll" xml:space="preserve">
     <value>すべて表示</value>
+    <comment/>
   </data>
   <data name="Destination" xml:space="preserve">
     <value>目的地</value>
+    <comment/>
   </data>
   <data name="AddressUpdating" xml:space="preserve">
     <value>住所を更新中</value>
+    <comment/>
   </data>
   <data name="ViewDetail" xml:space="preserve">
     <value>詳細を見る</value>
+    <comment/>
   </data>
-
-  <!-- POIDetailPage -->
   <data name="AudioNarration" xml:space="preserve">
     <value>音声解説</value>
+    <comment/>
   </data>
   <data name="AudioHintLine1" xml:space="preserve">
     <value>- 解説を聴いて、餐厅・雰囲気・おすすめ料理について更多信息を把握しましょう。生きた探索体験をお楽しみください。</value>
+    <comment/>
   </data>
   <data name="AudioHintLine2" xml:space="preserve">
     <value>- ベトナム語、英語、中国語、日本語、韓国語で対応。</value>
+    <comment/>
   </data>
   <data name="Menu" xml:space="preserve">
     <value>メニュー</value>
+    <comment/>
   </data>
   <data name="AboutUs" xml:space="preserve">
     <value>会社概要</value>
+    <comment/>
   </data>
   <data name="OpenedDate" xml:space="preserve">
     <value>开店日：{0}</value>
+    <comment/>
   </data>
   <data name="GetDirections" xml:space="preserve">
     <value>道順</value>
+    <comment/>
   </data>
   <data name="CallNow" xml:space="preserve">
     <value>今すぐ電話</value>
+    <comment/>
   </data>
-
-  <!-- TourPage -->
   <data name="ExploreToday" xml:space="preserve">
     <value>今日は何を探す？</value>
+    <comment/>
   </data>
   <data name="CulinaryJourney" xml:space="preserve">
     <value>ビンカン美食街の旅</value>
+    <comment/>
   </data>
   <data name="NoTourAvailable" xml:space="preserve">
     <value>利用可能な旅程がありません</value>
+    <comment/>
   </data>
   <data name="NoTourHint" xml:space="preserve">
     <value>接続または服务器的旅程データを確認してください</value>
+    <comment/>
   </data>
   <data name="BtnViewDetail" xml:space="preserve">
     <value>詳細を見る</value>
+    <comment/>
   </data>
-
-  <!-- TourDetailPage -->
   <data name="JourneyDetail" xml:space="preserve">
     <value>旅程の詳細</value>
+    <comment/>
   </data>
   <data name="Duration" xml:space="preserve">
     <value>所要時間</value>
+    <comment/>
   </data>
   <data name="Locations" xml:space="preserve">
     <value>場所</value>
+    <comment/>
   </data>
   <data name="ExploreJourney" xml:space="preserve">
     <value>探索の旅</value>
+    <comment/>
   </data>
   <data name="DetailedSchedule" xml:space="preserve">
     <value>詳細なスケジュール</value>
+    <comment/>
   </data>
   <data name="NoStopsYet" xml:space="preserve">
     <value>この旅程はまだ停留地がありません。</value>
+    <comment/>
   </data>
   <data name="LoadingTourDetail" xml:space="preserve">
     <value>旅程の詳細を読み込み中...</value>
+    <comment/>
   </data>
   <data name="LoadTourDetailFailed" xml:space="preserve">
     <value>旅程の詳細を読み込めません。</value>
+    <comment/>
   </data>
   <data name="TryAgainLater" xml:space="preserve">
     <value>後でもう一度お試しください。</value>
+    <comment/>
   </data>
   <data name="BtnRetry" xml:space="preserve">
     <value>再試行</value>
+    <comment/>
   </data>
   <data name="StartJourney" xml:space="preserve">
     <value>旅程を開始</value>
+    <comment/>
   </data>
   <data name="TourDurationMetricFormat" xml:space="preserve">
     <value>{0}分</value>
+    <comment/>
   </data>
   <data name="TourStopCountMetricFormat" xml:space="preserve">
     <value>{0}か所</value>
+    <comment/>
   </data>
   <data name="TourDescriptionFallback" xml:space="preserve">
     <value>この旅程にはまだ詳細な説明がありません。</value>
+    <comment/>
   </data>
   <data name="TourAddressUpdating" xml:space="preserve">
     <value>住所を更新中</value>
+    <comment/>
   </data>
-
-  <!-- FavoritePage -->
   <data name="Favorites" xml:space="preserve">
     <value>お気に入り</value>
+    <comment/>
   </data>
   <data name="NoFavoritesYet" xml:space="preserve">
     <value>お気に入りの餐厅がありません</value>
+    <comment/>
   </data>
   <data name="NoFavoritesHint" xml:space="preserve">
     <value>ハートアイコンをタップして追加</value>
+    <comment/>
   </data>
-
-  <!-- HistoryPage -->
   <data name="History" xml:space="preserve">
     <value>履歴</value>
+    <comment/>
   </data>
   <data name="NoHistoryYet" xml:space="preserve">
     <value>視聴履歴がありません</value>
+    <comment/>
   </data>
   <data name="NoHistoryHint" xml:space="preserve">
     <value>解説を聴くと履歴に表示されます</value>
+    <comment/>
   </data>
-
-  <!-- SettingsPage -->
   <data name="Settings" xml:space="preserve">
     <value>設定</value>
+    <comment/>
   </data>
   <data name="TodaysTip" xml:space="preserve">
     <value>今日のヒント</value>
+    <comment/>
   </data>
   <data name="TipTitle" xml:space="preserve">
     <value>探索の旅を体験</value>
+    <comment/>
   </data>
   <data name="TipDescription" xml:space="preserve">
     <value>自動解説をオンにして、各停留地での面白い物語をお楽しみください。</value>
+    <comment/>
   </data>
   <data name="ExperienceNow" xml:space="preserve">
     <value>今すぐ体験  -&gt;</value>
+    <comment/>
   </data>
   <data name="AppSection" xml:space="preserve">
     <value>アプリケーション</value>
+    <comment/>
   </data>
   <data name="NarrationLanguage" xml:space="preserve">
-    <value>解説言語</value>
+    <value>言語</value>
+    <comment/>
   </data>
   <data name="SelectNarrationLanguage" xml:space="preserve">
-    <value>解説言語を選択</value>
+    <value>言語を選択</value>
+    <comment/>
   </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>ベトナム語</value>
+    <comment/>
   </data>
   <data name="English" xml:space="preserve">
     <value>英語</value>
+    <comment/>
   </data>
   <data name="Japanese" xml:space="preserve">
     <value>日本語</value>
+    <comment/>
   </data>
   <data name="Korean" xml:space="preserve">
     <value>韓国語</value>
+    <comment/>
   </data>
   <data name="Chinese" xml:space="preserve">
     <value>中国語</value>
+    <comment/>
   </data>
   <data name="Notifications" xml:space="preserve">
     <value>通知</value>
+    <comment/>
   </data>
   <data name="BackgroundLocation" xml:space="preserve">
     <value>バックグラウンド位置情報</value>
+    <comment/>
   </data>
   <data name="NotCheckedYet" xml:space="preserve">
     <value>未確認</value>
+    <comment/>
   </data>
   <data name="DarkMode" xml:space="preserve">
     <value>ダークモード</value>
+    <comment/>
   </data>
   <data name="DataSection" xml:space="preserve">
     <value>データ</value>
+    <comment/>
   </data>
   <data name="StorageManagement" xml:space="preserve">
     <value>ストレージ管理</value>
+    <comment/>
   </data>
   <data name="StorageDescription" xml:space="preserve">
     <value>オフラインマップ、画像、音声データを含む。</value>
+    <comment/>
   </data>
   <data name="Used" xml:space="preserve">
     <value>使用済み</value>
+    <comment/>
   </data>
   <data name="MapLegend" xml:space="preserve">
     <value>マップ</value>
+    <comment/>
   </data>
   <data name="ImageLegend" xml:space="preserve">
     <value>画像</value>
+    <comment/>
   </data>
   <data name="OtherLegend" xml:space="preserve">
     <value>その他</value>
+    <comment/>
   </data>
   <data name="ClearAll" xml:space="preserve">
     <value> すべてクリア</value>
+    <comment/>
   </data>
   <data name="Details" xml:space="preserve">
     <value>詳細</value>
+    <comment/>
   </data>
   <data name="StorageDetailsTitle" xml:space="preserve">
     <value>ストレージ詳細</value>
+    <comment/>
   </data>
   <data name="StorageDetailTotal" xml:space="preserve">
     <value>総データ: {0}</value>
+    <comment/>
   </data>
   <data name="StorageDetailMap" xml:space="preserve">
     <value>地図: {0} ({1} ファイル)</value>
+    <comment/>
   </data>
   <data name="StorageDetailImage" xml:space="preserve">
     <value>画像: {0} ({1} ファイル)</value>
+    <comment/>
   </data>
   <data name="StorageDetailAudio" xml:space="preserve">
     <value>音声: {0}</value>
+    <comment/>
   </data>
   <data name="StorageDetailPoi" xml:space="preserve">
     <value>POI: {0}</value>
+    <comment/>
   </data>
   <data name="StorageDetailDish" xml:space="preserve">
     <value>料理: {0} ({1} ファイル)</value>
+    <comment/>
   </data>
   <data name="StorageDetailLanguage" xml:space="preserve">
     <value>言語: {0}</value>
+    <comment/>
   </data>
   <data name="ListeningHistory" xml:space="preserve">
     <value>視聴履歴</value>
+    <comment/>
   </data>
   <data name="ClearListeningHistory" xml:space="preserve">
     <value>視聴履歴をクリア</value>
+    <comment/>
   </data>
   <data name="ClearFavorites" xml:space="preserve">
     <value>お気に入りをクリア</value>
+    <comment/>
   </data>
   <data name="BtnClear" xml:space="preserve">
     <value>クリア</value>
+    <comment/>
   </data>
   <data name="SupportSection" xml:space="preserve">
     <value>サポート</value>
+    <comment/>
   </data>
   <data name="HelpCenter" xml:space="preserve">
     <value>ヘルプセンター</value>
+    <comment/>
   </data>
   <data name="PrivacyPolicy" xml:space="preserve">
     <value>プライバシーポリシー</value>
+    <comment/>
   </data>
   <data name="TermsOfService" xml:space="preserve">
     <value>利用規約</value>
+    <comment/>
   </data>
-
-  <!-- Common -->
   <data name="StreetName" xml:space="preserve">
     <value>ビンカン美食街</value>
+    <comment/>
   </data>
   <data name="GettingLocation" xml:space="preserve">
     <value>位置情報を取得中 ...</value>
+    <comment/>
   </data>
   <data name="Lock" xml:space="preserve">
     <value>ロック</value>
+    <comment/>
   </data>
   <data name="Language" xml:space="preserve">
     <value>言語</value>
+    <comment/>
   </data>
   <data name="QRCode" xml:space="preserve">
     <value>QRコード</value>
+    <comment/>
   </data>
   <data name="Story" xml:space="preserve">
     <value>ストーリー</value>
+    <comment/>
   </data>
   <data name="Map" xml:space="preserve">
     <value>地図</value>
+    <comment/>
   </data>
   <data name="SelectLanguage" xml:space="preserve">
     <value>言語を選択</value>
+    <comment/>
   </data>
   <data name="Close" xml:space="preserve">
     <value>閉じる</value>
+    <comment/>
   </data>
   <data name="NoticeTitle" xml:space="preserve">
     <value>お知らせ</value>
+    <comment/>
   </data>
   <data name="AudioInternetRequiredMessage" xml:space="preserve">
     <value>音声データをダウンロードするにはインターネットに接続してください。</value>
+    <comment/>
   </data>
   <data name="MapCannotGetLocation" xml:space="preserve">
     <value>現在地を取得できません。</value>
+    <comment/>
   </data>
   <data name="SearchNoResultsTitle" xml:space="preserve">
     <value>見つかりません</value>
+    <comment/>
   </data>
   <data name="SearchNoResultsMessage" xml:space="preserve">
     <value>{0} に一致する店舗がありません。</value>
+    <comment/>
   </data>
   <data name="OfflineMapTitle" xml:space="preserve">
     <value>オフライン地図</value>
+    <comment/>
   </data>
   <data name="OfflineMapUnavailableMessage" xml:space="preserve">
     <value>現在インターネットに接続されておらず、保存済み地図データもありません。地点の閲覧と操作は可能ですが、地図背景が表示されない場合があります。</value>
+    <comment/>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
     <value>電話番号</value>
+    <comment/>
   </data>
 </root>

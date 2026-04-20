@@ -1,4 +1,5 @@
 using food_market_narrator_api.DTOs.User;
+using food_market_narrator_api.Authorization;
 using food_market_narrator_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,12 @@ namespace food_market_narrator_api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly UserService _userService;
+    private readonly UserSessionService _userSessionService;
 
-    public UsersController(UserService userService)
+    public UsersController(UserService userService, UserSessionService userSessionService)
     {
         _userService = userService;
+        _userSessionService = userSessionService;
     }
 
     // GET api/users
@@ -24,6 +27,15 @@ public class UsersController : ControllerBase
     {
         var users = await _userService.GetAllUsersAsync();
         return Ok(users);
+    }
+
+    // GET api/users/visitors?limit=200
+    [HttpGet("visitors")]
+    [Authorize(AuthenticationSchemes = AuthSchemes.Admin)]
+    public async Task<IActionResult> GetVisitors([FromQuery] int limit = 200)
+    {
+        var visitors = await _userSessionService.GetVisitorsAsync(limit);
+        return Ok(visitors);
     }
 
     // GET api/users/{id}

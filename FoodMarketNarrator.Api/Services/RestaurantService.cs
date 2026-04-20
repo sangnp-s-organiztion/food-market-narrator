@@ -7,9 +7,12 @@ namespace food_market_narrator_api.Services
     public class RestaurantService
     {
         private readonly RestaurantRepository _restaurantRepository;
-        public RestaurantService(RestaurantRepository repository)
+        private readonly TranslationService _translationService;
+
+        public RestaurantService(RestaurantRepository repository, TranslationService translationService)
         {
             _restaurantRepository = repository;
+            _translationService = translationService;
         }
         public async Task<List<RestaurantResponse>> GetAllRestaurantsAsync()
         {
@@ -59,15 +62,46 @@ namespace food_market_narrator_api.Services
             };
 
             var created = await _restaurantRepository.AddAsync(model);
+
+            if (created.UserId > 0)
+            {
+                await _translationService.SyncRestaurantInfoTranslationsAsync(
+                    created.UserId,
+                    created.RestaurantId,
+                    new RestaurantTranslationContent
+                    {
+                        Name = created.Name,
+                        Description = created.Description,
+                        Address = created.Address
+                    },
+                    fieldsToSync: new[] { "description", "address" },
+                    requestIdPrefix: $"restaurant-create-{created.RestaurantId}");
+            }
+
             return MapRestaurant(created);
         }
 
-        public async Task<RestaurantResponse?> UpdateRestaurantAsync(string restaurantId, UpdateRestaurantRequest request)
+        public async Task<RestaurantResponse?> UpdateRestaurantAsync(
+            string restaurantId,
+            UpdateRestaurantRequest request,
+            int? sellerUserId = null)
         {
             var existing = await _restaurantRepository.GetByIdAsync(restaurantId);
             if (existing == null)
             {
                 return null;
+            }
+
+            var changedTranslationFields = new List<string>();
+
+            if (!string.Equals(NormalizeForComparison(existing.Description), NormalizeForComparison(request.Description), StringComparison.Ordinal))
+            {
+                changedTranslationFields.Add("description");
+            }
+
+            if (!string.Equals(NormalizeForComparison(existing.Address), NormalizeForComparison(request.Address), StringComparison.Ordinal))
+            {
+                changedTranslationFields.Add("address");
             }
 
             existing.Name = request.Name.Trim();
@@ -85,8 +119,28 @@ namespace food_market_narrator_api.Services
                 return null;
             }
 
+            if (sellerUserId.HasValue && changedTranslationFields.Count > 0)
+            {
+                await _translationService.SyncRestaurantInfoTranslationsAsync(
+                    sellerUserId.Value,
+                    restaurantId,
+                    new RestaurantTranslationContent
+                    {
+                        Name = existing.Name,
+                        Description = existing.Description,
+                        Address = existing.Address
+                    },
+                    fieldsToSync: changedTranslationFields,
+                    requestIdPrefix: $"restaurant-update-{restaurantId}");
+            }
+
             var latest = await _restaurantRepository.GetByIdAsync(restaurantId);
             return latest == null ? null : MapRestaurant(latest);
+        }
+
+        private static string NormalizeForComparison(string? value)
+        {
+            return (value ?? string.Empty).Trim();
         }
 
         public async Task<bool> UpdateRestaurantStatusAsync(string restaurantId, bool isActive)

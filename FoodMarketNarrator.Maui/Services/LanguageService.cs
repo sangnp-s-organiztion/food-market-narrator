@@ -5,6 +5,7 @@ using food_market_narrator.Resources;
 using food_market_narrator.Resources.Localization;
 using food_market_narrator.Settings;
 using System.Text.Json;
+using Microsoft.Maui.Networking;
 
 namespace food_market_narrator.Services;
 
@@ -46,6 +47,18 @@ public class LanguageService : ILanguageService
         }
 
         var cachedLanguages = await ReadLanguagesCacheAsync();
+
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+        {
+            if (cachedLanguages.Count > 0)
+            {
+                _cachedLanguages = cachedLanguages;
+                return _cachedLanguages;
+            }
+
+            _cachedLanguages = BuildFallbackLanguages();
+            return _cachedLanguages;
+        }
 
         var baseCandidates = new List<string>();
 
@@ -90,7 +103,20 @@ public class LanguageService : ILanguageService
             return _cachedLanguages;
         }
 
-        return new List<LanguageModel>();
+        _cachedLanguages = BuildFallbackLanguages();
+        return _cachedLanguages;
+    }
+
+    private static List<LanguageModel> BuildFallbackLanguages()
+    {
+        return new List<LanguageModel>
+        {
+            new() { LanguageCode = "vi-VN", LanguageName = "Tiếng Việt" },
+            new() { LanguageCode = "en-US", LanguageName = "English" },
+            new() { LanguageCode = "zh-CN", LanguageName = "中文" },
+            new() { LanguageCode = "ja-JP", LanguageName = "日本語" },
+            new() { LanguageCode = "ko-KR", LanguageName = "한국어" }
+        };
     }
 
     // Trả về đường dẫn file cache languages.json trong bộ nhớ app (và đảm bảo thư mục tồn tại)

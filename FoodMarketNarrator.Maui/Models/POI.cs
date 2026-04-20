@@ -147,7 +147,38 @@ public class POI
     public string CoordinatesDisplay => $"{Latitude.ToString("0.######", CultureInfo.InvariantCulture)}, {Longitude.ToString("0.######", CultureInfo.InvariantCulture)}";
 
     [Ignore]
-    public string CreatedAtDisplay => CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture);
+    public string CreatedAtDisplay
+    {
+        get
+        {
+            if (CreatedAt == default)
+            {
+                return "-";
+            }
+
+            var localDisplayTime = CreatedAt.Kind == DateTimeKind.Utc
+                ? CreatedAt.ToLocalTime()
+                : CreatedAt;
+
+            // Use short date/time pattern from current language culture.
+            return localDisplayTime.ToString("g", CultureInfo.CurrentCulture);
+        }
+    }
+
+    [Ignore]
+    public string OpenedDateDisplay
+    {
+        get
+        {
+            var template = LocalizationResourceManager.Instance["OpenedDate"];
+            if (string.IsNullOrWhiteSpace(template))
+            {
+                template = "Ngày mở bán: {0}";
+            }
+
+            return string.Format(CultureInfo.CurrentCulture, template, CreatedAtDisplay);
+        }
+    }
 
     [Ignore]
     public string AudioLanguagesDisplay

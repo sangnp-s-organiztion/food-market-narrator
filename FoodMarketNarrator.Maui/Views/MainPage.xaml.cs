@@ -4,6 +4,7 @@ using food_market_narrator.Settings;
 using food_market_narrator.Services;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Maui.Controls.Shapes;
 using Mapsui;
 using Mapsui.Projections;
 
@@ -43,9 +44,11 @@ public partial class MainPage : ContentPage
     private PoiCategoryFilter _activePoiFilter = PoiCategoryFilter.All; // filter đang được áp dụng cho danh sách POI, mặc định là All (tất cả)
     private List<POI> _filteredPois = new();
     private string _lastAppliedLanguageCode = string.Empty;
-
-    // private static bool _hasShownLanguagePopupThisSession;
-    // private bool _languageSelected = Preferences.Get("language_selected", false);
+    private bool _isLanguageSelectionPromptVisible;
+    private Grid? _firstLaunchLanguagePopupOverlay;
+    private VerticalStackLayout? _firstLaunchLanguageOptionsContainer;
+    private readonly Dictionary<string, Border> _firstLaunchLanguageOptions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Label> _firstLaunchLanguageChecks = new(StringComparer.OrdinalIgnoreCase);
 
 	// Hàm khởi tạo MainPage mới
     public MainPage(
@@ -134,7 +137,439 @@ public partial class MainPage : ContentPage
             ApplyPoiFilterAndRefresh();
         }
 
+        _ = EnsureFirstLaunchLanguageSelectionAsync();
+
         LogPerf("OnAppearing: completed", sw);
+    }
+
+    private async Task EnsureFirstLaunchLanguageSelectionAsync()
+    {
+        if (_isLanguageSelectionPromptVisible)
+        {
+            return;
+        }
+
+        if (Preferences.Get("language_selected", false))
+        {
+            return;
+        }
+
+        _isLanguageSelectionPromptVisible = true;
+
+        try
+        {
+            var currentLanguageCode = CanonicalizeLanguageCode(_languageService.CurrentLanguage);
+            var languageOptions = NormalizeLanguageOptions(await _languageService.GetAllLanguagesAsync(), currentLanguageCode);
+            await ShowFirstLaunchLanguagePopupAsync(languageOptions, currentLanguageCode);
+        }
+        catch
+        {
+            // Keep app usable when language picker cannot be shown.
+            _isLanguageSelectionPromptVisible = false;
+        }
+    }
+
+    private async Task ShowFirstLaunchLanguagePopupAsync(
+        IReadOnlyCollection<LanguageModel> languageOptions,
+        string currentLanguageCode)
+    {
+        if (_firstLaunchLanguagePopupOverlay != null)
+        {
+            return;
+        }
+
+        var options = languageOptions
+            .Where(x => !string.IsNullOrWhiteSpace(x.LanguageCode))
+            .Select(x => new LanguageModel
+            {
+                LanguageCode = CanonicalizeLanguageCode(x.LanguageCode),
+                LanguageName = x.LanguageName
+            })
+            .GroupBy(x => x.LanguageCode, StringComparer.OrdinalIgnoreCase)
+            .Select(x => x.First())
+            .ToList();
+
+        if (options.Count == 0)
+        {
+            _isLanguageSelectionPromptVisible = false;
+            return;
+        }
+
+        _firstLaunchLanguagePopupOverlay = new Grid
+        {
+            BackgroundColor = Color.FromArgb("#4D000000"),
+            InputTransparent = false,
+            Opacity = 0
+        };
+
+        var dismissBackdrop = new BoxView
+        {
+            Color = Colors.Transparent,
+            InputTransparent = false
+        };
+        dismissBackdrop.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await CloseFirstLaunchLanguagePopupAsync())
+        });
+        _firstLaunchLanguagePopupOverlay.Children.Add(dismissBackdrop);
+
+        var popupContent = new Border
+        {
+            BackgroundColor = Colors.White,
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 32 },
+            Padding = new Thickness(20, 14, 20, 24),
+            VerticalOptions = LayoutOptions.End,
+            Margin = new Thickness(0, 0, 0, -2)
+        };
+
+        var contentStack = new VerticalStackLayout { Spacing = 16 };
+
+        var titleGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            }
+        };
+
+        var titleLabel = new Label
+        {
+            Text = LocalizationResourceManager.Instance["SelectNarrationLanguage"],
+            FontSize = 22,
+            FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#1A1A1A"),
+            VerticalOptions = LayoutOptions.Center
+        };
+        titleGrid.Add(titleLabel, 0, 0);
+
+        var closeButton = new Border
+        {
+            BackgroundColor = Color.FromArgb("#E8E4E0"),
+            HeightRequest = 56,
+            WidthRequest = 56,
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 28 },
+            HorizontalOptions = LayoutOptions.End
+        };
+        closeButton.Content = new Label
+        {
+            Text = "\uF00D",
+            FontFamily = "FASolid",
+            FontSize = 20,
+            TextColor = Color.FromArgb("#6F6862"),
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+        closeButton.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await CloseFirstLaunchLanguagePopupAsync())
+        });
+        titleGrid.Add(closeButton, 1, 0);
+        contentStack.Add(titleGrid);
+
+        _firstLaunchLanguageOptionsContainer = new VerticalStackLayout { Spacing = 10 };
+        contentStack.Add(_firstLaunchLanguageOptionsContainer);
+
+        popupContent.Content = contentStack;
+
+        var mainStack = new VerticalStackLayout { VerticalOptions = LayoutOptions.End };
+        mainStack.Add(popupContent);
+        _firstLaunchLanguagePopupOverlay.Children.Add(mainStack);
+
+        if (Content is not Grid mainGrid)
+        {
+            _isLanguageSelectionPromptVisible = false;
+            _firstLaunchLanguagePopupOverlay = null;
+            return;
+        }
+
+        Grid.SetRowSpan(_firstLaunchLanguagePopupOverlay, 2);
+        mainGrid.Children.Add(_firstLaunchLanguagePopupOverlay);
+
+        BuildFirstLaunchLanguageOptions(options);
+        ApplyFirstLaunchLanguageSelectionStyle(currentLanguageCode);
+
+        await _firstLaunchLanguagePopupOverlay.FadeTo(1, 180);
+    }
+
+    private async Task CloseFirstLaunchLanguagePopupAsync()
+    {
+        if (_firstLaunchLanguagePopupOverlay == null)
+        {
+            _isLanguageSelectionPromptVisible = false;
+            return;
+        }
+
+        var overlay = _firstLaunchLanguagePopupOverlay;
+        _firstLaunchLanguagePopupOverlay = null;
+
+        await overlay.FadeTo(0, 140);
+
+        if (Content is Grid mainGrid)
+        {
+            mainGrid.Children.Remove(overlay);
+        }
+
+        _firstLaunchLanguageOptionsContainer = null;
+        _firstLaunchLanguageOptions.Clear();
+        _firstLaunchLanguageChecks.Clear();
+        _isLanguageSelectionPromptVisible = false;
+    }
+
+    private void BuildFirstLaunchLanguageOptions(IReadOnlyCollection<LanguageModel> languages)
+    {
+        if (_firstLaunchLanguageOptionsContainer == null)
+        {
+            return;
+        }
+
+        _firstLaunchLanguageOptionsContainer.Children.Clear();
+        _firstLaunchLanguageOptions.Clear();
+        _firstLaunchLanguageChecks.Clear();
+
+        foreach (var language in languages)
+        {
+            var languageCode = CanonicalizeLanguageCode(language.LanguageCode);
+
+            var optionBorder = new Border
+            {
+                BackgroundColor = Color.FromArgb("#F1EDE9"),
+                StrokeThickness = 0,
+                StrokeShape = new RoundRectangle { CornerRadius = 18 },
+                Padding = new Thickness(14, 16)
+            };
+
+            optionBorder.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(async () => await OnFirstLaunchLanguageOptionTappedAsync(languageCode))
+            });
+
+            var row = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Auto)
+                },
+                ColumnSpacing = 12,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            row.Add(new Label
+            {
+                Text = GetFlagByLanguageCode(languageCode),
+                FontSize = 22,
+                VerticalOptions = LayoutOptions.Center
+            }, 0, 0);
+
+            row.Add(new Label
+            {
+                Text = GetLanguageDisplayName(languageCode),
+                FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#1A1A1A"),
+                VerticalOptions = LayoutOptions.Center
+            }, 1, 0);
+
+            var checkLabel = new Label
+            {
+                Text = "✓",
+                FontSize = 20,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#F48C06"),
+                VerticalOptions = LayoutOptions.Center,
+                IsVisible = false
+            };
+            row.Add(checkLabel, 2, 0);
+
+            optionBorder.Content = row;
+
+            _firstLaunchLanguageOptions[languageCode] = optionBorder;
+            _firstLaunchLanguageChecks[languageCode] = checkLabel;
+            _firstLaunchLanguageOptionsContainer.Children.Add(optionBorder);
+        }
+    }
+
+    private void ApplyFirstLaunchLanguageSelectionStyle(string cultureCode)
+    {
+        foreach (var option in _firstLaunchLanguageOptions)
+        {
+            var isSelected = option.Key.Equals(cultureCode, StringComparison.OrdinalIgnoreCase);
+            option.Value.BackgroundColor = isSelected
+                ? Colors.White
+                : Color.FromArgb("#F1EDE9");
+            option.Value.StrokeThickness = isSelected ? 2 : 0;
+            option.Value.Stroke = isSelected
+                ? Color.FromArgb("#F48C06")
+                : Colors.Transparent;
+
+            if (_firstLaunchLanguageChecks.TryGetValue(option.Key, out var checkLabel))
+            {
+                checkLabel.IsVisible = isSelected;
+            }
+        }
+    }
+
+    private async Task OnFirstLaunchLanguageOptionTappedAsync(string cultureCode)
+    {
+        if (string.IsNullOrWhiteSpace(cultureCode))
+        {
+            return;
+        }
+
+        cultureCode = CanonicalizeLanguageCode(cultureCode);
+        ApplyFirstLaunchLanguageSelectionStyle(cultureCode);
+
+        await CloseFirstLaunchLanguagePopupAsync();
+        await ApplySelectedLanguageAsync(cultureCode);
+    }
+
+    private async Task ApplySelectedLanguageAsync(string cultureCode)
+    {
+        if (string.IsNullOrWhiteSpace(cultureCode))
+        {
+            return;
+        }
+
+        cultureCode = CanonicalizeLanguageCode(cultureCode);
+        var wasNarrating = _narrationFlowService.IsNarrating;
+
+        Preferences.Set("language_selected", true);
+        Preferences.Set("language", cultureCode);
+
+        if (!_languageService.CurrentLanguage.Equals(cultureCode, StringComparison.OrdinalIgnoreCase))
+        {
+            _languageService.ChangeLanguage(cultureCode);
+        }
+
+        _lastAppliedLanguageCode = string.Empty;
+        await RefreshPoiListForCurrentLanguageAsync();
+
+        if (wasNarrating)
+        {
+            _narrationFlowService.StartNarration();
+        }
+    }
+
+    private static string CanonicalizeLanguageCode(string? languageCode)
+    {
+        var normalized = (languageCode ?? string.Empty).Trim().Replace('_', '-').ToLowerInvariant();
+
+        return normalized switch
+        {
+            "vi" or "vi-vn" => "vi-VN",
+            "en" or "en-us" => "en-US",
+            "zh" or "zh-cn" => "zh-CN",
+            "ja" or "ja-jp" => "ja-JP",
+            "ko" or "ko-kr" => "ko-KR",
+            _ => string.IsNullOrWhiteSpace(languageCode) ? "vi-VN" : languageCode.Trim()
+        };
+    }
+
+    private static List<LanguageModel> BuildDefaultLanguageOptions()
+    {
+        return new List<LanguageModel>
+        {
+            new() { LanguageCode = "vi-VN", LanguageName = "Tiếng Việt" },
+            new() { LanguageCode = "en-US", LanguageName = "English" },
+            new() { LanguageCode = "zh-CN", LanguageName = "中文" },
+            new() { LanguageCode = "ja-JP", LanguageName = "日本語" },
+            new() { LanguageCode = "ko-KR", LanguageName = "한국어" }
+        };
+    }
+
+    private static List<LanguageModel> NormalizeLanguageOptions(
+        IEnumerable<LanguageModel> source,
+        string currentLanguage)
+    {
+        var merged = new Dictionary<string, LanguageModel>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in BuildDefaultLanguageOptions())
+        {
+            var code = CanonicalizeLanguageCode(item.LanguageCode);
+            merged[code] = new LanguageModel
+            {
+                LanguageCode = code,
+                LanguageName = item.LanguageName
+            };
+        }
+
+        foreach (var item in source)
+        {
+            if (string.IsNullOrWhiteSpace(item.LanguageCode))
+            {
+                continue;
+            }
+
+            var code = CanonicalizeLanguageCode(item.LanguageCode);
+            if (!merged.TryGetValue(code, out var existing) || string.IsNullOrWhiteSpace(existing.LanguageName))
+            {
+                merged[code] = new LanguageModel
+                {
+                    LanguageCode = code,
+                    LanguageName = item.LanguageName
+                };
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.LanguageName))
+            {
+                existing.LanguageName = item.LanguageName;
+            }
+        }
+
+        if (!merged.ContainsKey(currentLanguage))
+        {
+            merged[currentLanguage] = new LanguageModel
+            {
+                LanguageCode = currentLanguage,
+                LanguageName = currentLanguage
+            };
+        }
+
+        return merged.Values
+            .OrderBy(x => x.LanguageCode, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static string? GetLanguageResourceKey(string code)
+    {
+        return CanonicalizeLanguageCode(code).ToLowerInvariant() switch
+        {
+            "vi-vn" => "Vietnamese",
+            "en-us" => "English",
+            "ja-jp" => "Japanese",
+            "ko-kr" => "Korean",
+            "zh-cn" => "Chinese",
+            _ => null
+        };
+    }
+
+    private static string GetLanguageDisplayName(string code)
+    {
+        var resourceKey = GetLanguageResourceKey(code);
+        if (resourceKey == null)
+        {
+            return CanonicalizeLanguageCode(code);
+        }
+
+        return LocalizationResourceManager.Instance[resourceKey];
+    }
+
+    private static string GetFlagByLanguageCode(string languageCode)
+    {
+        return CanonicalizeLanguageCode(languageCode).ToLowerInvariant() switch
+        {
+            "vi-vn" => "🇻🇳",
+            "en-us" => "🇺🇸",
+            "zh-cn" => "🇨🇳",
+            "ko-kr" => "🇰🇷",
+            "ja-jp" => "🇯🇵",
+            _ => "🌐"
+        };
     }
 
     // Hàm này sẽ đảm nhiệm việc khởi tạo các phần nặng của MainPage như load map, lấy dữ liệu POI, lấy vị trí hiện tại nếu chưa có, v.v. Hàm này được thiết kế để chạy nền sau khi UI đã kịp render frame đầu tiên để tránh giật lag lúc cold start, đồng thời có cơ chế tránh chạy lại nếu đã đang trong quá trình khởi tạo để đảm bảo hiệu quả và tránh xung đột trạng thái

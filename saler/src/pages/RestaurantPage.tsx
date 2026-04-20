@@ -1,26 +1,63 @@
-﻿import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect } from "react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import type { Restaurant } from "@/types";
+import type {
+  Language,
+  Restaurant,
+  RestaurantFieldTranslations,
+} from "@/types";
 import {
+  getLanguagesApi,
+  getRestaurantTranslationsApi,
   resolveMapCoordinatesApi,
   updateRestaurantApi,
-  updateRestaurantStatusApi,
 } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { MapPin, Phone, Save, Clock } from "lucide-react";
 
 function isWithinSchedule(openTime: string, closeTime: string): boolean {
+  const parseTimeToMinutes = (value: string): number | null => {
+    const match = value.trim().match(/^(\d{1,2}):(\d{2})/);
+    if (!match) {
+      return null;
+    }
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+
+    if (
+      !Number.isFinite(hours) ||
+      !Number.isFinite(minutes) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return null;
+    }
+
+    return hours * 60 + minutes;
+  };
+
+  const openMinutes = parseTimeToMinutes(openTime);
+  const closeMinutes = parseTimeToMinutes(closeTime);
+  if (openMinutes === null || closeMinutes === null) {
+    return false;
+  }
+
   const now = new Date();
-  const [openH, openM] = openTime.split(":").map(Number);
-  const [closeH, closeM] = closeTime.split(":").map(Number);
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const openMinutes = openH * 60 + openM;
-  const closeMinutes = closeH * 60 + closeM;
 
   if (closeMinutes > openMinutes) {
     return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
@@ -72,48 +109,174 @@ function extractCoordinatesFromGoogleMapsUrl(
   return null;
 }
 
+function getBaseLanguageCode(code: string): string {
+  return code.trim().toLowerCase().replace("_", "-").split("-")[0] ?? "";
+}
+
 export default function RestaurantPage() {
   const { selectedRestaurant, refreshRestaurants } = useRestaurant();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(
     selectedRestaurant ? { ...selectedRestaurant } : null,
   );
+  const [persistedRestaurant, setPersistedRestaurant] =
+    useState<Restaurant | null>(
+      selectedRestaurant ? { ...selectedRestaurant } : null,
+    );
   const [googleMapsUrl, setGoogleMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hydratedRestaurantId, setHydratedRestaurantId] = useState<
+    string | null
+  >(selectedRestaurant?.restaurant_id ?? null);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [previewLanguageCode, setPreviewLanguageCode] = useState("vi");
+  const [translatedFields, setTranslatedFields] =
+    useState<RestaurantFieldTranslations>({});
+  const [loadingTranslation, setLoadingTranslation] = useState(false);
+  const restaurantId = restaurant?.restaurant_id ?? "";
+  const openTime = restaurant?.open_time ?? "";
+  const closeTime = restaurant?.close_time ?? "";
 
   useEffect(() => {
     if (selectedRestaurant) {
-      setRestaurant({ ...selectedRestaurant });
-      setGoogleMapsUrl("");
-      setAutoMode(true);
+      const isRestaurantChanged =
+        selectedRestaurant.restaurant_id !== hydratedRestaurantId;
+
+      if (!isRestaurantChanged && hasUnsavedChanges) {
+        return;
+      }
+
+      const shouldAutoOpen =
+        autoMode &&
+        isWithinSchedule(
+          selectedRestaurant.open_time,
+          selectedRestaurant.close_time,
+        );
+
+      setRestaurant({
+        ...selectedRestaurant,
+        is_active: autoMode ? shouldAutoOpen : selectedRestaurant.is_active,
+      });
+      setPersistedRestaurant({ ...selectedRestaurant });
+      setHasUnsavedChanges(false);
+      setHydratedRestaurantId(selectedRestaurant.restaurant_id);
+
+      if (isRestaurantChanged) {
+        setGoogleMapsUrl("");
+        setAutoMode(true);
+        setPreviewLanguageCode("vi");
+        setTranslatedFields({});
+      }
     }
-  }, [selectedRestaurant]);
+  }, [autoMode, hasUnsavedChanges, hydratedRestaurantId, selectedRestaurant]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadLanguages = async () => {
+      try {
+        const data = await getLanguagesApi();
+        if (!mounted) return;
+
+        const normalized = data
+          .filter((lang) => Boolean(lang.code))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setLanguages(normalized);
+
+        if (
+          !normalized.some(
+            (lang) => getBaseLanguageCode(lang.code ?? "") === "vi",
+          )
+        ) {
+          setPreviewLanguageCode(normalized[0]?.code ?? "vi");
+        }
+      } catch {
+        if (!mounted) return;
+        setLanguages([]);
+      }
+    };
+
+    loadLanguages();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadTranslation = async () => {
+      if (
+        !restaurantId ||
+        !previewLanguageCode ||
+        previewLanguageCode === "vi"
+      ) {
+        setTranslatedFields({});
+        return;
+      }
+
+      setLoadingTranslation(true);
+      try {
+        const translated = await getRestaurantTranslationsApi(
+          restaurantId,
+          previewLanguageCode,
+        );
+
+        if (!mounted) return;
+        setTranslatedFields(translated);
+      } catch {
+        if (!mounted) return;
+        setTranslatedFields({});
+      } finally {
+        if (mounted) {
+          setLoadingTranslation(false);
+        }
+      }
+    };
+
+    loadTranslation();
+
+    return () => {
+      mounted = false;
+    };
+  }, [previewLanguageCode, restaurantId]);
 
   const updateField = <K extends keyof Restaurant>(
     key: K,
     value: Restaurant[K],
   ) => {
-    setRestaurant((prev) => (prev ? { ...prev, [key]: value } : prev));
+    setRestaurant((prev) => {
+      if (!prev || prev[key] === value) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, [key]: value };
+    });
   };
 
-  const updateAutoStatus = useCallback(() => {
-    if (!autoMode || !restaurant) return;
-    const shouldBeActive = isWithinSchedule(
-      restaurant.open_time,
-      restaurant.close_time,
-    );
-    setRestaurant((prev) =>
-      prev && prev.is_active !== shouldBeActive
-        ? { ...prev, is_active: shouldBeActive }
-        : prev,
-    );
-  }, [autoMode, restaurant?.open_time, restaurant?.close_time]);
-
   useEffect(() => {
-    updateAutoStatus();
-    const interval = setInterval(updateAutoStatus, 60000);
-    return () => clearInterval(interval);
-  }, [updateAutoStatus]);
+    if (!autoMode) {
+      return;
+    }
+
+    setRestaurant((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      const shouldBeActive = isWithinSchedule(prev.open_time, prev.close_time);
+      if (prev.is_active === shouldBeActive) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, is_active: shouldBeActive };
+    });
+  }, [autoMode, closeTime, openTime]);
 
   const handleManualToggle = (value: boolean) => {
     setAutoMode(false);
@@ -141,11 +304,21 @@ export default function RestaurantPage() {
         restaurant.restaurant_id,
         restaurant,
       );
-      await updateRestaurantStatusApi(
-        restaurant.restaurant_id,
-        restaurant.is_active,
-      );
-      setRestaurant(updatedRestaurant);
+      setRestaurant({ ...updatedRestaurant, is_active: restaurant.is_active });
+      setPersistedRestaurant({ ...updatedRestaurant });
+      setHasUnsavedChanges(false);
+      setHydratedRestaurantId(updatedRestaurant.restaurant_id);
+      if (previewLanguageCode !== "vi") {
+        try {
+          const translated = await getRestaurantTranslationsApi(
+            restaurant.restaurant_id,
+            previewLanguageCode,
+          );
+          setTranslatedFields(translated);
+        } catch {
+          setTranslatedFields({});
+        }
+      }
       await refreshRestaurants();
       toast.success("Lưu thay đổi thành công!");
     } catch {
@@ -155,7 +328,18 @@ export default function RestaurantPage() {
   };
 
   const applyCoordinates = (latitude: number, longitude: number) => {
-    setRestaurant((prev) => (prev ? { ...prev, latitude, longitude } : prev));
+    setRestaurant((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      if (prev.latitude === latitude && prev.longitude === longitude) {
+        return prev;
+      }
+
+      setHasUnsavedChanges(true);
+      return { ...prev, latitude, longitude };
+    });
   };
 
   const handleGoogleMapsUrlChange = (value: string) => {
@@ -189,6 +373,22 @@ export default function RestaurantPage() {
   };
 
   if (!selectedRestaurant || !restaurant) return null;
+
+  const previewRestaurant = persistedRestaurant ?? selectedRestaurant;
+  const displayName = previewRestaurant?.name ?? "";
+  const displayDescription =
+    previewLanguageCode === "vi"
+      ? (previewRestaurant?.description ?? "")
+      : translatedFields.description || previewRestaurant?.description || "";
+  const displayAddress =
+    previewLanguageCode === "vi"
+      ? (previewRestaurant?.address ?? "")
+      : translatedFields.address || previewRestaurant?.address || "";
+
+  const hasTranslationForPreviewLanguage =
+    previewLanguageCode === "vi"
+      ? true
+      : Boolean(translatedFields.description || translatedFields.address);
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
@@ -362,6 +562,74 @@ export default function RestaurantPage() {
               referrerPolicy="no-referrer-when-downgrade"
               src={`https://www.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}&z=15&output=embed`}
             />
+          </div>
+        </div>
+
+        <div className="form-section space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h3 className="font-medium text-foreground">
+              Xem thông tin nhà hàng theo ngôn ngữ
+            </h3>
+            <div className="w-full sm:w-56">
+              <Select
+                value={previewLanguageCode}
+                onValueChange={setPreviewLanguageCode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn ngôn ngữ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vi">Tiếng Việt</SelectItem>
+                  {languages
+                    .filter(
+                      (language) =>
+                        language.code &&
+                        getBaseLanguageCode(language.code) !== "vi",
+                    )
+                    .map((language) => (
+                      <SelectItem
+                        key={language.language_id}
+                        value={language.code}
+                      >
+                        {language.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+            <div>
+              <p className="text-xs text-muted-foreground">Tên nhà hàng</p>
+              <p className="font-medium text-foreground">{displayName}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Mô tả</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">
+                {displayDescription || "(Chưa có mô tả)"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Địa chỉ</p>
+              <p className="text-sm text-foreground">
+                {displayAddress || "(Chưa có địa chỉ)"}
+              </p>
+            </div>
+
+            {previewLanguageCode !== "vi" &&
+              !loadingTranslation &&
+              !hasTranslationForPreviewLanguage && (
+                <p className="text-xs text-amber-600">
+                  Chưa có bản dịch cho ngôn ngữ này, hệ thống đang dùng dữ liệu
+                  tiếng Việt.
+                </p>
+              )}
+            {previewLanguageCode !== "vi" && loadingTranslation && (
+              <p className="text-xs text-muted-foreground">
+                Đang tải bản dịch...
+              </p>
+            )}
           </div>
         </div>
 

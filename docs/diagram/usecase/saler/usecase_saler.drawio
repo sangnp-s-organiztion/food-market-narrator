@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Copilot" pages="8">
   <diagram id="uc-general" name="Use case tổng quát">
-    <mxGraphModel dx="1380" dy="596" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -31,9 +31,6 @@
         <mxCell id="16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Quản lý tài khoản" vertex="1">
           <mxGeometry height="70" width="220" x="210" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="30" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="10">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="31" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="11">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -56,7 +53,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="uc-auth" name="Chi tiết - Xác thực">
-    <mxGraphModel dx="1466" dy="634" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -64,10 +61,13 @@
           <mxGeometry height="80" width="40" x="40" y="320" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;" value="" vertex="1">
-          <mxGeometry height="620" width="890" x="140" y="80" as="geometry" />
+          <mxGeometry height="620" width="880" x="140" y="80" as="geometry" />
         </mxCell>
         <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Kiểm tra phiên đăng nhập" vertex="1">
           <mxGeometry height="70" width="260" x="170" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Điều hướng và bảo vệ route" vertex="1">
+          <mxGeometry height="70" width="300" x="540" y="120" as="geometry" />
         </mxCell>
         <mxCell id="11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Đăng nhập" vertex="1">
           <mxGeometry height="70" width="190" x="490" y="280" as="geometry" />
@@ -86,9 +86,6 @@
         </mxCell>
         <mxCell id="16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Đặt mật khẩu mới" vertex="1">
           <mxGeometry height="60" width="210" x="500" y="570" as="geometry" />
-        </mxCell>
-        <mxCell id="30" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="10">
-          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="31" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="11">
           <mxGeometry relative="1" as="geometry" />
@@ -111,11 +108,20 @@
         <mxCell id="43" edge="1" parent="1" source="13" style="dashed=1;endArrow=open;html=1;fontStyle=1;" target="11" value="extend">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="44" edge="1" parent="1" source="17" style="dashed=1;endArrow=open;html=1;fontStyle=1;" target="10" value="include">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_VVu4xYgacUSYj-1uXii-44" edge="1" parent="1" source="2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="320" as="sourcePoint" />
+            <mxPoint x="574" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="uc-nav-restaurant" name="Chi tiết - Điều hướng và Nhà hàng">
-    <mxGraphModel dx="1466" dy="634" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+    <mxGraphModel dx="1755" dy="634" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -123,10 +129,7 @@
           <mxGeometry height="80" width="40" x="40" y="320" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;" value="" vertex="1">
-          <mxGeometry height="620" width="810" x="130" y="81" as="geometry" />
-        </mxCell>
-        <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Truy cập route dashboard được bảo vệ" vertex="1">
-          <mxGeometry height="70" width="340" x="220" y="140" as="geometry" />
+          <mxGeometry height="620" width="810" x="130" y="80" as="geometry" />
         </mxCell>
         <mxCell id="11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Chọn nhà hàng để quản lý" vertex="1">
           <mxGeometry height="70" width="270" x="380" y="230" as="geometry" />
@@ -142,9 +145,6 @@
         </mxCell>
         <mxCell id="15" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Tự điền tọa độ từ link Google Maps" vertex="1">
           <mxGeometry height="60" width="340" x="530" y="580" as="geometry" />
-        </mxCell>
-        <mxCell id="30" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="10">
-          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="31" edge="1" parent="1" source="2" style="endArrow=none;html=1;" target="11">
           <mxGeometry relative="1" as="geometry" />

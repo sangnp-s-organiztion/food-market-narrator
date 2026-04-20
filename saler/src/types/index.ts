@@ -55,6 +55,12 @@ export interface Language {
   code: string;
 }
 
+export interface RestaurantFieldTranslations {
+  name?: string;
+  description?: string;
+  address?: string;
+}
+
 export interface Audio {
   audio_id: number;
   restaurant_id: string;

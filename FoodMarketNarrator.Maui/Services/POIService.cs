@@ -424,13 +424,10 @@ public class POIService : IPOIService
             foreach (var poi in pois)
             {
                 var restaurantId = poi.restaurantId ?? string.Empty;
-                var translatedNameKey = BuildTranslationKey(restaurantId, "name");
                 var translatedDescriptionKey = BuildTranslationKey(restaurantId, "description");
                 var translatedAddressKey = BuildTranslationKey(restaurantId, "address");
 
-                poi.Name = translationMap.TryGetValue(translatedNameKey, out var translatedName)
-                    ? translatedName
-                    : (poi.OriginalName ?? poi.Name);
+                poi.Name = poi.OriginalName ?? poi.Name;
 
                 poi.Description = translationMap.TryGetValue(translatedDescriptionKey, out var translatedDescription)
                     ? translatedDescription

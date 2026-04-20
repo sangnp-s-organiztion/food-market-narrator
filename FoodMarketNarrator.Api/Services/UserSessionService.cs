@@ -31,6 +31,17 @@ public class UserSessionService
         });
     }
 
+    public async Task<int> CountVisitorsAsync()
+    {
+        var count = await _userSessionRepository.CountVisitorsAsync();
+        return count > int.MaxValue ? int.MaxValue : (int)count;
+    }
+
+    public Task<IReadOnlyList<VisitorSessionRecord>> GetVisitorsAsync(int limit = 200)
+    {
+        return _userSessionRepository.GetVisitorsAsync(limit);
+    }
+
     public async Task TouchSessionActivityAsync(IReadOnlyCollection<string> sessionIds, DateTime lastSeenAtUtc)
     {
         var normalizedSessionIds = sessionIds
