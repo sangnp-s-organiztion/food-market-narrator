@@ -281,7 +281,7 @@ public class Program
         // Health check endpoint cho platform (Render) khong phu thuoc DB.
         app.MapGet("/healthz", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
         // Endpoint tai APK public: neu thieu file se tra 404 thay vi 401.
-        app.MapGet("/uploads/apk/{fileName}", (string fileName, IWebHostEnvironment env) =>
+        app.MapMethods("/uploads/apk/{fileName}", ["GET", "HEAD"], (string fileName, IWebHostEnvironment env) =>
         {
             var safeFileName = Path.GetFileName(fileName ?? string.Empty);
             if (string.IsNullOrWhiteSpace(safeFileName))
