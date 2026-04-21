@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Download, QrCode as QrCodeIcon, Upload } from "lucide-react";
+import { Copy, Download, QrCode as QrCodeIcon, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,18 @@ const API_BASE =
   "http://localhost:5044";
 const QR_OUTPUT_FILE = "qr_open_app.png";
 const STORED_QR_PATH = `/uploads/qr/${QR_OUTPUT_FILE}`;
+const normalizeBaseUrl = (value: string) => value.trim().replace(/\/+$/, "");
 
 const QrCodePage = () => {
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
+  const [deployBaseUrl, setDeployBaseUrl] = useState(API_BASE);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const normalizedDeployBase =
+    normalizeBaseUrl(deployBaseUrl) || normalizeBaseUrl(API_BASE);
+  const qrLandingUrl = `${normalizedDeployBase}/app-open.html`;
+  const apkDownloadUrl = `${normalizedDeployBase}/apk-download.html`;
 
   const buildStoredQrUrl = (path = STORED_QR_PATH) =>
     `${API_BASE}${path}?v=${Date.now()}`;
@@ -160,6 +166,15 @@ const QrCodePage = () => {
     }
   };
 
+  const handleCopyQrUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(qrLandingUrl);
+      toast.success("Da copy noi dung URL cho ma QR");
+    } catch {
+      toast.error("Khong the copy URL");
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="page-header">
@@ -200,6 +215,35 @@ const QrCodePage = () => {
                 Tải PNG
               </Button>
             </div>
+          </div>
+
+          <div className="mt-6 rounded-xl border bg-slate-50 p-4">
+            <p className="text-sm font-medium text-slate-900">
+              URL chuan de tao ma QR sau khi deploy API qua ngrok
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Nhap domain ngrok cua API (vi du: https://abc123.ngrok-free.app),
+              sau do copy URL ben duoi de tao ma QR.
+            </p>
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <input
+                type="text"
+                value={deployBaseUrl}
+                onChange={(event) => setDeployBaseUrl(event.target.value)}
+                placeholder="https://your-ngrok-domain.ngrok-free.app"
+                className="h-10 flex-1 min-w-[260px] rounded-md border border-input bg-white px-3 text-sm"
+              />
+              <Button type="button" variant="outline" onClick={handleCopyQrUrl}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy URL QR
+              </Button>
+            </div>
+            <p className="text-xs text-slate-600 mt-3 break-all">
+              QR target: {qrLandingUrl}
+            </p>
+            <p className="text-xs text-slate-600 mt-1 break-all">
+              Trang tai APK: {apkDownloadUrl}
+            </p>
           </div>
 
           <div className="mt-6 rounded-xl border bg-white p-6 min-h-[460px] flex items-center justify-center">

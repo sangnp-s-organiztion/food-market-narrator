@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Food Market Narrator APK</title>
+    <style>
+      :root {
+        --bg: radial-gradient(
+          circle at 10% 20%,
+          #ecfeff 0%,
+          #f8fafc 45%,
+          #eff6ff 100%
+        );
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --accent: #0f766e;
+        --accent-2: #1d4ed8;
+        --warn: #b45309;
+        --border: #cbd5e1;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 20px;
+      }
+
+      .card {
+        width: min(640px, 100%);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.6rem;
+      }
+
+      p {
+        margin: 12px 0 0;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+
+      .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-download {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn-open {
+        background: var(--accent-2);
+        color: #fff;
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 0.9rem;
+      }
+
+      .warn {
+        margin-top: 16px;
+        color: var(--warn);
+        font-weight: 600;
+      }
+
+      code {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: #f1f5f9;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Install Food Market Narrator</h1>
+      <p>
+        Tap Download APK to install on Android. If Android blocks installation,
+        enable "Install unknown apps" for your browser or scanner app.
+      </p>
+
+      <div class="actions">
+        <a
+          id="downloadBtn"
+          class="btn btn-download"
+          href="/uploads/apk/food-market-narrator.apk"
+          download
+        >
+          Download APK
+        </a>
+        <a class="btn btn-open" href="foodmarketnarrator://open">Open App</a>
+      </div>
+
+      <p class="hint" id="apkPathText">
+        APK path: /uploads/apk/food-market-narrator.apk
+      </p>
+      <p class="warn" id="missingApkText" style="display: none">
+        APK file is missing on server. Upload file to
+        <code>wwwroot/uploads/apk/food-market-narrator.apk</code>
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var requestedApk =
+          params.get("apk") || "/uploads/apk/food-market-narrator.apk";
+        var downloadBtn = document.getElementById("downloadBtn");
+        var apkPathText = document.getElementById("apkPathText");
+        var missingApkText = document.getElementById("missingApkText");
+
+        downloadBtn.href = requestedApk;
+        apkPathText.textContent = "APK path: " + requestedApk;
+
+        fetch(requestedApk, { method: "HEAD" })
+          .then(function (response) {
+            if (response.ok) {
+              return;
+            }
+
+            throw new Error("APK not found");
+          })
+          .catch(function () {
+            missingApkText.style.display = "block";
+          });
+      })();
+    </script>
+  </body>
+</html>

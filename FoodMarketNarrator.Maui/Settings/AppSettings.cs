@@ -4,6 +4,9 @@ namespace food_market_narrator.Settings;
 
 public static class AppSettings
 {
+    private const bool PreferNgrokApiOnAndroid = true;
+    private const string NgrokApiBaseUrl = "https://scanning-carless-exhale.ngrok-free.dev/";
+
     // Chi can sua 1 dong nay khi IP may chay API thay doi.
     private const string LocalApiHost = "192.168.1.7";
     private const int HttpPort = 5044;
@@ -16,14 +19,34 @@ public static class AppSettings
     private static string ActiveApiHost =>
         DeviceInfo.DeviceType == DeviceType.Virtual ? "10.0.2.2" : LocalApiHost;
 
+    private static string NormalizedNgrokApiBaseUrl =>
+        NgrokApiBaseUrl.EndsWith("/", StringComparison.Ordinal)
+            ? NgrokApiBaseUrl
+            : $"{NgrokApiBaseUrl}/";
+
     public static string ApiBaseUrl
     {
-        get { return BuildHttpBaseUrl(ActiveApiHost); }
+        get
+        {
+            return PreferNgrokApiOnAndroid
+                ? NormalizedNgrokApiBaseUrl
+                : BuildHttpBaseUrl(ActiveApiHost);
+        }
     }
 
     public static string[] ApiFallbackBaseUrls
     {
-        get { return new[] { BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) }; }
+        get
+        {
+            return PreferNgrokApiOnAndroid
+                ? new[]
+                {
+                    NormalizedNgrokApiBaseUrl,
+                    BuildHttpBaseUrl(ActiveApiHost),
+                    BuildHttpsBaseUrl(ActiveApiHost)
+                }
+                : new[] { BuildHttpBaseUrl(ActiveApiHost), BuildHttpsBaseUrl(ActiveApiHost) };
+        }
     }
 #else
     public static string ApiBaseUrl => BuildHttpBaseUrl(LocalApiHost);
