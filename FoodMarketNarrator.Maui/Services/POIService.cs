@@ -70,6 +70,7 @@ public class POIService : IPOIService
     private const int WarmupPhaseATopCount = 6; // số lượng POI ưu tiên trong phase A của warm-up, thường là các POI có nhiều audio hoặc lượt truy cập để đảm bảo trải nghiệm mượt mà cho phần lớn người dùng ngay sau khi load POI từ cache hoặc network. Các POI còn lại sẽ được xếp vào phase B để warm-up sau đó nhằm tối ưu tài nguyên và tránh quá tải khi mới load POI.
     private const int WarmupPriorityHigh = 0; // độ ưu tiên cao cho các job warm-up ảnh của POI ưu tiên trong phase A, giúp đảm bảo các POI này có trải nghiệm tốt nhất ngay sau khi load
     private const int WarmupPriorityNormal = 1; // độ ưu tiên bình thường cho các job warm-up còn lại, sẽ được xử lý sau khi các job ưu tiên đã được xếp hàng và xử lý
+    private const int TranslationBatchSize = 80;
     private static readonly TimeSpan WarmupInitialDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupInitialDelayMs);
     private static readonly TimeSpan WarmupPhaseBDelay = TimeSpan.FromMilliseconds(AppSettings.OfflineWarmupPhaseBDelayMs);
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -395,6 +396,60 @@ public class POIService : IPOIService
         return new List<UiTranslationModel>();
     }
 
+    private static IEnumerable<List<string>> ChunkEntityIds(IEnumerable<string> entityIds, int chunkSize)
+    {
+        var chunk = new List<string>(chunkSize);
+
+        foreach (var entityId in entityIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            chunk.Add(entityId);
+            if (chunk.Count >= chunkSize)
+            {
+                yield return chunk;
+                chunk = new List<string>(chunkSize);
+            }
+        }
+
+        if (chunk.Count > 0)
+        {
+            yield return chunk;
+        }
+    }
+
+    private async Task<List<UiTranslationModel>> FetchUiTranslationsInChunksAsync(
+        string languageCode,
+        string entityType,
+        IReadOnlyCollection<string> entityIds)
+    {
+        if (entityIds.Count == 0)
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var merged = new Dictionary<string, UiTranslationModel>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var chunk in ChunkEntityIds(entityIds, TranslationBatchSize))
+        {
+            var chunkTranslations = await FetchUiTranslationsAsync(languageCode, entityType, chunk);
+            foreach (var item in chunkTranslations)
+            {
+                if (string.IsNullOrWhiteSpace(item.EntityId)
+                    || string.IsNullOrWhiteSpace(item.FieldName)
+                    || string.IsNullOrWhiteSpace(item.TranslatedText))
+                {
+                    continue;
+                }
+
+                var key = BuildTranslationKey(item.EntityId.Trim(), item.FieldName.Trim().ToLowerInvariant());
+                merged[key] = item;
+            }
+        }
+
+        return merged.Values.ToList();
+    }
+
     private async Task ApplyPoiTranslationsForCurrentLanguageAsync(List<POI> pois)
     {
         if (pois.Count == 0)
@@ -418,7 +473,7 @@ public class POIService : IPOIService
 
         try
         {
-            var translationItems = await FetchUiTranslationsAsync(currentLanguage, "restaurant", restaurantIds);
+            var translationItems = await FetchUiTranslationsInChunksAsync(currentLanguage, "restaurant", restaurantIds);
             var translationMap = ToTranslationMap(translationItems);
 
             foreach (var poi in pois)
@@ -438,9 +493,31 @@ public class POIService : IPOIService
                     : (poi.OriginalAddress ?? poi.Address);
             }
 
-            foreach (var poi in pois.Where(x => x.Dishes != null && x.Dishes.Count > 0))
+            var allDishes = pois
+                .Where(x => x.Dishes != null && x.Dishes.Count > 0)
+                .SelectMany(x => x.Dishes)
+                .ToList();
+
+            if (allDishes.Count > 0)
             {
-                await ApplyDishTranslationsForCurrentLanguageAsync(poi.restaurantId, poi.Dishes, currentLanguage);
+                CaptureOriginalDishText(allDishes);
+
+                var dishIds = allDishes
+                    .Select(x => x.DishId.ToString())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var dishTranslationItems = await FetchUiTranslationsInChunksAsync(currentLanguage, "dish", dishIds);
+                var dishTranslationMap = ToTranslationMap(dishTranslationItems);
+
+                foreach (var dish in allDishes)
+                {
+                    var translatedNameKey = BuildTranslationKey(dish.DishId.ToString(), "name");
+                    dish.Name = dishTranslationMap.TryGetValue(translatedNameKey, out var translatedName)
+                        ? translatedName
+                        : (dish.OriginalName ?? dish.Name);
+                }
             }
 
             _lastAppliedLanguageCode = currentLanguage;
