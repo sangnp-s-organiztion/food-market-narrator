@@ -492,3 +492,4 @@ FoodMarketNarrator.Api/build-temp/
 
 # Git worktrees
 .worktrees/
+*.apk

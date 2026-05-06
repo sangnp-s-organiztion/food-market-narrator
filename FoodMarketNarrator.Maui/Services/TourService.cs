@@ -15,6 +15,7 @@ public class TourService : ITourService
     private const string TranslationCacheFolderName = "translations";
     private const string ImageCacheFolderName = "image_cache";
     private const int MinValidImageBytes = 128;
+    private const int TranslationBatchSize = 80;
 
     private readonly HttpClient _httpClient;
     private readonly ILocationService _locationService;
@@ -25,6 +26,7 @@ public class TourService : ITourService
     private DateTime _memoryCachedAtUtc = DateTime.MinValue;
     private DateTime _lastNetworkFetchUtc = DateTime.MinValue;
     private string? _lastSuccessfulBaseUrl;
+    private string _lastAppliedLanguageCode = string.Empty;
 
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan TourRequestTimeout = TimeSpan.FromSeconds(5);
@@ -549,6 +551,60 @@ public class TourService : ITourService
         return FilterTranslationsByEntityIds(cached, entityIds);
     }
 
+    private static IEnumerable<List<string>> ChunkEntityIds(IEnumerable<string> entityIds, int chunkSize)
+    {
+        var chunk = new List<string>(chunkSize);
+
+        foreach (var entityId in entityIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            chunk.Add(entityId);
+            if (chunk.Count >= chunkSize)
+            {
+                yield return chunk;
+                chunk = new List<string>(chunkSize);
+            }
+        }
+
+        if (chunk.Count > 0)
+        {
+            yield return chunk;
+        }
+    }
+
+    private async Task<List<UiTranslationModel>> FetchTranslationsInChunksAsync(
+        string languageCode,
+        string entityType,
+        IReadOnlyCollection<string> entityIds)
+    {
+        if (entityIds.Count == 0)
+        {
+            return new List<UiTranslationModel>();
+        }
+
+        var merged = new Dictionary<string, UiTranslationModel>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var chunk in ChunkEntityIds(entityIds, TranslationBatchSize))
+        {
+            var chunkTranslations = await FetchTranslationsAsync(languageCode, entityType, chunk);
+            foreach (var item in chunkTranslations)
+            {
+                if (string.IsNullOrWhiteSpace(item.EntityId)
+                    || string.IsNullOrWhiteSpace(item.FieldName)
+                    || string.IsNullOrWhiteSpace(item.TranslatedText))
+                {
+                    continue;
+                }
+
+                var key = BuildTranslationKey(item.EntityId.Trim(), item.FieldName.Trim().ToLowerInvariant());
+                merged[key] = item;
+            }
+        }
+
+        return merged.Values.ToList();
+    }
+
     private async Task ApplyTourTranslationsForCurrentLanguageAsync(List<TourModel> tours)
     {
         if (tours.Count == 0)
@@ -557,6 +613,16 @@ public class TourService : ITourService
         }
 
         var currentLanguage = NormalizeLanguageCode(_languageService.CurrentLanguage);
+        var hasUncapturedOriginalText = tours.Any(t =>
+            t.OriginalName == null
+            || t.OriginalDescription == null
+            || t.Stops.Any(s => s.OriginalRestaurantName == null || s.OriginalAddress == null));
+
+        if (string.Equals(_lastAppliedLanguageCode, currentLanguage, StringComparison.OrdinalIgnoreCase)
+            && !hasUncapturedOriginalText)
+        {
+            return;
+        }
 
         CaptureOriginalTourText(tours);
         CaptureOriginalStopText(tours);
@@ -567,7 +633,7 @@ public class TourService : ITourService
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var tourTranslationItems = await FetchTranslationsAsync(currentLanguage, "tour", tourIds);
+        var tourTranslationItems = await FetchTranslationsInChunksAsync(currentLanguage, "tour", tourIds);
         var tourTranslationMap = ToTranslationMap(tourTranslationItems);
 
         var restaurantIds = tours
@@ -577,7 +643,7 @@ public class TourService : ITourService
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var restaurantTranslationItems = await FetchTranslationsAsync(currentLanguage, "restaurant", restaurantIds);
+        var restaurantTranslationItems = await FetchTranslationsInChunksAsync(currentLanguage, "restaurant", restaurantIds);
         var restaurantTranslationMap = ToTranslationMap(restaurantTranslationItems);
 
         foreach (var tour in tours)
@@ -610,6 +676,8 @@ public class TourService : ITourService
                     : (stop.OriginalAddress ?? stop.Address);
             }
         }
+
+        _lastAppliedLanguageCode = currentLanguage;
     }
 
     // Build endpoint danh sách tour, có gắn lat/lng/radius khi đã có vị trí người dùng.

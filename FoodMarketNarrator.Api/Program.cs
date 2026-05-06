@@ -3,6 +3,7 @@ using food_market_narrator_api.Models;
 using food_market_narrator_api.Services;
 using food_market_narrator_api.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -208,7 +209,12 @@ public class Program
             app.UseHttpsRedirection();
         }
         app.UseCors("SalerCors");
-        app.UseStaticFiles();
+        var staticContentTypeProvider = new FileExtensionContentTypeProvider();
+        staticContentTypeProvider.Mappings[".apk"] = "application/vnd.android.package-archive";
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            ContentTypeProvider = staticContentTypeProvider
+        });
         var mauiImagesDir = Path.GetFullPath(
             Path.Combine(
                 app.Environment.ContentRootPath,
