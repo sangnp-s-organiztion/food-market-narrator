@@ -1,0 +1,1814 @@
+0001 | image=false | caption=false | Tổng quan ứng dụng thuyết minh tự động – Phố ẩm thực Vĩnh Khánh
+0002 | image=false | caption=false | 1. Giới thiệu
+0003 | image=false | caption=false | Phố ẩm thực Vĩnh Khánh (đường Vĩnh Khánh, Quận 4, TP. Hồ Chí Minh) là một trong những khu vực nổi tiếng với nhiều món ăn đặc trưng và thu hút đông đảo du khách. Tuy nhiên, phần lớn khách tham quan chỉ trải nghiệm ẩm thực mà chưa có nhiều thông tin về nguồn gốc món ăn, lịch sử quán, hay các điểm đặc sắc của khu phố.
+0004 | image=false | caption=false | Ứng dụng Food Market Narrator được xây dựng nhằm cung cấp hệ thống thuyết minh tự động cho du khách khi tham quan phố ẩm thực Vĩnh Khánh. Khi người dùng di chuyển đến các vị trí nhất định trong khu vực, ứng dụng sẽ tự động phát nội dung thuyết minh về địa điểm, quán ăn hoặc món đặc trưng tại vị trí đó.
+0005 | image=false | caption=false | Hệ thống giúp nâng cao trải nghiệm du lịch, giúp người dùng vừa khám phá ẩm thực vừa hiểu thêm về văn hóa và lịch sử của khu phố.
+0006 | image=false | caption=false | 2. Mục tiêu của hệ thống
+0007 | image=false | caption=false | Ứng dụng được xây dựng nhằm đạt các mục tiêu sau:
+0008 | image=false | caption=false | Cung cấp thông tin thuyết minh tự động khi người dùng đến gần các địa điểm trong phố ẩm thực.
+0009 | image=false | caption=false | Giúp du khách khám phá các quán ăn nổi bật một cách thuận tiện.
+0010 | image=false | caption=false | Tăng trải nghiệm du lịch thông qua nội dung audio thuyết minh.
+0011 | image=false | caption=false | Hỗ trợ quản lý nội dung thuyết minh cho từng địa điểm thông qua hệ thống quản trị.
+0012 | image=false | caption=false | 3. Phạm vi hệ thống
+0013 | image=false | caption=false | Hệ thống tập trung vào khu vực phố ẩm thực Vĩnh Khánh, Quận 4 và bao gồm các chức năng chính:
+0014 | image=false | caption=false | Xác định vị trí người dùng thông qua GPS.
+0015 | image=false | caption=false | Tự động kích hoạt thuyết minh khi người dùng đi vào vùng địa lý của một địa điểm.
+0016 | image=false | caption=false | Phát nội dung thuyết minh (sử dụng file audio).
+0017 | image=false | caption=false | Hiển thị thông tin cơ bản về quán ăn hoặc địa điểm.
+0018 | image=false | caption=false | Quản lý dữ liệu địa điểm và nội dung thuyết minh.
+0019 | image=false | caption=false | 4. Đối tượng sử dụng
+0020 | image=false | caption=false | 4.1 Du khách
+0021 | image=false | caption=false | Khám phá các địa điểm ăn uống trong khu phố.
+0022 | image=false | caption=false | Nghe thuyết minh tự động khi đi qua các vị trí.
+0023 | image=false | caption=false | 4.2 Người quản trị / quản lý nội dung
+0024 | image=false | caption=false | Thêm, chỉnh sửa và quản lý thông tin địa điểm.
+0025 | image=false | caption=false | Quản lý nội dung thuyết minh (audio, văn bản).
+0026 | image=false | caption=false | Thống kê dữ liệu phục vụ cho việc phân tích
+0027 | image=false | caption=false | 5. Giá trị mang lại
+0028 | image=false | caption=false | Ứng dụng mang lại các giá trị sau:
+0029 | image=false | caption=false | Giúp du khách có trải nghiệm khám phá ẩm thực tương tác và sinh động hơn.
+0030 | image=false | caption=false | Tạo một hệ thống hướng dẫn tự động mà không cần hướng dẫn viên.
+0031 | image=false | caption=false | Góp phần quảng bá văn hóa ẩm thực địa phương.
+0032 | image=false | caption=false | Hỗ trợ quản lý và cập nhật nội dung một cách linh hoạt.
+0033 | image=false | caption=false | 6. Problem Statement (Vấn đề cần giải quyết)
+0034 | image=false | caption=false | Phố ẩm thực Vĩnh Khánh là một địa điểm nổi tiếng thu hút nhiều du khách trong và ngoài nước. Tuy nhiên, khi đến tham quan và trải nghiệm ẩm thực tại đây, người dùng thường gặp một số khó khăn trong việc tìm kiếm thông tin và khám phá các quầy bán hàng.
+0035 | image=false | caption=false | Hiện nay, phần lớn thông tin về các quán ăn, món đặc trưng hoặc vị trí quầy bán chưa được cung cấp một cách trực quan và thuận tiện cho du khách. Điều này dẫn đến trải nghiệm tham quan và thưởng thức ẩm thực chưa được tối ưu.
+0036 | image=false | caption=false | Một số vấn đề phổ biến mà người dùng thường gặp:
+0037 | image=false | caption=false | Khó tìm quầy bán mong muốn
+0038 | image=false | caption=false | Khu phố có nhiều quầy bán và hàng quán nằm gần nhau, khiến du khách khó xác định vị trí của quán ăn nổi tiếng hoặc quầy bán món mình muốn thử.
+0039 | image=false | caption=false | Không biết thông tin về menu hoặc món đặc trưng
+0040 | image=false | caption=false | Nhiều du khách không biết quán nào nổi tiếng với món gì hoặc món nào đáng thử khi đến khu phố.
+0041 | image=false | caption=false | Thiếu thông tin giới thiệu về quán ăn
+0042 | image=false | caption=false | Người dùng không biết lịch sử, đặc điểm nổi bật hoặc điểm đặc trưng của từng quán ăn.
+0043 | image=false | caption=false | Trải nghiệm khám phá ẩm thực còn bị động
+0044 | image=false | caption=false | Du khách thường chỉ đi dọc khu phố và chọn quán ngẫu nhiên, thiếu thông tin hướng dẫn hoặc gợi ý.
+0045 | image=false | caption=false | Do đó, cần có một hệ thống hỗ trợ cung cấp thông tin và thuyết minh tự động khi người dùng di chuyển trong khu vực phố ẩm thực, giúp họ dễ dàng khám phá các quán ăn và món đặc trưng một cách thuận tiện hơn.
+0046 | image=false | caption=false | 7. Goals / Objectives (Mục tiêu sản phẩm)
+0047 | image=false | caption=false | Ứng dụng thuyết minh tự động về phố ẩm thực Vĩnh Khánh được xây dựng nhằm cải thiện trải nghiệm khám phá ẩm thực của du khách, đồng thời hỗ trợ quảng bá các quán ăn trong khu phố. Các mục tiêu chính của sản phẩm bao gồm:
+0048 | image=false | caption=false | Giảm thời gian tìm kiếm quán ăn
+0049 | image=false | caption=false | Giúp người dùng nhanh chóng xác định vị trí các quán ăn hoặc điểm nổi bật trong khu phố thông qua hệ thống định vị và gợi ý.
+0050 | image=false | caption=false | Cung cấp thông tin món ăn rõ ràng và dễ tiếp cận
+0051 | image=false | caption=false | Giúp người dùng biết được menu, món đặc trưng và thông tin cơ bản của quán trước khi quyết định trải nghiệm.
+0052 | image=false | caption=false | Tăng tốc độ ra quyết định của khách hàng
+0053 | image=false | caption=false | Khi có thông tin thuyết minh và giới thiệu món ăn, người dùng có thể lựa chọn quán ăn hoặc món ăn nhanh hơn.
+0054 | image=false | caption=false | Nâng cao trải nghiệm tham quan và khám phá ẩm thực
+0055 | image=false | caption=false | Cung cấp nội dung thuyết minh tự động giúp người dùng hiểu thêm về món ăn, quán ăn và văn hóa ẩm thực của khu phố.
+0056 | image=false | caption=false | Hỗ trợ quảng bá các quán ăn địa phương
+0057 | image=false | caption=false | Tăng khả năng tiếp cận của các quán ăn với du khách thông qua hệ thống giới thiệu và thuyết minh tự động.
+0058 | image=false | caption=false | Góp phần tăng lượng khách và doanh thu cho các quán ăn
+0059 | image=false | caption=false | Khi du khách dễ dàng tiếp cận thông tin và được gợi ý quán ăn, khả năng ghé thăm và sử dụng dịch vụ tại các quán sẽ tăng lên.
+0060 | image=false | caption=false | 8. User Personas
+0061 | image=false | caption=false | Phần này mô tả các nhóm người dùng chính của hệ thống và nhu cầu của họ khi sử dụng ứng dụng thuyết minh tự động tại phố ẩm thực Vĩnh Khánh.
+0062 | image=false | caption=false | 8.1 Du khách / Khách tham quan (Visitor)
+0063 | image=false | caption=false | Độ tuổi: 13+
+0064 | image=false | caption=false | Thiết bị sử dụng: Smartphone (Android)
+0065 | image=false | caption=false | Đặc điểm:
+0066 | image=false | caption=false | Thường là khách du lịch hoặc người lần đầu đến phố ẩm thực Vĩnh Khánh.
+0067 | image=false | caption=false | Thích khám phá các món ăn mới và các quán nổi tiếng.
+0068 | image=false | caption=false | Di chuyển trong khu phố và tìm kiếm các quán ăn đáng thử.
+0069 | image=false | caption=false | Nhu cầu:
+0070 | image=false | caption=false | Biết được quán ăn nào nổi bật trong khu vực.
+0071 | image=false | caption=false | Nghe giới thiệu nhanh về món ăn hoặc quán khi đi ngang qua.
+0072 | image=false | caption=false | Có thông tin cơ bản như món đặc trưng, giá, vị trí.
+0073 | image=false | caption=false | Pain points:
+0074 | image=false | caption=false | Không biết quán nào ngon hoặc đáng thử.
+0075 | image=false | caption=false | Khó tìm vị trí quán nổi tiếng trong khu phố đông đúc.
+0076 | image=false | caption=false | Thiếu thông tin về món ăn trước khi quyết định mua.
+0077 | image=false | caption=false | 8.2 Người quản lý / Admin
+0078 | image=false | caption=false | Độ tuổi: 22 – 40+
+0079 | image=false | caption=false | Thiết bị sử dụng: Máy tính
+0080 | image=false | caption=false | Đặc điểm:
+0081 | image=false | caption=false | Là quản trị viên vận hành hệ thống ở cấp toàn cục.
+0082 | image=false | caption=false | Theo dõi hoạt động người dùng và chất lượng dữ liệu trên toàn nền tảng.
+0083 | image=false | caption=false | Sử dụng web admin để quản lý quyền truy cập, nhà hàng, tour và các chỉ số vận hành.
+0084 | image=false | caption=false | Nhu cầu:
+0085 | image=false | caption=false | Quản lý tài khoản người dùng: tạo mới, khóa/mở khóa.
+0086 | image=false | caption=false | Quản lý toàn bộ nhà hàng ở mức hệ thống và kiểm soát trạng thái hoạt động.
+0087 | image=false | caption=false | Theo dõi dashboard vận hành: Nhật ký hoạt động, tuyến di chuyển và heatmap.
+0088 | image=false | caption=false | Quản lý hành trình (tour), cấu hình QR mở app và theo dõi mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+0089 | image=false | caption=false | Quản lý tài khoản admin (thông tin cá nhân, mật khẩu) một cách an toàn.
+0090 | image=false | caption=false | Pain points:
+0091 | image=false | caption=false | Cần một giao diện quản trị thống nhất để thao tác nhanh trên nhiều nhóm dữ liệu.
+0092 | image=false | caption=false | Khó phát hiện sớm bất thường nếu thiếu log và số liệu vận hành theo thời gian thực.
+0093 | image=false | caption=false | Rủi ro phân quyền sai có thể làm lộ hoặc sai lệch dữ liệu vận hành.
+0094 | image=false | caption=false | Cần đảm bảo dữ liệu hiển thị cho visitor luôn nhất quán, chính xác và cập nhật.
+0095 | image=false | caption=false | 8.3 Chủ quán / Người bán (Seller)
+0096 | image=false | caption=false | Độ tuổi: 20 – 50+
+0097 | image=false | caption=false | Thiết bị sử dụng: Máy tính
+0098 | image=false | caption=false | Đặc điểm:
+0099 | image=false | caption=false | Là chủ quán hoặc người quản lý quán ăn trong khu phố.
+0100 | image=false | caption=false | Tập trung vận hành dữ liệu nhà hàng của chính mình thay vì quản trị toàn hệ thống.
+0101 | image=false | caption=false | Thao tác chủ yếu qua saler dashboard theo từng nhà hàng được phân quyền.
+0102 | image=false | caption=false | Nhu cầu:
+0103 | image=false | caption=false | Đăng nhập an toàn, chọn đúng nhà hàng cần thao tác.
+0104 | image=false | caption=false | Cập nhật thông tin nhà hàng, menu món ăn và hình ảnh.
+0105 | image=false | caption=false | Quản lý audio thuyết minh theo từng ngôn ngữ và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+0106 | image=false | caption=false | Cập nhật thông tin tài khoản cá nhân để sử dụng dashboard ổn định.
+0107 | image=false | caption=false | Pain points:
+0108 | image=false | caption=false | Dễ chỉnh nhầm dữ liệu nếu thao tác sai nhà hàng trong trường hợp quản lý nhiều cơ sở.
+0109 | image=false | caption=false | Mất nhiều thời gian khi cập nhật menu/ảnh/audio nếu quy trình không tập trung.
+0110 | image=false | caption=false | Cần đồng bộ nội dung nhanh để thông tin hiển thị cho visitor luôn chính xác.
+0111 | image=false | caption=false | 9. User Stories
+0112 | image=false | caption=false | Phần này mô tả các hành vi chính của người dùng khi sử dụng ứng dụng thuyết minh tự động tại phố ẩm thực Vĩnh Khánh.
+0113 | image=false | caption=false | Format chuẩn:
+0114 | image=false | caption=false | Với vai trò là [user]
+0115 | image=false | caption=false | Tôi muốn [action]
+0116 | image=false | caption=false | Để [goal]
+0117 | image=false | caption=false | 9.1 Visitor / Du khách
+0118 | image=false | caption=false | Story V1 - Mở ứng dụng nhanh
+0119 | image=false | caption=false | Với vai trò là du khách
+0120 | image=false | caption=false | Tôi muốn quét mã QR
+0121 | image=false | caption=false | Để có thể mở nhanh ứng dụng thuyết minh về phố ẩm thực.
+0122 | image=false | caption=false | Story V2 - Cấp quyền vị trí
+0123 | image=false | caption=false | Với vai trò là du khách
+0124 | image=false | caption=false | Tôi muốn ứng dụng xin quyền vị trí một cách rõ ràng
+0125 | image=false | caption=false | Để tôi hiểu vì sao vị trí là cần thiết cho tính năng thuyết minh.
+0126 | image=false | caption=false | Story V3 - Xem bản đồ POI
+0127 | image=false | caption=false | Với vai trò là du khách
+0128 | image=false | caption=false | Tôi muốn xem tất cả POI ẩm thực lân cận trên bản đồ
+0129 | image=false | caption=false | Để tôi có thể chọn nơi sẽ đi tiếp theo.
+0130 | image=false | caption=false | Story V4 - Xem chi tiết quán
+0131 | image=false | caption=false | Với vai trò là du khách
+0132 | image=false | caption=false | Tôi muốn xem chi tiết một quán ăn đã chọn
+0133 | image=false | caption=false | Để tôi có thể quyết định quán đó có phù hợp với sở thích của mình hay không.
+0134 | image=false | caption=false | Story V5 - Nghe thuyết minh tự động
+0135 | image=false | caption=false | Với vai trò là du khách
+0136 | image=false | caption=false | Tôi muốn thuyết minh tự động phát khi tôi đi vào vùng POI
+0137 | image=false | caption=false | Để tôi có thể tìm hiểu thông tin mà không cần tự tìm thủ công.
+0138 | image=false | caption=false | Story V6 - Đổi ngôn ngữ thuyết minh
+0139 | image=false | caption=false | Với vai trò là du khách
+0140 | image=false | caption=false | Tôi muốn đổi ngôn ngữ nghe thuyết minh
+0141 | image=false | caption=false | Để tôi có thể nghe bằng ngôn ngữ mình ưu tiên.
+0142 | image=false | caption=false | Story V7 - Phát lại thủ công
+0143 | image=false | caption=false | Với vai trò là du khách
+0144 | image=false | caption=false | Tôi muốn phát lại thủ công audio của POI
+0145 | image=false | caption=false | Để tôi có thể nghe lại những thông tin đã bỏ lỡ.
+0146 | image=false | caption=false | Story V8 - Hoạt động khi mạng yếu
+0147 | image=false | caption=false | Với vai trò là du khách
+0148 | image=false | caption=false | Tôi muốn ứng dụng dùng dữ liệu POI/audio đã cache khi mạng không ổn định
+0149 | image=false | caption=false | Để trải nghiệm của tôi không bị gián đoạn.
+0150 | image=false | caption=false | Story V9 - Nhận gợi ý quán gần nhất
+0151 | image=false | caption=false | Với vai trò là du khách
+0152 | image=false | caption=false | Tôi muốn thấy POI gần nhất được làm nổi bật
+0153 | image=false | caption=false | Để tôi có thể nhanh chóng khám phá các địa điểm xung quanh.
+0154 | image=false | caption=false | Story V10 - Không phát lặp gây phiền
+0155 | image=false | caption=false | Với vai trò là du khách
+0156 | image=false | caption=false | Tôi muốn ứng dụng tránh tự động phát lặp cùng một nội dung thuyết minh trong một phiên
+0157 | image=false | caption=false | Để tôi không bị khó chịu vì âm thanh lặp lại.
+0158 | image=false | caption=false | Story V11 – Tham quan theo tour
+0159 | image=false | caption=false | Với vai trò là du khách
+0160 | image=false | caption=false | Tôi muốn có thể tham quan theo một tour đã được thiết lập sẵn
+0161 | image=false | caption=false | Để tôi được hướng dẫn theo lộ trình tối ưu và không bỏ sót các điểm quan trọng
+0162 | image=false | caption=false | 9.2 Seller / Chủ quán
+0163 | image=false | caption=false | Story S1 - Đăng nhập quản lý quán
+0164 | image=false | caption=false | Với vai trò là chủ quán
+0165 | image=false | caption=false | Tôi muốn đăng nhập vào cổng quản lý của mình
+0166 | image=false | caption=false | Để tôi có thể quản lý dữ liệu nhà hàng một cách an toàn.
+0167 | image=false | caption=false | Story S2 - Cập nhật thông tin quán
+0168 | image=false | caption=false | Với vai trò là chủ quán
+0169 | image=false | caption=false | Tôi muốn chỉnh sửa thông tin hồ sơ nhà hàng
+0170 | image=false | caption=false | Để du khách luôn thấy thông tin chính xác.
+0171 | image=false | caption=false | Story S3 - Quản lý menu món ăn
+0172 | image=false | caption=false | Với vai trò là chủ quán
+0173 | image=false | caption=false | Tôi muốn tạo, cập nhật và xóa món ăn
+0174 | image=false | caption=false | Để menu phản ánh đúng các món đang phục vụ.
+0175 | image=false | caption=false | Story S4 - Quản lý hình ảnh quán
+0176 | image=false | caption=false | Với vai trò là chủ quán
+0177 | image=false | caption=false | Tôi muốn tải lên và sắp xếp lại hình ảnh nhà hàng
+0178 | image=false | caption=false | Để quán của tôi trông hấp dẫn và cung cấp thông tin tốt hơn.
+0179 | image=false | caption=false | Story S5 - Quản lý audio thuyết minh
+0180 | image=false | caption=false | Với vai trò là chủ quán
+0181 | image=false | caption=false | Tôi muốn tải lên audio thuyết minh theo từng ngôn ngữ
+0182 | image=false | caption=false | Để du khách có thể nghe phần giới thiệu của quán.
+0183 | image=false | caption=false | Story S6 - Bật/tắt nội dung không còn phù hợp
+0184 | image=false | caption=false | Với vai trò là chủ quán
+0185 | image=false | caption=false | Tôi muốn bật hoặc tắt các bản ghi audio
+0186 | image=false | caption=false | Để nội dung đã lỗi thời không bị phát cho du khách.
+0187 | image=false | caption=false | Story S7 - Chọn nhà hàng cần thao tác
+0188 | image=false | caption=false | Với vai trò là chủ quán
+0189 | image=false | caption=false | Tôi muốn chọn đúng nhà hàng trước khi chỉnh sửa dữ liệu
+0190 | image=false | caption=false | Để tránh cập nhật nhầm địa điểm.
+0191 | image=false | caption=false | Story S8 - Quản lý tài khoản saler
+0192 | image=false | caption=false | Với vai trò là chủ quán
+0193 | image=false | caption=false | Tôi muốn cập nhật thông tin tài khoản và mật khẩu đăng nhập
+0194 | image=false | caption=false | Để đảm bảo an toàn truy cập và duy trì vận hành ổn định.
+0195 | image=false | caption=false | Story S9 - Xem lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh
+0196 | image=false | caption=false | Với vai trò là chủ quán
+0197 | image=false | caption=false | Tôi muốn xem lại lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh theo tháng
+0198 | image=false | caption=false | Để tôi có thể theo dõi mức sử dụng, đối chiếu chi phí và tối ưu nội dung cần dịch/tạo audio.
+0199 | image=false | caption=false | 9.3 Admin / Quản trị hệ thống
+0200 | image=false | caption=false | Story A1 - Quản lý tài khoản người dùng
+0201 | image=false | caption=false | Với vai trò là quản trị viên
+0202 | image=false | caption=false | Tôi muốn quản lý tài khoản người dùng và vai trò
+0203 | image=false | caption=false | Để quyền truy cập được kiểm soát đúng.
+0204 | image=false | caption=false | Story A2 - Quản lý toàn bộ nhà hàng
+0205 | image=false | caption=false | Với vai trò là quản trị viên
+0206 | image=false | caption=false | Tôi muốn xem và cập nhật toàn bộ nhà hàng
+0207 | image=false | caption=false | Để chất lượng dữ liệu được đồng nhất trong toàn hệ thống.
+0208 | image=false | caption=false | Story A3 - Theo dõi vận hành hệ thống
+0209 | image=false | caption=false | Với vai trò là quản trị viên
+0210 | image=false | caption=false | Tôi muốn theo dõi sức khỏe hệ thống và hoạt động cập nhật nội dung
+0211 | image=false | caption=false | Để có thể phát hiện và xử lý vấn đề sớm.
+0212 | image=false | caption=false | Story A4 - Khóa/mở trạng thái nhà hàng
+0213 | image=false | caption=false | Với vai trò là quản trị viên
+0214 | image=false | caption=false | Tôi muốn bật hoặc tắt trạng thái hoạt động của nhà hàng
+0215 | image=false | caption=false | Để các địa điểm không hợp lệ hoặc không hoạt động không ảnh hưởng đến du khách.
+0216 | image=false | caption=false | Story A5 - Quản lý hành trình (Tour)
+0217 | image=false | caption=false | Với vai trò là quản trị viên
+0218 | image=false | caption=false | Tôi muốn tạo và quản lý các hành trình gồm nhiều nhà hàng
+0219 | image=false | caption=false | Để du khách có thể khám phá theo tuyến gợi ý có cấu trúc.
+0220 | image=false | caption=false | 10. Features / Functional Requirements
+0221 | image=false | caption=false | Đây là phần đặc tả chức năng chi tiết của sản phẩm theo 3 nhóm người dùng: Visitor, Seller, Admin.
+0222 | image=false | caption=false | 10.1 Visitor Features (Du khách)
+0223 | image=false | caption=false | Feature V-01: Scan QR mở ứng dụng
+0224 | image=false | caption=false | Mô tả: Người dùng quét QR để mở nhanh ứng dụng tại khu phố ẩm thực.
+0225 | image=false | caption=false | Actor: Visitor.
+0226 | image=false | caption=false | Functional requirements:
+0227 | image=false | caption=false | Hệ thống hỗ trợ deep link mở đúng màn hình khởi động app.
+0228 | image=false | caption=false | Nếu app chưa cài, điều hướng đến trang cài đặt phù hợp nền tảng.
+0229 | image=false | caption=false | Ghi nhận sự kiện mở app từ QR để đo hiệu quả onboarding.
+0230 | image=false | caption=false | Flow:
+0231 | image=false | caption=false | Quét QR
+0232 | image=false | caption=false | -> mở app
+0233 | image=false | caption=false | -> kiểm tra trạng thái đăng nhập/quyền vị trí
+0234 | image=false | caption=false | -> hiển thị bản đồ POI
+0235 | image=false | caption=false | -> phát audio nếu ở gần POI
+0236 | image=false | caption=false | Feature V-02: Hiển thị bản đồ và POI
+0237 | image=false | caption=false | Mô tả: Hiển thị danh sách điểm ăn uống trên bản đồ theo dữ liệu API.
+0238 | image=false | caption=false | Actor: Visitor.
+0239 | image=false | caption=false | Functional requirements:
+0240 | image=false | caption=false | Tải danh sách POI từ endpoint công khai.
+0241 | image=false | caption=false | Hiển thị marker POI và vị trí hiện tại của người dùng.
+0242 | image=false | caption=false | Cho phép chọn marker để mở thông tin tóm tắt.
+0243 | image=false | caption=false | Hỗ trợ fallback cache POI khi mất mạng.
+0244 | image=false | caption=false | Flow:
+0245 | image=false | caption=false | Mở app
+0246 | image=false | caption=false | -> gọi API lấy POI
+0247 | image=false | caption=false | -> render marker
+0248 | image=false | caption=false | -> người dùng chạm marker
+0249 | image=false | caption=false | -> hiển thị card thông tin
+0250 | image=false | caption=false | Feature V-03: Xem chi tiết quán và menu
+0251 | image=false | caption=false | Mô tả: Người dùng xem thông tin đầy đủ của quán trước khi quyết định trải nghiệm.
+0252 | image=false | caption=false | Actor: Visitor.
+0253 | image=false | caption=false | Functional requirements:
+0254 | image=false | caption=false | Hiển thị tên quán, mô tả, địa chỉ.
+0255 | image=false | caption=false | Hiển thị danh sách ảnh quán.
+0256 | image=false | caption=false | Hiển thị danh sách món ăn (menu) theo quán.
+0257 | image=false | caption=false | Hiển thị audio có sẵn theo ngôn ngữ.
+0258 | image=false | caption=false | Flow:
+0259 | image=false | caption=false | Chọn POI
+0260 | image=false | caption=false | -> mở trang chi tiết
+0261 | image=false | caption=false | -> gọi API ảnh + món + audio
+0262 | image=false | caption=false | -> hiển thị nội dung đầy đủ
+0263 | image=false | caption=false | Feature V-04: Thuyết minh tự động theo vị trí
+0264 | image=false | caption=false | Mô tả: App tự phát audio khi người dùng vào vùng kích hoạt của POI.
+0265 | image=false | caption=false | Actor: Visitor.
+0266 | image=false | caption=false | Functional requirements:
+0267 | image=false | caption=false | Theo dõi vị trí theo chu kỳ khi bật narration.
+0268 | image=false | caption=false | Tính khoảng cách đến POI gần nhất.
+0269 | image=false | caption=false | Tự phát audio nếu khoảng cách <= ngưỡng trigger.
+0270 | image=false | caption=false | Không tự phát lặp lại cùng POI trong một phiên.
+0271 | image=false | caption=false | Hỗ trợ phát lại thủ công theo yêu cầu người dùng.
+0272 | image=false | caption=false | Flow:
+0273 | image=false | caption=false | Bật narration
+0274 | image=false | caption=false | -> nhận cập nhật vị trí
+0275 | image=false | caption=false | -> tìm POI gần nhất
+0276 | image=false | caption=false | -> kiểm tra điều kiện trigger
+0277 | image=false | caption=false | -> phát audio
+0278 | image=false | caption=false | Feature V-05: Chọn ngôn ngữ thuyết minh
+0279 | image=false | caption=false | Mô tả: Visitor chọn ngôn ngữ nghe nội dung audio.
+0280 | image=false | caption=false | Actor: Visitor.
+0281 | image=false | caption=false | Functional requirements:
+0282 | image=false | caption=false | Tải danh sách ngôn ngữ khả dụng từ API.
+0283 | image=false | caption=false | Lưu lựa chọn ngôn ngữ hiện tại trong phiên.
+0284 | image=false | caption=false | Khi phát audio, ưu tiên file theo ngôn ngữ đã chọn.
+0285 | image=false | caption=false | Nếu thiếu audio ngôn ngữ tương ứng, hiển thị thông báo phù hợp.
+0286 | image=false | caption=false | Flow:
+0287 | image=false | caption=false | Mở cài đặt ngôn ngữ
+0288 | image=false | caption=false | -> chọn ngôn ngữ
+0289 | image=false | caption=false | -> lưu cấu hình
+0290 | image=false | caption=false | -> lần phát tiếp theo dùng ngôn ngữ mới
+0291 | image=false | caption=false | Feature V-06: Offline cache cho trải nghiệm liên tục
+0292 | image=false | caption=false | Mô tả: Dữ liệu đã tải được cache để dùng khi mạng yếu.
+0293 | image=false | caption=false | Actor: Visitor.
+0294 | image=false | caption=false | Functional requirements:
+0295 | image=false | caption=false | Cache POI vào bộ nhớ cục bộ.
+0296 | image=false | caption=false | Cache audio đã phát theo khóa định danh.
+0297 | image=false | caption=false | Khi API lỗi/timeout, tự fallback sang cache.
+0298 | image=false | caption=false | Không chặn toàn bộ UI khi chỉ một endpoint lỗi.
+0299 | image=false | caption=false | Flow:
+0300 | image=false | caption=false | App gọi API
+0301 | image=false | caption=false | -> nếu thành công thì cập nhật cache
+0302 | image=false | caption=false | -> nếu thất bại thì đọc cache
+0303 | image=false | caption=false | -> hiển thị dữ liệu khả dụng
+0304 | image=false | caption=false | 10.2 Seller Features (Chủ quán)
+0305 | image=false | caption=false | Feature S-01: Đăng nhập Seller Portal
+0306 | image=false | caption=false | Mô tả: Seller đăng nhập để quản lý dữ liệu quán của mình.
+0307 | image=false | caption=false | Actor: Seller.
+0308 | image=false | caption=false | Functional requirements:
+0309 | image=false | caption=false | Hỗ trợ đăng nhập bằng username/password.
+0310 | image=false | caption=false | Duy trì phiên làm việc bằng cookie auth.
+0311 | image=false | caption=false | Chặn truy cập route quản trị khi chưa đăng nhập.
+0312 | image=false | caption=false | Flow:
+0313 | image=false | caption=false | Mở trang seller
+0314 | image=false | caption=false | -> nhập tài khoản
+0315 | image=false | caption=false | -> xác thực thành công
+0316 | image=false | caption=false | -> vào dashboard
+0317 | image=false | caption=false | Feature S-02: Chọn nhà hàng cần quản lý
+0318 | image=false | caption=false | Mô tả: Seller chọn đúng nhà hàng trước khi thao tác.
+0319 | image=false | caption=false | Actor: Seller.
+0320 | image=false | caption=false | Functional requirements:
+0321 | image=false | caption=false | Hiển thị danh sách nhà hàng thuộc quyền seller.
+0322 | image=false | caption=false | Lưu nhà hàng đang chọn cho các màn hình chức năng.
+0323 | image=false | caption=false | Cảnh báo nếu seller thao tác khi chưa chọn nhà hàng.
+0324 | image=false | caption=false | Flow:
+0325 | image=false | caption=false | Đăng nhập
+0326 | image=false | caption=false | -> chọn nhà hàng
+0327 | image=false | caption=false | -> chuyển vào dashboard theo ngữ cảnh nhà hàng
+0328 | image=false | caption=false | Feature S-03: Quản lý thông tin quán (Restaurant Profile)
+0329 | image=false | caption=false | Mô tả: Seller cập nhật thông tin hồ sơ quán.
+0330 | image=false | caption=false | Actor: Seller.
+0331 | image=false | caption=false | Functional requirements:
+0332 | image=false | caption=false | Cho phép sửa tên, mô tả, địa chỉ, trạng thái hoạt động.
+0333 | image=false | caption=false | Validate dữ liệu đầu vào trước khi lưu.
+0334 | image=false | caption=false | Sau khi lưu thành công, hiển thị dữ liệu mới ngay trên giao diện.
+0335 | image=false | caption=false | Flow:
+0336 | image=false | caption=false | Mở tab Restaurant
+0337 | image=false | caption=false | -> chỉnh thông tin
+0338 | image=false | caption=false | -> lưu
+0339 | image=false | caption=false | -> API cập nhật
+0340 | image=false | caption=false | -> hiển thị kết quả mới
+0341 | image=false | caption=false | Feature S-04: Quản lý menu món ăn
+0342 | image=false | caption=false | Mô tả: Seller quản lý danh sách món ăn theo quán.
+0343 | image=false | caption=false | Actor: Seller.
+0344 | image=false | caption=false | Functional requirements:
+0345 | image=false | caption=false | Tạo món mới.
+0346 | image=false | caption=false | Sửa thông tin món hiện có.
+0347 | image=false | caption=false | Xóa món không còn kinh doanh.
+0348 | image=false | caption=false | Hỗ trợ phân trang khi danh sách món lớn.
+0349 | image=false | caption=false | Flow:
+0350 | image=false | caption=false | Mở tab Dishes
+0351 | image=false | caption=false | -> thêm/sửa/xóa món
+0352 | image=false | caption=false | -> xác nhận thao tác
+0353 | image=false | caption=false | -> cập nhật danh sách
+0354 | image=false | caption=false | Feature S-05: Quản lý hình ảnh quán
+0355 | image=false | caption=false | Mô tả: Seller upload và sắp xếp ảnh hiển thị cho quán.
+0356 | image=false | caption=false | Actor: Seller.
+0357 | image=false | caption=false | Functional requirements:
+0358 | image=false | caption=false | Upload ảnh mới theo nhà hàng.
+0359 | image=false | caption=false | Đặt ảnh đại diện (primary image).
+0360 | image=false | caption=false | Sắp xếp thứ tự hiển thị ảnh.
+0361 | image=false | caption=false | Xóa ảnh không còn phù hợp.
+0362 | image=false | caption=false | Flow:
+0363 | image=false | caption=false | Mở tab Images
+0364 | image=false | caption=false | -> upload/chọn ảnh
+0365 | image=false | caption=false | -> đặt primary hoặc reorder
+0366 | image=false | caption=false | -> lưu
+0367 | image=false | caption=false | -> đồng bộ hiển thị
+0368 | image=false | caption=false | Feature S-06: Quản lý audio thuyết minh
+0369 | image=false | caption=false | Mô tả: Seller quản lý audio giới thiệu quán theo ngôn ngữ.
+0370 | image=false | caption=false | Actor: Seller.
+0371 | image=false | caption=false | Functional requirements:
+0372 | image=false | caption=false | Upload audio theo language.
+0373 | image=false | caption=false | Bật/tắt trạng thái hoạt động của audio.
+0374 | image=false | caption=false | Xóa audio lỗi hoặc không còn dùng.
+0375 | image=false | caption=false | Hạn chế kích thước file upload theo cấu hình hệ thống.
+0376 | image=false | caption=false | Flow:
+0377 | image=false | caption=false | Mở tab Audio
+0378 | image=false | caption=false | -> upload/chỉnh trạng thái/xóa
+0379 | image=false | caption=false | -> API xử lý
+0380 | image=false | caption=false | -> cập nhật danh sách audio
+0381 | image=false | caption=false | Feature S-07: Theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh
+0382 | image=false | caption=false | Mô tả: Seller xem lịch sử mức sử dụng theo tháng cho cả dịch thuật văn bản và tạo tệp thuyết minh.
+0383 | image=false | caption=false | Actor: Seller.
+0384 | image=false | caption=false | Functional requirements:
+0385 | image=false | caption=false | Hiển thị KPI tổng mức sử dụng theo tháng cho dịch thuật và tạo tệp thuyết minh.
+0386 | image=false | caption=false | Hiển thị bảng lịch sử dịch thuật gồm thời gian, hành động, ký tự đầu vào, mức sử dụng.
+0387 | image=false | caption=false | Hiển thị bảng lịch sử tạo tệp thuyết minh gồm thời gian, nhà hàng, ngôn ngữ, hành động, ký tự đầu vào, mức sử dụng.
+0388 | image=false | caption=false | Hỗ trợ lọc theo tháng và phân trang dữ liệu mức sử dụng.
+0389 | image=false | caption=false | Flow:
+0390 | image=false | caption=false | Mở tab Lịch sử thuyết minh
+0391 | image=false | caption=false | -> chọn tháng cần xem
+0392 | image=false | caption=false | -> gọi API mức sử dụng dịch thuật và mức sử dụng tạo tệp thuyết minh
+0393 | image=false | caption=false | -> hiển thị KPI + bảng lịch sử
+0394 | image=false | caption=false | -> đổi trang để xem thêm dữ liệu
+0395 | image=false | caption=false | 10.3 Admin Features (Quản trị hệ thống)
+0396 | image=false | caption=false | Ghi chú phạm vi:
+0397 | image=false | caption=false | Nhóm A-01 đến A-06 là phạm vi đã có trong trạng thái hiện tại.
+0398 | image=false | caption=false | Nhóm A-07 đến A-09 là roadmap, chưa phải module hoàn chỉnh trên admin web.
+0399 | image=false | caption=false | Feature A-01: Đăng nhập quản trị
+0400 | image=false | caption=false | Mô tả: Admin đăng nhập để truy cập các chức năng quản trị hệ thống.
+0401 | image=false | caption=false | Actor: Admin.
+0402 | image=false | caption=false | Functional requirements:
+0403 | image=false | caption=false | Xác thực bằng tài khoản admin.
+0404 | image=false | caption=false | Dùng cookie auth cho phiên quản trị.
+0405 | image=false | caption=false | Từ chối truy cập khi user không đủ role.
+0406 | image=false | caption=false | Flow:
+0407 | image=false | caption=false | Mở trang admin
+0408 | image=false | caption=false | -> đăng nhập
+0409 | image=false | caption=false | -> kiểm tra role
+0410 | image=false | caption=false | -> vào trang quản trị
+0411 | image=false | caption=false | Feature A-02: Quản lý user và role
+0412 | image=false | caption=false | Mô tả: Admin quản lý tài khoản người dùng nội bộ hệ thống.
+0413 | image=false | caption=false | Actor: Admin.
+0414 | image=false | caption=false | Functional requirements:
+0415 | image=false | caption=false | Xem danh sách user.
+0416 | image=false | caption=false | Cập nhật role user theo chính sách phân quyền.
+0417 | image=false | caption=false | Khóa/mở trạng thái tài khoản khi cần.
+0418 | image=false | caption=false | Flow:
+0419 | image=false | caption=false | Mở module Users
+0420 | image=false | caption=false | -> chọn user
+0421 | image=false | caption=false | -> chỉnh role/trạng thái
+0422 | image=false | caption=false | -> lưu thay đổi
+0423 | image=false | caption=false | Feature A-03: Quản lý toàn cục nhà hàng
+0424 | image=false | caption=false | Mô tả: Admin giám sát và cập nhật trạng thái nhà hàng trên toàn hệ thống.
+0425 | image=false | caption=false | Actor: Admin.
+0426 | image=false | caption=false | Functional requirements:
+0427 | image=false | caption=false | Xem toàn bộ nhà hàng không phụ thuộc owner.
+0428 | image=false | caption=false | Cập nhật trạng thái hoạt động của nhà hàng.
+0429 | image=false | caption=false | Kiểm tra tính đầy đủ dữ liệu cơ bản để phục vụ vận hành.
+0430 | image=false | caption=false | Flow:
+0431 | image=false | caption=false | Mở module Restaurants
+0432 | image=false | caption=false | -> lọc/chọn nhà hàng
+0433 | image=false | caption=false | -> chỉnh trạng thái hoặc dữ liệu
+0434 | image=false | caption=false | -> lưu
+0435 | image=false | caption=false | Feature A-04: Dashboard analytics vận hành
+0436 | image=false | caption=false | Mô tả: Admin theo dõi chỉ số vận hành và hành vi nghe để ra quyết định.
+0437 | image=false | caption=false | Actor: Admin.
+0438 | image=false | caption=false | Functional requirements:
+0439 | image=false | caption=false | Xem KPI tổng quan, heatmap, top restaurants, movement paths.
+0440 | image=false | caption=false | Hỗ trợ session limit cho movement paths (bao gồm chế độ all).
+0441 | image=false | caption=false | Tự refresh dữ liệu analytics theo chu kỳ phù hợp.
+0442 | image=false | caption=false | Flow:
+0443 | image=false | caption=false | Mở dashboard
+0444 | image=false | caption=false | -> gọi analytics APIs
+0445 | image=false | caption=false | -> render widgets/charts
+0446 | image=false | caption=false | -> lưu
+0447 | image=false | caption=false | Feature A-05: Theo dõi recent activity và audit logs
+0448 | image=false | caption=false | Mô tả: Admin theo dõi hoạt động gần đây để phát hiện bất thường sớm.
+0449 | image=false | caption=false | Actor: Admin.
+0450 | image=false | caption=false | Functional requirements:
+0451 | image=false | caption=false | Xem danh sách recent activity từ analytics.
+0452 | image=false | caption=false | Xem audit logs phục vụ truy vết thao tác hệ thống.
+0453 | image=false | caption=false | Hỗ trợ phân loại nhanh hành vi để điều tra khi cần.
+0454 | image=false | caption=false | Flow:
+0455 | image=false | caption=false | Mở module Logs
+0456 | image=false | caption=false | -> lấy recent activity/audit logs
+0457 | image=false | caption=false | -> lọc theo nhu cầu
+0458 | image=false | caption=false | -> đối chiếu sự kiện
+0459 | image=false | caption=false | Feature A-06: Quản lý hành trình (Tour Management)
+0460 | image=false | caption=false | Mô tả: Admin tạo và quản lý tuyến hành trình du lịch theo nhiều điểm dừng.
+0461 | image=false | caption=false | Actor: Admin.
+0462 | image=false | caption=false | Functional requirements:
+0463 | image=false | caption=false | Xem danh sách tour và chi tiết từng tour.
+0464 | image=false | caption=false | Tạo/sửa thông tin tour (name, description, estimated duration, isActive).
+0465 | image=false | caption=false | Thêm/xóa nhà hàng trong tour.
+0466 | image=false | caption=false | Sắp xếp lại thứ tự stop trong tour.
+0467 | image=false | caption=false | Upload ảnh đại diện cho tour.
+0468 | image=false | caption=false | Flow:
+0469 | image=false | caption=false | Mở module Tours
+0470 | image=false | caption=false | -> tạo/chỉnh sửa tour
+0471 | image=false | caption=false | -> thêm hoặc xóa nhà hàng
+0472 | image=false | caption=false | -> sắp xếp thứ tự điểm dừng
+0473 | image=false | caption=false | -> lưu thay đổi
+0474 | image=false | caption=false | Feature A-07 (Roadmap): Quản lý ngôn ngữ hệ thống
+0475 | image=false | caption=false | Mô tả: Duy trì danh mục ngôn ngữ phục vụ thuyết minh đa ngôn ngữ.
+0476 | image=false | caption=false | Actor: Admin.
+0477 | image=false | caption=false | Functional requirements:
+0478 | image=false | caption=false | Xem danh sách ngôn ngữ hiện có.
+0479 | image=false | caption=false | Thêm/sửa thông tin ngôn ngữ.
+0480 | image=false | caption=false | Ngăn trùng mã ngôn ngữ.
+0481 | image=false | caption=false | Flow:
+0482 | image=false | caption=false | Mở module Languages
+0483 | image=false | caption=false | -> thêm/sửa ngôn ngữ
+0484 | image=false | caption=false | -> validate
+0485 | image=false | caption=false | -> lưu
+0486 | image=false | caption=false | Feature A-08 (Roadmap): Kiểm duyệt media và chất lượng nội dung
+0487 | image=false | caption=false | Mô tả: Admin kiểm duyệt nội dung media để đảm bảo chất lượng trải nghiệm visitor.
+0488 | image=false | caption=false | Actor: Admin.
+0489 | image=false | caption=false | Functional requirements:
+0490 | image=false | caption=false | Rà soát ảnh/audio bị lỗi hoặc không phù hợp.
+0491 | image=false | caption=false | Gỡ hoặc vô hiệu hóa media vi phạm.
+0492 | image=false | caption=false | Ghi nhận lịch sử thao tác kiểm duyệt.
+0493 | image=false | caption=false | Flow:
+0494 | image=false | caption=false | Mở module Media Review
+0495 | image=false | caption=false | -> xem danh sách media
+0496 | image=false | caption=false | -> duyệt hoặc từ chối
+0497 | image=false | caption=false | -> cập nhật trạng thái
+0498 | image=false | caption=false | Feature A-09 (Roadmap): Cấu hình chính sách bảo mật endpoint
+0499 | image=false | caption=false | Mô tả: Admin kiểm tra nhóm endpoint public/private theo chính sách hệ thống.
+0500 | image=false | caption=false | Actor: Admin.
+0501 | image=false | caption=false | Functional requirements:
+0502 | image=false | caption=false | Theo dõi danh sách endpoint công khai.
+0503 | image=false | caption=false | Đảm bảo endpoint nhạy cảm luôn yêu cầu xác thực.
+0504 | image=false | caption=false | Kiểm tra phản hồi 401/403 đúng chuẩn API khi không đủ quyền.
+0505 | image=false | caption=false | Flow:
+0506 | image=false | caption=false | Mở module Security
+0507 | image=false | caption=false | -> xem cấu hình endpoint
+0508 | image=false | caption=false | -> cập nhật chính sách
+0509 | image=false | caption=false | -> kiểm tra lại phân quyền truy cập
+0510 | image=false | caption=false | 10.4 Functional Requirement Summary
+0511 | image=false | caption=false | FR-01: Visitor có thể mở app nhanh bằng QR/deep link.
+0512 | image=false | caption=false | FR-02: Visitor xem bản đồ POI và chi tiết quán (ảnh, món, audio).
+0513 | image=false | caption=false | FR-03: Hệ thống tự động thuyết minh theo vị trí và ngôn ngữ đã chọn.
+0514 | image=false | caption=false | FR-04: Ứng dụng hỗ trợ cache POI/audio để hoạt động ổn định khi mạng yếu.
+0515 | image=false | caption=false | FR-05: Seller quản lý dữ liệu nhà hàng, món ăn, ảnh, audio theo quyền sở hữu và theo dõi lịch sử mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+0516 | image=false | caption=false | FR-06: Admin quản lý user/role, restaurants, tours, analytics và logs để vận hành hệ thống.
+0517 | image=false | caption=false | FR-07: Hệ thống áp dụng phân quyền và bảo vệ endpoint theo nguyên tắc secure-by-default.
+0518 | image=false | caption=false | FR-08: Admin quản lý vận hành nội dung mở rộng gồm QR và mức sử dụng dịch vụ dịch thuật và tạo tệp thuyết minh.
+0519 | image=false | caption=false | FR-09: Các module admin nâng cao (language/media review/security) được quản lý theo roadmap.
+0520 | image=false | caption=false | 11. Technical Requirements
+0521 | image=false | caption=false | Phần này mô tả yêu cầu kỹ thuật cốt lõi để đội dev triển khai hệ thống thống nhất.
+0522 | image=false | caption=false | 11.1 Tech stack chính
+0523 | image=false | caption=false | Backend: ASP.NET Core Web API (.NET 10.0), kiến trúc Model - Controller - Service - Repository.
+0524 | image=false | caption=false | Database: SQL Server, truy cập qua Entity Framework Core.
+0525 | image=false | caption=false | Mobile app (Visitor): .NET MAUI (Android), hỗ trợ bản đồ và audio playback.
+0526 | image=false | caption=false | Web app Seller: React + Vite + TypeScript.
+0527 | image=false | caption=false | Web app Admin: React + Vite + TypeScript.
+0528 | image=false | caption=false | API format: REST (JSON request/response).
+0529 | image=false | caption=false | Authentication: Cookie-based authentication + role claims.
+0530 | image=false | caption=false | 11.2 API và tích hợp
+0531 | image=false | caption=false | Public APIs cho Visitor:
+0532 | image=false | caption=false | GET /Restaurant
+0533 | image=false | caption=false | GET /Restaurant/{id}
+0534 | image=false | caption=false | GET /Language
+0535 | image=false | caption=false | GET /Restaurant/{restaurantId}/images
+0536 | image=false | caption=false | GET /Restaurant/{restaurantId}/dishes
+0537 | image=false | caption=false | GET /Restaurant/{restaurantId}/audios
+0538 | image=false | caption=false | GET /public/Restaurant/{restaurantId}/dishes
+0539 | image=false | caption=false | GET /public/Restaurant/{restaurantId}/audios
+0540 | image=false | caption=false | Protected APIs cho Seller/Admin:
+0541 | image=false | caption=false | CRUD Restaurant, Dish, Image, Audio
+0542 | image=false | caption=false | User/Role management
+0543 | image=false | caption=false | Tour management (GET/POST/PATCH tour, add/remove stop, reorder stops, upload image)
+0544 | image=false | caption=false | Chuẩn dữ liệu:
+0545 | image=false | caption=false | JSON UTF-8
+0546 | image=false | caption=false | HTTP status code rõ ràng (200/400/401/403/404/500)
+0547 | image=false | caption=false | 11.3 Data và media
+0548 | image=false | caption=false | Dữ liệu nghiệp vụ lưu trên SQL Server.
+0549 | image=false | caption=false | Ảnh và audio lưu dưới dạng file .mp3, truy cập bằng URL media do API cung cấp.
+0550 | image=false | caption=false | Mobile cần cơ chế cache POI và cache audio để hỗ trợ mạng yếu/mất mạng.
+0551 | image=false | caption=false | 11.4 Môi trường triển khai
+0552 | image=false | caption=false | Môi trường tối thiểu:
+0553 | image=false | caption=false | Dev: local API + SQL Server + MongoDB
+0554 | image=false | caption=false | Staging: kiểm thử tích hợp end-to-end
+0555 | image=false | caption=false | Production: API ổn định, backup dữ liệu định kỳ
+0556 | image=false | caption=false | CORS cho frontend web tại localhost ở môi trường phát triển.
+0557 | image=false | caption=false | 11.5 Kiến trúc hệ thống (Architecture)
+0558 | image=true  | caption=false | 11.6 Luồng dữ liệu hoạt động (How Data Works)
+0559 | image=false | caption=false | Visitor App Open
+0560 | image=false | caption=false | -> GET /Restaurant
+0561 | image=false | caption=false | -> API đọc SQL Server
+0562 | image=false | caption=false | -> trả JSON POI
+0563 | image=false | caption=false | -> render bản đồ + lưu offline_cache
+0564 | image=false | caption=false | Visitor Tap POI
+0565 | image=false | caption=false | -> GET /Restaurant/{restaurantId}/images
+0566 | image=false | caption=false | -> GET /public/Restaurant/{restaurantId}/dishes
+0567 | image=false | caption=false | -> GET /public/Restaurant/{restaurantId}/audios
+0568 | image=false | caption=false | -> hiển thị ảnh + menu + audio
+0569 | image=false | caption=false | Visitor Start Narration
+0570 | image=false | caption=false | -> LocationService cập nhật GPS
+0571 | image=false | caption=false | -> NarrationFlowService tính khoảng cách
+0572 | image=false | caption=false | -> nếu đủ gần thì chọn audio theo language
+0573 | image=false | caption=false | -> AudioService phát từ cache
+0574 | image=false | caption=false | -> nếu chưa có cache: tải từ API -> lưu cache -> phát
+0575 | image=false | caption=false | Seller/Admin Data Update
+0576 | image=false | caption=false | -> login (cookie auth)
+0577 | image=false | caption=false | -> gọi protected APIs (CRUD)
+0578 | image=false | caption=false | -> API ghi SQL + cập nhật media storage
+0579 | image=false | caption=false | -> Visitor phiên sau nhận dữ liệu mới khi sync
+0580 | image=false | caption=false | Network Failure Fallback
+0581 | image=false | caption=false | -> API timeout / mất mạng
+0582 | image=false | caption=false | -> app đọc POI/audio từ cache local
+0583 | image=false | caption=false | -> UI vẫn hoạt động ở chế độ offline cơ bản
+0584 | image=false | caption=false | 12. Non-functional Requirements
+0585 | image=false | caption=false | 12.1 Performance
+0586 | image=false | caption=false | API read phổ biến (Restaurant/Language/public data) có thời gian phản hồi trung bình < 500ms ở điều kiện bình thường.
+0587 | image=false | caption=false | API ghi dữ liệu (create/update/delete) có thời gian phản hồi trung bình < 800ms.
+0588 | image=false | caption=false | Thời gian tải màn hình bản đồ ban đầu trên mobile < 3 giây với mạng ổn định.
+0589 | image=false | caption=false | Thời gian bắt đầu phát audio:
+0590 | image=false | caption=false | < 2 giây với audio đã cache.
+0591 | image=false | caption=false | < 5 giây với audio tải từ mạng.
+0592 | image=false | caption=false | 12.2 Security
+0593 | image=false | caption=false | Mọi endpoint mặc định yêu cầu xác thực, chỉ public các endpoint được khai báo rõ ràng.
+0594 | image=false | caption=false | Role-based access control cho Seller và Admin.
+0595 | image=false | caption=false | Trả về 401/403 đúng chuẩn API khi chưa đăng nhập hoặc không đủ quyền.
+0596 | image=false | caption=false | Không trả dữ liệu nhạy cảm (mật khẩu, hash) trong response.
+0597 | image=false | caption=false | 12.3 Scalability
+0598 | image=false | caption=false | Hệ thống hỗ trợ tối thiểu 1.000 người dùng hoạt động/ngày ở giai đoạn đầu.
+0599 | image=false | caption=false | Cho phép mở rộng ngang API khi tăng tải (scale out).
+0600 | image=false | caption=false | Thiết kế module cho phép mở rộng thêm khu ẩm thực ngoài Vĩnh Khánh.
+0601 | image=false | caption=false | 12.4 Reliability và Availability
+0602 | image=false | caption=false | Uptime mục tiêu cho API: >= 99.5%/tháng.
+0603 | image=false | caption=false | Có fallback cache trên mobile khi API tạm thời không khả dụng.
+0604 | image=false | caption=false | Upload media cần cơ chế retry hợp lý khi mạng gián đoạn.
+0605 | image=false | caption=false | 12.5 Maintainability
+0606 | image=false | caption=false | Tài liệu API và PRD phải cập nhật theo phiên bản phát hành.
+0607 | image=false | caption=false | Coding convention thống nhất cho backend và frontend.
+0608 | image=false | caption=false | Mỗi thay đổi lớn phải có test case chức năng tương ứng.
+0609 | image=false | caption=false | 12.6 Observability
+0610 | image=false | caption=false | Ghi log cho các sự kiện quan trọng: login, upload media, lỗi API, trigger narration.
+0611 | image=false | caption=false | Có dashboard theo dõi các chỉ số vận hành chính (API latency, error rate, audio success rate).
+0612 | image=false | caption=false | 13. Edge Cases (Xử lý lỗi)
+0613 | image=false | caption=false | Phần này mô tả các tình huống lỗi hoặc trạng thái biên quan trọng mà sản phẩm cần xử lý ổn định để không làm gián đoạn trải nghiệm visitor và không gây sai lệch vận hành.
+0614 | image=false | caption=false | 13.1 Quyền vị trí và tracking
+0615 | image=false | caption=false | Nếu visitor từ chối quyền vị trí foreground, ứng dụng vẫn phải mở được bản đồ, danh sách POI và trang chi tiết; chỉ các tính năng auto narration và tracking theo vị trí bị vô hiệu cho đến khi người dùng cấp quyền.
+0616 | image=false | caption=false | Trên Android, nếu chưa có quyền background location, hệ thống vẫn cho phép trải nghiệm foreground bình thường nhưng phải hạ cấp rõ ràng với background tracking, đồng thời hướng dẫn người dùng mở Settings để cấp quyền khi cần.
+0617 | image=false | caption=false | Nếu GPS chưa bắt được tín hiệu, timeout hoặc trả về location null, ứng dụng không được crash và không được tự phát audio sai; hệ thống sẽ chờ lần sample tiếp theo và giữ UI ở trạng thái ổn định.
+0618 | image=false | caption=false | Hệ thống cần giảm false trigger khi người dùng đứng gần ranh giới POI bằng cơ chế debounce/hysteresis: chỉ phát khi đủ gần, không phát lặp khi dao động nhẹ quanh mép geofence, và phải có ngưỡng enter/exit tách biệt.
+0619 | image=false | caption=false | 13.2 Mạng yếu, cache và dữ liệu thiếu
+0620 | image=false | caption=false | Nếu API public cho POI, ngôn ngữ hoặc dishes lỗi/timeout, mobile phải fallback về cache cục bộ/in-memory nếu có; nếu chưa từng cache thì hiển thị trạng thái degraded hoặc empty state rõ ràng thay vì lỗi chặn toàn bộ màn hình.
+0621 | image=false | caption=false | Nếu audio đúng ngôn ngữ không tồn tại, hệ thống ưu tiên audio active mới nhất theo ngôn ngữ đã chọn; nếu vẫn không có thì có thể fallback sang audio active hợp lệ khác hoặc bỏ qua autoplay một cách an toàn.
+0622 | image=false | caption=false | Nếu audio file bị hỏng, quá nhỏ, không tải được hoặc không còn truy cập được từ remote URL, ứng dụng không được treo luồng narration; chỉ bỏ qua lượt phát đó và tiếp tục hoạt động với các POI khác.
+0623 | image=false | caption=false | Nếu người dùng mở app lần đầu trong trạng thái offline và thư viện audio chưa sẵn sàng, hệ thống vẫn cho phép xem POI/nội dung đã có nhưng phải thông báo rõ rằng audio có thể chưa phát được cho tới khi có mạng để đồng bộ.
+0624 | image=false | caption=false | Nếu bộ nhớ cache audio chạm quota hoặc thiết bị thiếu dung lượng trống, hệ thống cần dọn cache theo LRU trước; nếu vẫn không đủ chỗ thì từ chối cache mới một cách an toàn và không làm hỏng dữ liệu đang có.
+0625 | image=false | caption=false | 13.3 QR session, sync log và telemetry
+0626 | image=false | caption=false | Nếu kiểm tra QR với server lỗi do mất mạng tạm thời, hệ thống không được cắt narration ngay khi local expiry vẫn còn hiệu lực; thay vào đó tiếp tục chạy theo trạng thái local và retry check ở vòng sau.
+0627 | image=false | caption=false | Nếu audio log gặp race condition Session not found, mobile phải tự khởi tạo lại session, flush location logs ngay và retry gửi audio log 1 lần trước khi bỏ qua.
+0628 | image=false | caption=false | Nếu đồng bộ location logs thất bại, batch phải được giữ lại trong buffer memory để retry theo chu kỳ; cần có giới hạn buffer để tránh tràn bộ nhớ và chấp nhận chiến lược drop oldest khi quá ngưỡng.
+0629 | image=false | caption=false | Nếu app bị sleep/terminate trước khi flush log thành công, PRD phải chấp nhận rủi ro mất một phần telemetry chưa đồng bộ và không coi đây là lỗi chặn trải nghiệm chính của visitor.
+0630 | image=false | caption=false | 14. Privacy (Bảo mật vị trí)
+0631 | image=false | caption=false | Phần này mô tả cách sản phẩm xử lý dữ liệu vị trí và telemetry visitor theo nguyên tắc tối thiểu hóa dữ liệu, kiểm soát truy cập và minh bạch với người dùng.
+0632 | image=false | caption=false | 14.1 Dữ liệu được thu thập trong phiên visitor
+0633 | image=false | caption=false | Hệ thống hiện ghi nhận sessionId cho từng phiên visitor, deviceId dạng định danh nội bộ lưu cục bộ trên thiết bị, deviceInfo cơ bản và thời điểm hết hạn QR nếu phiên có giới hạn thời gian.
+0634 | image=false | caption=false | Location telemetry gửi lên backend gồm thời gian ghi nhận và tọa độ GeoJSON Point [longitude, latitude]; audio telemetry gồm restaurantId, audioId, thời gian bắt đầu/kết thúc và thời lượng nghe.
+0635 | image=false | caption=false | Trên thiết bị, ứng dụng có thể lưu cache POI, ngôn ngữ, dishes, audio, favorites, history và preference ngôn ngữ để phục vụ trải nghiệm offline/liền mạch.
+0636 | image=false | caption=false | 14.2 Nguyên tắc bảo mật và phân quyền
+0637 | image=false | caption=false | Ứng dụng phải giải thích rõ lý do cần quyền vị trí trước hoặc trong lúc xin quyền; quyền background location trên Android phải được xin tách biệt với quyền foreground.
+0638 | image=false | caption=false | Dữ liệu movement path dùng cho analytics phải được hiển thị cho Admin dưới dạng đường đi theo session ẩn danh; Seller và người dùng public không được truy cập dữ liệu vị trí thô của visitor.
+0639 | image=false | caption=false | Tất cả analytics, audit logs, quản trị user và quản lý vận hành phải nằm sau lớp xác thực và role-based access control; nguyên tắc mặc định là protected-by-default, chỉ mở public cho các endpoint được khai báo tường minh.
+0640 | image=false | caption=false | API không được trả về dữ liệu nhạy cảm như password/hash hoặc thông tin định danh quản trị không cần thiết trong response.
+0641 | image=false | caption=false | Môi trường production bắt buộc dùng HTTPS và chính sách xác thực chứng chỉ phù hợp; các cấu hình chấp nhận mọi certificate chỉ được chấp nhận trong môi trường dev/test nội bộ.
+0642 | image=false | caption=false | 14.3 Quyền kiểm soát của người dùng và vòng đời dữ liệu
+0643 | image=false | caption=false | Visitor phải có khả năng dừng narration bất kỳ lúc nào; hệ thống không được ép phát lặp liên tục trong cùng phiên chỉ vì dữ liệu vị trí dao động.
+0644 | image=false | caption=false | Ứng dụng nên cung cấp khả năng quản lý dữ liệu cục bộ như xóa audio cache, xóa history, xóa favorites và kiểm tra/truy cập phần cấp quyền tracking nền trong phần settings.
+0645 | image=false | caption=false | Sản phẩm cần có privacy notice ngắn gọn ở onboarding hoặc luồng QR entry, nêu rõ vì sao vị trí được thu thập, loại telemetry nào được gửi lên server và dữ liệu analytics được xử lý theo session ẩn danh.
+0646 | image=false | caption=false | Cần xác định retention policy riêng cho location logs, audio logs và audit data để tránh lưu dữ liệu hành vi lâu hơn mức cần thiết cho vận hành và phân tích.
+0647 | image=false | caption=false | 15. Success Metrics
+0648 | image=false | caption=false | Phần này dùng để đo mức độ thành công của sản phẩm sau khi triển khai.
+0649 | image=false | caption=false | 15.1 Visitor metrics
+0650 | image=false | caption=false | > = 80% phiên mở app bắt đầu từ QR/deep link tại điểm tham quan.
+0651 | image=false | caption=false | > = 70% visitor bật narration ít nhất 1 lần trong phiên.
+0652 | image=false | caption=false | > = 60% visitor nghe ít nhất 1 audio hoàn chỉnh (>= 80% thời lượng file).
+0653 | image=false | caption=false | Tỷ lệ lỗi phát audio < 3% tổng số lượt phát.
+0654 | image=false | caption=false | Tỷ lệ dùng cache thành công khi offline >= 90% với dữ liệu đã từng tải.
+0655 | image=false | caption=false | 15.2 Seller metrics
+0656 | image=false | caption=false | > = 70% seller cập nhật nội dung quán (món/ảnh/audio) ít nhất 1 lần mỗi tuần.
+0657 | image=false | caption=false | > = 90% thao tác CRUD từ seller thành công ngay lần đầu.
+0658 | image=false | caption=false | Thời gian trung bình cập nhật một mục nội dung < 2 phút.
+0659 | image=false | caption=false | 15.3 Admin metrics
+0660 | image=false | caption=false | 100% tài khoản quản trị được gán role hợp lệ.
+0661 | image=false | caption=false | > = 95% bản ghi bất thường trong recent activity/audit logs được phát hiện và xử lý trong vòng 24 giờ.
+0662 | image=false | caption=false | Tỷ lệ sự cố phân quyền (truy cập sai quyền) < 1% tổng request protected.
+0663 | image=false | caption=false | 15.4 System/business metrics tổng hợp
+0664 | image=false | caption=false | API error rate (5xx) < 1% theo ngày.
+0665 | image=false | caption=false | P95 API latency cho endpoint public < 800ms.
+0666 | image=false | caption=false | Số phiên sử dụng thành công mỗi ngày tăng trưởng đều theo tháng.
+0667 | image=false | caption=false | Mục tiêu giai đoạn đầu: đạt tối thiểu 500 phiên trải nghiệm/ngày trong khu vực triển khai.
+0669 | image=false | caption=false | 16. Use Case Diagram va dac ta
+0670 | image=false | caption=false | 16.1 Visitor App
+0671 | image=false | caption=false | Usecase App - Tong quat
+0672 | image=true  | caption=false | 
+0673 | image=false | caption=false | TongQuat.png
+0674 | image=false | caption=false | Use case tong quat: khong bo sung dac ta chi tiet theo yeu cau.
+0675 | image=false | caption=false | Usecase App - Theo doi vi tri
+0676 | image=true  | caption=false | 
+0677 | image=false | caption=false | TheoDoiViTri.png
+0678 | image=false | caption=false | Dac ta use case:
+0679 | image=false | caption=false | Tên use case: Theo dõi vị trí
+0680 | image=false | caption=false | Tác nhân: Người dùng
+0681 | image=false | caption=false | Mô tả: Người dùng bật theo dõi vị trí để app hỗ trợ các chức năng liên quan địa điểm.
+0682 | image=false | caption=false | Tiền điều kiện: Thiết bị hỗ trợ GPS.
+0683 | image=false | caption=false | Hậu điều kiện: Theo dõi vị trí được bật/tắt theo thao tác người dùng.
+0684 | image=false | caption=false | Luồng chính:
+0685 | image=false | caption=false | Người dùng bật theo dõi vị trí.
+0686 | image=false | caption=false | Hệ thống yêu cầu quyền truy cập vị trí (include).
+0687 | image=false | caption=false | Người dùng chấp nhận quyền.
+0688 | image=false | caption=false | Hệ thống kích hoạt theo dõi vị trí.
+0689 | image=false | caption=false | Luồng thay thế:
+0690 | image=false | caption=false | Người dùng từ chối quyền truy cập thì hệ thống thông báo không thể theo dõi vị trí.
+0691 | image=false | caption=false | Người dùng bật quyền chạy nền (extend) khi cần theo dõi ổn định ngoài màn hình chính.
+0692 | image=false | caption=false | Người dùng tắt theo dõi vị trí (extend).
+0693 | image=false | caption=false | Usecase App - Kham pha POI
+0694 | image=true  | caption=false | 
+0695 | image=false | caption=false | KhamPhaPOI.png
+0696 | image=false | caption=false | Dac ta use case:
+0697 | image=false | caption=false | Tên use case: Khám phá POI
+0698 | image=false | caption=false | Tác nhân: Người dùng
+0699 | image=false | caption=false | Mô tả: Người dùng duyệt, tìm kiếm, lọc và xem chi tiết POI để thực hiện các thao tác liên quan.
+0700 | image=false | caption=false | Tiền điều kiện: Danh sách POI có sẵn.
+0701 | image=false | caption=false | Hậu điều kiện: Người dùng xác định được POI mong muốn và thực hiện thao tác kế tiếp.
+0702 | image=false | caption=false | Luồng chính:
+0703 | image=false | caption=false | Người dùng mở chức năng khám phá POI.
+0704 | image=false | caption=false | Người dùng có thể tìm kiếm hoặc lọc POI (extend).
+0705 | image=false | caption=false | Người dùng xem chi tiết POI (extend).
+0706 | image=false | caption=false | Từ chi tiết POI, người dùng có thể yêu thích/chia sẻ/xem đường đi/liên hệ nhà hàng/nghe thuyết minh (extend).
+0707 | image=false | caption=false | Luồng thay thế:
+0708 | image=false | caption=false | Không có kết quả phù hợp, hệ thống hiển thị trạng thái rỗng.
+0709 | image=false | caption=false | Không tải được chi tiết POI, hệ thống thông báo và cho thử lại.
+0710 | image=false | caption=false | Usecase App - Nghe thuyet minh
+0711 | image=true  | caption=false | 
+0712 | image=false | caption=false | NgheThuyetMinhTheoNgonNgu.png
+0713 | image=false | caption=false | Dac ta use case:
+0714 | image=false | caption=false | Tên use case: Nghe thuyết minh
+0715 | image=false | caption=false | Tác nhân: Người dùng
+0716 | image=false | caption=false | Mô tả: Người dùng nghe thuyết minh cho POI theo nhu cầu và ngôn ngữ mong muốn.
+0717 | image=false | caption=false | Tiền điều kiện: POI có nội dung audio khả dụng.
+0718 | image=false | caption=false | Hậu điều kiện: Người dùng nghe được nội dung thuyết minh mong muốn.
+0719 | image=false | caption=false | Luồng chính:
+0720 | image=false | caption=false | Người dùng mở chức năng nghe thuyết minh.
+0721 | image=false | caption=false | Người dùng chọn cách nghe: tự động hoặc thủ công (extend).
+0722 | image=false | caption=false | Người dùng chọn ngôn ngữ thuyết minh (extend).
+0723 | image=false | caption=false | Hệ thống phát audio.
+0724 | image=false | caption=false | Người dùng có thể phát lại audio (extend).
+0725 | image=false | caption=false | Luồng thay thế:
+0726 | image=false | caption=false | Không có audio phù hợp, hệ thống thông báo.
+0727 | image=false | caption=false | Lỗi phát audio, hệ thống hiển thị thông báo và cho thử lại.
+0728 | image=false | caption=false | Usecase App - Kham pha Tour
+0729 | image=true  | caption=false | 
+0730 | image=false | caption=false | KhamPhaTour.png
+0731 | image=false | caption=false | Dac ta use case:
+0732 | image=false | caption=false | Tên use case: Khám phá Tour
+0733 | image=false | caption=false | Tác nhân: Người dùng
+0734 | image=false | caption=false | Mô tả: Người dùng xem danh sách tour, xem chi tiết tour và khám phá POI của tour.
+0735 | image=false | caption=false | Tiền điều kiện: Dữ liệu tour khả dụng.
+0736 | image=false | caption=false | Hậu điều kiện: Người dùng chọn được tour và nắm thông tin POI liên quan.
+0737 | image=false | caption=false | Luồng chính:
+0738 | image=false | caption=false | Người dùng mở chức năng khám phá tour.
+0739 | image=false | caption=false | Người dùng xem danh sách tour (extend).
+0740 | image=false | caption=false | Người dùng xem chi tiết tour (extend).
+0741 | image=false | caption=false | Người dùng xem POI trên bản đồ (extend).
+0742 | image=false | caption=false | Người dùng có thể xem chi tiết POI trong tour (extend).
+0743 | image=false | caption=false | Luồng thay thế:
+0744 | image=false | caption=false | Không có tour phù hợp, hệ thống thông báo không có dữ liệu.
+0745 | image=false | caption=false | Không tải được dữ liệu bản đồ/tour, hệ thống thông báo và cho quay lại.
+0746 | image=false | caption=false | Usecase App - Quan ly danh sach yeu thich
+0747 | image=true  | caption=false | 
+0748 | image=false | caption=false | QuanLiDanhSachYeuThich.png
+0749 | image=false | caption=false | Đặc tả usecase
+0750 | image=false | caption=false | Tên use case: Quản lí danh sách POI yêu thích
+0751 | image=false | caption=false | Tác nhân: Người dùng
+0752 | image=false | caption=false | Mô tả: Người dùng xem danh sách POI yêu thích, xem chi tiết và xóa POI khỏi danh sách.
+0753 | image=false | caption=false | Tiền điều kiện: Người dùng đã có hoặc có thể tạo danh sách yêu thích.
+0754 | image=false | caption=false | Hậu điều kiện: Danh sách yêu thích được cập nhật theo thao tác người dùng.
+0755 | image=false | caption=false | Luồng chính:
+0756 | image=false | caption=false | Người dùng mở danh sách POI yêu thích.
+0757 | image=false | caption=false | Người dùng xem chi tiết POI (extend).
+0758 | image=false | caption=false | Người dùng xóa POI khỏi danh sách yêu thích.
+0759 | image=false | caption=false | Luồng thay thế:
+0760 | image=false | caption=false | Danh sách rỗng thì hệ thống hiển thị trạng thái chưa có dữ liệu.
+0761 | image=false | caption=false | Xóa thất bại thì giữ nguyên dữ liệu và thông báo lỗi.
+0762 | image=false | caption=false | Usecase App - Quan ly lich su
+0763 | image=true  | caption=false | 
+0764 | image=false | caption=false | QuanLiLichSu.png
+0765 | image=false | caption=false | Đặc tả usecase
+0766 | image=false | caption=false | Tên use case: Quản lí lịch sử
+0767 | image=false | caption=false | Tác nhân: Người dùng
+0768 | image=false | caption=false | Mô tả: Người dùng xem lịch sử đã nghe, xem lại chi tiết POI và có thể xóa lịch sử.
+0769 | image=false | caption=false | Tiền điều kiện: Đã có dữ liệu lịch sử trước đó.
+0770 | image=false | caption=false | Hậu điều kiện: Lịch sử được hiển thị hoặc cập nhật sau thao tác xóa.
+0771 | image=false | caption=false | Luồng chính:
+0772 | image=false | caption=false | Người dùng mở lịch sử đã nghe.
+0773 | image=false | caption=false | Người dùng xem chi tiết POI từ lịch sử (extend).
+0774 | image=false | caption=false | Người dùng xóa lịch sử (extend).
+0775 | image=false | caption=false | Luồng thay thế:
+0776 | image=false | caption=false | Không có lịch sử thì hệ thống hiển thị trạng thái rỗng.
+0777 | image=false | caption=false | Xóa lịch sử thất bại thì hệ thống thông báo lỗi.
+0778 | image=false | caption=false | Usecase App - Quan ly bo nho dem
+0779 | image=true  | caption=false | 
+0780 | image=false | caption=false | QuanLiBoNhoDem.png
+0781 | image=false | caption=false | Đặc tả usecase
+0782 | image=false | caption=false | Tên use case: Quản lí bộ nhớ đệm
+0783 | image=false | caption=false | Tác nhân: Người dùng
+0784 | image=false | caption=false | Mô tả: Người dùng xem dung lượng bộ nhớ đệm, xem chi tiết theo loại dữ liệu và xóa bộ nhớ đệm.
+0785 | image=false | caption=false | Tiền điều kiện: App đã phát sinh dữ liệu lưu cục bộ.
+0786 | image=false | caption=false | Hậu điều kiện: Thông tin bộ nhớ được cập nhật sau thao tác xem/xóa.
+0787 | image=false | caption=false | Luồng chính:
+0788 | image=false | caption=false | Người dùng mở màn hình quản lí bộ nhớ đệm.
+0789 | image=false | caption=false | Hệ thống hiển thị dung lượng bộ nhớ đệm hiện tại.
+0790 | image=false | caption=false | Người dùng xem chi tiết dung lượng (extend).
+0791 | image=false | caption=false | Người dùng xóa bộ nhớ đệm (extend).
+0792 | image=false | caption=false | Luồng thay thế:
+0793 | image=false | caption=false | Bộ nhớ đệm đang trống thì hệ thống thông báo không có dữ liệu để xóa.
+0794 | image=false | caption=false | Xóa bộ nhớ đệm thất bại thì hệ thống thông báo lỗi và giữ nguyên dữ liệu.
+0795 | image=false | caption=false | 16.2 Admin
+0796 | image=false | caption=false | Usecase Admin - Tong quat
+0797 | image=true  | caption=false | 
+0798 | image=false | caption=false | TongQuat.png
+0799 | image=false | caption=false | Use case tong quat: khong bo sung dac ta chi tiet theo yeu cau.
+0800 | image=false | caption=false | Usecase Admin - Dang nhap
+0801 | image=true  | caption=false | 
+0802 | image=false | caption=false | DangNhap.png
+0803 | image=false | caption=false | Đặc tả usecase
+0804 | image=false | caption=false | UC-ADM-01 - Kiểm tra phiên đăng nhập
+0805 | image=false | caption=false | Mục tiêu: Xác định phiên admin còn hợp lệ để cho phép vào route bảo vệ.
+0806 | image=false | caption=false | Tác nhân chính: Admin.
+0807 | image=false | caption=false | Tiền điều kiện: Admin đã truy cập ứng dụng admin.
+0808 | image=false | caption=false | Hậu điều kiện: Thiết lập trạng thái đăng nhập hoặc chuyển về trang đăng nhập.
+0809 | image=false | caption=false | Luồng chính:
+0810 | image=false | caption=false | Admin mở ứng dụng.
+0811 | image=false | caption=false | Frontend gọi GET /Auth/admin/me.
+0812 | image=false | caption=false | API trả về user hợp lệ, role admin.
+0813 | image=false | caption=false | Frontend cho phép truy cập route bảo vệ.
+0814 | image=false | caption=false | Luồng phụ:
+0815 | image=false | caption=false | API trả 401 hoặc role không hợp lệ.
+0816 | image=false | caption=false | Frontend xóa state local.
+0817 | image=false | caption=false | Frontend điều hướng về /login.
+0818 | image=false | caption=false | UC-ADM-02 - Đăng nhập admin
+0819 | image=false | caption=false | Mục tiêu: Cho phép admin đăng nhập bằng username/password.
+0820 | image=false | caption=false | Tác nhân chính: Admin.
+0821 | image=false | caption=false | Tiền điều kiện: Admin ở trang đăng nhập.
+0822 | image=false | caption=false | Hậu điều kiện: Đăng nhập thành công vào dashboard hoặc hiển thị lỗi.
+0823 | image=false | caption=false | Luồng chính:
+0824 | image=false | caption=false | Admin nhập username/password.
+0825 | image=false | caption=false | Frontend validate dữ liệu bắt buộc.
+0826 | image=false | caption=false | Frontend gọi POST /Auth/admin/login.
+0827 | image=false | caption=false | API trả thành công và set cookie.
+0828 | image=false | caption=false | Frontend điều hướng vào dashboard.
+0829 | image=false | caption=false | Luồng phụ:
+0830 | image=false | caption=false | Validate không hợp lệ hoặc API trả lỗi.
+0831 | image=false | caption=false | Frontend hiển thị thông báo lỗi đăng nhập.
+0832 | image=false | caption=false | UC-ADM-03 - Đăng xuất
+0833 | image=false | caption=false | Mục tiêu: Kết thúc phiên làm việc admin an toàn.
+0834 | image=false | caption=false | Tác nhân chính: Admin.
+0835 | image=false | caption=false | Tiền điều kiện: Admin đang đăng nhập.
+0836 | image=false | caption=false | Hậu điều kiện: State đăng nhập bị xóa và quay về /login.
+0837 | image=false | caption=false | Luồng chính:
+0838 | image=false | caption=false | Admin bấm Đăng xuất.
+0839 | image=false | caption=false | Frontend gọi POST /Auth/logout theo best-effort.
+0840 | image=false | caption=false | Frontend xóa user và auth state.
+0841 | image=false | caption=false | Frontend chuyển về /login.
+0842 | image=false | caption=false | UC-ADM-04 - Điều hướng và bảo vệ route
+0843 | image=false | caption=false | Mục tiêu: Chỉ cho phép người dùng admin truy cập các trang quản trị.
+0844 | image=false | caption=false | Tác nhân chính: Admin.
+0845 | image=false | caption=false | Tiền điều kiện: Có yêu cầu điều hướng tới route trong dashboard.
+0846 | image=false | caption=false | Hậu điều kiện: Route hợp lệ được render hoặc bị chặn.
+0847 | image=false | caption=false | Luồng chính:
+0848 | image=false | caption=false | Admin chọn menu trên sidebar.
+0849 | image=false | caption=false | React Router điều hướng đến route mục tiêu.
+0850 | image=false | caption=false | ProtectedRoute kiểm tra isAuthenticated và role admin.
+0851 | image=false | caption=false | Trang tương ứng được hiển thị.
+0852 | image=false | caption=false | Luồng phụ:
+0853 | image=false | caption=false | Không đủ điều kiện truy cập.
+0854 | image=false | caption=false | Hệ thống điều hướng về /login.
+0855 | image=false | caption=false | Usecase Admin - Dashboard
+0856 | image=true  | caption=false | 
+0857 | image=false | caption=false | Dashboard.png
+0858 | image=false | caption=false | Đặc tả usecase
+0859 | image=false | caption=false | UC-ADM-05 - Xem dashboard tổng quan
+0860 | image=false | caption=false | Mục tiêu: Hiển thị KPI tổng quan hệ thống cho admin.
+0861 | image=false | caption=false | Tác nhân chính: Admin.
+0862 | image=false | caption=false | Tiền điều kiện: Admin đã đăng nhập và vào trang tổng quan.
+0863 | image=false | caption=false | Hậu điều kiện: Dashboard hiển thị KPI thực thể, analytics và dữ liệu bản đồ.
+0864 | image=false | caption=false | Luồng chính:
+0865 | image=false | caption=false | Frontend tải song song KPI thực thể, KPI analytics và dữ liệu map.
+0866 | image=false | caption=false | Frontend tổng hợp dữ liệu.
+0867 | image=false | caption=false | Frontend render card thống kê, chart top restaurants và heatmap.
+0868 | image=false | caption=false | Luồng phụ:
+0869 | image=false | caption=false | Một hoặc nhiều API lỗi.
+0870 | image=false | caption=false | Frontend hiển thị trạng thái lỗi/thiếu dữ liệu tương ứng.
+0871 | image=false | caption=false | UC-ADM-06 - Đổi bộ lọc heatmap
+0872 | image=false | caption=false | Mục tiêu: Cập nhật heatmap theo mốc thời gian admin chọn.
+0873 | image=false | caption=false | Tác nhân chính: Admin.
+0874 | image=false | caption=false | Tiền điều kiện: Admin đang xem dashboard.
+0875 | image=false | caption=false | Hậu điều kiện: Bản đồ nhiệt phản ánh filter mới.
+0876 | image=false | caption=false | Luồng chính:
+0877 | image=false | caption=false | Admin chọn mốc 1h/6h/24h/all.
+0878 | image=false | caption=false | Frontend gọi API heatmap với tham số tương ứng.
+0879 | image=false | caption=false | Frontend cập nhật dữ liệu heatmap.
+0880 | image=false | caption=false | UC-ADM-07 - Xem tuyến di chuyển người dùng
+0881 | image=false | caption=false | Mục tiêu: Theo dõi đường đi của người dùng trên bản đồ.
+0882 | image=false | caption=false | Tác nhân chính: Admin.
+0883 | image=false | caption=false | Tiền điều kiện: Admin vào trang /trajectory.
+0884 | image=false | caption=false | Hậu điều kiện: Bản đồ trajectory hiển thị theo sessionLimit hiện tại.
+0885 | image=false | caption=false | Luồng chính:
+0886 | image=false | caption=false | Frontend gọi GET /api/analytics/movement-paths?sessionLimit=100.
+0887 | image=false | caption=false | API trả danh sách session và tọa độ.
+0888 | image=false | caption=false | Frontend render tuyến di chuyển.
+0889 | image=false | caption=false | Usecase Admin - Quan ly nha hang
+0890 | image=true  | caption=false | 
+0891 | image=false | caption=false | DanhSachNhaHang&TimKiem.png
+0892 | image=false | caption=false | Đặc tả usecase
+0893 | image=false | caption=false | UC-ADM-08 - Xem danh sách và tìm kiếm nhà hàng
+0894 | image=false | caption=false | Mục tiêu: Quản lý và tra cứu nhà hàng nhanh trên giao diện admin.
+0895 | image=false | caption=false | Tác nhân chính: Admin.
+0896 | image=false | caption=false | Tiền điều kiện: Admin ở trang nhà hàng.
+0897 | image=false | caption=false | Hậu điều kiện: Danh sách nhà hàng được hiển thị và lọc theo từ khóa.
+0898 | image=false | caption=false | Luồng chính:
+0899 | image=false | caption=false | Frontend tải danh sách nhà hàng và người dùng.
+0900 | image=false | caption=false | Frontend lọc seller active cho form tạo.
+0901 | image=false | caption=false | Admin nhập từ khóa tìm kiếm.
+0902 | image=false | caption=false | Frontend lọc client theo tên/địa chỉ và hiển thị kết quả.
+0903 | image=false | caption=false | UC-ADM-09 - Xem chi tiết nhà hàng
+0904 | image=false | caption=false | Mục tiêu: Xem đầy đủ thông tin chi tiết của một nhà hàng.
+0905 | image=false | caption=false | Tác nhân chính: Admin.
+0906 | image=false | caption=false | Tiền điều kiện: Nhà hàng tồn tại trong danh sách.
+0907 | image=false | caption=false | Hậu điều kiện: Dialog chi tiết mở thành công hoặc hiển thị lỗi.
+0908 | image=false | caption=false | Luồng chính:
+0909 | image=false | caption=false | Admin bấm xem chi tiết.
+0910 | image=false | caption=false | Frontend gọi GET /restaurant/{id}.
+0911 | image=false | caption=false | Frontend chọn ảnh primary (fallback ảnh đầu tiên).
+0912 | image=false | caption=false | Frontend hiển thị dialog chi tiết.
+0913 | image=false | caption=false | Luồng phụ:
+0914 | image=false | caption=false | API lỗi.
+0915 | image=false | caption=false | Frontend hiển thị lỗi tải chi tiết.
+0916 | image=false | caption=false | UC-ADM-10 - Tạo nhà hàng mới
+0917 | image=false | caption=false | Mục tiêu: Tạo mới nhà hàng và gán seller quản lý.
+0918 | image=false | caption=false | Tác nhân chính: Admin.
+0919 | image=false | caption=false | Tiền điều kiện: Admin ở trang nhà hàng; có seller active khả dụng.
+0920 | image=false | caption=false | Hậu điều kiện: Nhà hàng mới được tạo và danh sách được cập nhật.
+0921 | image=false | caption=false | Luồng chính:
+0922 | image=false | caption=false | Admin mở dialog và nhập thông tin.
+0923 | image=false | caption=false | Frontend validate tên nhà hàng và seller quản lý.
+0924 | image=false | caption=false | Frontend gọi POST /restaurant.
+0925 | image=false | caption=false | API trả thành công.
+0926 | image=false | caption=false | Frontend reload danh sách, đóng dialog và hiển thị thông báo thành công.
+0927 | image=false | caption=false | Luồng phụ:
+0928 | image=false | caption=false | Validate không hợp lệ hoặc API lỗi.
+0929 | image=false | caption=false | Frontend hiển thị thông báo thất bại.
+0930 | image=false | caption=false | UC-ADM-10A - Tự điền tọa độ từ link Google Maps khi tạo nhà hàng
+0931 | image=false | caption=false | Mục tiêu: Hỗ trợ tự động điền vĩ độ/kinh độ từ link Google Maps.
+0932 | image=false | caption=false | Tác nhân chính: Admin.
+0933 | image=false | caption=false | Tiền điều kiện: Admin nhập URL Google Maps trong form tạo nhà hàng.
+0934 | image=false | caption=false | Hậu điều kiện: Tọa độ được tự điền hoặc báo lỗi để nhập tay.
+0935 | image=false | caption=false | Luồng chính:
+0936 | image=false | caption=false | Frontend parse tọa độ từ URL bằng regex.
+0937 | image=false | caption=false | Nếu parse được, frontend điền latitude/longitude.
+0938 | image=false | caption=false | Luồng phụ:
+0939 | image=false | caption=false | Parse client thất bại.
+0940 | image=false | caption=false | Frontend gọi API resolve-coordinates.
+0941 | image=false | caption=false | Nếu API thành công thì tự điền tọa độ.
+0942 | image=false | caption=false | Nếu API thất bại thì hiển thị lỗi và cho nhập thủ công.
+0943 | image=false | caption=false | UC-ADM-11 - Khóa hoặc mở khóa nhà hàng
+0944 | image=false | caption=false | Mục tiêu: Quản lý trạng thái hoạt động của nhà hàng.
+0945 | image=false | caption=false | Tác nhân chính: Admin.
+0946 | image=false | caption=false | Tiền điều kiện: Nhà hàng tồn tại trong danh sách.
+0947 | image=false | caption=false | Hậu điều kiện: Trạng thái nhà hàng được cập nhật hoặc giữ nguyên nếu lỗi.
+0948 | image=false | caption=false | Luồng chính:
+0949 | image=false | caption=false | Admin bấm khóa/mở khóa nhà hàng.
+0950 | image=false | caption=false | Frontend hiển thị confirm dialog.
+0951 | image=false | caption=false | Admin xác nhận thao tác.
+0952 | image=false | caption=false | Frontend gọi PATCH /restaurant/{id}/status.
+0953 | image=false | caption=false | Frontend cập nhật danh sách và thông báo thành công.
+0954 | image=false | caption=false | Luồng phụ:
+0955 | image=false | caption=false | API lỗi.
+0956 | image=false | caption=false | Frontend thông báo thất bại.
+0957 | image=false | caption=false | Usecase Admin - Quan ly nguoi dung
+0958 | image=true  | caption=false | 
+0959 | image=false | caption=false | NguoiDung.png
+0960 | image=false | caption=false | Đặc tả usecase
+0961 | image=false | caption=false | UC-ADM-12 - Xem danh sách người dùng
+0962 | image=false | caption=false | Mục tiêu: Hiển thị bảng người dùng để quản trị.
+0963 | image=false | caption=false | Tác nhân chính: Admin.
+0964 | image=false | caption=false | Tiền điều kiện: Admin vào trang người dùng.
+0965 | image=false | caption=false | Hậu điều kiện: Danh sách người dùng được hiển thị hoặc báo lỗi tải dữ liệu.
+0966 | image=false | caption=false | Luồng chính:
+0967 | image=false | caption=false | Frontend gọi GET /api/users.
+0968 | image=false | caption=false | API trả danh sách user.
+0969 | image=false | caption=false | Frontend render bảng người dùng.
+0970 | image=false | caption=false | Luồng phụ:
+0971 | image=false | caption=false | API lỗi.
+0972 | image=false | caption=false | Frontend hiển thị lỗi tải dữ liệu.
+0973 | image=false | caption=false | UC-ADM-13 - Tạo người dùng mới
+0974 | image=false | caption=false | Mục tiêu: Tạo mới tài khoản người dùng trong hệ thống.
+0975 | image=false | caption=false | Tác nhân chính: Admin.
+0976 | image=false | caption=false | Tiền điều kiện: Admin ở trang người dùng.
+0977 | image=false | caption=false | Hậu điều kiện: User mới được tạo và danh sách được cập nhật.
+0978 | image=false | caption=false | Luồng chính:
+0979 | image=false | caption=false | Admin mở dialog tạo user và nhập thông tin.
+0980 | image=false | caption=false | Frontend validate username/password/confirm/phone/email/role.
+0981 | image=false | caption=false | Frontend gọi POST /api/users.
+0982 | image=false | caption=false | API trả thành công.
+0983 | image=false | caption=false | Frontend refresh bảng và hiển thị thông báo thành công.
+0984 | image=false | caption=false | Luồng phụ:
+0985 | image=false | caption=false | Validate không hợp lệ hoặc API lỗi.
+0986 | image=false | caption=false | Frontend hiển thị lỗi tương ứng.
+0987 | image=false | caption=false | UC-ADM-14 - Khóa hoặc mở khóa người dùng
+0988 | image=false | caption=false | Mục tiêu: Quản lý trạng thái active của tài khoản người dùng.
+0989 | image=false | caption=false | Tác nhân chính: Admin.
+0990 | image=false | caption=false | Tiền điều kiện: User tồn tại trong bảng quản trị.
+0991 | image=false | caption=false | Hậu điều kiện: Trạng thái user được cập nhật hoặc giữ nguyên nếu lỗi.
+0992 | image=false | caption=false | Luồng chính:
+0993 | image=false | caption=false | Admin bấm khóa/mở khóa user.
+0994 | image=false | caption=false | Frontend hiển thị xác nhận.
+0995 | image=false | caption=false | Admin xác nhận thao tác.
+0996 | image=false | caption=false | Frontend gọi PATCH /api/users/{id}/status.
+0997 | image=false | caption=false | Frontend refresh bảng và hiển thị kết quả.
+0998 | image=false | caption=false | Luồng phụ:
+0999 | image=false | caption=false | API lỗi.
+1000 | image=false | caption=false | Frontend hiển thị thông báo lỗi.
+1001 | image=false | caption=false | UC-ADM-14A - Xem chi tiết người dùng và nhà hàng quản lý
+1002 | image=false | caption=false | Mục tiêu: Xem hồ sơ user và các nhà hàng user đang quản lý.
+1003 | image=false | caption=false | Tác nhân chính: Admin.
+1004 | image=false | caption=false | Tiền điều kiện: Dữ liệu user và restaurant đã được tải.
+1005 | image=false | caption=false | Hậu điều kiện: Chi tiết user được hiển thị đầy đủ.
+1006 | image=false | caption=false | Luồng chính:
+1007 | image=false | caption=false | Admin mở chi tiết một user.
+1008 | image=false | caption=false | Frontend lấy dữ liệu user từ danh sách hiện có.
+1009 | image=false | caption=false | Frontend đối chiếu danh sách nhà hàng user quản lý.
+1010 | image=false | caption=false | Frontend hiển thị thông tin hồ sơ và danh sách nhà hàng liên quan.
+1011 | image=false | caption=false | Usecase Admin - Nhat ky he thong
+1012 | image=true  | caption=false | 
+1013 | image=false | caption=false | NhatKiHeThong.png
+1014 | image=false | caption=false | Đặc tả usecase
+1015 | image=false | caption=false | UC-ADM-15 - Xem nhật ký hệ thống và nhật ký nghe audio
+1016 | image=false | caption=false | Mục tiêu: Theo dõi hoạt động vận hành qua hai loại log.
+1017 | image=false | caption=false | Tác nhân chính: Admin.
+1018 | image=false | caption=false | Tiền điều kiện: Admin truy cập trang logs.
+1019 | image=false | caption=false | Hậu điều kiện: Hai bảng log được hiển thị đồng thời.
+1020 | image=false | caption=false | Luồng chính:
+1021 | image=false | caption=false | Frontend gọi API audit logs.
+1022 | image=false | caption=false | Frontend gọi API audio activity logs.
+1023 | image=false | caption=false | Frontend hiển thị hai bảng dữ liệu.
+1024 | image=false | caption=false | Luồng phụ:
+1025 | image=false | caption=false | Một trong hai API lỗi.
+1026 | image=false | caption=false | Frontend hiển thị lỗi ở bảng tương ứng.
+1027 | image=false | caption=false | UC-ADM-16 - Tự động làm mới nhật ký
+1028 | image=false | caption=false | Mục tiêu: Giữ dữ liệu log luôn mới theo chu kỳ tự động.
+1029 | image=false | caption=false | Tác nhân chính: Admin.
+1030 | image=false | caption=false | Tiền điều kiện: Trang logs đang mở.
+1031 | image=false | caption=false | Hậu điều kiện: Dữ liệu log được refresh mỗi 30 giây.
+1032 | image=false | caption=false | Luồng chính:
+1033 | image=false | caption=false | Frontend khởi tạo timer 30 giây.
+1034 | image=false | caption=false | Mỗi chu kỳ, frontend gọi lại API cho hai bảng log.
+1035 | image=false | caption=false | Frontend cập nhật dữ liệu mới lên UI.
+1036 | image=false | caption=false | UC-ADM-17 - Phân trang nhật ký
+1037 | image=false | caption=false | Mục tiêu: Duyệt dữ liệu log theo từng trang độc lập.
+1038 | image=false | caption=false | Tác nhân chính: Admin.
+1039 | image=false | caption=false | Tiền điều kiện: Trang logs có nhiều bản ghi.
+1040 | image=false | caption=false | Hậu điều kiện: Bảng audit và audio activity chuyển trang đúng trạng thái.
+1041 | image=false | caption=false | Luồng chính:
+1042 | image=false | caption=false | Admin đổi trang ở bảng audit hoặc audio activity.
+1043 | image=false | caption=false | Frontend cập nhật page/pageSize theo bảng tương ứng.
+1044 | image=false | caption=false | Frontend gọi lại API theo tham số mới.
+1045 | image=false | caption=false | Frontend render dữ liệu trang mới.
+1046 | image=false | caption=false | Usecase Admin - Tour
+1047 | image=true  | caption=false | 
+1048 | image=false | caption=false | Tour.png
+1049 | image=false | caption=false | Đặc tả usecase
+1050 | image=false | caption=false | UC-ADM-18 - Xem danh sách tour và chi tiết tour
+1051 | image=false | caption=false | Mục tiêu: Theo dõi danh sách tour và thông tin chi tiết của từng tour.
+1052 | image=false | caption=false | Tác nhân chính: Admin.
+1053 | image=false | caption=false | Tiền điều kiện: Admin vào trang tour.
+1054 | image=false | caption=false | Hậu điều kiện: Danh sách tour và chi tiết tour được hiển thị.
+1055 | image=false | caption=false | Luồng chính:
+1056 | image=false | caption=false | Frontend tải danh sách tour.
+1057 | image=false | caption=false | Frontend tải dữ liệu nhà hàng liên quan.
+1058 | image=false | caption=false | Admin chọn một tour.
+1059 | image=false | caption=false | Frontend hiển thị chi tiết tour để chỉnh sửa.
+1060 | image=false | caption=false | UC-ADM-18A - Tạo tour mới
+1061 | image=false | caption=false | Mục tiêu: Tạo mới tour, có thể kèm ảnh đại diện tour.
+1062 | image=false | caption=false | Tác nhân chính: Admin.
+1063 | image=false | caption=false | Tiền điều kiện: Admin ở trang tour và có dữ liệu hợp lệ.
+1064 | image=false | caption=false | Hậu điều kiện: Tour mới được tạo thành công và hiển thị trong danh sách.
+1065 | image=false | caption=false | Luồng chính:
+1066 | image=false | caption=false | Admin nhập thông tin tour.
+1067 | image=false | caption=false | Frontend validate dữ liệu đầu vào.
+1068 | image=false | caption=false | Nếu có ảnh, frontend upload ảnh tour.
+1069 | image=false | caption=false | Frontend gọi API tạo tour.
+1070 | image=false | caption=false | Frontend refresh danh sách tour.
+1071 | image=false | caption=false | Luồng phụ:
+1072 | image=false | caption=false | Validate lỗi hoặc API lỗi.
+1073 | image=false | caption=false | Frontend hiển thị thông báo thất bại.
+1074 | image=false | caption=false | UC-ADM-19 - Lưu cập nhật tour (stop order và metadata)
+1075 | image=false | caption=false | Mục tiêu: Lưu các thay đổi cấu hình tour.
+1076 | image=false | caption=false | Tác nhân chính: Admin.
+1077 | image=false | caption=false | Tiền điều kiện: Tour đang ở chế độ chỉnh sửa.
+1078 | image=false | caption=false | Hậu điều kiện: Thứ tự điểm dừng và metadata được lưu.
+1079 | image=false | caption=false | Luồng chính:
+1080 | image=false | caption=false | Admin chỉnh sửa stop order và thông tin tour.
+1081 | image=false | caption=false | Frontend validate dữ liệu trước khi lưu.
+1082 | image=false | caption=false | Frontend gọi API cập nhật stop order.
+1083 | image=false | caption=false | Frontend gọi API cập nhật metadata.
+1084 | image=false | caption=false | Frontend hiển thị kết quả lưu thành công.
+1085 | image=false | caption=false | Luồng phụ:
+1086 | image=false | caption=false | Một trong các API lỗi.
+1087 | image=false | caption=false | Frontend hiển thị lỗi và giữ trạng thái chưa lưu.
+1088 | image=false | caption=false | UC-ADM-20 - Thêm nhà hàng vào tour
+1089 | image=false | caption=false | Mục tiêu: Bổ sung điểm dừng nhà hàng vào tour.
+1090 | image=false | caption=false | Tác nhân chính: Admin.
+1091 | image=false | caption=false | Tiền điều kiện: Tour hợp lệ và không có thay đổi chưa lưu.
+1092 | image=false | caption=false | Hậu điều kiện: Nhà hàng được thêm vào danh sách điểm dừng của tour.
+1093 | image=false | caption=false | Luồng chính:
+1094 | image=false | caption=false | Admin chọn nhà hàng cần thêm.
+1095 | image=false | caption=false | Frontend kiểm tra dữ liệu hợp lệ.
+1096 | image=false | caption=false | Frontend gọi API thêm nhà hàng vào tour.
+1097 | image=false | caption=false | Frontend cập nhật chi tiết tour và hiển thị thông báo thành công.
+1098 | image=false | caption=false | Luồng phụ:
+1099 | image=false | caption=false | Có unsaved changes hoặc dữ liệu không hợp lệ.
+1100 | image=false | caption=false | Frontend chặn thao tác và hiển thị cảnh báo.
+1101 | image=false | caption=false | UC-ADM-20A - Khóa hoặc mở khóa tour
+1102 | image=false | caption=false | Mục tiêu: Kích hoạt hoặc tạm ngưng tour theo nhu cầu vận hành.
+1103 | image=false | caption=false | Tác nhân chính: Admin.
+1104 | image=false | caption=false | Tiền điều kiện: Tour tồn tại trong danh sách.
+1105 | image=false | caption=false | Hậu điều kiện: Trạng thái tour được cập nhật.
+1106 | image=false | caption=false | Luồng chính:
+1107 | image=false | caption=false | Admin bấm khóa/mở khóa tour.
+1108 | image=false | caption=false | Frontend hiển thị xác nhận thao tác.
+1109 | image=false | caption=false | Admin xác nhận.
+1110 | image=false | caption=false | Frontend gọi PATCH /Tour/{id}.
+1111 | image=false | caption=false | Frontend cập nhật danh sách và hiển thị kết quả.
+1112 | image=false | caption=false | Luồng phụ:
+1113 | image=false | caption=false | API lỗi.
+1114 | image=false | caption=false | Frontend hiển thị thông báo thất bại.
+1115 | image=false | caption=false | Usecase Admin - Tai khoan
+1116 | image=true  | caption=false | 
+1117 | image=false | caption=false | TaiKhoan.png
+1118 | image=false | caption=false | Đặc tả usecase
+1119 | image=false | caption=false | UC-ADM-21 - Xem và cập nhật thông tin tài khoản
+1120 | image=false | caption=false | Mục tiêu: Quản lý hồ sơ admin hiện tại.
+1121 | image=false | caption=false | Tác nhân chính: Admin.
+1122 | image=false | caption=false | Tiền điều kiện: Admin đã đăng nhập và mở trang tài khoản.
+1123 | image=false | caption=false | Hậu điều kiện: Thông tin profile được cập nhật và state đăng nhập được refresh.
+1124 | image=false | caption=false | Luồng chính:
+1125 | image=false | caption=false | Frontend tải dữ liệu profile hiện tại.
+1126 | image=false | caption=false | Admin chỉnh sửa thông tin cá nhân.
+1127 | image=false | caption=false | Frontend validate dữ liệu.
+1128 | image=false | caption=false | Frontend gọi API cập nhật profile.
+1129 | image=false | caption=false | Frontend gọi refresh me và hiển thị thành công.
+1130 | image=false | caption=false | Luồng phụ:
+1131 | image=false | caption=false | Validate hoặc API lỗi.
+1132 | image=false | caption=false | Frontend hiển thị thông báo lỗi.
+1133 | image=false | caption=false | UC-ADM-22 - Đổi mật khẩu tài khoản
+1134 | image=false | caption=false | Mục tiêu: Cho phép admin đổi mật khẩu an toàn.
+1135 | image=false | caption=false | Tác nhân chính: Admin.
+1136 | image=false | caption=false | Tiền điều kiện: Admin ở trang tài khoản.
+1137 | image=false | caption=false | Hậu điều kiện: Mật khẩu mới được cập nhật và form được reset.
+1138 | image=false | caption=false | Luồng chính:
+1139 | image=false | caption=false | Admin nhập mật khẩu cũ, mật khẩu mới, xác nhận.
+1140 | image=false | caption=false | Frontend validate bắt buộc, độ dài và xác nhận khớp.
+1141 | image=false | caption=false | Frontend gọi API đổi mật khẩu.
+1142 | image=false | caption=false | Frontend reset form và hiển thị thành công.
+1143 | image=false | caption=false | Luồng phụ:
+1144 | image=false | caption=false | Validate không đạt hoặc API lỗi.
+1145 | image=false | caption=false | Frontend hiển thị lỗi tương ứng.
+1146 | image=false | caption=false | Usecase Admin - Quan ly dich
+1147 | image=true  | caption=false | 
+1148 | image=false | caption=false | QuanLyDich.png
+1149 | image=false | caption=false | Đặc tả usecase
+1150 | image=false | caption=false | UC-ADM-23 - Xem chi phí dịch token
+1151 | image=false | caption=false | Mục tiêu: Theo dõi chi phí dịch token ở mức tổng hợp và chi tiết.
+1152 | image=false | caption=false | Tác nhân chính: Admin.
+1153 | image=false | caption=false | Tiền điều kiện: Admin mở trang translation-billing.
+1154 | image=false | caption=false | Hậu điều kiện: KPI cùng dữ liệu monthly/usage được hiển thị.
+1155 | image=false | caption=false | Luồng chính:
+1156 | image=false | caption=false | Frontend tải dữ liệu KPI.
+1157 | image=false | caption=false | Frontend tải bảng monthly summary.
+1158 | image=false | caption=false | Frontend tải bảng usage chi tiết.
+1159 | image=false | caption=false | Frontend hiển thị dashboard chi phí dịch token.
+1160 | image=false | caption=false | Luồng phụ:
+1161 | image=false | caption=false | Một phần dữ liệu lỗi.
+1162 | image=false | caption=false | Frontend hiển thị thông báo lỗi theo khối dữ liệu.
+1163 | image=false | caption=false | UC-ADM-24 - Lọc và phân trang chi phí dịch token
+1164 | image=false | caption=false | Mục tiêu: Truy vấn và duyệt dữ liệu billing theo bộ lọc linh hoạt.
+1165 | image=false | caption=false | Tác nhân chính: Admin.
+1166 | image=false | caption=false | Tiền điều kiện: Admin đang ở trang translation-billing.
+1167 | image=false | caption=false | Hậu điều kiện: Dữ liệu monthly và usage phản ánh bộ lọc và trang hiện tại.
+1168 | image=false | caption=false | Luồng chính:
+1169 | image=false | caption=false | Admin chọn tháng hoặc seller.
+1170 | image=false | caption=false | Frontend reset page phù hợp và gọi lại API theo filter mới.
+1171 | image=false | caption=false | Admin thao tác phân trang ở bảng monthly/usage.
+1172 | image=false | caption=false | Frontend tải dữ liệu trang mới cho từng bảng độc lập.
+1173 | image=false | caption=false | 16.3 Seller
+1174 | image=false | caption=false | Usecase Seller - Tong quat
+1175 | image=true  | caption=false | 
+1176 | image=false | caption=false | TongQuat.png
+1177 | image=false | caption=false | Use case tong quat: khong bo sung dac ta chi tiet theo yeu cau.
+1178 | image=false | caption=false | Usecase Seller - Xac thuc
+1179 | image=true  | caption=false | 
+1180 | image=false | caption=false | XacThuc.png
+1181 | image=false | caption=false | Đặc tả usecase
+1182 | image=false | caption=false | UC-SAL-01 - Kiểm tra phiên đăng nhập
+1183 | image=false | caption=false | Mục tiêu: Xác định người dùng đã đăng nhập hợp lệ với vai trò saler hay chưa khi mở ứng dụng.
+1184 | image=false | caption=false | Tác nhân chính: Saler.
+1185 | image=false | caption=false | Tiền điều kiện: Người dùng đã truy cập ứng dụng saler.
+1186 | image=false | caption=false | Hậu điều kiện: Hệ thống thiết lập trạng thái đăng nhập hoặc điều hướng về trang đăng nhập.
+1187 | image=false | caption=false | Luồng chính:
+1188 | image=false | caption=false | Saler mở ứng dụng.
+1189 | image=false | caption=false | Frontend gọi GET /Auth/me.
+1190 | image=false | caption=false | Hệ thống trả về thông tin user hợp lệ và role saler.
+1191 | image=false | caption=false | Frontend thiết lập isAuthenticated=true.
+1192 | image=false | caption=false | Luồng phụ:
+1193 | image=false | caption=false | API trả về lỗi hoặc role không phải saler.
+1194 | image=false | caption=false | Frontend gọi POST /Auth/logout theo best-effort.
+1195 | image=false | caption=false | Frontend điều hướng về /login.
+1196 | image=false | caption=false | UC-SAL-02 - Đăng nhập saler
+1197 | image=false | caption=false | Mục tiêu: Cho phép saler đăng nhập vào hệ thống bằng username/password.
+1198 | image=false | caption=false | Tác nhân chính: Saler.
+1199 | image=false | caption=false | Tiền điều kiện: Saler ở trang /login.
+1200 | image=false | caption=false | Hậu điều kiện: Đăng nhập thành công và chuyển tới /select-restaurant, hoặc hiển thị lỗi.
+1201 | image=false | caption=false | Luồng chính:
+1202 | image=false | caption=false | Saler nhập username/password.
+1203 | image=false | caption=false | Frontend gọi POST /Auth/login.
+1204 | image=false | caption=false | API trả về thành công và set cookie, role là saler.
+1205 | image=false | caption=false | Frontend điều hướng đến /select-restaurant.
+1206 | image=false | caption=false | Luồng phụ:
+1207 | image=false | caption=false | Sai thông tin hoặc role không hợp lệ.
+1208 | image=false | caption=false | Frontend gọi logout best-effort.
+1209 | image=false | caption=false | Frontend hiển thị lỗi đăng nhập.
+1210 | image=false | caption=false | UC-SAL-03 - Quên mật khẩu bằng OTP
+1211 | image=false | caption=false | Mục tiêu: Khôi phục mật khẩu thông qua OTP email.
+1212 | image=false | caption=false | Tác nhân chính: Saler.
+1213 | image=false | caption=false | Tiền điều kiện: Saler ở trang đăng nhập và nhớ username/email.
+1214 | image=false | caption=false | Hậu điều kiện: Mật khẩu mới được cập nhật hoặc quá trình thất bại có thông báo lỗi.
+1215 | image=false | caption=false | Luồng chính:
+1216 | image=false | caption=false | Saler mở dialog quên mật khẩu.
+1217 | image=false | caption=false | Saler nhập username + email.
+1218 | image=false | caption=false | Frontend gọi POST /Auth/forgot-password/send-otp.
+1219 | image=false | caption=false | Frontend hiển thị countdown OTP.
+1220 | image=false | caption=false | Saler nhập OTP.
+1221 | image=false | caption=false | Frontend gọi POST /Auth/forgot-password/verify-otp.
+1222 | image=false | caption=false | Saler nhập mật khẩu mới và xác nhận.
+1223 | image=false | caption=false | Frontend gọi POST /Auth/forgot-password/reset.
+1224 | image=false | caption=false | Frontend đóng dialog và hiển thị toast thành công.
+1225 | image=false | caption=false | Luồng phụ:
+1226 | image=false | caption=false | OTP không hợp lệ hoặc hết hạn.
+1227 | image=false | caption=false | Frontend hiển thị lỗi và yêu cầu gửi OTP lại.
+1228 | image=false | caption=false | UC-SAL-04 - Đăng xuất
+1229 | image=false | caption=false | Mục tiêu: Kết thúc phiên làm việc của saler.
+1230 | image=false | caption=false | Tác nhân chính: Saler.
+1231 | image=false | caption=false | Tiền điều kiện: Saler đang đăng nhập.
+1232 | image=false | caption=false | Hậu điều kiện: Trạng thái đăng nhập bị xóa và quay về /login.
+1233 | image=false | caption=false | Luồng chính:
+1234 | image=false | caption=false | Saler bấm Đăng xuất.
+1235 | image=false | caption=false | Frontend gọi POST /Auth/logout theo best-effort.
+1236 | image=false | caption=false | Frontend xóa auth state.
+1237 | image=false | caption=false | Frontend điều hướng về /login.
+1238 | image=false | caption=false | UC-SAL-05 - Điều hướng và bảo vệ route
+1239 | image=false | caption=false | Mục tiêu: Đảm bảo chỉ người dùng hợp lệ được vào đúng route.
+1240 | image=false | caption=false | Tác nhân chính: Saler.
+1241 | image=false | caption=false | Tiền điều kiện: Có yêu cầu truy cập route dashboard.
+1242 | image=false | caption=false | Hậu điều kiện: Người dùng được render trang hợp lệ hoặc bị chuyển hướng.
+1243 | image=false | caption=false | Luồng chính:
+1244 | image=false | caption=false | Saler truy cập /dashboard/*.
+1245 | image=false | caption=false | ProtectedRoute kiểm tra isAuthenticated.
+1246 | image=false | caption=false | Hệ thống kiểm tra selectedRestaurant nếu route yêu cầu.
+1247 | image=false | caption=false | Render trang dashboard tương ứng.
+1248 | image=false | caption=false | Luồng phụ:
+1249 | image=false | caption=false | Chưa đăng nhập thì redirect /login.
+1250 | image=false | caption=false | Đã đăng nhập nhưng chưa chọn nhà hàng, và route khác /dashboard/account thì redirect /select-restaurant.
+1251 | image=false | caption=false | Usecase Seller - Nha hang
+1252 | image=true  | caption=false | 
+1253 | image=false | caption=false | NhaHang.png
+1254 | image=false | caption=false | Đặc tả usecase
+1255 | image=false | caption=false | UC-SAL-06 - Chọn nhà hàng để quản lý
+1256 | image=false | caption=false | Mục tiêu: Chọn nhà hàng mục tiêu cho phiên quản trị.
+1257 | image=false | caption=false | Tác nhân chính: Saler.
+1258 | image=false | caption=false | Tiền điều kiện: Saler đã đăng nhập và ở /select-restaurant.
+1259 | image=false | caption=false | Hậu điều kiện: selectedRestaurant được lưu trong context và chuyển sang dashboard.
+1260 | image=false | caption=false | Luồng chính:
+1261 | image=false | caption=false | Frontend gọi GET /Restaurant.
+1262 | image=false | caption=false | Frontend lọc theo user_id của saler hiện tại.
+1263 | image=false | caption=false | Saler chọn một nhà hàng để quản lý.
+1264 | image=false | caption=false | Frontend gọi selectRestaurant(restaurantId).
+1265 | image=false | caption=false | Frontend điều hướng /dashboard/restaurant.
+1266 | image=false | caption=false | Luồng phụ:
+1267 | image=false | caption=false | Chỉ có một nhà hàng hợp lệ.
+1268 | image=false | caption=false | Hệ thống tự chọn và tự chuyển trang.
+1269 | image=false | caption=false | UC-SAL-07 - Chuyển nhà hàng từ header dashboard
+1270 | image=false | caption=false | Mục tiêu: Đổi nhanh nhà hàng đang quản lý trong dashboard.
+1271 | image=false | caption=false | Tác nhân chính: Saler.
+1272 | image=false | caption=false | Tiền điều kiện: Saler đang ở dashboard và có danh sách nhà hàng có thể chọn.
+1273 | image=false | caption=false | Hậu điều kiện: selectedRestaurant mới được áp dụng cho các trang con.
+1274 | image=false | caption=false | Luồng chính:
+1275 | image=false | caption=false | Saler chọn nhà hàng mới trong dropdown header.
+1276 | image=false | caption=false | Frontend gọi selectRestaurant(restaurantId).
+1277 | image=false | caption=false | Các trang con tải dữ liệu theo nhà hàng mới.
+1278 | image=false | caption=false | UC-SAL-08 - Cập nhật thông tin nhà hàng
+1279 | image=false | caption=false | Mục tiêu: Cập nhật thông tin và trạng thái hoạt động nhà hàng.
+1280 | image=false | caption=false | Tác nhân chính: Saler.
+1281 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và ở trang nhà hàng.
+1282 | image=false | caption=false | Hậu điều kiện: Dữ liệu nhà hàng được cập nhật hoặc báo lỗi.
+1283 | image=false | caption=false | Luồng chính:
+1284 | image=false | caption=false | Saler chỉnh sửa thông tin nhà hàng.
+1285 | image=false | caption=false | Saler bấm Lưu thay đổi.
+1286 | image=false | caption=false | Frontend gọi PATCH /Restaurant/{id}.
+1287 | image=false | caption=false | Frontend gọi PATCH /Restaurant/{id}/status.
+1288 | image=false | caption=false | Frontend refresh danh sách nhà hàng.
+1289 | image=false | caption=false | Frontend hiển thị toast thành công.
+1290 | image=false | caption=false | Luồng phụ:
+1291 | image=false | caption=false | API trả lỗi.
+1292 | image=false | caption=false | Frontend hiển thị toast lỗi.
+1293 | image=false | caption=false | UC-SAL-09 - Tự động hoặc thủ công trạng thái mở cửa
+1294 | image=false | caption=false | Mục tiêu: Quản lý trạng thái mở cửa theo lịch hoặc thao tác tay.
+1295 | image=false | caption=false | Tác nhân chính: Saler.
+1296 | image=false | caption=false | Tiền điều kiện: Saler ở trang nhà hàng.
+1297 | image=false | caption=false | Hậu điều kiện: Trạng thái mở cửa được xác định theo mode đã chọn.
+1298 | image=false | caption=false | Luồng chính:
+1299 | image=false | caption=false | Saler bật auto mode.
+1300 | image=false | caption=false | Hệ thống định kỳ tính isWithinSchedule.
+1301 | image=false | caption=false | Hệ thống cập nhật trạng thái is_active trên form.
+1302 | image=false | caption=false | Luồng phụ:
+1303 | image=false | caption=false | Saler tắt auto mode.
+1304 | image=false | caption=false | Saler gạt trạng thái thủ công mở hoặc đóng.
+1305 | image=false | caption=false | UC-SAL-10 - Tự điền tọa độ từ link Google Maps
+1306 | image=false | caption=false | Mục tiêu: Tự động lấy latitude/longitude từ URL Google Maps.
+1307 | image=false | caption=false | Tác nhân chính: Saler.
+1308 | image=false | caption=false | Tiền điều kiện: Saler nhập link Google Maps tại form nhà hàng.
+1309 | image=false | caption=false | Hậu điều kiện: Tọa độ được điền tự động hoặc hiển thị lỗi.
+1310 | image=false | caption=false | Luồng chính:
+1311 | image=false | caption=false | Saler dán link Google Maps.
+1312 | image=false | caption=false | Frontend parse tọa độ bằng regex.
+1313 | image=false | caption=false | Nếu parse thành công, frontend tự điền latitude/longitude.
+1314 | image=false | caption=false | Luồng phụ:
+1315 | image=false | caption=false | Parse client thất bại.
+1316 | image=false | caption=false | Frontend gọi GET /api/maps/resolve-coordinates?url=....
+1317 | image=false | caption=false | Nếu API thành công thì điền tọa độ.
+1318 | image=false | caption=false | Nếu API thất bại thì hiển thị toast lỗi.
+1319 | image=false | caption=false | Usecase Seller - Mon an
+1320 | image=true  | caption=false | 
+1321 | image=false | caption=false | MonAn.png
+1322 | image=false | caption=false | Đặc tả usecase
+1323 | image=false | caption=false | UC-SAL-11 - Xem danh sách món ăn
+1324 | image=false | caption=false | Mục tiêu: Hiển thị danh sách món ăn kèm ảnh tương ứng.
+1325 | image=false | caption=false | Tác nhân chính: Saler.
+1326 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và truy cập /dashboard/dishes.
+1327 | image=false | caption=false | Hậu điều kiện: Danh sách món + ảnh được hiển thị.
+1328 | image=false | caption=false | Luồng chính:
+1329 | image=false | caption=false | Frontend tải song song dishes và images.
+1330 | image=false | caption=false | Frontend map image_id của dish với ảnh phù hợp.
+1331 | image=false | caption=false | Frontend render danh sách món.
+1332 | image=false | caption=false | UC-SAL-12 - Thêm món ăn mới
+1333 | image=false | caption=false | Mục tiêu: Tạo món ăn mới, có thể kèm ảnh.
+1334 | image=false | caption=false | Tác nhân chính: Saler.
+1335 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và ở trang món ăn.
+1336 | image=false | caption=false | Hậu điều kiện: Món mới được tạo hoặc rollback ảnh nếu tạo dish thất bại.
+1337 | image=false | caption=false | Luồng chính:
+1338 | image=false | caption=false | Saler mở dialog thêm món.
+1339 | image=false | caption=false | Saler nhập tên, giá, chọn ảnh tùy chọn.
+1340 | image=false | caption=false | Frontend validate dữ liệu.
+1341 | image=false | caption=false | Nếu có ảnh, frontend upload ảnh.
+1342 | image=false | caption=false | Frontend gọi POST /Restaurant/{id}/dishes.
+1343 | image=false | caption=false | Frontend đóng dialog và hiển thị thành công.
+1344 | image=false | caption=false | Luồng phụ:
+1345 | image=false | caption=false | Dish tạo thất bại sau khi upload ảnh.
+1346 | image=false | caption=false | Frontend gọi DELETE ảnh vừa upload theo best-effort.
+1347 | image=false | caption=false | Frontend hiển thị lỗi.
+1348 | image=false | caption=false | UC-SAL-13 - Cập nhật món ăn
+1349 | image=false | caption=false | Mục tiêu: Chỉnh sửa thông tin món ăn và/hoặc thay ảnh.
+1350 | image=false | caption=false | Tác nhân chính: Saler.
+1351 | image=false | caption=false | Tiền điều kiện: Món ăn đã tồn tại.
+1352 | image=false | caption=false | Hậu điều kiện: Món ăn được cập nhật; ảnh cũ hoặc ảnh mới được xử lý an toàn.
+1353 | image=false | caption=false | Luồng chính:
+1354 | image=false | caption=false | Saler mở dialog sửa món.
+1355 | image=false | caption=false | Saler chỉnh tên, giá, ảnh.
+1356 | image=false | caption=false | Frontend gọi PUT /Dishes/{dishId}.
+1357 | image=false | caption=false | Frontend thông báo kết quả.
+1358 | image=false | caption=false | Luồng phụ:
+1359 | image=false | caption=false | Có chọn ảnh mới.
+1360 | image=false | caption=false | Frontend upload ảnh mới trước khi gọi PUT.
+1361 | image=false | caption=false | Nếu PUT thành công thì xóa ảnh cũ best-effort.
+1362 | image=false | caption=false | Nếu PUT thất bại thì xóa ảnh mới upload best-effort.
+1363 | image=false | caption=false | UC-SAL-14 - Xóa món ăn
+1364 | image=false | caption=false | Mục tiêu: Xóa món ăn khỏi danh sách quản lý.
+1365 | image=false | caption=false | Tác nhân chính: Saler.
+1366 | image=false | caption=false | Tiền điều kiện: Món ăn tồn tại trong danh sách.
+1367 | image=false | caption=false | Hậu điều kiện: Món bị xóa hoặc giữ nguyên nếu API lỗi.
+1368 | image=false | caption=false | Luồng chính:
+1369 | image=false | caption=false | Saler bấm xóa món.
+1370 | image=false | caption=false | Frontend gọi DELETE /Dishes/{dishId}.
+1371 | image=false | caption=false | Frontend cập nhật lại danh sách và hiển thị toast thành công.
+1372 | image=false | caption=false | Luồng phụ:
+1373 | image=false | caption=false | API lỗi.
+1374 | image=false | caption=false | Frontend hiển thị toast lỗi.
+1375 | image=false | caption=false | Ghi chú: Hiện chưa có confirm dialog trước khi xóa.
+1376 | image=false | caption=false | Usecase Seller - Anh dai dien
+1377 | image=true  | caption=false | 
+1378 | image=false | caption=false | AnhDaiDien.png
+1379 | image=false | caption=false | Đặc tả usecase
+1380 | image=false | caption=false | UC-SAL-15 - Thay ảnh đại diện nhà hàng
+1381 | image=false | caption=false | Mục tiêu: Cập nhật ảnh primary của nhà hàng.
+1382 | image=false | caption=false | Tác nhân chính: Saler.
+1383 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và truy cập /dashboard/images.
+1384 | image=false | caption=false | Hậu điều kiện: Ảnh đại diện mới được cập nhật và dữ liệu liên quan nhất quán.
+1385 | image=false | caption=false | Luồng chính:
+1386 | image=false | caption=false | Saler chọn ảnh và tải lên với is_primary=true.
+1387 | image=false | caption=false | Frontend xử lý các món đang dùng ảnh primary cũ.
+1388 | image=false | caption=false | Frontend xóa ảnh primary cũ.
+1389 | image=false | caption=false | Frontend hiển thị avatar mới và toast thành công.
+1390 | image=false | caption=false | Usecase Seller - Am thanh
+1391 | image=true  | caption=false | 
+1392 | image=false | caption=false | AmThanh.png
+1393 | image=false | caption=false | Đặc tả usecase
+1394 | image=false | caption=false | UC-SAL-16 - Tải lên và quản lý phiên bản âm thanh
+1395 | image=false | caption=false | Mục tiêu: Quản lý đầy đủ vòng đời audio mô tả theo ngôn ngữ.
+1396 | image=false | caption=false | Tác nhân chính: Saler.
+1397 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và ở /dashboard/audio/description.
+1398 | image=false | caption=false | Hậu điều kiện: Audio được tải lên, bật/tắt active, hoặc xóa theo ràng buộc nghiệp vụ.
+1399 | image=false | caption=false | Luồng chính:
+1400 | image=false | caption=false | Frontend tải danh sách ngôn ngữ và audio.
+1401 | image=false | caption=false | Saler tải file audio mới.
+1402 | image=false | caption=false | Frontend gọi POST /Restaurant/{id}/audios và refresh danh sách.
+1403 | image=false | caption=false | Saler bật hoặc tắt active audio.
+1404 | image=false | caption=false | Frontend gọi PATCH /Audios/{audioId}/active.
+1405 | image=false | caption=false | Saler xóa audio.
+1406 | image=false | caption=false | Frontend gọi DELETE /Audios/{audioId}.
+1407 | image=false | caption=false | Luồng phụ:
+1408 | image=false | caption=false | Tắt active bị chặn nếu ngôn ngữ chỉ còn 1 active.
+1409 | image=false | caption=false | Xóa bị chặn nếu ngôn ngữ chỉ còn 1 bản ghi.
+1410 | image=false | caption=false | UC-SAL-17 - Dịch văn bản và tạo âm thanh từ text
+1411 | image=false | caption=false | Mục tiêu: Dịch nội dung và sinh audio trực tiếp từ văn bản.
+1412 | image=false | caption=false | Tác nhân chính: Saler.
+1413 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và có nội dung văn bản nguồn.
+1414 | image=false | caption=false | Hậu điều kiện: Có bản dịch và/hoặc audio mới để preview.
+1415 | image=false | caption=false | Luồng chính:
+1416 | image=false | caption=false | Saler nhập source text, chọn ngôn ngữ nguồn và đích.
+1417 | image=false | caption=false | Frontend gọi POST /Restaurant/{id}/translate.
+1418 | image=false | caption=false | Frontend hiển thị translatedText và estimatedCost.
+1419 | image=false | caption=false | Saler bấm tạo âm thanh.
+1420 | image=false | caption=false | Frontend gọi POST /Restaurant/{id}/audios/from-text.
+1421 | image=false | caption=false | Frontend refresh danh sách audio và cho preview.
+1422 | image=false | caption=false | Usecase Seller - Thong ke
+1423 | image=true  | caption=false | 
+1424 | image=false | caption=false | ThongKe.png
+1425 | image=false | caption=false | Đặc tả usecase
+1426 | image=false | caption=false | UC-SAL-18 - Xem thống kê nghe và lịch sử chi phí token
+1427 | image=false | caption=false | Mục tiêu: Theo dõi KPI nghe audio và chi phí dịch token.
+1428 | image=false | caption=false | Tác nhân chính: Saler.
+1429 | image=false | caption=false | Tiền điều kiện: Đã chọn nhà hàng và truy cập /dashboard/audio/history.
+1430 | image=false | caption=false | Hậu điều kiện: KPI và dữ liệu usage được hiển thị theo bộ lọc hiện tại.
+1431 | image=false | caption=false | Luồng chính:
+1432 | image=false | caption=false | Frontend gọi API KPI nhà hàng.
+1433 | image=false | caption=false | Frontend gọi API usage theo billingMonth/page/pageSize.
+1434 | image=false | caption=false | Frontend hiển thị KPI và bảng usage.
+1435 | image=false | caption=false | Saler đổi tháng hoặc chuyển trang.
+1436 | image=false | caption=false | Frontend tải lại usage và cập nhật bảng.
+1437 | image=false | caption=false | Usecase Seller - Tai khoan
+1438 | image=true  | caption=false | 
+1439 | image=false | caption=false | TaiKhoan.png
+1440 | image=false | caption=false | Đặc tả usecase
+1441 | image=false | caption=false | UC-SAL-19 - Xem và cập nhật tài khoản
+1442 | image=false | caption=false | Mục tiêu: Quản lý hồ sơ cá nhân và đổi mật khẩu.
+1443 | image=false | caption=false | Tác nhân chính: Saler.
+1444 | image=false | caption=false | Tiền điều kiện: Saler đã đăng nhập, truy cập /dashboard/account.
+1445 | image=false | caption=false | Hậu điều kiện: Thông tin profile được cập nhật và/hoặc mật khẩu mới được lưu.
+1446 | image=false | caption=false | Luồng chính:
+1447 | image=false | caption=false | Frontend tải thông tin user theo userId.
+1448 | image=false | caption=false | Saler chỉnh sửa profile và bấm lưu.
+1449 | image=false | caption=false | Frontend validate dữ liệu.
+1450 | image=false | caption=false | Frontend gọi PATCH /Auth/profile.
+1451 | image=false | caption=false | Frontend gọi refreshMe và hiển thị thành công.
+1452 | image=false | caption=false | Saler nhập thông tin đổi mật khẩu.
+1453 | image=false | caption=false | Frontend validate old/new/confirm.
+1454 | image=false | caption=false | Frontend gọi PATCH /Auth/password.
+1455 | image=false | caption=false | Frontend reset form và hiển thị thành công.
+1456 | image=false | caption=false | Luồng phụ:
+1457 | image=false | caption=false | Validate thất bại hoặc API lỗi.
+1458 | image=false | caption=false | Frontend hiển thị thông báo lỗi tương ứng.
+1460 | image=false | caption=false | 17. Diagram Appendix
+1461 | image=false | caption=false | activity/admin/DashBoard
+1462 | image=true  | caption=false | 
+1463 | image=false | caption=false | 1.png
+1464 | image=true  | caption=false | 
+1465 | image=false | caption=false | 2.png
+1466 | image=false | caption=false | activity/admin/NguoiDung
+1467 | image=true  | caption=false | 
+1468 | image=false | caption=false | 1.png
+1469 | image=true  | caption=false | 
+1470 | image=false | caption=false | 2.png
+1471 | image=false | caption=false | activity/admin/QuanLyDich
+1472 | image=true  | caption=false | 
+1473 | image=false | caption=false | 1.png
+1474 | image=true  | caption=false | 
+1475 | image=false | caption=false | 2.png
+1476 | image=false | caption=false | activity/admin/QuanLyLichSu
+1477 | image=true  | caption=false | 
+1478 | image=false | caption=false | 1.png
+1479 | image=true  | caption=false | 
+1480 | image=false | caption=false | 2.png
+1481 | image=false | caption=false | activity/admin/QuanLyNhaHang
+1482 | image=true  | caption=false | 
+1483 | image=false | caption=false | 1.png
+1484 | image=true  | caption=false | 
+1485 | image=false | caption=false | 2.png
+1486 | image=false | caption=false | activity/admin/TaiKhoan
+1487 | image=true  | caption=false | 
+1488 | image=false | caption=false | 1.png
+1489 | image=true  | caption=false | 
+1490 | image=false | caption=false | 2.png
+1491 | image=false | caption=false | activity/admin/Tour
+1492 | image=true  | caption=false | 
+1493 | image=false | caption=false | 1.png
+1494 | image=true  | caption=false | 
+1495 | image=false | caption=false | 2.png
+1496 | image=false | caption=false | activity/admin/XacThuc
+1497 | image=true  | caption=false | 
+1498 | image=false | caption=false | 1.png
+1499 | image=true  | caption=false | 
+1500 | image=false | caption=false | 2.png
+1501 | image=true  | caption=false | 
+1502 | image=false | caption=false | 3.png
+1503 | image=false | caption=false | activity/app/KhamPhaPOI
+1504 | image=true  | caption=false | 
+1505 | image=false | caption=false | 1.png
+1506 | image=true  | caption=false | 
+1507 | image=false | caption=false | 2.png
+1508 | image=false | caption=false | activity/app/KhamPhaTour
+1509 | image=true  | caption=false | 
+1510 | image=false | caption=false | 1.png
+1511 | image=true  | caption=false | 
+1512 | image=false | caption=false | 2.png
+1513 | image=false | caption=false | activity/app/NgheThuyetMinh
+1514 | image=true  | caption=false | 
+1515 | image=false | caption=false | 1.jpg
+1516 | image=true  | caption=false | 
+1517 | image=false | caption=false | 2.png
+1518 | image=false | caption=false | activity/app/QuanLiYeuThich
+1519 | image=true  | caption=false | 
+1520 | image=false | caption=false | 1.png
+1521 | image=true  | caption=false | 
+1522 | image=false | caption=false | 2.png
+1523 | image=false | caption=false | activity/app/QuanLyBoNhoDem
+1524 | image=true  | caption=false | 
+1525 | image=false | caption=false | 1.png
+1526 | image=true  | caption=false | 
+1527 | image=false | caption=false | 2.png
+1528 | image=false | caption=false | activity/app/QuanLyLichSu
+1529 | image=true  | caption=false | 
+1530 | image=false | caption=false | 1.png
+1531 | image=true  | caption=false | 
+1532 | image=false | caption=false | 2.png
+1533 | image=false | caption=false | activity/app/TheoDoiViTri
+1534 | image=true  | caption=false | 
+1535 | image=false | caption=false | 1.png
+1536 | image=true  | caption=false | 
+1537 | image=false | caption=false | 2.png
+1538 | image=false | caption=false | activity/saler/AmThanh
+1539 | image=true  | caption=false | 
+1540 | image=false | caption=false | 1.png
+1541 | image=true  | caption=false | 
+1542 | image=false | caption=false | 2.png
+1543 | image=false | caption=false | activity/saler/MonAn
+1544 | image=true  | caption=false | 
+1545 | image=false | caption=false | 1.png
+1546 | image=true  | caption=false | 
+1547 | image=false | caption=false | 2.png
+1548 | image=false | caption=false | activity/saler/NhaHang
+1549 | image=true  | caption=false | 
+1550 | image=false | caption=false | 1.png
+1551 | image=true  | caption=false | 
+1552 | image=false | caption=false | 2.png
+1553 | image=false | caption=false | activity/saler/TaiKhoan
+1554 | image=true  | caption=false | 
+1555 | image=false | caption=false | 1.png
+1556 | image=true  | caption=false | 
+1557 | image=false | caption=false | 2.png
+1558 | image=false | caption=false | activity/saler/XacThuc
+1559 | image=true  | caption=false | 
+1560 | image=false | caption=false | 1.png
+1561 | image=true  | caption=false | 
+1562 | image=false | caption=false | 2.png
+1563 | image=true  | caption=false | 
+1564 | image=false | caption=false | 3.png
+1565 | image=false | caption=false | class
+1566 | image=true  | caption=false | 
+1567 | image=false | caption=false | class_admin.png
+1568 | image=true  | caption=false | 
+1569 | image=false | caption=false | class_app.png
+1570 | image=true  | caption=false | 
+1571 | image=false | caption=false | Class_saler.png
+1572 | image=false | caption=false | erd
+1573 | image=true  | caption=false | 
+1574 | image=true  | caption=false | 
+1575 | image=false | caption=false | mongodb.jpg
+1576 | image=false | caption=false | mssql.png
+1578 | image=false | caption=false | sequence/admin/DangNhap
+1579 | image=true  | caption=false | 
+1580 | image=true  | caption=false | 
+1581 | image=true  | caption=false | 
+1582 | image=false | caption=false | 1_KiemTraDangNhap.png
+1583 | image=true  | caption=false | 
+1584 | image=false | caption=false | 2_DangNhapAdmin.png
+1585 | image=false | caption=false | 3_DangXuat.png
+1586 | image=false | caption=false | 4_DieuHuongVaBaoVeRoute.png
+1588 | image=false | caption=false | sequence/admin/DashBoard
+1589 | image=true  | caption=false | 
+1590 | image=false | caption=false | 5_XemDashboard.png
+1592 | image=true  | caption=false | 
+1593 | image=true  | caption=false | 
+1594 | image=false | caption=false | 6_BoLocHeatMap.png
+1595 | image=false | caption=false | 7_XemTuyenDiChuyenNguoiDung.png
+1597 | image=false | caption=false | sequence/admin/NguoiDung
+1598 | image=true  | caption=false | 
+1599 | image=false | caption=false | 12_XemDanhSachNguoiDung.png
+1601 | image=true  | caption=false | 
+1602 | image=false | caption=false | 13_ThemNguoiDung.png
+1604 | image=true  | caption=false | 
+1605 | image=false | caption=false | 14_KhoaNguoiDung.png
+1607 | image=true  | caption=false | 
+1608 | image=false | caption=false | 14a_XemChiTietNhaHang&NguoiDungQuanLy.png
+1610 | image=false | caption=false | sequence/admin/NhaHang
+1611 | image=true  | caption=false | 
+1612 | image=false | caption=false | 10_TaoNhaHangMoi.png
+1614 | image=true  | caption=false | 
+1615 | image=false | caption=false | 10a_DienToaDoaGGMap.png
+1617 | image=true  | caption=false | 
+1618 | image=false | caption=false | 11_KhoaNhaHang.png
+1620 | image=true  | caption=false | 
+1621 | image=true  | caption=false | 
+1622 | image=false | caption=false | 8_TimKiemVaHienNhaHang.png
+1623 | image=false | caption=false | 9_XemChiTietNhaHang.png
+1624 | image=false | caption=false | sequence/admin/NhatKyHeThong
+1625 | image=true  | caption=false | 
+1626 | image=false | caption=false | 16_TuDongCapNhat.png
+1627 | image=true  | caption=false | 
+1628 | image=false | caption=false | 17_PhanTrangNhatKy.png
+1629 | image=false | caption=false | sequence/admin/QuanLyDich
+1630 | image=true  | caption=false | 
+1631 | image=true  | caption=false | 
+1632 | image=false | caption=false | 15_XemNhatKyHeThong.png
+1633 | image=false | caption=false | 23_XemChiPhiDich.png
+1635 | image=true  | caption=false | 
+1636 | image=false | caption=false | 24_LocVaPhanTrangDich.png
+1638 | image=false | caption=false | sequence/admin/TaiKhoan
+1639 | image=true  | caption=false | 
+1640 | image=false | caption=false | 22_DoiMatKhauMoTaiKhoan.png
+1642 | image=false | caption=false | sequence/admin/Tour
+1643 | image=true  | caption=false | 
+1644 | image=false | caption=false | 18_XemChiTietTour.png
+1646 | image=true  | caption=false | 
+1647 | image=true  | caption=false | 
+1648 | image=true  | caption=false | 
+1649 | image=false | caption=false | 18a_TaoTourMoi.png
+1650 | image=false | caption=false | 19_LuuCapNhatTour.png
+1651 | image=false | caption=false | 20_ThemNhaHangVaoTour.png
+1653 | image=true  | caption=false | 
+1654 | image=false | caption=false | 20a_KhoaTour.png
+1656 | image=false | caption=false | sequence/app/KhamPhaPOI
+1657 | image=true  | caption=false | 
+1658 | image=true  | caption=false | 
+1659 | image=true  | caption=false | 
+1660 | image=false | caption=false | ChiaSePOI.png
+1661 | image=true  | caption=false | 
+1662 | image=false | caption=false | LocPOI.png
+1663 | image=true  | caption=false | 
+1664 | image=false | caption=false | NgheThuyetMinh.png
+1665 | image=true  | caption=false | 
+1666 | image=false | caption=false | TimKiemPOi.png
+1667 | image=false | caption=false | XemChiTietPOI.png
+1668 | image=false | caption=false | XemDanhSachPOI.png
+1670 | image=true  | caption=false | 
+1671 | image=false | caption=false | XemDuongDi.png
+1672 | image=false | caption=false | sequence/app/KhamPhaTOUR
+1673 | image=true  | caption=false | 
+1674 | image=false | caption=false | XemChiTietPOI.png
+1676 | image=true  | caption=false | 
+1677 | image=true  | caption=false | 
+1678 | image=false | caption=false | XemChiTietTOUR.png
+1679 | image=false | caption=false | XemDanhSachTOUR.png
+1681 | image=false | caption=false | sequence/app/NgheTMTheoNgonNgu
+1682 | image=true  | caption=false | 
+1683 | image=true  | caption=false | 
+1684 | image=false | caption=false | ChonNgonNguThuyetMinh.png
+1685 | image=false | caption=false | NgheThuyetMinh.png
+1687 | image=true  | caption=false | 
+1688 | image=true  | caption=false | 
+1689 | image=true  | caption=false | 
+1690 | image=false | caption=false | NgheThuyetMinhThuCong.png
+1691 | image=false | caption=false | NgheThuyetMinhTuDong.png
+1692 | image=false | caption=false | PhatLaiAudio.png
+1693 | image=false | caption=false | sequence/app/QuanLiBoNhoDem
+1694 | image=true  | caption=false | 
+1695 | image=false | caption=false | XemDungLuongBoNhoDem.png
+1696 | image=true  | caption=false | 
+1697 | image=false | caption=false | XoaBoNhoDem.png
+1698 | image=false | caption=false | sequence/app/QuanLiDanhSachPOIYeuThich
+1699 | image=true  | caption=false | 
+1700 | image=false | caption=false | XemChiTietPOI.png
+1702 | image=true  | caption=false | 
+1703 | image=true  | caption=false | 
+1704 | image=false | caption=false | XemDSPOIYeuThich.png
+1705 | image=false | caption=false | XoaPoiKhoiDSYeuThich.png
+1707 | image=false | caption=false | sequence/app/QuanLyLichSu
+1708 | image=true  | caption=false | 
+1709 | image=true  | caption=false | 
+1710 | image=false | caption=false | XemChiTietPOI.png
+1711 | image=false | caption=false | XemLichSuDaNghe.png
+1713 | image=true  | caption=false | 
+1714 | image=false | caption=false | XoaLichSu.png
+1716 | image=false | caption=false | sequence/app/TheoDoiViTri
+1717 | image=true  | caption=false | 
+1718 | image=true  | caption=false | 
+1719 | image=false | caption=false | TatTheoDoiViTri.png
+1720 | image=false | caption=false | TheoDoiViTri.png
+1722 | image=true  | caption=false | 
+1723 | image=true  | caption=false | 
+1724 | image=false | caption=false | XinQuyenChayNen.png
+1725 | image=false | caption=false | XinQuyenTruyCap.png
+1727 | image=false | caption=false | sequence/saler/AmThanh
+1728 | image=true  | caption=false | 
+1729 | image=false | caption=false | 16_Tai_Xoa_Bat&TatAudio.png
+1730 | image=true  | caption=false | 
+1731 | image=false | caption=false | 17_DichVanBanVaTaoAmThanh.png
+1732 | image=false | caption=false | sequence/saler/AnhDaiDien
+1733 | image=true  | caption=false | 
+1734 | image=false | caption=false | 15_ThayAnhDaiDienNhaHang.png
+1735 | image=false | caption=false | sequence/saler/MonAn
+1736 | image=true  | caption=false | 
+1737 | image=true  | caption=false | 
+1738 | image=true  | caption=false | 
+1739 | image=false | caption=false | 11_XemDanhSachMonAn.png
+1740 | image=true  | caption=false | 
+1741 | image=false | caption=false | 12_ThemMonAnMoi.png
+1742 | image=false | caption=false | 13_CapNhatMonAn.png
+1743 | image=false | caption=false | 14_XoaMonAn.png
+1745 | image=false | caption=false | sequence/saler/NhaHang
+1746 | image=true  | caption=false | 
+1747 | image=false | caption=false | 10_TuDienToaDo.png
+1749 | image=true  | caption=false | 
+1750 | image=true  | caption=false | 
+1751 | image=false | caption=false | 6_ChonNhaHangDeQL.png
+1752 | image=false | caption=false | 7_ChuyenNhaHang.png
+1754 | image=true  | caption=false | 
+1755 | image=true  | caption=false | 
+1756 | image=false | caption=false | 8_CapNhatThongTinNhaHang.png
+1757 | image=false | caption=false | 9_TuDongMoCua.png
+1758 | image=false | caption=false | sequence/saler/TaiKhoan
+1759 | image=true  | caption=false | 
+1760 | image=false | caption=false | 19_XemVaCapNhatTaiKhoan.png
+1762 | image=false | caption=false | sequence/saler/ThongKe
+1763 | image=true  | caption=false | 
+1764 | image=false | caption=false | 18_XemThongKeVaLichSu.png
+1765 | image=false | caption=false | sequence/saler/XacThuc
+1766 | image=true  | caption=false | 
+1767 | image=true  | caption=false | 
+1768 | image=false | caption=false | 1_KiemTraPhienDangNhap.png
+1769 | image=false | caption=false | 2_DangNhap.png
+1771 | image=true  | caption=false | 
+1772 | image=false | caption=false | 3_QuenMatKhau.png
+1774 | image=true  | caption=false | 
+1775 | image=true  | caption=false | 
+1776 | image=false | caption=false | 4_DangXuat.png
+1777 | image=false | caption=false | 5_DieuHuongVaBaoVeRoute.png
+1779 | image=false | caption=false | 18. Giao diện ứng dụng
+1780 | image=false | caption=false | 18.1. Admin
+1781 | image=true  | caption=false | 
+1782 | image=false | caption=false | login.jpg
+1783 | image=true  | caption=false | 
+1784 | image=false | caption=false | root.jpg
+1785 | image=true  | caption=false | 
+1786 | image=false | caption=false | trajectory.jpg
+1787 | image=true  | caption=false | 
+1788 | image=false | caption=false | tours.jpg
+1791 | image=true  | caption=false | 
+1792 | image=false | caption=false | restaurants.jpg
+1793 | image=true  | caption=false | 
+1794 | image=false | caption=false | users.jpg
+1795 | image=true  | caption=false | 
+1796 | image=false | caption=false | logs.jpg
+1797 | image=true  | caption=false | 
+1798 | image=false | caption=false | translation-billing.jpg
+1799 | image=true  | caption=false | 
+1800 | image=false | caption=false | qr-code.jpg
+1801 | image=true  | caption=false | 
+1802 | image=false | caption=false | account.jpg
+1804 | image=false | caption=false | 18.2. Seller
+1805 | image=true  | caption=false | 
+1806 | image=false | caption=false | login.jpg
+1809 | image=true  | caption=false | 
+1810 | image=false | caption=false | select-restaurant.jpg
+1811 | image=true  | caption=false | 
+1812 | image=false | caption=false | restaurant.jpg
+1813 | image=true  | caption=false | 
+1814 | image=false | caption=false | dishes.jpg
+1815 | image=true  | caption=false | 
+1816 | image=false | caption=false | images.jpg
+1817 | image=true  | caption=false | 
+1818 | image=false | caption=false | audio-description.jpg
+1819 | image=true  | caption=false | 
+1820 | image=false | caption=false | audio-history.jpg
+1821 | image=true  | caption=false | 
+1822 | image=false | caption=false | account.jpg
+1823 | image=false | caption=false | 18.3. Visitor
+1824 | image=true  | caption=false | 
+1826 | image=false | caption=false | main.jpg
+1827 | image=true  | caption=false | map.jpg
+1828 | image=true  | caption=false | 
+1829 | image=false | caption=false | tour.jpg
+1831 | image=true  | caption=false | tour-detail.jpg
+1832 | image=true  | caption=false | history.jpg
+1833 | image=true  | caption=false | favorite.jpg
+1834 | image=true  | caption=false | settings.jpg
+1835 | image=true  | caption=false | poi-detail.jpg
+1837 | image=false | caption=false | 19. Kết luận và hướng phát triển
+1838 | image=false | caption=false | 19.1. Kết luận
+1839 | image=false | caption=false | Sau thời gian thực hiện đề tài, với sự nỗ lực nghiên cứu tài liệu và áp dụng các kiến thức đã học, chúng em đã hoàn thành các mục tiêu cơ bản đặt ra ban đầu. Hệ thống được xây dựng không chỉ là một sản phẩm phần mềm mà còn là kết quả của quá trình phân tích nghiệp vụ và áp dụng các công nghệ hiện đại.
+1840 | image=false | caption=false | 19.1.1. Những kết quả đạt được (Ưu điểm)
+1841 | image=false | caption=false | Về mặt kỹ thuật: Hệ thống đã được triển khai với cấu trúc mã nguồn rõ ràng, tuân thủ các quy tắc thiết kế phần mềm. Phần mềm duy trì được sự ổn định cao trong các kịch bản kiểm thử, xử lý tốt các ngoại lệ (exception) và đảm bảo tính nhất quán của dữ liệu khi tương tác với cơ sở dữ liệu.
+1842 | image=false | caption=false | Về mặt trải nghiệm người dùng (UX/UI): Giao diện được thiết kế theo phong cách tối giản nhưng hiệu quả. Các luồng thao tác được tối ưu hóa để giảm thiểu số bước thực hiện cho người dùng, đảm bảo ngay cả những người không am hiểu sâu về kỹ thuật cũng có thể tiếp cận và sử dụng thành thạo trong thời gian ngắn.
+1843 | image=false | caption=false | Về mặt chức năng: Hoàn thiện đầy đủ các chức năng cốt lõi (Core Functions) đã cam kết trong phần đặc tả yêu cầu, phục vụ tốt nhu cầu quản lý và vận hành thực tế.
+1844 | image=false | caption=false | 19.1.2. Những mặt còn hạn chế
+1845 | image=false | caption=false | Bên cạnh những kết quả đạt được, do hạn chế về mặt thời gian và nguồn lực, hệ thống vẫn tồn tại một số vấn đề cần được cải thiện:
+1846 | image=false | caption=false | Cơ chế quản lý phân quyền: Hiện tại hệ thống mới chỉ dừng lại ở việc phân quyền dựa trên vai trò cơ bản (Role-based access control). Trong thực tế, các tổ chức đòi hỏi sự phân quyền chi tiết hơn đến từng hành động hoặc từng bản ghi dữ liệu cụ thể (Fine-grained access control), điều mà phiên bản hiện tại chưa đáp ứng hoàn toàn.
+1847 | image=false | caption=false | Chức năng tài chính: Việc chưa tích hợp các cổng thanh toán trực tuyến là một thiếu sót lớn trong bối cảnh thương mại điện tử phát triển. Người dùng vẫn phải thực hiện các bước xác nhận thủ công, làm giảm đi tính tiện dụng và độ chuyên nghiệp của hệ thống.
+1848 | image=false | caption=false | Khả năng mở rộng (Scalability): Hệ thống hiện tại được thiết kế tối ưu cho quy mô vừa và nhỏ. Khi số lượng người dùng truy cập đồng thời tăng đột biến, cần có những giải pháp về cân bằng tải và tối ưu hóa truy vấn chuyên sâu hơn.
+1849 | image=false | caption=false | 19.2. Hướng phát triển trong tương lai
+1850 | image=false | caption=false | Từ những hạn chế nêu trên, em đề xuất các hướng phát triển tiếp theo để hoàn thiện sản phẩm:
+1851 | image=false | caption=false | Đa nền tảng hóa:
+1852 | image=false | caption=false | Phát triển phiên bản Web Responsive để người dùng có thể truy cập từ bất kỳ trình duyệt nào mà không cần cài đặt.
+1853 | image=false | caption=false | Xây dựng ứng dụng di động (Native App hoặc Cross-platform) nhằm tận dụng các tính năng phần cứng như thông báo đẩy (Push Notifications) và định vị GPS, giúp tăng cường sự gắn kết với người dùng.
+1854 | image=false | caption=false | Triển khai ứng dụng trên nền tản IOS, IpadOS.
+1855 | image=false | caption=false | Hoàn thiện hệ sinh thái tính năng:
+1856 | image=false | caption=false | Tích hợp các SDK thanh toán phổ biến như VNPay, MoMo hoặc các cổng quốc tế như PayPal/Stripe để tự động hóa hoàn toàn quy trình giao dịch.
+1857 | image=false | caption=false | Nâng cấp hệ thống bảo mật bằng cách áp dụng xác thực hai lớp (2FA) và mã hóa dữ liệu nhạy cảm theo tiêu chuẩn AES-256.
+1858 | image=false | caption=false | Ứng dụng trí tuệ nhân tạo (AI): Nghiên cứu triển khai các mô hình học máy đơn giản để phân tích hành vi người dùng, từ đó đưa ra các gợi ý cá nhân hóa hoặc dự báo xu hướng trong tương lai, giúp người quản lý có cái nhìn tổng quan và chính xác hơn về dữ liệu.
